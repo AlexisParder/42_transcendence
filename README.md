@@ -1,9 +1,9 @@
 # ft_transcendence
 Bataille navale revisitée
 
-- Grill cachée
+- Grille cachée
 - Tour par tour
-- Jouable jusau'a 4 joueurs (grille plus grande) (solo, duo possible pour 4j)
+- Jouable jusqu'a 4 joueurs (grille plus grande) (solo, duo possible pour 4j)
 - Capacaites speciales
 - Bot (adversaire)
 - Gestion utilisateur et amis
