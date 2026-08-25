@@ -1,0 +1,94 @@
+import type React from "react";
+import { SonarTitle } from "../components/SonarTitle";
+import { useState } from "react";
+import { FaDiscord, FaGoogle } from "react-icons/fa6";
+
+type Errors = {
+	email?: string
+	password?: string
+}
+
+function validateLogin(email: string, password: string): Errors {
+	const errors: Errors = {}
+
+	if (email.length === 0)
+		errors.email = "Email is empty!"
+	else if (!isValidEmail(email))
+		errors.email = "Invalid email format!"
+
+	if (password.length === 0)
+		errors.password = "Password is empty!"
+
+	return errors
+}
+
+function isValidEmail(email: string): boolean {
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+export function Login() {
+	const [errors, setErrors] = useState<Errors>({})
+
+	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = (e) => {
+		e.preventDefault()
+
+		const form = new FormData(e.currentTarget)
+		const email = form.get('email')?.toString().trim() ?? ''
+		const password = form.get('password')?.toString() ?? ''
+		// const remember = form.get('remember') ? true : false
+
+		const newErrors = validateLogin(email, password)
+		setErrors(newErrors)
+
+		if (Object.keys(newErrors).length > 0)
+			return
+
+		// BACK 
+
+	}
+
+	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+		<div className="card bg-base-200 max-w-md w-full shadow-xl border border-neutral">
+			<div className="card-body">
+				<fieldset className="fieldset p-0">
+					<SonarTitle />
+
+					<h2 className="card-title text-neutral-content text-xl mt-2">Immersion</h2>
+					<p className="text-neutral-content/40 mb-2">Sign in to join the crew.</p>
+
+					<button className="btn btn-info"><FaGoogle /> Continue with Google</button>
+					<button className="btn btn-info"><FaDiscord /> Continue with Discord</button>
+
+					<div className="divider text-neutral-content/40 m-0 mt-3 mb-1">OR</div>
+
+					<form onSubmit={handleSubmit} className="min-w-full">
+
+						<label className="floating-label mt-2">
+							<span className="bg-base-200">Email</span>
+							<input type="email" name="email" placeholder="Email" className={`input input-md outline-0 input-info ${errors.email ? 'border-error' : 'border-neutral mb-2'} focus:border-info w-full bg-base-200`} autoComplete="off" />
+						</label>
+						{errors.email && <span className="text-error block pb-2 pl-2">{errors.email}</span>}
+
+						<label className="floating-label mt-2">
+							<span className="bg-base-200">Password</span>
+							<input type="password" name="password" placeholder="Password" className={`input input-md input-info outline-0 ${errors.password ? 'border-error' : 'border-neutral mb-2'} focus:border-info w-full bg-base-200`} autoComplete="current-password" />
+						</label>
+						{errors.password && <span className="text-error block pb-2 pl-2">{errors.password}</span>}
+
+						<div className="flex items-center justify-between mt-3 mb-5">
+							<label className="label">
+								<input type="checkbox" name="remember" className="checkbox checkbox-sm checked:checkbox-info" />
+								<span className="text-neutral-content/40">Keep me signed in</span>
+							</label>
+							<a href="forgot" className="link-primary">Forgot password?</a>
+						</div>
+
+						<button name="signBtn" className="btn btn-soft btn-info border-neutral hover:border-info w-full">Sign in</button>
+					</form>
+
+					<p className="text-neutral-content/40 mt-3 text-center">No account yet? <a href="register" className="link-primary">Create one</a></p>
+				</fieldset>
+			</div>
+		</div>
+	</div>
+}

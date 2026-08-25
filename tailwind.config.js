@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./*.{html,js,tsx}", "./**/*.tsx"],
+  content: ["./*.{html,js,ts,jsx,tsx}", "./**/*.tsx"],
   safelist: [
+    'badge',
     'badge-primary',
     'badge-secondary',
     'badge-accent',
@@ -10,6 +11,7 @@ module.exports = {
     'badge-error',
     'badge-info',
     'badge-ghost',
+    'badge-outline',
     'bg-primary',
     'bg-secondary',
     'bg-accent',
@@ -334,16 +336,6 @@ module.exports = {
           '900': '#881337',
           '950': '#4c0519',
         }
-      },
-      fontFamily: {
-        'poppins': ['Poppins', 'sans-serif']
-      },
-      spacing: {
-        '8xl': '96rem',
-        '9xl': '128rem',
-      },
-      borderRadius: {
-        '4xl': '2rem',
       }
     }
   },
