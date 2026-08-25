@@ -1,155 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
 
+@plugin "daisyui/theme" {
+  name: "sonar";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+
+  --color-base-100: #070d12;
+  --color-base-200: #0b141b;
+  --color-base-300: #12202a;
+  --color-base-content: #dbe8ee;
+
+  --color-primary: #4fd6cf;
+  --color-primary-content: #06131a;
+
+  --color-secondary: #e07fb8;
+  --color-secondary-content: #1a0a13;
+  --color-accent: #8fa2e8;
+  --color-accent-content: #0a0f1f;
+
+  --color-neutral: #2c3a42;
+  --color-neutral-content: #dbe8ee;
+
+  --color-info: #4fd6cf;
+  --color-info-content: #06131a;
+  --color-success: #4fd6cf;
+  --color-success-content: #06131a;
+
+  --color-warning: #e8b04b;
+  --color-warning-content: #120c02;
+
+  --color-error: #e05a5a;
+  --color-error-content: #1a0505;
+
+  --radius-selector: 1.25rem;
+  --radius-field: 0.55rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
 
 @theme {
-  --font-poppins: "Poppins", sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+
+  --color-abyss-900: #05090d;
+  --color-abyss-800: #070d12;
+  --color-abyss-700: #0b141b;
+  --color-abyss-600: #12202a;
+  --color-sonar: #4fd6cf;
+  --color-alert: #e8b04b;
+  --color-sunk: #e05a5a;
+  --color-crew-pink: #e07fb8;
+  --color-crew-blue: #8fa2e8;
+
+  --color-hull-ok: #7f9aa4;
+  --color-hull-hit: #d8a44e;
+  --color-hull-sunk: #b5504a;
+
+  --tracking-label: 0.18em;
+  --tracking-brand: 0.16em;
+
+  --animate-sweep: sweep 4.5s linear infinite;
+  --animate-blip: blip 1.4s ease-in-out infinite;
+  --animate-blip-slow: blip 2.8s ease-in-out infinite;
 }
 
-@plugin "daisyui/theme" { name: "night"; default: true; }
-@plugin "daisyui/theme" { name: "dark"; }
-@plugin "daisyui/theme" { name: "forest"; }
-@plugin "daisyui/theme" { name: "dracula"; }
-@plugin "daisyui/theme" { name: "sunset"; }
-@plugin "daisyui/theme" { name: "dim"; }
-@plugin "daisyui/theme" { name: "abyss"; }
-@plugin "daisyui/theme" { name: "halloween"; }
-@plugin "daisyui/theme" { name: "coffee"; }
-@plugin "daisyui/theme" { name: "business"; }
-@plugin "daisyui/theme" { name: "black"; }
-@plugin "daisyui/theme" { name: "luxury"; }
-@plugin "daisyui/theme" { name: "synthwave"; }
-@plugin "daisyui/theme" { name: "cyberpunk"; }
-@plugin "daisyui/theme" { name: "light"; }
-@plugin "daisyui/theme" { name: "nord"; }
-@plugin "daisyui/theme" { name: "cupcake"; }
-@plugin "daisyui/theme" { name: "bumblebee"; }
-@plugin "daisyui/theme" { name: "emerald"; }
-@plugin "daisyui/theme" { name: "corporate"; }
-@plugin "daisyui/theme" { name: "retro"; }
-@plugin "daisyui/theme" { name: "valentine"; }
-@plugin "daisyui/theme" { name: "garden"; }
-@plugin "daisyui/theme" { name: "aqua"; }
-@plugin "daisyui/theme" { name: "lofi"; }
-@plugin "daisyui/theme" { name: "pastel"; }
-@plugin "daisyui/theme" { name: "fantasy"; }
-@plugin "daisyui/theme" { name: "wireframe"; }
-@plugin "daisyui/theme" { name: "cmyk"; }
-@plugin "daisyui/theme" { name: "autumn"; }
-@plugin "daisyui/theme" { name: "acid"; }
-@plugin "daisyui/theme" { name: "lemonade"; }
-@plugin "daisyui/theme" { name: "winter"; }
-@plugin "daisyui/theme" { name: "caramellatte"; }
-@plugin "daisyui/theme" { name: "silk"; }
+@keyframes sweep { to { transform: rotate(360deg); } }
+@keyframes blip { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@utility grid-cols-14 { grid-template-columns: repeat(14, minmax(0, 1fr)); }
+@utility grid-rows-14 { grid-template-rows: repeat(14, minmax(0, 1fr)); }
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+@utility bg-radar-sweep {
+  background-image: conic-gradient(from 0deg, rgb(79 214 207 / 0.30), rgb(79 214 207 / 0) 55%);
+}
+@utility bg-radar-glow {
+  background-image: radial-gradient(circle, rgb(79 214 207 / 0.13), rgb(6 19 26 / 0) 68%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
+html { @apply bg-abyss-900 font-sans text-base-content;}
