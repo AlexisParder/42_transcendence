@@ -3,10 +3,13 @@ import { SonarTitle } from "../components/SonarTitle";
 import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../components/Input";
+import { authClient } from "../lib/auth-client";
+import { useNavigate } from "react-router-dom";
 
 type Errors = {
 	email?: string
 	password?: string
+	form?: string
 }
 
 function validateLogin(email: string, password: string): Errors {
@@ -27,24 +30,9 @@ function isValidEmail(email: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
-async function handleLogin(email: string, password: string) {
-	const res = await fetch("http://localhost:3000/api/auth/login", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ email, password }),
-	})
-
-	if (!res.ok) {
-		const err = await res.json()
-		throw new Error(err.error)
-	}
-
-	const { token } = await res.json()
-	return token
-}
-
 export function Login() {
 	const [errors, setErrors] = useState<Errors>({})
+	const navigate = useNavigate()
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -61,11 +49,16 @@ export function Login() {
 			return
 
 		// BACK 
-		try {
-			const token = await handleLogin(email, password)
-			localStorage.setItem("token", token) // a changer pour plus de secu (peut etre avec un cookie httpOnly)
-		} catch (error) {
-			console.log(error) // afficher une alerte (toast)
+		const {error} = await authClient.signIn.email({
+			email,
+			password
+		})
+
+		if (error){
+			setErrors({ form: error.message ?? "Login failed"})
+			console.log(error.message)
+		} else {
+			navigate('/')
 		}
 	}
 
@@ -91,12 +84,13 @@ export function Login() {
 						<div className="flex items-center justify-between mt-3 mb-5">
 							<label className="label">
 								<input type="checkbox" name="remember" className="checkbox checkbox-sm checked:checkbox-info" />
-								<span className="text-neutral-content/40">Keep me signed in</span>
+								<span className="text-neutral-content/40 select-none">Keep me signed in</span>
 							</label>
 							<a href="forgot" className="link-primary">Forgot password?</a>
 						</div>
 
 						<button name="signBtn" className="btn btn-soft btn-info border-neutral hover:border-info w-full">Sign in</button>
+						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>
 
 					<p className="text-neutral-content/40 mt-3 text-center">No account yet? <a href="register" className="link-primary">Create one</a></p>

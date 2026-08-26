@@ -3,6 +3,9 @@ set -e
 
 export CI=true
 
+echo "Generating Prisma client..."
+pnpm prisma generate
+
 echo "Applying database migrations..."
 n=0
 until pnpm prisma migrate deploy; do
