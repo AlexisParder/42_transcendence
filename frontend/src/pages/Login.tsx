@@ -2,6 +2,7 @@ import type React from "react";
 import { SonarTitle } from "../components/SonarTitle";
 import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
+import { Input } from "../components/Input";
 
 type Errors = {
 	email?: string
@@ -29,8 +30,8 @@ function isValidEmail(email: string): boolean {
 async function handleLogin(email: string, password: string) {
 	const res = await fetch("http://localhost:3000/api/auth/login", {
 		method: "POST",
-		headers: {"Content-Type": "application/json"},
-		body: JSON.stringify({ email, password}),
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ email, password }),
 	})
 
 	if (!res.ok) {
@@ -84,17 +85,8 @@ export function Login() {
 
 					<form onSubmit={handleSubmit} className="min-w-full">
 
-						<label className="floating-label mt-2">
-							<span className="bg-base-200">Email</span>
-							<input type="email" name="email" placeholder="Email" className={`input input-md outline-0 input-info ${errors.email ? 'border-error' : 'border-neutral mb-2'} focus:border-info w-full bg-base-200`} autoComplete="off" />
-						</label>
-						{errors.email && <span className="text-error block pb-2 pl-2">{errors.email}</span>}
-
-						<label className="floating-label mt-2">
-							<span className="bg-base-200">Password</span>
-							<input type="password" name="password" placeholder="Password" className={`input input-md input-info outline-0 ${errors.password ? 'border-error' : 'border-neutral mb-2'} focus:border-info w-full bg-base-200`} autoComplete="current-password" />
-						</label>
-						{errors.password && <span className="text-error block pb-2 pl-2">{errors.password}</span>}
+						<Input type="email" label="Email" name="email" errorMsg={errors.email} />
+						<Input type="password" label="Password" name="password" errorMsg={errors.password} />
 
 						<div className="flex items-center justify-between mt-3 mb-5">
 							<label className="label">
