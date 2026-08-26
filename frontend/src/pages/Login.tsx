@@ -26,10 +26,26 @@ function isValidEmail(email: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
+async function handleLogin(email: string, password: string) {
+	const res = await fetch("http://localhost:3000/api/auth/login", {
+		method: "POST",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify({ email, password}),
+	})
+
+	if (!res.ok) {
+		const err = await res.json()
+		throw new Error(err.error)
+	}
+
+	const { token } = await res.json()
+	return token
+}
+
 export function Login() {
 	const [errors, setErrors] = useState<Errors>({})
 
-	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = (e) => {
+	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
 		const form = new FormData(e.currentTarget)
@@ -44,7 +60,8 @@ export function Login() {
 			return
 
 		// BACK 
-
+		const token = await handleLogin(email, password)
+		localStorage.setItem("token", token) // a changer pour plus de secu (peut etre avec un cookie httpOnly)
 	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
