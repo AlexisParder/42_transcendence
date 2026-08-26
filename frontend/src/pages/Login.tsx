@@ -60,8 +60,12 @@ export function Login() {
 			return
 
 		// BACK 
-		const token = await handleLogin(email, password)
-		localStorage.setItem("token", token) // a changer pour plus de secu (peut etre avec un cookie httpOnly)
+		try {
+			const token = await handleLogin(email, password)
+			localStorage.setItem("token", token) // a changer pour plus de secu (peut etre avec un cookie httpOnly)
+		} catch (error) {
+			console.log(error) // afficher une alerte (toast)
+		}
 	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
