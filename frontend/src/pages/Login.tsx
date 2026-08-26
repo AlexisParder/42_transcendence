@@ -2,10 +2,14 @@ import type React from "react";
 import { SonarTitle } from "../components/SonarTitle";
 import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
+import { Input } from "../components/Input";
+import { authClient } from "../lib/auth-client";
+import { useNavigate } from "react-router-dom";
 
 type Errors = {
 	email?: string
 	password?: string
+	form?: string
 }
 
 function validateLogin(email: string, password: string): Errors {
@@ -28,8 +32,9 @@ function isValidEmail(email: string): boolean {
 
 export function Login() {
 	const [errors, setErrors] = useState<Errors>({})
+	const navigate = useNavigate()
 
-	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = (e) => {
+	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
 		const form = new FormData(e.currentTarget)
@@ -44,7 +49,17 @@ export function Login() {
 			return
 
 		// BACK 
+		const {error} = await authClient.signIn.email({
+			email,
+			password
+		})
 
+		if (error){
+			setErrors({ form: error.message ?? "Login failed"})
+			console.log(error.message)
+		} else {
+			navigate('/')
+		}
 	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
@@ -63,27 +78,19 @@ export function Login() {
 
 					<form onSubmit={handleSubmit} className="min-w-full">
 
-						<label className="floating-label mt-2">
-							<span className="bg-base-200">Email</span>
-							<input type="email" name="email" placeholder="Email" className={`input input-md outline-0 input-info ${errors.email ? 'border-error' : 'border-neutral mb-2'} focus:border-info w-full bg-base-200`} autoComplete="off" />
-						</label>
-						{errors.email && <span className="text-error block pb-2 pl-2">{errors.email}</span>}
-
-						<label className="floating-label mt-2">
-							<span className="bg-base-200">Password</span>
-							<input type="password" name="password" placeholder="Password" className={`input input-md input-info outline-0 ${errors.password ? 'border-error' : 'border-neutral mb-2'} focus:border-info w-full bg-base-200`} autoComplete="current-password" />
-						</label>
-						{errors.password && <span className="text-error block pb-2 pl-2">{errors.password}</span>}
+						<Input type="email" label="Email" name="email" errorMsg={errors.email} />
+						<Input type="password" label="Password" name="password" errorMsg={errors.password} />
 
 						<div className="flex items-center justify-between mt-3 mb-5">
 							<label className="label">
 								<input type="checkbox" name="remember" className="checkbox checkbox-sm checked:checkbox-info" />
-								<span className="text-neutral-content/40">Keep me signed in</span>
+								<span className="text-neutral-content/40 select-none">Keep me signed in</span>
 							</label>
 							<a href="forgot" className="link-primary">Forgot password?</a>
 						</div>
 
 						<button name="signBtn" className="btn btn-soft btn-info border-neutral hover:border-info w-full">Sign in</button>
+						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>
 
 					<p className="text-neutral-content/40 mt-3 text-center">No account yet? <a href="register" className="link-primary">Create one</a></p>
