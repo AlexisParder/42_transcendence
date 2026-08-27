@@ -6,6 +6,7 @@ import { Input } from "../components/Input";
 // import { authClient } from "../lib/auth-client";
 // import { useNavigate } from "react-router-dom";
 import { isValidEmail } from "../lib/isValideEmail";
+import { PasswordBar } from "../components/PasswordBar";
 
 type Errors = {
 	username?: string
@@ -34,12 +35,12 @@ function validateRegister(username: string, email: string, password: string, pas
 		errors.password2 = "Password is empty!"
 
 	if (password.length > 0 && password2.length > 0 && password !== password2) {
-		errors.password = "The passwords do not match."
-		errors.password2 = "The passwords do not match."
+		errors.password = "Passwords do not match!"
+		errors.password2 = "Passwords do not match!"
 	}
 
 	if (!agree)
-		errors.agree = "You must accept the terms."
+		errors.agree = "You must accept the terms!"
 
 	return errors
 }
@@ -47,23 +48,8 @@ function validateRegister(username: string, email: string, password: string, pas
 export function Register() {
 	const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
-	const [isFocused2, setIsFocused2] = useState(false)
+	const [password, setPassword] = useState('')
 
-	const handleFocus = () => {
-		setIsFocused(true)
-	}
-
-	const handleBlur = () => {
-		setIsFocused(false)
-	}
-
-	const handleFocus2 = () => {
-		setIsFocused2(true)
-	}
-
-	const handleBlur2 = () => {
-		setIsFocused2(false)
-	}
 	// const navigate = useNavigate()
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -114,17 +100,10 @@ export function Register() {
 
 						<Input type="text" label="Username" name="username" errorMsg={errors.username} />
 						<Input type="email" label="Email" name="email" errorMsg={errors.email} />
-						<Input type="password" label="Password" name="password" errorMsg={errors.password} onFocus={handleFocus} onBlur={handleBlur} autoComplete="new-password" />
-						{isFocused && <div className="flex items-center w-full">
-							<progress className="progress progress-warning h-1.5" value={50} max="100"></progress>
-							<span className="pl-2 text-warning">STRONG</span>
-						</div>}
+						<Input type="password" label="Password" name="password" errorMsg={errors.password} value={password} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
+						{isFocused && <PasswordBar password={password} />}
 
-						<Input type="password" label="Confirm password" name="password2" errorMsg={errors.password2} onFocus={handleFocus2} onBlur={handleBlur2} autoComplete="new-password" />
-						{isFocused2 && <div className="flex items-center w-full">
-							<progress className="progress progress-warning h-1.5" value={50} max="100"></progress>
-							<span className="pl-2 text-warning">STRONG</span>
-						</div>}
+						<Input type="password" label="Confirm password" name="password2" errorMsg={errors.password2} autoComplete="new-password" />
 
 						<div className="mt-3 mb-5">
 							<label className="label">
