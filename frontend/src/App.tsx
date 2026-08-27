@@ -2,6 +2,8 @@ import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { authClient } from './lib/auth-client'
+import { Terms } from './pages/Terms'
+import { Privacy } from './pages/Privacy'
 
 const router = createBrowserRouter([
   {
@@ -16,6 +18,14 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: <Login />
+      },
+      {
+        path: 'terms',
+        element: <Terms />
+      },
+      {
+        path: 'privacy',
+        element: <Privacy />
       }
     ]
   }
