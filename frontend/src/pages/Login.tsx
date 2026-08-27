@@ -46,17 +46,15 @@ export function Login() {
 			return
 
 		// BACK 
-		const {error} = await authClient.signIn.email({
+		const { error } = await authClient.signIn.email({
 			email,
 			password
 		})
 
-		if (error){
-			setErrors({ form: error.message ?? "Login failed"})
-			console.log(error.message)
-		} else {
+		if (error)
+			setErrors({ form: error.message ?? "Login failed" })
+		else
 			navigate('/')
-		}
 	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">

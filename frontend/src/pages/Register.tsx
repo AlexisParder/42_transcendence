@@ -3,8 +3,8 @@ import { SonarTitle } from "../components/SonarTitle";
 import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../components/Input";
-// import { authClient } from "../lib/auth-client";
-// import { useNavigate } from "react-router-dom";
+import { authClient } from "../lib/auth-client";
+import { useNavigate } from "react-router-dom";
 import { isValidEmail } from "../lib/isValideEmail";
 import { PasswordBar } from "../components/PasswordBar";
 
@@ -17,11 +17,19 @@ type Errors = {
 	form?: string
 }
 
-function validateRegister(username: string, email: string, password: string, password2: string, agree: boolean): Errors {
+async function validateRegister(username: string, email: string, password: string, password2: string, agree: boolean): Promise<Errors> {
 	const errors: Errors = {}
 
 	if (username.length === 0)
 		errors.username = "Username is empty!"
+	else {
+		const { data, error } = await authClient.isUsernameAvailable({
+			username: username
+		})
+
+		if (!data?.available)
+			errors.username = error?.message ?? "Username alredy use!"
+	}
 
 	if (email.length === 0)
 		errors.email = "Email is empty!"
@@ -50,36 +58,40 @@ export function Register() {
 	const [isFocused, setIsFocused] = useState(false)
 	const [password, setPassword] = useState('')
 
-	// const navigate = useNavigate()
+	const navigate = useNavigate()
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
 		const form = new FormData(e.currentTarget)
-		const username = form.get('username')?.toString().trim() ?? ''
+		const name = form.get('username')?.toString().trim() ?? ''
 		const email = form.get('email')?.toString().trim().toLowerCase() ?? ''
 		const password = form.get('password')?.toString() ?? ''
 		const password2 = form.get('password2')?.toString() ?? ''
 		const agree = form.get('agree') ? true : false
 
-		const newErrors = validateRegister(username, email, password, password2, agree)
+		const newErrors = await validateRegister(name, email, password, password2, agree)
 		setErrors(newErrors)
 
 		if (Object.keys(newErrors).length > 0)
 			return
 
-		// // BACK 
-		// const {error} = await authClient.signIn.email({
-		// 	email,
-		// 	password
-		// })
+		// BACK
+		const { error } = await authClient.signUp.email({
+			email,
+			password,
+			name,
+			username: name
+		})
 
-		// if (error){
-		// 	setErrors({ form: error.message ?? "Login failed"})
-		// 	console.log(error.message)
-		// } else {
-		// 	navigate('/')
-		// }
+		if (error) {
+			if (error.status === 422)
+				setErrors({ email: error.message })
+			else
+				setErrors({ form: error.message ?? "Login failed" })
+		} else {
+			navigate('/')
+		}
 	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
@@ -98,7 +110,7 @@ export function Register() {
 
 					<form onSubmit={handleSubmit} className="min-w-full">
 
-						<Input type="text" label="Username" name="username" errorMsg={errors.username} />
+						<Input type="text" label="Username" name="username" errorMsg={errors.username} autoComplete="off" />
 						<Input type="email" label="Email" name="email" errorMsg={errors.email} />
 						<Input type="password" label="Password" name="password" errorMsg={errors.password} value={password} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
 						{isFocused && <PasswordBar password={password} />}
