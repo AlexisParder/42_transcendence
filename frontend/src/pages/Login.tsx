@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { isValidEmail } from "../lib/isValideEmail";
 import { SignGoogle } from "../lib/SignGoogle";
 import { SignDiscord } from "../lib/SignDiscord";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 type Errors = {
 	email?: string
@@ -30,6 +31,7 @@ function validateLogin(email: string, password: string): Errors {
 }
 
 export function Login() {
+	useDocumentTitle("Sign in")
 	const [errors, setErrors] = useState<Errors>({})
 	const navigate = useNavigate()
 

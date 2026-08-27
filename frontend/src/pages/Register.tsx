@@ -9,6 +9,7 @@ import { isValidEmail } from "../lib/isValideEmail";
 import { PasswordBar } from "../components/PasswordBar";
 import { SignGoogle } from "../lib/SignGoogle";
 import { SignDiscord } from "../lib/SignDiscord";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 type Errors = {
 	username?: string
@@ -56,6 +57,7 @@ async function validateRegister(username: string, email: string, password: strin
 }
 
 export function Register() {
+	useDocumentTitle("Sign up")
 	const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
 	const [password, setPassword] = useState('')
