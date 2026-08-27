@@ -5,6 +5,7 @@ import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../components/Input";
 import { authClient } from "../lib/auth-client";
 import { useNavigate } from "react-router-dom";
+import { isValidEmail } from "../lib/isValideEmail";
 
 type Errors = {
 	email?: string
@@ -26,10 +27,6 @@ function validateLogin(email: string, password: string): Errors {
 	return errors
 }
 
-function isValidEmail(email: string): boolean {
-	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
-
 export function Login() {
 	const [errors, setErrors] = useState<Errors>({})
 	const navigate = useNavigate()
@@ -38,7 +35,7 @@ export function Login() {
 		e.preventDefault()
 
 		const form = new FormData(e.currentTarget)
-		const email = form.get('email')?.toString().trim() ?? ''
+		const email = form.get('email')?.toString().trim().toLowerCase() ?? ''
 		const password = form.get('password')?.toString() ?? ''
 		// const remember = form.get('remember') ? true : false
 
@@ -79,7 +76,7 @@ export function Login() {
 					<form onSubmit={handleSubmit} className="min-w-full">
 
 						<Input type="email" label="Email" name="email" errorMsg={errors.email} />
-						<Input type="password" label="Password" name="password" errorMsg={errors.password} />
+						<Input type="password" label="Password" name="password" errorMsg={errors.password} autoComplete="current-password" />
 
 						<div className="flex items-center justify-between mt-3 mb-5">
 							<label className="label">
