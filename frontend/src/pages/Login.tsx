@@ -6,6 +6,8 @@ import { Input } from "../components/Input";
 import { authClient } from "../lib/auth-client";
 import { useNavigate } from "react-router-dom";
 import { isValidEmail } from "../lib/isValideEmail";
+import { SignGoogle } from "../lib/SignGoogle";
+import { SignDiscord } from "../lib/SignDiscord";
 
 type Errors = {
 	email?: string
@@ -66,8 +68,8 @@ export function Login() {
 					<h2 className="card-title text-neutral-content text-xl mt-2">Immersion</h2>
 					<p className="text-neutral-content/40 mb-2">Sign in to join the crew.</p>
 
-					<button className="btn btn-info"><FaGoogle /> Continue with Google</button>
-					<button className="btn btn-info"><FaDiscord /> Continue with Discord</button>
+					<button onClick={SignGoogle} className="btn btn-info"><FaGoogle /> Continue with Google</button>
+					<button onClick={SignDiscord} className="btn btn-info"><FaDiscord /> Continue with Discord</button>
 
 					<div className="divider text-neutral-content/40 m-0 mt-3 mb-1">OR</div>
 

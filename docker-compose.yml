@@ -13,14 +13,12 @@ services:
       - sonar_network
   backend:
     build: ./backend
+    env_file:
+      - .env
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID} 
-      GOOGLE_SECRET_ID: ${GOOGLE_SECRET_ID} 
-      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID} 
-      DISCORD_SECRET_ID: ${DISCORD_SECRET_ID} 
     volumes:
       - ./backend:/app
       - /app/node_modules

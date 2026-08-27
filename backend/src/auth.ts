@@ -10,6 +10,7 @@ export const auth = betterAuth({
 	trustedOrigins: ["http://localhost:5173"],
 	socialProviders: {
 		google: {
+			prompt: "select_account",
 			clientId: process.env.GOOGLE_CLIENT_ID as string,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
 		},
@@ -23,5 +24,28 @@ export const auth = betterAuth({
 			minUsernameLength: 3,
 			maxUsernameLength: 25,
 		})
-	]
+	],
+	databaseHooks: {
+		user: {
+			create: {
+				before: async (user, ctx) => {
+					if (user.username) return { data: user }
+
+					const base = (user.email?.split("@")[0] ?? user.name ?? "user").toLowerCase().replace(/[^a-z0-9_.]/g, "").slice(0, 24) || "user"
+
+					let candidate = base
+					let i = 0
+					while (await ctx?.context.adapter.findOne({
+						model: "user",
+						where: [{ field: "username", value: candidate }]
+					})) {
+						i++
+						candidate = `${base}${i}`
+					}
+
+					return { data: { ...user, username: candidate, displayUsername: candidate } }
+				}
+			},
+		},
+	},
 })

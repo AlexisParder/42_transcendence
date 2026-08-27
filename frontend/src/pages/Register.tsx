@@ -7,6 +7,8 @@ import { authClient } from "../lib/auth-client";
 import { useNavigate } from "react-router-dom";
 import { isValidEmail } from "../lib/isValideEmail";
 import { PasswordBar } from "../components/PasswordBar";
+import { SignGoogle } from "../lib/SignGoogle";
+import { SignDiscord } from "../lib/SignDiscord";
 
 type Errors = {
 	username?: string
@@ -103,8 +105,8 @@ export function Register() {
 					<h2 className="card-title text-neutral-content text-xl mt-2">Join the fleet</h2>
 					<p className="text-neutral-content/40 mb-2">Pick a callsign and you're ready to dive.</p>
 
-					<button className="btn btn-info"><FaGoogle /> Sign up with Google</button>
-					<button className="btn btn-info"><FaDiscord /> Sign up with Discord</button>
+					<button onClick={SignGoogle} className="btn btn-info"><FaGoogle /> Sign up with Google</button>
+					<button onClick={SignDiscord} className="btn btn-info"><FaDiscord /> Sign up with Discord</button>
 
 					<div className="divider text-neutral-content/40 m-0 mt-3 mb-1">OR</div>
 

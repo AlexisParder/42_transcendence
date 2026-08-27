@@ -56,7 +56,7 @@ function Root() {
       </header> */}
       <main className='flex-1 flex flex-col'>
         {isPending && <p>Chargement...</p>}
-        {!isPending && session ? <p>Connecté en tant que {session.user.name}</p> : <p>Pas connecté</p>}
+        {!isPending && session ? <p>Connecté en tant que {session.user.username}</p> : <p>Pas connecté</p>}
         <Outlet />
       </main>
     </div>
