@@ -4,6 +4,7 @@ import { Register } from './pages/Register'
 import { authClient } from './lib/auth-client'
 import { Terms } from './pages/Terms'
 import { Privacy } from './pages/Privacy'
+import { OTP } from './pages/OTP'
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: 'privacy',
         element: <Privacy />
+      },
+      {
+        path: 'otp',
+        element: <OTP />
       }
     ]
   }

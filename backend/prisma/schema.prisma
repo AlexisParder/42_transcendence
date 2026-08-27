@@ -29,6 +29,9 @@ model User {
   username        String?
   displayUsername String?
 
+  twoFactorEnabled Boolean?    @default(false)
+  twofactors       TwoFactor[]
+
   @@map("user")
   @@unique([username])
 }
@@ -80,4 +83,19 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model TwoFactor {
+  id                      String    @id
+  secret                  String
+  backupCodes             String
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+
+  @@index([secret])
+  @@index([userId])
+  @@map("twoFactor")
 }

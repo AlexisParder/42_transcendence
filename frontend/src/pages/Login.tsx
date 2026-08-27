@@ -86,7 +86,7 @@ export function Login() {
 							<a href="forgot" className="link-primary">Forgot password?</a>
 						</div>
 
-						<button name="signBtn" className="btn btn-soft btn-info border-neutral hover:border-info w-full">Sign in</button>
+						<button className="btn btn-soft btn-info border-neutral hover:border-info w-full">Sign in</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>
 

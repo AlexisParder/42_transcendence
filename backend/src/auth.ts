@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./db/client.ts"
-import { username } from "better-auth/plugins"
+import { twoFactor, username } from "better-auth/plugins"
 
 export const auth = betterAuth({
+	appName: "Sonar",
 	baseURL: process.env.BETTER_AUTH_URL,
 	database: prismaAdapter(prisma, { provider: "postgresql" }),
 	emailAndPassword: { enabled: true },
@@ -23,7 +24,8 @@ export const auth = betterAuth({
 		username({
 			minUsernameLength: 3,
 			maxUsernameLength: 25,
-		})
+		}),
+		twoFactor()
 	],
 	databaseHooks: {
 		user: {

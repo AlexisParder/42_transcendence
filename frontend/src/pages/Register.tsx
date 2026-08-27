@@ -127,7 +127,7 @@ export function Register() {
 							{errors.agree && <span className="text-error block pb-2 pl-2">{errors.agree}</span>}
 						</div>
 
-						<button name="signBtn" className="btn btn-soft btn-info border-neutral hover:border-info w-full">Create account</button>
+						<button className="btn btn-soft btn-info border-neutral hover:border-info w-full">Create account</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>
 
