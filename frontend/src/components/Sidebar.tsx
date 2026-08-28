@@ -29,20 +29,22 @@ export function Sidebar() {
 		<div className="drawer-side">
 			<ul className="menu bg-base-200 min-h-full max-w-50 p-4 gap-1">
 				<p className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</p>
-				{navItems.map(({ to, icon: Icon, label, end }) => (
-					<li key={to}>
-						<NavLink to={to} end={end} className={({ isActive }) => (isActive ? "font-bold bg-info/15" : "")} >
-							{({ isActive }) => (
-								<>
-									<Icon className={isActive ? "text-info" : ""} /> {label}
-								</>
-							)}
-						</NavLink>
-					</li>
-				))}
+				<div className="flex flex-col flex-1 gap-1">
+					{navItems.map(({ to, icon: Icon, label, end }) => (
+						<li key={to}>
+							<NavLink to={to} end={end} className={({ isActive }) => (isActive ? "font-bold bg-info/15" : "")} >
+								{({ isActive }) => (
+									<>
+										<Icon className={isActive ? "text-info" : ""} /> {label}
+									</>
+								)}
+							</NavLink>
+						</li>
+					))}
+				</div>
 
-				<div className="flex flex-1 items-end mb-5">
-					<img src="https://placehold.co/40x40" alt="" />
+				<div className="flex items-end mb-5 p-1.5 border border-neutral rounded-md">
+					<img src="https://placehold.co/40x40" alt="" className="rounded-md" />
 					<div className="ml-3">
 						<p className="font-bold">alexis</p>
 						<p className="text-warning">1,254 pts</p>
