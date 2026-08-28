@@ -2,8 +2,11 @@ import type React from "react"
 import { Input } from "../components/Input"
 import { Sidebar } from "../components/Sidebar"
 import { PasswordBar } from "../components/PasswordBar"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { MdWarning } from "react-icons/md"
+import { authClient } from "../lib/auth-client"
+import { getAvatar } from "../lib/getAvatar"
+import { prettyUA } from "../lib/prettyUA"
 
 // type Errors = {
 // 	username?: string
@@ -14,9 +17,13 @@ import { MdWarning } from "react-icons/md"
 // }
 
 export function AccountSettings() {
+	const { data: session } = authClient.useSession()
+
 	// const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
 	const [password, setPassword] = useState('')
+
+	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
 
 	return <Sidebar>
 		<div className="p-4">
@@ -27,13 +34,13 @@ export function AccountSettings() {
 
 			<SectionSetting title="Profile" description="Your callsign and avatar are visible to every player." hasDividerBottom={true}>
 				<div className="flex gap-2 items-center">
-					<img src="https://placehold.co/64x64" alt="" className="rounded-md" />
+					<img src={getAvatar(session?.user.image)} width={64} height={64} alt="" className="rounded-md" />
 					<button className="btn btn-outline border-neutral">Upload new</button>
 					<button className="btn btn-outline border-neutral">Remove</button>
 				</div>
 				<div className="flex mt-2 items-center w-full gap-2">
 					<InputWithText text="callsign">
-						<Input type="text" name="username" label="Username" defaultValue="alexis" useLabel={false} />
+						<Input type="text" name="username" label="Username" defaultValue={session?.user.username ? session?.user.username : ''} useLabel={false} />
 					</InputWithText>
 					<InputWithText text="display language">
 						<select defaultValue="en" className="select outline-none focus:border-info w-full bg-abyss-700">
@@ -44,7 +51,7 @@ export function AccountSettings() {
 				</div>
 				<div>
 					<InputWithText text="email">
-						<Input type="email" name="email" label="Email" defaultValue="ft.sonar42@gmail.com" useLabel={false} />
+						<Input type="email" name="email" label="Email" defaultValue={session?.user.email ? session?.user.email : ''} useLabel={false} />
 					</InputWithText>
 				</div>
 			</SectionSetting>
@@ -68,45 +75,18 @@ export function AccountSettings() {
 			</SectionSetting>
 
 			<SectionSetting title="Two-factor authentification" description="A six-digit code from your authentificator app, asked after your password." hasDividerBottom={true}>
-				<div className="flex bg-info/10 border border-info/50 rounded-md p-4 items-center">
-					<div className="flex-1">
-						<p className="text-sm pb-1">Authentificator app <span className="badge badge-xs badge-outline badge-info ml-1">ENABLED</span></p>
-						<p className="text-xs text-neutral-content/60">Added 12 June 2026 - last used today</p>
-					</div>
-					<div>
-						<Input type="checkbox" name="checkbox" label="" useLabel={false} customStyle="toggle checkbox-sm checked:toggle-info checked:border-info checked:bg-info checked:text-neutral" />
-					</div>
-				</div>
+				<SectionOTP isEnabled={isOTPEnabled} />
 				<div className="flex gap-2 pt-3 pb-3">
 					<button className="btn btn-outline border-neutral">Show recovery codes</button>
 					<button className="btn btn-outline border-neutral">Re-scan QR code</button>
+					<button className={`btn btn-outline btn-${isOTPEnabled ? 'error' : 'info'}`}>{isOTPEnabled ? 'Disabled' : 'Enable'}</button>
 				</div>
 				<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><MdWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">Disabling two-factor authentification requires your password and takes effect immediately.<br />Ranked tournament hosts may require it.</span></p>
 			</SectionSetting>
 
 			<SectionSetting title="Active sessions" description="Devices currently signed in to your account" hasDividerBottom={true}>
 				<div className="max-h-37 overflow-y-auto scrollbar-thin">
-					<div className="flex bg-info/10 border border-info/50 rounded-md p-4 items-center mr-2">
-						<div className="flex-1">
-							<p className="text-sm">Firefox - Linux</p>
-							<p className="text-xs text-neutral-content/60">42 Angoulême - 10.11.4.2</p>
-						</div>
-						<div>
-							<p className="text-info text-xs font-semibold">THIS DEVICE</p>
-						</div>
-					</div>
-					<div className="flex border border-neutral rounded-md p-4 items-center mt-2 mr-2">
-						<div className="flex-1/2">
-							<p className="text-sm">Chrome - iPhone</p>
-							<p className="text-xs text-neutral-content/60">Angoulême - 88.174.21.9</p>
-						</div>
-						<div className="flex-1/2">
-							<p className="text-xs text-neutral-content/60">2 days ago</p>
-						</div>
-						<div>
-							<button className="btn btn-outline border-neutral btn-sm">Revoke</button>
-						</div>
-					</div>
+					<SessionsDisplay />
 				</div>
 				<a href="/revoke_all" className="link-error text-xs font-bold">Sign out everywhere else</a>
 			</SectionSetting>
@@ -142,7 +122,7 @@ function InputWithText({ text = "", children }: { text?: string, children: React
 	</div>
 }
 
-function SectionSetting({ title, titleColor = "", description, hasDividerBottom = false, children }: { title: string, titleColor?:string, description: string, hasDividerBottom?: boolean, children: React.ReactNode }) {
+function SectionSetting({ title, titleColor = "", description, hasDividerBottom = false, children }: { title: string, titleColor?: string, description: string, hasDividerBottom?: boolean, children: React.ReactNode }) {
 	return <>
 		<div className="flex justify">
 			<div className="flex-1/3 max-w-100">
@@ -154,5 +134,49 @@ function SectionSetting({ title, titleColor = "", description, hasDividerBottom 
 			</div>
 		</div>
 		{hasDividerBottom && <div className="divider text-neutral-content/40 m-0 mt-3 mb-3"></div>}
+	</>
+}
+
+function SectionOTP({ isEnabled = false }: { isEnabled?: boolean }) {
+
+	let color = "warning"
+	if (isEnabled)
+		color = "info"
+
+	return <div className={`flex bg-${color}/10 border border-${color}/50 rounded-md p-4 items-center`}>
+		<div className="flex-1">
+			<p className="text-sm pb-1">Authentificator app <span className={`badge badge-xs badge-outline badge-${color} ml-1`}>{isEnabled ? "ENABLED" : "DISABLED"}</span></p>
+			{isEnabled && <p className="text-xs text-neutral-content/60">Added 12 June 2026 - last used today</p>}
+		</div>
+	</div>
+}
+
+type SessionRow = typeof authClient.$Infer.Session["session"]
+function SessionsDisplay() {
+	const { data: currentSession } = authClient.useSession()
+	const [sessions, setSessions] = useState<SessionRow[]>([])
+
+	useEffect(() => {
+		authClient.listSessions().then(({data}) => {
+			if (data) setSessions(data)
+		})
+	}, [])
+
+	return <>
+		{sessions.map(s => {
+			const isCurrent = s.id === currentSession?.session.id
+
+			return	(
+				<div key={s.id} className={`flex border rounded-md p-4 items-center mt-2 mr-2 ${isCurrent ? "bg-info/10 border-info/50" : "border-neutral"}`}>
+					<div className="flex-1">
+						<p className="text-sm">{prettyUA(s.userAgent)}</p>
+						<p className="text-xs text-neutral-content/60">{s.ipAddress || "Unknown IP Address"}</p>
+					</div>
+					<div>
+						{isCurrent ? <p className="text-info text-xs font-semibold">THIS DEVICE</p> : <button className="btn btn-outline border-neutral btn-sm">Revoke</button>}
+					</div>
+				</div>
+			)
+		})}
 	</>
 }

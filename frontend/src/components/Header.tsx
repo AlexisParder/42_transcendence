@@ -1,4 +1,6 @@
 import { FaRegCircle } from "react-icons/fa6";
+import { authClient } from "../lib/auth-client";
+import { useNavigate } from "react-router-dom";
 
 function Links() {
 	return <>
@@ -9,7 +11,31 @@ function Links() {
 	</>
 }
 
+function SignLinks() {
+	const navigate = useNavigate()
+	const { data: currentSession } = authClient.useSession()
+
+	async function handleSignOut() {
+		await authClient.signOut({
+			fetchOptions: {
+				onSuccess: () => {
+					navigate("/");
+				}
+			}
+		})
+	}
+
+	if (currentSession)
+		return <button className="btn btn-info btn-outline mr-2" onClick={handleSignOut}>Sign out</button>
+
+	return <>
+		<a className="btn btn-info btn-outline mr-2" href="/login">Sign in</a>
+		<a className="btn btn-info" href="/register">Sign up</a>
+	</>
+}
+
 export function Header() {
+
 	return <div className="navbar bg-base-200 shadow-sm">
 		<div className="navbar-start">
 			<div className="dropdown">
@@ -30,8 +56,7 @@ export function Header() {
 			</ul>
 		</div>
 		<div className="navbar-end mr-2">
-			<a className="btn btn-info btn-outline mr-2" href="/login">Sign in</a>
-			<a className="btn btn-info" href="/register">Sign up</a>
+			<SignLinks />
 		</div>
 	</div>
 }

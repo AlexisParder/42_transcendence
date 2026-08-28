@@ -6,6 +6,8 @@ import { TbSettingsFilled, TbTournament } from "react-icons/tb";
 import { NavLink } from "react-router-dom";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import type React from "react";
+import { authClient } from "../lib/auth-client";
+import { getAvatar } from "../lib/getAvatar";
 
 interface NavItem {
 	to: string,
@@ -24,41 +26,54 @@ const navItems: NavItem[] = [
 ]
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
+	const { data: session, isPending } = authClient.useSession()
 	useDocumentTitle("Settings")
-	return <div className="drawer drawer-open">
-		<input id="my-drawer-3" type="checkbox" className="drawer-toggle hidden" />
-		<div className="drawer-content">
-			{children}
-		</div>
-		<div className="drawer-side">
-			<ul className="menu bg-base-200 min-h-full w-50 max-w-50 p-4 gap-1">
-				<p className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</p>
-				<div className="flex flex-col flex-1 gap-1">
-					{navItems.map(({ to, icon: Icon, label, end }) => (
-						<li key={to}>
-							<NavLink to={to} end={end} className={({ isActive }) => (isActive ? "font-bold bg-info/15" : "")} >
-								{({ isActive }) => (
-									<>
-										<Icon className={isActive ? "text-info" : ""} /> {label}
-									</>
-								)}
-							</NavLink>
-						</li>
-					))}
-				</div>
 
-				<div className="flex items-end mb-5 p-1.5 border border-neutral rounded-md">
-					<img src="https://placehold.co/40x40" alt="" className="rounded-md" />
-					<div className="ml-3">
-						<p className="font-bold">alexis</p>
-						<p className="text-warning">1,254 pts</p>
+	if (!session && !isPending)
+		return <p>Pas connecté</p>
+
+	const username = session?.user.username ? session?.user.username : ""
+	return <>
+		{isPending && <p>Loading...</p>}
+		{!isPending && <div className="drawer drawer-open">
+			<input id="my-drawer-3" type="checkbox" className="drawer-toggle hidden" />
+			<div className="drawer-content">
+				{children}
+			</div>
+			<div className="drawer-side">
+				<ul className="menu bg-base-200 min-h-full w-50 max-w-50 p-4 gap-1">
+					<p className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</p>
+					<div className="flex flex-col flex-1 gap-1">
+						{navItems.map(({ to, icon: Icon, label, end }) => (
+							<li key={to}>
+								<NavLink to={to} end={end} className={({ isActive }) => (isActive ? "font-bold bg-info/15" : "")} >
+									{({ isActive }) => (
+										<>
+											<Icon className={isActive ? "text-info" : ""} /> {label}
+										</>
+									)}
+								</NavLink>
+							</li>
+						))}
 					</div>
-				</div>
-				<div className="flex gap-2">
-					<a href="privacy" className="link-primary text-xs">Privacy</a>
-					<a href="terms" className="link-primary text-xs">Terms</a>
-				</div>
-			</ul>
-		</div>
-	</div>
+
+					<div className="flex items-end mb-5 p-1.5 border border-neutral rounded-md">
+						<img src={getAvatar(session?.user.image)} width={40} height={40} alt="" className="rounded-md" />
+						<div className="ml-3">
+							<p className="font-bold">{truncateUsername(username)}</p>
+							<p className="text-warning">1,254 pts</p>
+						</div>
+					</div>
+					<div className="flex gap-2">
+						<a href="privacy" className="link-primary text-xs">Privacy</a>
+						<a href="terms" className="link-primary text-xs">Terms</a>
+					</div>
+				</ul>
+			</div>
+		</div>}
+	</>
+}
+
+function truncateUsername(username: string): string {
+	return username.length > 11 ? (username.slice(0, 11) + "..") : username
 }
