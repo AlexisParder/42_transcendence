@@ -1,13 +1,13 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./db/client.ts"
+import { sendMail } from "./lib/mail.ts"
 import { twoFactor, username } from "better-auth/plugins"
 
 export const auth = betterAuth({
 	appName: "Sonar",
 	baseURL: process.env.BETTER_AUTH_URL,
 	database: prismaAdapter(prisma, { provider: "postgresql" }),
-	emailAndPassword: { enabled: true },
 	trustedOrigins: ["http://localhost:5173"],
 	socialProviders: {
 		google: {
@@ -18,6 +18,29 @@ export const auth = betterAuth({
 		discord: {
 			clientId: process.env.DISCORD_CLIENT_ID as string,
 			clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
+		}
+	},
+	emailAndPassword: {
+		enabled: true,
+		requireEmailVerification: true
+	},
+	emailVerification: {
+		sendOnSignUp: true,
+		autoSignInAfterVerification: true,
+		expiresIn: 3600,
+		sendVerificationEmail: async ({user, token}) => {
+			const link = `${process.env.BETTER_AUTH_URL}/api/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent("http://localhost:5173/")}`
+			await sendMail({
+				to: user.email,
+				subject: "Confirm your address",
+				html: `<a href="${link}">Confirm my address</a>`,
+			})
+		}
+	},
+	account: {
+		accountLinking: {
+			enabled: true,
+			trustedProviders: ["google", "discord"]
 		}
 	},
 	plugins: [

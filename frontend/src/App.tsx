@@ -9,75 +9,80 @@ import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
 import { AccountSettings } from './pages/AccountSettings'
+import { Verified } from './pages/Verified'
 
 const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Root />,
-    errorElement: <PageError />,
-    children: [
-      {
-        path: '',
-        element: <Home />
-      },
-      {
-        path: 'register',
-        element: <Register />
-      },
-      {
-        path: 'login',
-        element: <Login />
-      },
-      {
-        path: 'terms',
-        element: <Terms />
-      },
-      {
-        path: 'privacy',
-        element: <Privacy />
-      },
-      {
-        path: 'otp',
-        element: <OTP />
-      }
-    ]
-  },
-  {
-    path: '/account_settings',
-    element: <AccountSettings />,
-    errorElement: <PageError />
-  }
+	{
+		path: '/',
+		element: <Root />,
+		errorElement: <PageError />,
+		children: [
+			{
+				path: '',
+				element: <Home />
+			},
+			{
+				path: 'register',
+				element: <Register />
+			},
+			{
+				path: 'login',
+				element: <Login />
+			},
+			{
+				path: 'terms',
+				element: <Terms />
+			},
+			{
+				path: 'privacy',
+				element: <Privacy />
+			},
+			{
+				path: 'otp',
+				element: <OTP />
+			},
+			{
+				path: 'verified',
+				element: <Verified />
+			}
+		]
+	},
+	{
+		path: '/account_settings',
+		element: <AccountSettings />,
+		errorElement: <PageError />
+	}
 ])
 
 function PageError() {
-  // const error = useRouteError()
+	// const error = useRouteError()
 
-  return <>
-    <h1>Error</h1>
-    {/* <p>
+	return <>
+		<h1>Error</h1>
+		{/* <p>
       {error?.error?.toString() ?? error?.toString()}
     </p> */}
-  </>
+	</>
 }
 
 // Exemple pour la navbar
 function Root() {
-  const { data: session, isPending } = authClient.useSession()
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className='flex-1 flex flex-col'>
-        {isPending && <p>Chargement...</p>}
-        {!isPending && session ? <p>Connecté en tant que {session.user.username}</p> : <p>Pas connecté</p>}
-        <Outlet />
-      </main>
-      <Footer />
-    </div>
-  )
+	const { data: session, isPending } = authClient.useSession()
+	return (
+		<div className="flex flex-col min-h-screen">
+			<Header />
+			<main className='flex-1 flex flex-col'>
+				{isPending && <p>Chargement...</p>}
+				{!isPending && session ? <p>Connecté en tant que {session.user.username}</p> : <p>Pas connecté</p>}
+				<Outlet />
+			</main>
+			<Footer />
+		</div>
+	)
 }
 
 function App() {
-  return <RouterProvider router={router} />
+	return <RouterProvider router={router} />
 }
 
 export default App

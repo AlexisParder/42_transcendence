@@ -94,7 +94,7 @@ export function Register() {
 			else
 				setErrors({ form: error.message ?? "Login failed" })
 		} else {
-			navigate('/')
+			navigate('/verified')
 		}
 	}
 
