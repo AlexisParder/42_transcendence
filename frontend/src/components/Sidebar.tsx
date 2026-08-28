@@ -31,7 +31,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 			{children}
 		</div>
 		<div className="drawer-side">
-			<ul className="menu bg-base-200 min-h-full max-w-50 p-4 gap-1">
+			<ul className="menu bg-base-200 min-h-full w-50 max-w-50 p-4 gap-1">
 				<p className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</p>
 				<div className="flex flex-col flex-1 gap-1">
 					{navItems.map(({ to, icon: Icon, label, end }) => (
