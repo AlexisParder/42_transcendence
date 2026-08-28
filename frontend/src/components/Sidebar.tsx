@@ -5,6 +5,7 @@ import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled, TbTournament } from "react-icons/tb";
 import { NavLink } from "react-router-dom";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import type React from "react";
 
 interface NavItem {
 	to: string,
@@ -22,10 +23,13 @@ const navItems: NavItem[] = [
 	{ to: "/account_settings", icon: TbSettingsFilled, label: "Settings" }
 ]
 
-export function Sidebar() {
+export function Sidebar({ children }: { children: React.ReactNode }) {
 	useDocumentTitle("Settings")
 	return <div className="drawer drawer-open">
 		<input id="my-drawer-3" type="checkbox" className="drawer-toggle hidden" />
+		<div className="drawer-content">
+			{children}
+		</div>
 		<div className="drawer-side">
 			<ul className="menu bg-base-200 min-h-full max-w-50 p-4 gap-1">
 				<p className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</p>
