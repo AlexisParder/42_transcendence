@@ -9,6 +9,7 @@ import { authClient } from "../lib/auth-client"
 import { getAvatar } from "../lib/getAvatar"
 import { prettyUA } from "../lib/prettyUA"
 import { useSessions } from "../hooks/useSessions"
+import { HideModal, Modal, ShowModal } from "../components/Modal"
 
 type Errors = {
 	username?: string
@@ -28,6 +29,7 @@ export function AccountSettings() {
 	const [currPassword, setCurrPassword] = useState('')
 	const [password, setPassword] = useState('')
 	const [password2, setPassword2] = useState('')
+	const [picture, setPicture] = useState('')
 	const [hasPwd, setHasPwd] = useState<boolean | null>()
 
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
@@ -96,6 +98,40 @@ export function AccountSettings() {
 		}
 	}
 
+	const handleChangePicture: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+
+		const form = new FormData(e.currentTarget)
+		const pictureRaw = form.get('picture')?.toString().trim() ?? ''
+
+		let picture = ''
+		try {
+			const url = new URL(pictureRaw)
+			if (url.protocol === 'http:' || url.protocol === 'https:')
+				picture = url.href
+		} catch {
+			return
+		}
+
+		if (picture.length > 0) {
+			await authClient.updateUser({
+				image: picture,
+			})
+
+			setPicture('')
+			HideModal('pictureModal')
+		}
+	}
+
+	async function handleRemovePicture() {
+		if (!session?.user.image)
+			return
+
+		await authClient.updateUser({
+			image: null,
+		})
+	}
+
 	return <Sidebar>
 		<div className="p-4">
 			<h1 className="text-xl font-bold">Settings</h1>
@@ -106,8 +142,8 @@ export function AccountSettings() {
 			<SectionSetting title="Profile" description="Your callsign and avatar are visible to every player." hasDividerBottom={true}>
 				<div className="flex gap-2 items-center">
 					<img src={getAvatar(session?.user.image)} width={64} height={64} alt="" className="rounded-md" />
-					<button className="btn btn-outline border-neutral">Upload new</button>
-					<button className="btn btn-outline border-neutral">Remove</button>
+					<button className="btn btn-outline border-neutral" onClick={() => ShowModal('pictureModal')}>Upload new</button>
+					<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>Remove</button>
 				</div>
 				<div className="flex mt-2 items-center w-full gap-2">
 					<InputWithText text="callsign">
@@ -186,6 +222,14 @@ export function AccountSettings() {
 				</div>
 			</SectionSetting>
 		</div>
+
+		<Modal id="pictureModal">
+			<p className="pb-2">Upload new profile picture</p>
+			<form onSubmit={handleChangePicture}>
+				<Input type="text" label="Image link" name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} />
+				<button className="btn btn-info btn-outline">Upload</button>
+			</form>
+		</Modal>
 	</Sidebar>
 }
 
