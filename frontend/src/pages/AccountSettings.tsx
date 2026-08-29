@@ -10,6 +10,7 @@ import { getAvatar } from "../lib/getAvatar"
 import { prettyUA } from "../lib/prettyUA"
 import { useSessions } from "../hooks/useSessions"
 import { HideModal, Modal, ShowModal } from "../components/Modal"
+import { useNavigate } from "react-router-dom"
 
 type Errors = {
 	username?: string
@@ -21,6 +22,7 @@ type Errors = {
 }
 
 export function AccountSettings() {
+	const navigate = useNavigate()
 	const { data: session } = authClient.useSession()
 	const { sessions, revokeSession, revokeOthers } = useSessions()
 
@@ -169,6 +171,17 @@ export function AccountSettings() {
 			setErrors({ username: error.message ?? "Update username failed" })
 	}
 
+	async function handleDeleteAccount() {
+		const {error} = await authClient.deleteUser();
+
+		HideModal("deleteModal")
+		if (error)
+			setErrors({ form: error.message ?? "delete account failed" })
+		else	
+			navigate('/')
+			// Ajouter une notif
+	}
+
 	return <Sidebar>
 		<div className="p-4">
 			<h1 className="text-xl font-bold">Settings</h1>
@@ -177,12 +190,14 @@ export function AccountSettings() {
 			<div className="divider text-neutral-content/40 m-0 mt-3 mb-3"></div>
 
 			<SectionSetting title="Profile" description="Your callsign and avatar are visible to every player." hasDividerBottom={true}>
-				<div className="flex gap-2 items-center">
+				<div className="flex gap-4 md:gap-2 items-center">
 					<img src={getAvatar(session?.user.image)} width={64} height={64} alt="" className="rounded-md" />
-					<button className="btn btn-outline border-neutral" onClick={() => ShowModal('pictureModal')}>Upload new</button>
-					<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>Remove</button>
+					<div className="flex gap-2 flex-col md:flex-row">
+						<button className="btn btn-outline border-neutral" onClick={() => ShowModal('pictureModal')}>Upload new</button>
+						<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>Remove</button>
+					</div>
 				</div>
-				<div className="flex mt-2 items-center w-full gap-2">
+				<div className="flex mt-2 flex-col md:flex-row items-center w-full gap-2">
 					<InputWithText text="callsign">
 						<Input type="text" name="username" label="Username" defaultValue={session?.user.username ?? ''} useLabel={false}
 						onChange={e => setUsername(e.target.value.trim())} onBlur={changeUsername} errorMsg={errors.username} />
@@ -194,9 +209,9 @@ export function AccountSettings() {
 						</select>
 					</InputWithText>
 				</div>
-				<div>
+				<div className="pt-3 md:pt-0">
 					<InputWithText text="email">
-						<Input type="email" name="email" label="Email" defaultValue={session?.user.email ?? ''} useLabel={false} />
+						<Input type="email" name="email" label="Email" defaultValue={session?.user.email ?? ''} useLabel={false}/>
 					</InputWithText>
 				</div>
 			</SectionSetting>
@@ -208,7 +223,7 @@ export function AccountSettings() {
 							<Input type="password" name="currPassword" label="Current password" onChange={e => setCurrPassword(e.target.value)} value={currPassword} autoComplete="current-password" errorMsg={errors.currPassword} customLabelStyle="bg-base-100" />
 						</InputWithText>
 					</div>}
-					<div className="flex gap-2">
+					<div className="flex flex-col md:flex-row md:gap-2">
 						<InputWithText>
 							<Input type="password" name="password" label="new password" onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
 						</InputWithText>
@@ -217,14 +232,14 @@ export function AccountSettings() {
 						</InputWithText>
 					</div>
 					{isFocused && <PasswordBar password={password} />}
-					<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2">Update password</button>
+					<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2 w-full md:w-auto">Update password</button>
 					{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 				</form>
 			</SectionSetting>
 
 			<SectionSetting title="Two-factor authentification" description="A six-digit code from your authentificator app, asked after your password." hasDividerBottom={true}>
 				<SectionOTP isEnabled={isOTPEnabled} />
-				<div className="flex gap-2 pt-3 pb-3">
+				<div className="flex gap-2 pt-3 pb-3 flex-col lg:flex-row">
 					<button className="btn btn-outline border-neutral">Show recovery codes</button>
 					<button className="btn btn-outline border-neutral">Re-scan QR code</button>
 					<button className={`btn btn-outline btn-${isOTPEnabled ? 'error' : 'info'}`}>{isOTPEnabled ? 'Disabled' : 'Enable'}</button>
@@ -252,10 +267,11 @@ export function AccountSettings() {
 				<div className="flex border border-error bg-error/10 rounded-md p-4 items-center mt-2">
 					<div className="flex-1">
 						<p className="text-sm">Delete my account</p>
-						<p className="text-xs text-neutral-content/60">Erased within 30 days; tournament result stay anonymised.</p>
+						<p className="text-xs text-neutral-content/60">Tournament result stay anonymised.</p>
 					</div>
 					<div>
-						<button className="btn btn-outline btn-error border-error btn-sm">Delete account</button>
+						<button onClick={() => ShowModal("deleteModal")} className="btn btn-outline btn-error border-error btn-sm">Delete account</button>
+						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</div>
 				</div>
 			</SectionSetting>
@@ -267,6 +283,13 @@ export function AccountSettings() {
 				<Input type="text" label="Image link" name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} />
 				<button className="btn btn-info btn-outline">Upload</button>
 			</form>
+		</Modal>
+		<Modal id="deleteModal">
+			<p className="pb-2">Are you sure you want to delete your account?</p>
+			<div className="flex gap-2">
+				<button onClick={() => HideModal("deleteModal")} className="btn btn-success">Cancel</button>
+				<button onClick={handleDeleteAccount} className="btn btn-error btn-outline">Confirm</button>
+			</div>
 		</Modal>
 	</Sidebar>
 }
