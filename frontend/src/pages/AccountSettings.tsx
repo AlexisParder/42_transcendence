@@ -3,31 +3,98 @@ import type { SessionRow } from "../hooks/useSessions"
 import { Input } from "../components/Input"
 import { Sidebar } from "../components/Sidebar"
 import { PasswordBar } from "../components/PasswordBar"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { MdWarning } from "react-icons/md"
 import { authClient } from "../lib/auth-client"
 import { getAvatar } from "../lib/getAvatar"
 import { prettyUA } from "../lib/prettyUA"
 import { useSessions } from "../hooks/useSessions"
 
-// type Errors = {
-// 	username?: string
-// 	email?: string
-// 	password?: string
-// 	password2?: string
-// 	form?: string
-// }
+type Errors = {
+	username?: string
+	email?: string
+	currPassword?: string
+	password?: string
+	password2?: string
+	form?: string
+}
 
 export function AccountSettings() {
 	const { data: session } = authClient.useSession()
 	const { sessions, revokeSession, revokeOthers } = useSessions()
 
-	// const [errors, setErrors] = useState<Errors>({})
+	const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
+	const [currPassword, setCurrPassword] = useState('')
 	const [password, setPassword] = useState('')
+	const [password2, setPassword2] = useState('')
+	const [hasPwd, setHasPwd] = useState<boolean | null>()
 
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
 
+	useEffect(() => {
+		authClient.listAccounts().then(({ data }) => {
+			setHasPwd(!!data?.some(acc => acc.providerId === "credential"))
+		})
+	}, [])
+
+	const handleSubmitChangePwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+
+		const newErrors: Errors = {}
+
+		if (password.length === 0)
+			newErrors.password = "Password is empty!"
+
+		if (password2.length === 0)
+			newErrors.password2 = "Password is empty!"
+
+		if (password.length > 0 && password2.length > 0 && password !== password2) {
+			newErrors.password = "Passwords do not match!"
+			newErrors.password2 = "Passwords do not match!"
+		}
+
+		if (hasPwd === true) {
+			if (currPassword.length === 0)
+				newErrors.currPassword = "Password is empty!"
+		}
+
+		setErrors(newErrors)
+		if (Object.keys(newErrors).length > 0)
+			return
+
+		if (hasPwd === true) {
+			const { error } = await authClient.changePassword({
+				currentPassword: currPassword,
+				newPassword: password,
+				revokeOtherSessions: true,
+			})
+
+			if (error)
+				setErrors({ form: error.message ?? "Update password failed" })
+			else {
+				setCurrPassword('')
+				setPassword('')
+				setPassword2('')
+				// ajouter une notif de success
+			}
+
+		} else {
+			const res = await fetch("/api/set-pwd", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				body: JSON.stringify({ newPassword: password }),
+			})
+
+			if (res.ok) {
+				setHasPwd(true);
+				setCurrPassword('')
+				setPassword('')
+				setPassword2('')
+				// ajouter une notif de success
+			}
+		}
+	}
 
 	return <Sidebar>
 		<div className="p-4">
@@ -61,21 +128,24 @@ export function AccountSettings() {
 			</SectionSetting>
 
 			<SectionSetting title="Password" description="Changing it signs you ot of every other session." hasDividerBottom={true}>
-				<div>
-					<InputWithText>
-						<Input type="password" name="currPwd" label="Current password" useLabel={false} />
-					</InputWithText>
-				</div>
-				<div className="flex gap-2">
-					<InputWithText>
-						<Input type="password" name="password" label="new password" useLabel={false} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} />
-					</InputWithText>
-					<InputWithText>
-						<Input type="password" name="password2" label="Confirm password" useLabel={false} />
-					</InputWithText>
-				</div>
-				{isFocused && <PasswordBar password={password} />}
-				<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2">Update password</button>
+				<form onSubmit={handleSubmitChangePwd}>
+					{hasPwd === true && <div>
+						<InputWithText>
+							<Input type="password" name="currPassword" label="Current password" onChange={e => setCurrPassword(e.target.value)} value={currPassword} autoComplete="current-password" errorMsg={errors.currPassword} customLabelStyle="bg-base-100" />
+						</InputWithText>
+					</div>}
+					<div className="flex gap-2">
+						<InputWithText>
+							<Input type="password" name="password" label="new password" onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
+						</InputWithText>
+						<InputWithText>
+							<Input type="password" name="password2" label="Confirm password" onChange={e => setPassword2(e.target.value)} value={password2} autoComplete="new-password" errorMsg={errors.password2} customLabelStyle="bg-base-100" />
+						</InputWithText>
+					</div>
+					{isFocused && <PasswordBar password={password} />}
+					<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2">Update password</button>
+					{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
+				</form>
 			</SectionSetting>
 
 			<SectionSetting title="Two-factor authentification" description="A six-digit code from your authentificator app, asked after your password." hasDividerBottom={true}>
