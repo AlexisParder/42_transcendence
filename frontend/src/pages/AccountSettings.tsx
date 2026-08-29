@@ -1,12 +1,14 @@
 import type React from "react"
+import type { SessionRow } from "../hooks/useSessions"
 import { Input } from "../components/Input"
 import { Sidebar } from "../components/Sidebar"
 import { PasswordBar } from "../components/PasswordBar"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { MdWarning } from "react-icons/md"
 import { authClient } from "../lib/auth-client"
 import { getAvatar } from "../lib/getAvatar"
 import { prettyUA } from "../lib/prettyUA"
+import { useSessions } from "../hooks/useSessions"
 
 // type Errors = {
 // 	username?: string
@@ -18,12 +20,14 @@ import { prettyUA } from "../lib/prettyUA"
 
 export function AccountSettings() {
 	const { data: session } = authClient.useSession()
+	const { sessions, revokeSession, revokeOthers } = useSessions()
 
 	// const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
 	const [password, setPassword] = useState('')
 
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
+
 
 	return <Sidebar>
 		<div className="p-4">
@@ -86,9 +90,9 @@ export function AccountSettings() {
 
 			<SectionSetting title="Active sessions" description="Devices currently signed in to your account" hasDividerBottom={true}>
 				<div className="max-h-37 overflow-y-auto scrollbar-thin">
-					<SessionsDisplay />
+					<SessionsDisplay sessions={sessions} onRevoke={revokeSession} />
 				</div>
-				<a href="/revoke_all" className="link-error text-xs font-bold">Sign out everywhere else</a>
+				<button onClick={revokeOthers} className="link-error text-xs font-bold cursor-pointer">Sign out everywhere else</button>
 			</SectionSetting>
 
 			<SectionSetting title="Danger zone" titleColor="text-error" description="These actions can't be undone">
@@ -151,29 +155,21 @@ function SectionOTP({ isEnabled = false }: { isEnabled?: boolean }) {
 	</div>
 }
 
-type SessionRow = typeof authClient.$Infer.Session["session"]
-function SessionsDisplay() {
+function SessionsDisplay({ sessions, onRevoke }: { sessions: SessionRow[], onRevoke: (token: string, id: string) => void }) {
 	const { data: currentSession } = authClient.useSession()
-	const [sessions, setSessions] = useState<SessionRow[]>([])
-
-	useEffect(() => {
-		authClient.listSessions().then(({data}) => {
-			if (data) setSessions(data)
-		})
-	}, [])
 
 	return <>
-		{sessions.map(s => {
+		{currentSession && sessions.map(s => {
 			const isCurrent = s.id === currentSession?.session.id
 
-			return	(
+			return (
 				<div key={s.id} className={`flex border rounded-md p-4 items-center mt-2 mr-2 ${isCurrent ? "bg-info/10 border-info/50" : "border-neutral"}`}>
 					<div className="flex-1">
 						<p className="text-sm">{prettyUA(s.userAgent)}</p>
 						<p className="text-xs text-neutral-content/60">{s.ipAddress || "Unknown IP Address"}</p>
 					</div>
 					<div>
-						{isCurrent ? <p className="text-info text-xs font-semibold">THIS DEVICE</p> : <button className="btn btn-outline border-neutral btn-sm">Revoke</button>}
+						{isCurrent ? <p className="text-info text-xs font-semibold">THIS DEVICE</p> : <button className="btn btn-outline border-neutral btn-sm" onClick={() => onRevoke(s.token, s.id)}>Revoke</button>}
 					</div>
 				</div>
 			)
