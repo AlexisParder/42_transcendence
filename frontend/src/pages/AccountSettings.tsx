@@ -32,7 +32,8 @@ export function AccountSettings() {
 	const [password, setPassword] = useState('')
 	const [password2, setPassword2] = useState('')
 	const [picture, setPicture] = useState('')
-	const [username, setUsername] = useState('')
+	const [username, setUsername] = useState(session?.user.username ?? "")
+	const [prevUsername, setPrevUsername] = useState(session?.user.username)
 	const [hasPwd, setHasPwd] = useState<boolean | null>()
 
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
@@ -42,6 +43,11 @@ export function AccountSettings() {
 			setHasPwd(!!data?.some(acc => acc.providerId === "credential"))
 		})
 	}, [])
+
+	if (session?.user.username !== prevUsername) {
+		setPrevUsername(session?.user.username)
+		setUsername(session?.user.username ?? "")
+	}
 
 	const handleSubmitChangePwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -145,6 +151,9 @@ export function AccountSettings() {
 	async function changeUsername() {
 		const newErrors: Errors = {}
 
+		if (username === session?.user.username)
+			return
+
 		if (username.length === 0)
 			newErrors.username = "Username is empty!"
 		else {
@@ -172,14 +181,14 @@ export function AccountSettings() {
 	}
 
 	async function handleDeleteAccount() {
-		const {error} = await authClient.deleteUser();
+		const { error } = await authClient.deleteUser();
 
 		HideModal("deleteModal")
 		if (error)
 			setErrors({ form: error.message ?? "delete account failed" })
-		else	
+		else
 			navigate('/')
-			// Ajouter une notif
+		// Ajouter une notif
 	}
 
 	return <Sidebar>
@@ -200,7 +209,7 @@ export function AccountSettings() {
 				<div className="flex mt-2 flex-col md:flex-row items-center w-full gap-2">
 					<InputWithText text="callsign">
 						<Input type="text" name="username" label="Username" defaultValue={session?.user.username ?? ''} useLabel={false}
-						onChange={e => setUsername(e.target.value.trim())} onBlur={changeUsername} errorMsg={errors.username} />
+							onChange={e => setUsername(e.target.value.trim())} onBlur={changeUsername} errorMsg={errors.username} />
 					</InputWithText>
 					<InputWithText text="display language">
 						<select defaultValue="en" className="select outline-none focus:border-info w-full bg-abyss-700">
@@ -211,7 +220,7 @@ export function AccountSettings() {
 				</div>
 				<div className="pt-3 md:pt-0">
 					<InputWithText text="email">
-						<Input type="email" name="email" label="Email" defaultValue={session?.user.email ?? ''} useLabel={false}/>
+						<Input type="email" name="email" label="Email" defaultValue={session?.user.email ?? ''} useLabel={false} />
 					</InputWithText>
 				</div>
 			</SectionSetting>
@@ -225,7 +234,7 @@ export function AccountSettings() {
 					</div>}
 					<div className="flex flex-col md:flex-row md:gap-2">
 						<InputWithText>
-							<Input type="password" name="password" label="new password" onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
+							<Input type="password" name="password" label="New password" onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
 						</InputWithText>
 						<InputWithText>
 							<Input type="password" name="password2" label="Confirm password" onChange={e => setPassword2(e.target.value)} value={password2} autoComplete="new-password" errorMsg={errors.password2} customLabelStyle="bg-base-100" />
