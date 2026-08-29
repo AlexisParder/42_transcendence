@@ -30,6 +30,7 @@ export function AccountSettings() {
 	const [password, setPassword] = useState('')
 	const [password2, setPassword2] = useState('')
 	const [picture, setPicture] = useState('')
+	const [username, setUsername] = useState('')
 	const [hasPwd, setHasPwd] = useState<boolean | null>()
 
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
@@ -114,12 +115,16 @@ export function AccountSettings() {
 		}
 
 		if (picture.length > 0) {
-			await authClient.updateUser({
+			const { error } = await authClient.updateUser({
 				image: picture,
 			})
 
-			setPicture('')
-			HideModal('pictureModal')
+			if (error)
+				setErrors({ form: error.message ?? "Update username failed" })
+			else {
+				setPicture('')
+				HideModal('pictureModal')
+			}
 		}
 	}
 
@@ -127,9 +132,41 @@ export function AccountSettings() {
 		if (!session?.user.image)
 			return
 
-		await authClient.updateUser({
+		const { error } = await authClient.updateUser({
 			image: null,
 		})
+
+		if (error)
+			setErrors({ form: error.message ?? "Remove picture failed" })
+	}
+
+	async function changeUsername() {
+		const newErrors: Errors = {}
+
+		if (username.length === 0)
+			newErrors.username = "Username is empty!"
+		else {
+			const { data, error } = await authClient.isUsernameAvailable({
+				username
+			})
+
+			if (!data?.available)
+				newErrors.username = error?.message ?? "Username alredy use!"
+		}
+
+		setErrors(newErrors)
+
+		if (Object.keys(newErrors).length > 0)
+			return
+
+		const { error } = await authClient.updateUser({
+			username,
+			displayUsername: username,
+			name: username
+		})
+
+		if (error)
+			setErrors({ username: error.message ?? "Update username failed" })
 	}
 
 	return <Sidebar>
@@ -147,7 +184,8 @@ export function AccountSettings() {
 				</div>
 				<div className="flex mt-2 items-center w-full gap-2">
 					<InputWithText text="callsign">
-						<Input type="text" name="username" label="Username" defaultValue={session?.user.username ? session?.user.username : ''} useLabel={false} />
+						<Input type="text" name="username" label="Username" defaultValue={session?.user.username ?? ''} useLabel={false}
+						onChange={e => setUsername(e.target.value.trim())} onBlur={changeUsername} errorMsg={errors.username} />
 					</InputWithText>
 					<InputWithText text="display language">
 						<select defaultValue="en" className="select outline-none focus:border-info w-full bg-abyss-700">
@@ -158,7 +196,7 @@ export function AccountSettings() {
 				</div>
 				<div>
 					<InputWithText text="email">
-						<Input type="email" name="email" label="Email" defaultValue={session?.user.email ? session?.user.email : ''} useLabel={false} />
+						<Input type="email" name="email" label="Email" defaultValue={session?.user.email ?? ''} useLabel={false} />
 					</InputWithText>
 				</div>
 			</SectionSetting>
