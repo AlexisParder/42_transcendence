@@ -1,6 +1,7 @@
 import { FaRegCircle } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
 import { useNavigate } from "react-router-dom";
+import { TbSettingsFilled } from "react-icons/tb";
 
 function Links() {
 	return <>
@@ -26,7 +27,10 @@ function SignLinks() {
 	}
 
 	if (currentSession)
-		return <button className="btn btn-info btn-outline mr-2" onClick={handleSignOut}>Sign out</button>
+		return <>
+			<a className="btn btn-info btn-outline mr-2" href="/account_settings"><TbSettingsFilled /></a>
+			<button className="btn btn-info mr-2" onClick={handleSignOut}>Sign out</button>
+		</>
 
 	return <>
 		<a className="btn btn-info btn-outline mr-2" href="/login">Sign in</a>

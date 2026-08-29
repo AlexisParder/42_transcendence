@@ -70,7 +70,6 @@ export function Register() {
 		const form = new FormData(e.currentTarget)
 		const name = form.get('username')?.toString().trim() ?? ''
 		const email = form.get('email')?.toString().trim().toLowerCase() ?? ''
-		const password = form.get('password')?.toString() ?? ''
 		const password2 = form.get('password2')?.toString() ?? ''
 		const agree = form.get('agree') ? true : false
 

@@ -1,5 +1,5 @@
 import type { IconType } from "react-icons";
-import { FaHistory, FaRegCircle, FaUserFriends } from "react-icons/fa";
+import { FaHistory, FaRegCircle, FaUserFriends, FaDoorOpen } from "react-icons/fa";
 import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled, TbTournament } from "react-icons/tb";
@@ -22,7 +22,8 @@ const navItems: NavItem[] = [
 	{ to: "/leaderboard", icon: MdLeaderboard, label: "Leaderboard" },
 	{ to: "/friends", icon: FaUserFriends, label: "Friends" },
 	{ to: "/history", icon: FaHistory, label: "History" },
-	{ to: "/account_settings", icon: TbSettingsFilled, label: "Settings" }
+	{ to: "/account_settings", icon: TbSettingsFilled, label: "Settings" },
+	{ to: "/", icon: FaDoorOpen, label: "Quit" }
 ]
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
