@@ -213,7 +213,7 @@ export function AccountSettings() {
 							onChange={e => setUsername(e.target.value.trim())} onBlur={changeUsername} errorMsg={errors.username} />
 					</InputWithText>
 					<InputWithText text="display language">
-						<select defaultValue="en" className="select outline-none focus:border-info w-full bg-abyss-700">
+						<select defaultValue="en" className="select outline-none focus:border-info w-full bg-abyss-700 mt-2 mb-2">
 							<option value="fr">French</option>
 							<option value="en">English</option>
 						</select>
