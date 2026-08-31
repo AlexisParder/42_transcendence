@@ -7,8 +7,8 @@ import { NavLink } from "react-router-dom";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
-import { getAvatar } from "../lib/getAvatar";
 import { FaBars } from "react-icons/fa6";
+import { Avatar } from "./Avatar";
 
 interface NavItem {
 	to: string,
@@ -64,7 +64,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 					</div>
 
 					<div className="flex items-end mb-5 p-1.5 border border-neutral rounded-md">
-						<img src={getAvatar(session?.user.image)} alt="" className="rounded-md w-10 h-10 object-cover shrink-0" />
+						<Avatar username={session?.user.username} image={session?.user.image} size={40} />
 						<div className="ml-3">
 							<p className="font-bold">{truncateUsername(username)}</p>
 							<p className="text-warning">1,254 pts</p>

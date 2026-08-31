@@ -6,11 +6,11 @@ import { PasswordBar } from "../components/PasswordBar"
 import { useEffect, useState } from "react"
 import { MdWarning } from "react-icons/md"
 import { authClient } from "../lib/auth-client"
-import { getAvatar } from "../lib/getAvatar"
 import { prettyUA } from "../lib/prettyUA"
 import { useSessions } from "../hooks/useSessions"
 import { HideModal, Modal, ShowModal } from "../components/Modal"
 import { useNavigate } from "react-router-dom"
+import { Avatar } from "../components/Avatar"
 
 type Errors = {
 	username?: string
@@ -18,6 +18,7 @@ type Errors = {
 	currPassword?: string
 	password?: string
 	password2?: string
+	confirmPwd?: string
 	form?: string
 }
 
@@ -189,8 +190,7 @@ export function AccountSettings() {
 	}
 
 	const handleChangeLanguage = async (lang: string) => {
-		if (lang !== "en" && lang !== "fr")
-		{
+		if (lang !== "en" && lang !== "fr") {
 			setLanguage("en")
 			return
 		}
@@ -204,7 +204,7 @@ export function AccountSettings() {
 
 		if (error)
 			console.log("Error during language update")
-			// ajouter une notif d'erreur
+		// ajouter une notif d'erreur
 	}
 
 	async function handleDeleteAccount() {
@@ -227,7 +227,7 @@ export function AccountSettings() {
 
 			<SectionSetting title="Profile" description="Your callsign and avatar are visible to every player." hasDividerBottom={true}>
 				<div className="flex gap-4 md:gap-2 items-center">
-					<img src={getAvatar(session?.user.image)} alt="" className="rounded-md w-16 h-16 object-cover shrink-0" />
+					<Avatar username={session?.user.username} image={session?.user.image} size={64} />
 					<div className="flex gap-2 flex-col md:flex-row">
 						<button className="btn btn-outline border-neutral" onClick={() => ShowModal('pictureModal')}>Upload new</button>
 						<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>Remove</button>
@@ -280,11 +280,13 @@ export function AccountSettings() {
 			<SectionSetting title="Two-factor authentification" description="A six-digit code from your authentificator app, asked after your password." hasDividerBottom={true}>
 				<SectionOTP isEnabled={isOTPEnabled} />
 				<div className="flex gap-2 pt-3 pb-3 flex-col lg:flex-row">
-					<button className="btn btn-outline border-neutral">Show recovery codes</button>
-					<button className="btn btn-outline border-neutral">Re-scan QR code</button>
-					<button className={`btn btn-outline btn-${isOTPEnabled ? 'error' : 'info'}`}>{isOTPEnabled ? 'Disabled' : 'Enable'} 2FA</button>
+					{isOTPEnabled && <button className="btn btn-outline border-neutral">Show recovery codes</button>}
+					{isOTPEnabled && <button className="btn btn-outline border-neutral">Re-scan QR code</button>}
+					{isOTPEnabled && <button className="btn btn-outline btn-error">Disable 2FA</button>}
+					{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => ShowModal('askPwdForEnable2FA')} disabled={hasPwd !== true}>Enable 2FA</button>}
 				</div>
-				<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><MdWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">Disabling two-factor authentification requires your password and takes effect immediately.<br />Ranked tournament hosts may require it.</span></p>
+				{!isOTPEnabled && hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><MdWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">You must set a password to enable two-factor authentification.<br />Please see the section above.</span></p>}
+				{isOTPEnabled && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><MdWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">Disabling two-factor authentification requires your password and takes effect immediately.<br />Ranked tournament hosts may require it.</span></p>}
 			</SectionSetting>
 
 			<SectionSetting title="Active sessions" description="Devices currently signed in to your account" hasDividerBottom={true}>
@@ -330,6 +332,10 @@ export function AccountSettings() {
 				<button onClick={() => HideModal("deleteModal")} className="btn btn-success">Cancel</button>
 				<button onClick={handleDeleteAccount} className="btn btn-error btn-outline">Confirm</button>
 			</div>
+		</Modal>
+		<Modal id="Enable2FAModal">
+			<p className="pb-2">Enable 2FA</p>
+			
 		</Modal>
 	</Sidebar>
 }
@@ -391,3 +397,23 @@ function SessionsDisplay({ sessions, onRevoke }: { sessions: SessionRow[], onRev
 		})}
 	</>
 }
+
+// type Enable2FAStep = 'password' | 'verify'
+// function Enable2FAModal() {
+// 	const [step, setStep] = useState<Enable2FAStep>('password')
+// 	const [totpURI, setTotpURI] = useState<string | null>(null)
+// 	const [backupCodes, setBackupCodes] = useState<string[]>([])
+// 	const [errors, setErrors] = useState<{ confirmPwd?: string, code?: string }>({})
+
+// 	const reset = () => {
+// 		setStep('password')
+// 		setTotpURI(null)
+// 		setBackupCodes([])
+// 		setErrors({})
+// 	}
+
+// 	const close = () => {
+// 		HideModal('Enable2FAModal')
+// 		reset()
+// 	}
+// }
