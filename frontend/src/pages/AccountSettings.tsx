@@ -102,6 +102,7 @@ export function AccountSettings() {
 				setCurrPassword('')
 				setPassword('')
 				setPassword2('')
+				revokeOthers()
 				// ajouter une notif de success
 			}
 		}
@@ -234,14 +235,14 @@ export function AccountSettings() {
 					</div>}
 					<div className="flex flex-col md:flex-row md:gap-2">
 						<InputWithText>
-							<Input type="password" name="password" label="New password" onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
+							<Input type="password" name="password" label={hasPwd === true ? 'New password' : 'Password'} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
 						</InputWithText>
 						<InputWithText>
 							<Input type="password" name="password2" label="Confirm password" onChange={e => setPassword2(e.target.value)} value={password2} autoComplete="new-password" errorMsg={errors.password2} customLabelStyle="bg-base-100" />
 						</InputWithText>
 					</div>
 					{isFocused && <PasswordBar password={password} />}
-					<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2 w-full md:w-auto">Update password</button>
+					<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2 w-full md:w-auto">{hasPwd === true ? 'Update password' : 'Add password'}</button>
 					{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 				</form>
 			</SectionSetting>
