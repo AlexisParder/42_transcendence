@@ -282,7 +282,7 @@ export function AccountSettings() {
 				<div className="flex gap-2 pt-3 pb-3 flex-col lg:flex-row">
 					<button className="btn btn-outline border-neutral">Show recovery codes</button>
 					<button className="btn btn-outline border-neutral">Re-scan QR code</button>
-					<button className={`btn btn-outline btn-${isOTPEnabled ? 'error' : 'info'}`}>{isOTPEnabled ? 'Disabled' : 'Enable'}</button>
+					<button className={`btn btn-outline btn-${isOTPEnabled ? 'error' : 'info'}`}>{isOTPEnabled ? 'Disabled' : 'Enable'} 2FA</button>
 				</div>
 				<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><MdWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">Disabling two-factor authentification requires your password and takes effect immediately.<br />Ranked tournament hosts may require it.</span></p>
 			</SectionSetting>

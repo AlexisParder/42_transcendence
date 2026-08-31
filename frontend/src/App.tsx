@@ -10,6 +10,11 @@ import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
 import { AccountSettings } from './pages/AccountSettings'
 import { Verified } from './pages/Verified'
+import { Play } from './pages/Play'
+import { Tournaments } from './pages/Tournaments'
+import { Leaderboard } from './pages/Leaderboard'
+import { Friends } from './pages/Friends'
+import { History } from './pages/History'
 
 const router = createBrowserRouter([
 	{
@@ -50,6 +55,31 @@ const router = createBrowserRouter([
 	{
 		path: '/account_settings',
 		element: <AccountSettings />,
+		errorElement: <PageError />
+	},
+	{
+		path: '/play',
+		element: <Play />,
+		errorElement: <PageError />
+	},
+	{
+		path: '/tournaments',
+		element: <Tournaments />,
+		errorElement: <PageError />
+	},
+	{
+		path: '/leaderboard',
+		element: <Leaderboard />,
+		errorElement: <PageError />
+	},
+	{
+		path: '/friends',
+		element: <Friends />,
+		errorElement: <PageError />
+	},
+	{
+		path: '/history',
+		element: <History />,
 		errorElement: <PageError />
 	}
 ])
