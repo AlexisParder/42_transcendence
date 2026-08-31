@@ -43,6 +43,14 @@ export const auth = betterAuth({
 			beforeDelete: async(user, request) => {
 				// ajouter la logique pour les historiques en mettant "Anonyme"
 			},
+		},
+		additionalFields: {
+			language: {
+				type: "string",
+				required: false,
+				defaultValue: "en",
+				input: true
+			}
 		}
 	},
 	account: {

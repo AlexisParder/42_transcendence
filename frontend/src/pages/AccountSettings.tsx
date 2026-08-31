@@ -34,6 +34,8 @@ export function AccountSettings() {
 	const [picture, setPicture] = useState('')
 	const [username, setUsername] = useState(session?.user.username ?? "")
 	const [prevUsername, setPrevUsername] = useState(session?.user.username)
+	const [language, setLanguage] = useState(session?.user.language ?? "en")
+	const [prevLanguage, setPrevLanguage] = useState(session?.user.language)
 	const [hasPwd, setHasPwd] = useState<boolean | null>()
 
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
@@ -47,6 +49,11 @@ export function AccountSettings() {
 	if (session?.user.username !== prevUsername) {
 		setPrevUsername(session?.user.username)
 		setUsername(session?.user.username ?? "")
+	}
+
+	if (session?.user.language !== prevLanguage) {
+		setPrevLanguage(session?.user.language)
+		setLanguage(session?.user.language ?? "en")
 	}
 
 	const handleSubmitChangePwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -149,7 +156,7 @@ export function AccountSettings() {
 			setErrors({ form: error.message ?? "Remove picture failed" })
 	}
 
-	async function changeUsername() {
+	async function handleChangeUsername() {
 		const newErrors: Errors = {}
 
 		if (username === session?.user.username)
@@ -181,6 +188,25 @@ export function AccountSettings() {
 			setErrors({ username: error.message ?? "Update username failed" })
 	}
 
+	const handleChangeLanguage = async (lang: string) => {
+		if (lang !== "en" && lang !== "fr")
+		{
+			setLanguage("en")
+			return
+		}
+
+		if (lang === session?.user.language)
+			return
+
+		const { error } = await authClient.updateUser({
+			language: lang
+		})
+
+		if (error)
+			console.log("Error during language update")
+			// ajouter une notif d'erreur
+	}
+
 	async function handleDeleteAccount() {
 		const { error } = await authClient.deleteUser();
 
@@ -210,10 +236,14 @@ export function AccountSettings() {
 				<div className="flex mt-2 flex-col md:flex-row items-center w-full gap-2">
 					<InputWithText text="callsign">
 						<Input type="text" name="username" label="Username" defaultValue={session?.user.username ?? ''} useLabel={false}
-							onChange={e => setUsername(e.target.value.trim())} onBlur={changeUsername} errorMsg={errors.username} />
+							onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
 					</InputWithText>
 					<InputWithText text="display language">
-						<select defaultValue="en" className="select outline-none focus:border-info w-full bg-abyss-700 mt-2 mb-2">
+						<select className="select outline-none focus:border-info w-full bg-abyss-700 mt-2 mb-2" value={language ?? "en"} onChange={e => {
+							const lang = e.target.value
+							setLanguage(lang)
+							handleChangeLanguage(lang)
+						}}>
 							<option value="fr">French</option>
 							<option value="en">English</option>
 						</select>
