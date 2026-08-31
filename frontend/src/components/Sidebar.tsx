@@ -64,7 +64,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 					</div>
 
 					<div className="flex items-end mb-5 p-1.5 border border-neutral rounded-md">
-						<img src={getAvatar(session?.user.image)} width={40} height={40} alt="" className="rounded-md" />
+						<img src={getAvatar(session?.user.image)} alt="" className="rounded-md w-10 h-10 object-cover shrink-0" />
 						<div className="ml-3">
 							<p className="font-bold">{truncateUsername(username)}</p>
 							<p className="text-warning">1,254 pts</p>

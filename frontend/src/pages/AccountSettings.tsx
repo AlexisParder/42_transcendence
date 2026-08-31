@@ -227,7 +227,7 @@ export function AccountSettings() {
 
 			<SectionSetting title="Profile" description="Your callsign and avatar are visible to every player." hasDividerBottom={true}>
 				<div className="flex gap-4 md:gap-2 items-center">
-					<img src={getAvatar(session?.user.image)} width={64} height={64} alt="" className="rounded-md" />
+					<img src={getAvatar(session?.user.image)} alt="" className="rounded-md w-16 h-16 object-cover shrink-0" />
 					<div className="flex gap-2 flex-col md:flex-row">
 						<button className="btn btn-outline border-neutral" onClick={() => ShowModal('pictureModal')}>Upload new</button>
 						<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>Remove</button>
