@@ -4,13 +4,13 @@ import { Input } from "../components/Input"
 import { Sidebar } from "../components/Sidebar"
 import { PasswordBar } from "../components/PasswordBar"
 import { useEffect, useState } from "react"
-import { MdWarning } from "react-icons/md"
 import { authClient } from "../lib/auth-client"
 import { prettyUA } from "../lib/prettyUA"
 import { useSessions } from "../hooks/useSessions"
 import { HideModal, Modal, ShowModal } from "../components/Modal"
 import { useNavigate } from "react-router-dom"
 import { Avatar } from "../components/Avatar"
+import { IoWarning } from "react-icons/io5"
 
 type Errors = {
 	username?: string
@@ -283,10 +283,10 @@ export function AccountSettings() {
 					{isOTPEnabled && <button className="btn btn-outline border-neutral">Show recovery codes</button>}
 					{isOTPEnabled && <button className="btn btn-outline border-neutral">Re-scan QR code</button>}
 					{isOTPEnabled && <button className="btn btn-outline btn-error">Disable 2FA</button>}
-					{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => ShowModal('askPwdForEnable2FA')} disabled={hasPwd !== true}>Enable 2FA</button>}
+					{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => ShowModal('Enable2FAModal')} disabled={hasPwd !== true}>Enable 2FA</button>}
 				</div>
-				{!isOTPEnabled && hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><MdWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">You must set a password to enable two-factor authentification.<br />Please see the section above.</span></p>}
-				{isOTPEnabled && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><MdWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">Disabling two-factor authentification requires your password and takes effect immediately.<br />Ranked tournament hosts may require it.</span></p>}
+				{!isOTPEnabled && hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">You must set a password to enable two-factor authentification.<br />Please see the section above.</span></p>}
+				{isOTPEnabled && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">Disabling two-factor authentification requires your password and takes effect immediately.<br />Ranked tournament hosts may require it.</span></p>}
 			</SectionSetting>
 
 			<SectionSetting title="Active sessions" description="Devices currently signed in to your account" hasDividerBottom={true}>
@@ -333,10 +333,7 @@ export function AccountSettings() {
 				<button onClick={handleDeleteAccount} className="btn btn-error btn-outline">Confirm</button>
 			</div>
 		</Modal>
-		<Modal id="Enable2FAModal">
-			<p className="pb-2">Enable 2FA</p>
-			
-		</Modal>
+		<Enable2FA hasPwd={hasPwd} />
 	</Sidebar>
 }
 
@@ -398,22 +395,72 @@ function SessionsDisplay({ sessions, onRevoke }: { sessions: SessionRow[], onRev
 	</>
 }
 
-// type Enable2FAStep = 'password' | 'verify'
-// function Enable2FAModal() {
-// 	const [step, setStep] = useState<Enable2FAStep>('password')
-// 	const [totpURI, setTotpURI] = useState<string | null>(null)
-// 	const [backupCodes, setBackupCodes] = useState<string[]>([])
-// 	const [errors, setErrors] = useState<{ confirmPwd?: string, code?: string }>({})
+type Enable2FAStep = 'password' | 'verify'
+function Enable2FA({hasPwd}: {hasPwd: boolean | null | undefined}) {
+	const [step, setStep] = useState<Enable2FAStep>('password')
+	const [totpURI, setTotpURI] = useState<string | null>(null)
+	const [backupCodes, setBackupCodes] = useState<string[]>([])
+	const [errors, setErrors] = useState<{ confirmPwd?: string, code?: string }>({})
 
-// 	const reset = () => {
-// 		setStep('password')
-// 		setTotpURI(null)
-// 		setBackupCodes([])
-// 		setErrors({})
-// 	}
+	const reset = () => {
+		setStep('password')
+		setTotpURI(null)
+		setBackupCodes([])
+		setErrors({})
+	}
 
-// 	const close = () => {
-// 		HideModal('Enable2FAModal')
-// 		reset()
-// 	}
-// }
+	const close = () => {
+		HideModal('Enable2FAModal')
+		reset()
+	}
+
+	const handleSubmitPwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+
+		if (hasPwd !== true)
+		{
+			e.currentTarget.reset()
+			close()
+		}
+
+		const form = new FormData(e.currentTarget)
+		const password = form.get("confirmPwd")?.toString() ?? ''
+		
+		if (password.length <= 0)
+			setErrors({ confirmPwd: "Password is empty!"})
+
+		if (Object.keys(errors).length > 0)
+			return
+	}
+
+	const handleSubmitVerify: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+
+		if (hasPwd !== true)
+		{
+			e.currentTarget.reset()
+			close()
+		}
+	}
+
+	return <Modal id="Enable2FAModal">
+		<div className="flex items-center justify-between pb-4">
+			<p className="font-bold text-lg">Enable 2FA</p>
+			<p className="text-xs text-neutral-content/60">Step {step === "password" ? '1' : '2'}/2</p>
+		</div>
+		{step === "password" && <form onSubmit={handleSubmitPwd}>
+			<p className="pb-2 text-sm text-neutral-content/60">Enter your password to enable 2FA</p>
+			<InputWithText>
+				<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+			</InputWithText>
+			<div className="flex gap-2">
+				<button onClick={close} type="button" className="btn btn-neutral">Cancel</button>
+				<button className="btn btn-info btn-outline">Confirm</button>
+			</div>
+		</form>}
+
+		{step === "verify" && totpURI && <form onSubmit={handleSubmitVerify}>
+
+		</form>}
+	</Modal>
+}

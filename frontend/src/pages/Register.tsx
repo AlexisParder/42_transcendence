@@ -23,7 +23,7 @@ type Errors = {
 async function validateRegister(username: string, email: string, password: string, password2: string, agree: boolean): Promise<Errors> {
 	const errors: Errors = {}
 
-	if (username.length === 0)
+	if (username.length <= 0)
 		errors.username = "Username is empty!"
 	else {
 		const { data, error } = await authClient.isUsernameAvailable({
@@ -34,15 +34,15 @@ async function validateRegister(username: string, email: string, password: strin
 			errors.username = error?.message ?? "Username alredy use!"
 	}
 
-	if (email.length === 0)
+	if (email.length <= 0)
 		errors.email = "Email is empty!"
 	else if (!isValidEmail(email))
 		errors.email = "Invalid email format!"
 
-	if (password.length === 0)
+	if (password.length <= 0)
 		errors.password = "Password is empty!"
 
-	if (password2.length === 0)
+	if (password2.length <= 0)
 		errors.password2 = "Password is empty!"
 
 	if (password.length > 0 && password2.length > 0 && password !== password2) {

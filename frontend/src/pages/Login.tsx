@@ -19,12 +19,12 @@ type Errors = {
 function validateLogin(email: string, password: string): Errors {
 	const errors: Errors = {}
 
-	if (email.length === 0)
+	if (email.length <= 0)
 		errors.email = "Email is empty!"
 	else if (!isValidEmail(email))
 		errors.email = "Invalid email format!"
 
-	if (password.length === 0)
+	if (password.length <= 0)
 		errors.password = "Password is empty!"
 
 	return errors
