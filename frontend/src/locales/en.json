@@ -10,6 +10,8 @@
 
 	"btn_remove": "Remove",
 	"btn_upload": "Upload",
+	"btn_cancel": "Cancel",
+	"btn_confirm": "Confirm",
 
 	"txt_enabled": "Enabled",
 	"txt_disabled": "Disabled",
@@ -17,6 +19,13 @@
 	"txt_email": "Email",
 	"txt_password": "Password",
 	"txt_password_confirm": "Confirm password",
+	"txt_step": "Step",
+
+	"txt_err_pwd_empty": "Password is empty!",
+	"txt_err_pwd_invalid": "Password is invalid!",
+	"txt_err_2fa_empty": "Code is empty!",
+	"txt_err_2fa_size": "Code must contain 6 digits!",
+	"txt_err_2fa_invalid": "Code is invalid!",
 
 	"lg_fr": "French",
 	"lg_en": "English",
@@ -50,5 +59,16 @@
 	"settings_session_revoke": "Revoke",
 	"settings_session_revoke_others": "Sign out everywhere else",
 	"settings_danger_title": "Danger zone",
-	"settings_danger_desc": "These actions can't be undone"
+	"settings_danger_desc": "These actions can't be undone",
+	"settings_danger_dl_data": "Download my data",
+	"settings_danger_dl_desc": "Profile, match history and messages as JSON",
+	"settings_danger_dl_btn": "Request export",
+	"settings_danger_dlt_user": "Delete my account",
+	"settings_danger_dlt_desc": "Tournament result stay anonymised",
+	"settings_danger_dlt_btn": "Delete account",
+	"settings_modal_upl_pic": "Upload new profile picture",
+	"settings_modal_upl_pic_link": "Image link",
+	"settings_modal_dlt_user": "Are you sure you want to delete your account?",
+	"settings_modal_enabled_2fa": "Enter your password to enabled 2FA",
+	"settings_modal_disabled_2fa": "Enter your password to disable 2FA"
 }

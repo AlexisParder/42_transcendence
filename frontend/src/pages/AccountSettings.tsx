@@ -65,10 +65,10 @@ export function AccountSettings() {
 		const newErrors: Errors = {}
 
 		if (password.length === 0)
-			newErrors.password = "Password is empty!"
+			newErrors.password = t("txt_err_pwd_empty")
 
 		if (password2.length === 0)
-			newErrors.password2 = "Password is empty!"
+			newErrors.password2 = t("txt_err_pwd_empty")
 
 		if (password.length > 0 && password2.length > 0 && password !== password2) {
 			newErrors.password = "Passwords do not match!"
@@ -77,7 +77,7 @@ export function AccountSettings() {
 
 		if (hasPwd === true) {
 			if (currPassword.length === 0)
-				newErrors.currPassword = "Password is empty!"
+				newErrors.currPassword = t("txt_err_pwd_empty")
 		}
 
 		setErrors(newErrors)
@@ -154,7 +154,7 @@ export function AccountSettings() {
 		const password = new FormData(form).get('confirmPwd')?.toString() ?? ""
 
 		if (password.length <= 0) {
-			setErrors({ confirmPwd: "Password is empty!" })
+			setErrors({ confirmPwd: t("txt_err_pwd_empty") })
 			return
 		}
 
@@ -163,7 +163,7 @@ export function AccountSettings() {
 		})
 
 		if (error) {
-			setErrors({ confirmPwd: error.message })
+			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
 			return
 		}
 		setErrors({})
@@ -228,8 +228,7 @@ export function AccountSettings() {
 			language: lang
 		})
 
-		if (error)
-		{
+		if (error) {
 			console.log("Error during language update")
 			return
 		}
@@ -330,20 +329,20 @@ export function AccountSettings() {
 			<SectionSetting title={t("settings_danger_title")} titleColor="text-error" description={`${t("settings_danger_desc")}.`} >
 				<div className="flex border border-neutral rounded-md p-4 items-center mt-2">
 					<div className="flex-1">
-						<p className="text-sm">Download my data</p>
-						<p className="text-xs text-neutral-content/60">Profile, match history and messages as JSON.</p>
+						<p className="text-sm">{t("settings_danger_dl_data")}</p>
+						<p className="text-xs text-neutral-content/60">{t("settings_danger_dl_desc")}.</p>
 					</div>
 					<div>
-						<button className="btn btn-outline border-neutral btn-sm">Request export</button>
+						<button className="btn btn-outline border-neutral btn-sm">{t("settings_danger_dl_btn")}</button>
 					</div>
 				</div>
 				<div className="flex border border-error bg-error/10 rounded-md p-4 items-center mt-2">
 					<div className="flex-1">
-						<p className="text-sm">Delete my account</p>
-						<p className="text-xs text-neutral-content/60">Tournament result stay anonymised.</p>
+						<p className="text-sm">{t("settings_danger_dlt_user")}</p>
+						<p className="text-xs text-neutral-content/60">{t("settings_danger_dlt_desc")}.</p>
 					</div>
 					<div>
-						<button onClick={() => ShowModal("deleteModal")} className="btn btn-outline btn-error border-error btn-sm">Delete account</button>
+						<button onClick={() => ShowModal("deleteModal")} className="btn btn-outline btn-error border-error btn-sm">{t("settings_danger_dlt_btn")}</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</div>
 				</div>
@@ -351,38 +350,41 @@ export function AccountSettings() {
 		</div>
 
 		<Modal id="pictureModal">
-			<p className="pb-2">Upload new profile picture</p>
+			<p className="pb-2">{t("settings_modal_upl_pic")}</p>
 			<form onSubmit={handleChangePicture}>
-				<Input type="text" label="Image link" name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} />
-				<button className="btn btn-info btn-outline">Upload</button>
+				<Input type="text" label={t("settings_modal_upl_pic_link")} name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} />
+				<div className="flex gap-2 pt-2 justify-end">
+					<button onClick={() => HideModal("pictureModal")} className="btn btn-neutral">{t("btn_cancel")}</button>
+					<button className="btn btn-info btn-outline">{t("btn_upload")}</button>
+				</div>
 			</form>
 		</Modal>
 		<Modal id="deleteModal">
-			<p className="pb-2">Are you sure you want to delete your account?</p>
-			<div className="flex gap-2">
-				<button onClick={() => HideModal("deleteModal")} className="btn btn-success">Cancel</button>
-				<button onClick={handleDeleteAccount} className="btn btn-error btn-outline">Confirm</button>
+			<p className="pb-2">{t("settings_modal_dlt_user")}</p>
+			<div className="flex gap-2 pt-2">
+				<button onClick={() => HideModal("deleteModal")} className="btn btn-success">{t("btn_cancel")}</button>
+				<button onClick={handleDeleteAccount} className="btn btn-error btn-outline">{t("btn_confirm")}</button>
 			</div>
 		</Modal>
-		<Enable2FA hasPwd={hasPwd} />
 		<Modal id="Disable2FAModal">
 			<div className="flex items-center justify-between pb-4">
-				<p className="font-bold text-lg">Disable 2FA</p>
+				<p className="font-bold text-lg">{t("settings_2fa_disable")}</p>
 			</div>
 			<form onSubmit={handleDisable2FA}>
-				<p className="pb-2 text-sm text-neutral-content/60">Enter your password to disable 2FA</p>
+				<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_disabled_2fa")}</p>
 				<InputWithText>
-					<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+					<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
 				</InputWithText>
 				<div className="flex gap-2 justify-end">
 					<button onClick={() => {
 						setErrors({})
 						HideModal('Disable2FAModal')
-					}} type="button" className="btn btn-neutral">Cancel</button>
-					<button className="btn btn-info btn-outline">Confirm</button>
+					}} type="button" className="btn btn-neutral">{t("btn_cancel")}</button>
+					<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
 				</div>
 			</form>
 		</Modal>
+		<Enable2FA hasPwd={hasPwd} />
 		<RecoveryCodes />
 		<ReScan2FA />
 	</Sidebar>
@@ -475,7 +477,7 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 		const password = new FormData(formElem).get("confirmPwd")?.toString() ?? ''
 
 		if (password.length <= 0) {
-			setErrors({ confirmPwd: "Password is empty!" })
+			setErrors({ confirmPwd: t("txt_err_pwd_empty") })
 			return
 		}
 
@@ -484,7 +486,7 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 			method: "totp"
 		})
 		if (error) {
-			setErrors({ confirmPwd: "Invalid password!" })
+			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
 			return
 		}
 
@@ -508,16 +510,16 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 
 		const code = new FormData(formElem).get("code")?.toString().trim() as string
 		if (code.length <= 0) {
-			setErrors({ code: "Code is empty!" })
+			setErrors({ code: t("txt_err_2fa_empty") })
 			return
 		} else if (code.length !== 6) {
-			setErrors({ code: "Code must contain 6 digits!" })
+			setErrors({ code: t("txt_err_2fa_size") })
 			return
 		}
 
 		const { error } = await authClient.twoFactor.verifyTotp({ code })
 		if (error) {
-			setErrors({ code: "Invalid code!" })
+			setErrors({ code: t("txt_err_2fa_invalid") })
 			return
 		}
 		close()
@@ -526,17 +528,17 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 
 	return <Modal id="Enable2FAModal">
 		<div className="flex items-center justify-between pb-4">
-			<p className="font-bold text-lg">Enable 2FA</p>
-			<p className="text-xs text-neutral-content/60">Step {step === "password" ? '1' : '2'}/2</p>
+			<p className="font-bold text-lg">{t("settings_2fa_enable")}</p>
+			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
 		</div>
 		{step === "password" && <form onSubmit={handleSubmitPwd}>
-			<p className="pb-2 text-sm text-neutral-content/60">Enter your password to enable 2FA</p>
+			<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_enabled_2fa")}</p>
 			<InputWithText>
-				<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+				<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
 			</InputWithText>
 			<div className="flex gap-2 justify-end">
-				<button onClick={close} type="button" className="btn btn-neutral">Cancel</button>
-				<button className="btn btn-info btn-outline">Confirm</button>
+				<button onClick={close} type="button" className="btn btn-neutral">{t("btn_cancel")}</button>
+				<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
 			</div>
 		</form>}
 
@@ -592,7 +594,7 @@ function RecoveryCodes() {
 		const password = new FormData(formElem).get("confirmPwd")?.toString() ?? ''
 
 		if (password.length <= 0) {
-			setErrors({ confirmPwd: "Password is empty!" })
+			setErrors({ confirmPwd: t("txt_err_pwd_empty") })
 			return
 		}
 
@@ -605,7 +607,7 @@ function RecoveryCodes() {
 		const body = await res.json()
 
 		if (!res.ok || !body.ok) {
-			setErrors({ confirmPwd: "Invalid password!" })
+			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
 			return
 		}
 
@@ -675,7 +677,7 @@ function ReScan2FA() {
 		const password = new FormData(formElem).get("confirmPwd")?.toString() ?? ''
 
 		if (password.length <= 0) {
-			setErrors({ confirmPwd: "Password is empty!" })
+			setErrors({ confirmPwd: t("txt_err_pwd_empty") })
 			return
 		}
 
@@ -683,7 +685,7 @@ function ReScan2FA() {
 			password
 		})
 		if (error) {
-			setErrors({ confirmPwd: "Invalid password!" })
+			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
 			return
 		}
 
