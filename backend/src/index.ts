@@ -2,8 +2,9 @@ import express from "express"
 import cors from "cors"
 import { toNodeHandler } from "better-auth/node"
 import { auth } from "./auth.ts"
-import { setPwdHandler } from "./routes/setPwd.ts"
-import { checkPwdHandler } from "./routes/checkPwd.ts"
+import { setPwdHandler } from "./routes/setPwd.route.ts"
+import { checkPwdHandler } from "./routes/checkPwd.route.ts"
+import { getBackupCodesHandler } from "./routes/getBackupCodes.route.ts"
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.get("/api/test", (req, res) => {
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
+app.post("/api/view-codes", getBackupCodesHandler)
 
 const PORT = 3000
 app.listen(PORT, () => console.log(`Backend listening on port ${PORT}`))

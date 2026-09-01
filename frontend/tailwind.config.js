@@ -49,6 +49,10 @@ module.exports = {
     'peer-checked:bg-error',
     'peer-checked:border-error',
     'peer-checked:text-error-content',
+    'w-16',
+    'w-10',
+    'h-16',
+    'h-10',
   ],
   theme: {
     extend: {

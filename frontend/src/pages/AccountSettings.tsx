@@ -11,6 +11,7 @@ import { HideModal, Modal, ShowModal } from "../components/Modal"
 import { useNavigate } from "react-router-dom"
 import { Avatar } from "../components/Avatar"
 import { IoWarning } from "react-icons/io5"
+import { QRCodeSVG } from "qrcode.react"
 
 type Errors = {
 	username?: string
@@ -143,6 +144,30 @@ export function AccountSettings() {
 				HideModal('pictureModal')
 			}
 		}
+	}
+
+	const handleDisable2FA: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+
+		const form = e.currentTarget
+		const password = new FormData(form).get('confirmPwd')?.toString() ?? ""
+
+		if (password.length <= 0) {
+			setErrors({ confirmPwd: "Password is empty!" })
+			return
+		}
+
+		const { error } = await authClient.twoFactor.disable({
+			password
+		})
+
+		if (error) {
+			setErrors({ confirmPwd: error.message })
+			return
+		}
+		setErrors({})
+		HideModal("Disable2FAModal")
+		// ajouter une notif
 	}
 
 	async function handleRemovePicture() {
@@ -280,9 +305,9 @@ export function AccountSettings() {
 			<SectionSetting title="Two-factor authentification" description="A six-digit code from your authentificator app, asked after your password." hasDividerBottom={true}>
 				<SectionOTP isEnabled={isOTPEnabled} />
 				<div className="flex gap-2 pt-3 pb-3 flex-col lg:flex-row">
-					{isOTPEnabled && <button className="btn btn-outline border-neutral">Show recovery codes</button>}
-					{isOTPEnabled && <button className="btn btn-outline border-neutral">Re-scan QR code</button>}
-					{isOTPEnabled && <button className="btn btn-outline btn-error">Disable 2FA</button>}
+					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => ShowModal('ShowCodesModal')}>Show recovery codes</button>}
+					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => ShowModal('ReScan2FAModal')}>Re-scan QR code</button>}
+					{isOTPEnabled && <button className="btn btn-outline btn-error" onClick={() => ShowModal('Disable2FAModal')}>Disable 2FA</button>}
 					{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => ShowModal('Enable2FAModal')} disabled={hasPwd !== true}>Enable 2FA</button>}
 				</div>
 				{!isOTPEnabled && hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">You must set a password to enable two-factor authentification.<br />Please see the section above.</span></p>}
@@ -334,6 +359,26 @@ export function AccountSettings() {
 			</div>
 		</Modal>
 		<Enable2FA hasPwd={hasPwd} />
+		<Modal id="Disable2FAModal">
+			<div className="flex items-center justify-between pb-4">
+				<p className="font-bold text-lg">Disable 2FA</p>
+			</div>
+			<form onSubmit={handleDisable2FA}>
+				<p className="pb-2 text-sm text-neutral-content/60">Enter your password to disable 2FA</p>
+				<InputWithText>
+					<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+				</InputWithText>
+				<div className="flex gap-2 justify-end">
+					<button onClick={() => {
+						setErrors({})
+						HideModal('Disable2FAModal')
+					}} type="button" className="btn btn-neutral">Cancel</button>
+					<button className="btn btn-info btn-outline">Confirm</button>
+				</div>
+			</form>
+		</Modal>
+		<RecoveryCodes />
+		<ReScan2FA />
 	</Sidebar>
 }
 
@@ -368,7 +413,6 @@ function SectionOTP({ isEnabled = false }: { isEnabled?: boolean }) {
 	return <div className={`flex bg-${color}/10 border border-${color}/50 rounded-md p-4 items-center`}>
 		<div className="flex-1">
 			<p className="text-sm pb-1">Authentificator app <span className={`badge badge-xs badge-outline badge-${color} ml-1`}>{isEnabled ? "ENABLED" : "DISABLED"}</span></p>
-			{isEnabled && <p className="text-xs text-neutral-content/60">Added 12 June 2026 - last used today</p>}
 		</div>
 	</div>
 }
@@ -396,16 +440,14 @@ function SessionsDisplay({ sessions, onRevoke }: { sessions: SessionRow[], onRev
 }
 
 type Enable2FAStep = 'password' | 'verify'
-function Enable2FA({hasPwd}: {hasPwd: boolean | null | undefined}) {
+function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 	const [step, setStep] = useState<Enable2FAStep>('password')
 	const [totpURI, setTotpURI] = useState<string | null>(null)
-	const [backupCodes, setBackupCodes] = useState<string[]>([])
 	const [errors, setErrors] = useState<{ confirmPwd?: string, code?: string }>({})
 
 	const reset = () => {
 		setStep('password')
 		setTotpURI(null)
-		setBackupCodes([])
 		setErrors({})
 	}
 
@@ -416,31 +458,64 @@ function Enable2FA({hasPwd}: {hasPwd: boolean | null | undefined}) {
 
 	const handleSubmitPwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
+		const formElem = e.currentTarget
 
-		if (hasPwd !== true)
-		{
-			e.currentTarget.reset()
+		if (hasPwd !== true) {
+			formElem.reset()
 			close()
+			return
 		}
 
-		const form = new FormData(e.currentTarget)
-		const password = form.get("confirmPwd")?.toString() ?? ''
-		
-		if (password.length <= 0)
-			setErrors({ confirmPwd: "Password is empty!"})
+		const password = new FormData(formElem).get("confirmPwd")?.toString() ?? ''
 
-		if (Object.keys(errors).length > 0)
+		if (password.length <= 0) {
+			setErrors({ confirmPwd: "Password is empty!" })
 			return
+		}
+
+		const { data, error } = await authClient.twoFactor.enable({
+			password,
+			method: "totp"
+		})
+		if (error) {
+			setErrors({ confirmPwd: "Invalid password!" })
+			return
+		}
+
+		if (data.method === "totp") {
+			setTotpURI(data.totpURI)
+			setErrors({})
+			formElem.reset()
+			setStep("verify")
+		}
 	}
 
 	const handleSubmitVerify: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
+		const formElem = e.currentTarget
 
-		if (hasPwd !== true)
-		{
-			e.currentTarget.reset()
+		if (hasPwd !== true) {
+			formElem.reset()
 			close()
+			return
 		}
+
+		const code = new FormData(formElem).get("code")?.toString().trim() as string
+		if (code.length <= 0) {
+			setErrors({ code: "Code is empty!" })
+			return
+		} else if (code.length !== 6) {
+			setErrors({ code: "Code must contain 6 digits!" })
+			return
+		}
+
+		const { error } = await authClient.twoFactor.verifyTotp({ code })
+		if (error) {
+			setErrors({ code: "Invalid code!" })
+			return
+		}
+		close()
+		// ajouter notif
 	}
 
 	return <Modal id="Enable2FAModal">
@@ -453,14 +528,188 @@ function Enable2FA({hasPwd}: {hasPwd: boolean | null | undefined}) {
 			<InputWithText>
 				<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
 			</InputWithText>
-			<div className="flex gap-2">
+			<div className="flex gap-2 justify-end">
 				<button onClick={close} type="button" className="btn btn-neutral">Cancel</button>
 				<button className="btn btn-info btn-outline">Confirm</button>
 			</div>
 		</form>}
 
 		{step === "verify" && totpURI && <form onSubmit={handleSubmitVerify}>
+			<div className="flex flex-col items-center">
+				<p className="pb-2 text-sm text-neutral-content/60">Scan the QR Code, then enter the 6-digit code</p>
 
+				<div className="p-2 opacity-75">
+					<QRCodeSVG value={totpURI} size={200} />
+				</div>
+				<div>
+					<label className="otp otp-info otp-lg mt-4">
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<input type="text" name="code" autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
+					</label>
+					{errors.code && <span className="text-error block">{errors.code}</span>}
+				</div>
+				<div className="flex gap-2 mt-4">
+					<button type="button" onClick={close} className="btn btn-neutral">Cancel</button>
+					<button className="btn btn-info btn-outline">Verify</button>
+				</div>
+			</div>
 		</form>}
+	</Modal>
+}
+
+type RecoveryCodesStep = "password" | "show"
+function RecoveryCodes() {
+	const [step, setStep] = useState<RecoveryCodesStep>('password')
+	const [backupCodes, setBackupCodes] = useState<string[]>([])
+	const [errors, setErrors] = useState<{ confirmPwd?: string }>({})
+
+	const reset = () => {
+		setStep('password')
+		setBackupCodes([])
+		setErrors({})
+	}
+
+	const close = () => {
+		HideModal('ShowCodesModal')
+		reset()
+	}
+
+	const handleSubmitPwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+		const formElem = e.currentTarget
+
+		const password = new FormData(formElem).get("confirmPwd")?.toString() ?? ''
+
+		if (password.length <= 0) {
+			setErrors({ confirmPwd: "Password is empty!" })
+			return
+		}
+
+		const res = await fetch("/api/view-codes", {
+			method: "POST",
+			headers: { "Content-type": "application/json" },
+			body: JSON.stringify({ password }),
+		})
+
+		const body = await res.json()
+
+		if (!res.ok || !body.ok) {
+			setErrors({ confirmPwd: "Invalid password!" })
+			return
+		}
+
+		setErrors({})
+		formElem.reset()
+		setBackupCodes(body.backupCodes)
+		setStep("show")
+	}
+
+	function handleCopyAll() {
+		navigator.clipboard.writeText(backupCodes.join('\n'))
+		close()
+	}
+
+	return <Modal id="ShowCodesModal">
+		<div className="flex items-center justify-between pb-4">
+			<p className="font-bold text-lg">Recovery codes</p>
+			<p className="text-xs text-neutral-content/60">Step {step === "password" ? '1' : '2'}/2</p>
+		</div>
+		{step === "password" && <form onSubmit={handleSubmitPwd}>
+			<p className="pb-2 text-sm text-neutral-content/60">Enter your password to view codes</p>
+			<InputWithText>
+				<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+			</InputWithText>
+			<div className="flex gap-2 justify-end">
+				<button onClick={close} type="button" className="btn btn-neutral">Cancel</button>
+				<button className="btn btn-info btn-outline">Confirm</button>
+			</div>
+		</form>}
+
+		{step === "show" && <div className="flex flex-col">
+			<div className="grid grid-cols-2">
+				{backupCodes.map((code) => (
+					<p key={code} className="p-2 m-2 bg-base-200 rounded text-center">
+						{code}
+					</p>
+				))}
+			</div>
+			<div className="flex">
+				<button onClick={close} type="button" className="m-2 btn btn-neutral flex-1/2">Close</button>
+				<button type="button" className="m-2 btn btn-outline btn-info flex-1/2" onClick={handleCopyAll}>Copy all</button>
+			</div>
+		</div>}
+	</Modal>
+}
+
+function ReScan2FA() {
+	const [step, setStep] = useState<RecoveryCodesStep>('password')
+	const [totpURI, setTotpURI] = useState<string | null>(null)
+	const [errors, setErrors] = useState<{ confirmPwd?: string }>({})
+
+	const reset = () => {
+		setStep('password')
+		setTotpURI(null)
+		setErrors({})
+	}
+
+	const close = () => {
+		HideModal('ReScan2FAModal')
+		reset()
+	}
+
+	const handleSubmitPwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+		const formElem = e.currentTarget
+
+		const password = new FormData(formElem).get("confirmPwd")?.toString() ?? ''
+
+		if (password.length <= 0) {
+			setErrors({ confirmPwd: "Password is empty!" })
+			return
+		}
+
+		const { data, error } = await authClient.twoFactor.getTotpUri({
+			password
+		})
+		if (error) {
+			setErrors({ confirmPwd: "Invalid password!" })
+			return
+		}
+
+		setTotpURI(data.totpURI)
+		setErrors({})
+		formElem.reset()
+		setStep("show")
+	}
+
+	return <Modal id="ReScan2FAModal">
+		<div className="flex items-center justify-between pb-4">
+			<p className="font-bold text-lg">Re-Scan Qr-code</p>
+			<p className="text-xs text-neutral-content/60">Step {step === "password" ? '1' : '2'}/2</p>
+		</div>
+		{step === "password" && <form onSubmit={handleSubmitPwd}>
+			<p className="pb-2 text-sm text-neutral-content/60">Enter your password to re-scan QR code</p>
+			<InputWithText>
+				<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+			</InputWithText>
+			<div className="flex gap-2 justify-end">
+				<button onClick={close} type="button" className="btn btn-neutral">Cancel</button>
+				<button className="btn btn-info btn-outline">Confirm</button>
+			</div>
+		</form>}
+
+		{step === "show" && totpURI && <div className="flex flex-col items-center">
+			<div className="p-2 opacity-75">
+				<QRCodeSVG value={totpURI} size={200} />
+			</div>
+			<div className="flex gap-2 mt-4">
+				<button type="button" onClick={close} className="btn btn-neutral">Close</button>
+			</div>
+		</div>}
 	</Modal>
 }
