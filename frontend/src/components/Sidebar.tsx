@@ -9,6 +9,7 @@ import type React from "react";
 import { authClient } from "../lib/auth-client";
 import { FaBars } from "react-icons/fa6";
 import { Avatar } from "./Avatar";
+import { t } from "../lib/translate";
 
 interface NavItem {
 	to: string,
@@ -18,13 +19,13 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-	{ to: "/play", icon: GiBombingRun, label: "Play", end: true },
-	{ to: "/tournaments", icon: TbTournament, label: "Tournaments" },
-	{ to: "/leaderboard", icon: MdLeaderboard, label: "Leaderboard" },
-	{ to: "/friends", icon: FaUserFriends, label: "Friends" },
-	{ to: "/history", icon: FaHistory, label: "History" },
-	{ to: "/account_settings", icon: TbSettingsFilled, label: "Settings" },
-	{ to: "/", icon: FaDoorOpen, label: "Quit" }
+	{ to: "/play", icon: GiBombingRun, label: t("play_title"), end: true },
+	{ to: "/tournaments", icon: TbTournament, label: t("tournaments_title") },
+	{ to: "/leaderboard", icon: MdLeaderboard, label: t("leaderboard_title") },
+	{ to: "/friends", icon: FaUserFriends, label: t("friends_title") },
+	{ to: "/history", icon: FaHistory, label: t("history_title") },
+	{ to: "/account_settings", icon: TbSettingsFilled, label: t("settings_title") },
+	{ to: "/", icon: FaDoorOpen, label: t("quit_title") }
 ]
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
@@ -71,8 +72,8 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 						</div>
 					</div>
 					<div className="flex gap-2">
-						<a href="privacy" className="link-primary text-xs">Privacy</a>
-						<a href="terms" className="link-primary text-xs">Terms</a>
+						<a href="privacy" className="link-primary text-xs">{t("privacy_title")}</a>
+						<a href="terms" className="link-primary text-xs">{t("terms_title")}</a>
 					</div>
 				</ul>
 			</div>

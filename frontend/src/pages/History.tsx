@@ -1,7 +1,8 @@
 import { Sidebar } from "../components/Sidebar";
+import { t } from "../lib/translate";
 
 export function History() {
 	return <Sidebar>
-		<p>History</p>
+		<p>{t("history_title")}</p>
 	</Sidebar>
 }
