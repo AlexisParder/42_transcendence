@@ -4,7 +4,6 @@ import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled, TbTournament } from "react-icons/tb";
 import { NavLink } from "react-router-dom";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
 import { FaBars } from "react-icons/fa6";
@@ -30,7 +29,6 @@ const navItems: NavItem[] = [
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
 	const { data: session, isPending } = authClient.useSession()
-	useDocumentTitle("Settings")
 
 	if (!session && !isPending)
 		return <p>Pas connecté</p>
@@ -68,12 +66,12 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 						<Avatar username={session?.user.username} image={session?.user.image} size={40} />
 						<div className="ml-3">
 							<p className="font-bold">{truncateUsername(username)}</p>
-							<p className="text-warning">1,254 pts</p>
+							<p className="text-warning">1,254 {t("txt_pts")}</p>
 						</div>
 					</div>
 					<div className="flex gap-2">
-						<a href="privacy" className="link-primary text-xs">{t("privacy_title")}</a>
-						<a href="terms" className="link-primary text-xs">{t("terms_title")}</a>
+						<a href="privacy" className="link-primary text-xs">{t("privacy_short_title")}</a>
+						<a href="terms" className="link-primary text-xs">{t("terms_short_title")}</a>
 					</div>
 				</ul>
 			</div>

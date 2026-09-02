@@ -2,13 +2,14 @@ import { FaRegCircle } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
 import { useNavigate } from "react-router-dom";
 import { TbSettingsFilled } from "react-icons/tb";
+import { t } from "../lib/translate";
 
 function Links() {
 	return <>
-		<li><a href="">Play</a></li>
-		<li><a href="">Leaderboard</a></li>
-		<li><a href="">Tournaments</a></li>
-		<li><a href="">Rules</a></li>
+		<li><a href="/play">{t("play_title")}</a></li>
+		<li><a href="/leaderboard">{t("leaderboard_title")}</a></li>
+		<li><a href="/tournaments">{t("tournaments_title")}</a></li>
+		<li><a href="/rules">{t("rules_title")}</a></li>
 	</>
 }
 
@@ -29,12 +30,12 @@ function SignLinks() {
 	if (currentSession)
 		return <>
 			<a className="btn btn-info btn-outline mr-2" href="/account_settings"><TbSettingsFilled /></a>
-			<button className="btn btn-info mr-2" onClick={handleSignOut}>Sign out</button>
+			<button className="btn btn-info mr-2" onClick={handleSignOut}>{t("btn_sign_out")}</button>
 		</>
 
 	return <>
-		<a className="btn btn-info btn-outline mr-2" href="/login">Sign in</a>
-		<a className="btn btn-info" href="/register">Sign up</a>
+		<a className="btn btn-info btn-outline mr-2" href="/login">{t("btn_sign_in")}</a>
+		<a className="btn btn-info" href="/register">{t("btn_sign_up")}</a>
 	</>
 }
 

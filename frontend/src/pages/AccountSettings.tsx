@@ -278,7 +278,7 @@ export function AccountSettings() {
 						<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>{t("btn_remove")}</button>
 					</div>
 				</div>
-				<div className="flex mt-2 flex-col md:flex-row items-center w-full gap-2">
+				<div className="flex mt-2 flex-col md:flex-row w-full gap-2">
 					<InputWithText text={t("settings_profile_callsign")}>
 						<Input type="text" name="username" label={t("txt_username")} defaultValue={session?.user.username ?? ''} useLabel={false}
 							onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />

@@ -10,6 +10,7 @@ import { PasswordBar } from "../components/PasswordBar";
 import { SignGoogle } from "../lib/SignGoogle";
 import { SignDiscord } from "../lib/SignDiscord";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { t } from "../lib/translate";
 
 type Errors = {
 	username?: string
@@ -30,34 +31,40 @@ async function validateRegister(username: string, email: string, password: strin
 			username: username
 		})
 
-		if (!data?.available)
-			errors.username = error?.message ?? "Username alredy use!"
+		if (!data?.available) {
+			if (error?.code === "USERNAME_TOO_SHORT")
+				errors.username = t("txt_err_user_short")
+			else if (error?.code === "INVALID_USERNAME")
+				errors.username = t("txt_err_user_invalid")
+			else
+				errors.username = t("txt_err_user_exist")
+		}
 	}
 
 	if (email.length <= 0)
-		errors.email = "Email is empty!"
+		errors.email = t("txt_err_email_empty")
 	else if (!isValidEmail(email))
-		errors.email = "Invalid email format!"
+		errors.email = t("txt_err_email_invalid")
 
 	if (password.length <= 0)
-		errors.password = "Password is empty!"
+		errors.password = t("txt_err_pwd_empty")
 
 	if (password2.length <= 0)
-		errors.password2 = "Password is empty!"
+		errors.password2 = t("txt_err_pwd_empty")
 
 	if (password.length > 0 && password2.length > 0 && password !== password2) {
-		errors.password = "Passwords do not match!"
-		errors.password2 = "Passwords do not match!"
+		errors.password = t("txt_err_pwd_not_match")
+		errors.password2 = errors.password
 	}
 
 	if (!agree)
-		errors.agree = "You must accept the terms!"
+		errors.agree = t("txt_err_agree_terms")
 
 	return errors
 }
 
 export function Register() {
-	useDocumentTitle("Sign up")
+	useDocumentTitle(t("btn_sign_up"))
 	const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
 	const [password, setPassword] = useState('')
@@ -67,11 +74,12 @@ export function Register() {
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
-		const form = new FormData(e.currentTarget)
-		const name = form.get('username')?.toString().trim() ?? ''
-		const email = form.get('email')?.toString().trim().toLowerCase() ?? ''
-		const password2 = form.get('password2')?.toString() ?? ''
-		const agree = form.get('agree') ? true : false
+		const form = e.currentTarget
+		const formElem = new FormData(form)
+		const name = formElem.get('username')?.toString().trim() ?? ''
+		const email = formElem.get('email')?.toString().trim().toLowerCase() ?? ''
+		const password2 = formElem.get('password2')?.toString() ?? ''
+		const agree = formElem.get('agree') ? true : false
 
 		const newErrors = await validateRegister(name, email, password, password2, agree)
 		setErrors(newErrors)
@@ -89,9 +97,9 @@ export function Register() {
 
 		if (error) {
 			if (error.status === 422)
-				setErrors({ email: error.message })
+				setErrors({ email: t("txt_err_email_exist") })
 			else
-				setErrors({ form: error.message ?? "Login failed" })
+				setErrors({ form: t("sign_up_failed") })
 		} else {
 			navigate('/verified')
 		}
@@ -103,36 +111,36 @@ export function Register() {
 				<fieldset className="fieldset p-0">
 					<SonarTitle />
 
-					<h2 className="card-title text-neutral-content text-xl mt-2">Join the fleet</h2>
-					<p className="text-neutral-content/40 mb-2">Pick a callsign and you're ready to dive.</p>
+					<h2 className="card-title text-neutral-content text-xl mt-2">{t("sign_up_title")}</h2>
+					<p className="text-neutral-content/40 mb-2">{t("sign_up_desc")}.</p>
 
-					<button onClick={SignGoogle} className="btn btn-info"><FaGoogle /> Sign up with Google</button>
-					<button onClick={SignDiscord} className="btn btn-info"><FaDiscord /> Sign up with Discord</button>
+					<button onClick={SignGoogle} className="btn btn-info"><FaGoogle /> {t("sign_up_google")}</button>
+					<button onClick={SignDiscord} className="btn btn-info"><FaDiscord /> {t("sign_up_discord")}</button>
 
-					<div className="divider text-neutral-content/40 m-0 mt-3 mb-1">OR</div>
+					<div className="divider text-neutral-content/40 m-0 mt-3 mb-1">{t("txt_or").toUpperCase()}</div>
 
 					<form onSubmit={handleSubmit} className="min-w-full">
 
-						<Input type="text" label="Username" name="username" errorMsg={errors.username} autoComplete="off" />
-						<Input type="email" label="Email" name="email" errorMsg={errors.email} />
-						<Input type="password" label="Password" name="password" errorMsg={errors.password} value={password} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
+						<Input type="text" label={t("txt_username")} name="username" errorMsg={errors.username} autoComplete="off" />
+						<Input type="email" label={t("txt_email")} name="email" errorMsg={errors.email} />
+						<Input type="password" label={t("txt_password")} name="password" errorMsg={errors.password} value={password} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
 						{isFocused && <PasswordBar password={password} />}
 
-						<Input type="password" label="Confirm password" name="password2" errorMsg={errors.password2} autoComplete="new-password" />
+						<Input type="password" label={t("txt_password_confirm")} name="password2" errorMsg={errors.password2} autoComplete="new-password" />
 
 						<div className="mt-3 mb-5">
 							<label className="label">
 								<input type="checkbox" name="agree" className="checkbox checkbox-sm checked:checkbox-info" />
-								<span className="text-neutral-content/40 select-none">I agree of the <a href="/terms" className="link-primary">Terms of Service</a> and the <a href="/privacy" className="link-primary">Privacy Policy</a>.</span>
+								<span className="text-neutral-content/40 select-none">{t("sign_up_agree_1")} <a href="/terms" className="link-primary">{t("terms_title")}</a> {t("sign_up_agree_2")} <a href="/privacy" className="link-primary">{t("privacy_title")}</a>.</span>
 							</label>
 							{errors.agree && <span className="text-error block pb-2 pl-2">{errors.agree}</span>}
 						</div>
 
-						<button className="btn btn-soft btn-info border-neutral hover:border-info w-full">Create account</button>
+						<button className="btn btn-soft btn-info border-neutral hover:border-info w-full">{t("btn_sign_up")}</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>
 
-					<p className="text-neutral-content/40 mt-3 text-center">Already aboard? <a href="login" className="link-primary">Sign in</a></p>
+					<p className="text-neutral-content/40 mt-3 text-center">{t("sign_up_already_acc")} <a href="login" className="link-primary">{t("btn_sign_in")}</a></p>
 				</fieldset>
 			</div>
 		</div>

@@ -1,7 +1,8 @@
 import { Sidebar } from "../components/Sidebar";
+import { t } from "../lib/translate";
 
 export function Tournaments() {
 	return <Sidebar>
-		<p>Tournaments</p>
+		<p>{t("tournaments_title")}</p>
 	</Sidebar>
 }
