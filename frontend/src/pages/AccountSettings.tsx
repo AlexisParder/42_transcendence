@@ -22,6 +22,7 @@ type Errors = {
 	password2?: string
 	confirmPwd?: string
 	form?: string
+	lang?: string
 }
 
 export function AccountSettings() {
@@ -71,8 +72,8 @@ export function AccountSettings() {
 			newErrors.password2 = t("txt_err_pwd_empty")
 
 		if (password.length > 0 && password2.length > 0 && password !== password2) {
-			newErrors.password = "Passwords do not match!"
-			newErrors.password2 = "Passwords do not match!"
+			newErrors.password = t("txt_err_pwd_not_match")
+			newErrors.password2 = newErrors.password
 		}
 
 		if (hasPwd === true) {
@@ -91,14 +92,15 @@ export function AccountSettings() {
 				revokeOtherSessions: true,
 			})
 
-			if (error)
-				setErrors({ form: error.message ?? "Update password failed" })
-			else {
-				setCurrPassword('')
-				setPassword('')
-				setPassword2('')
-				// ajouter une notif de success
+			if (error) {
+				setErrors({ form: t("settings_err_updt_pwd") })
+				return
 			}
+
+			setCurrPassword('')
+			setPassword('')
+			setPassword2('')
+			// ajouter une notif de success
 
 		} else {
 			const res = await fetch("/api/set-pwd", {
@@ -107,14 +109,17 @@ export function AccountSettings() {
 				body: JSON.stringify({ newPassword: password }),
 			})
 
-			if (res.ok) {
-				setHasPwd(true);
-				setCurrPassword('')
-				setPassword('')
-				setPassword2('')
-				revokeOthers()
-				// ajouter une notif de success
+			if (!res.ok) {
+				setErrors({ form: t("settings_err_updt_pwd") })
+				return
 			}
+
+			setHasPwd(true);
+			setCurrPassword('')
+			setPassword('')
+			setPassword2('')
+			revokeOthers()
+			// ajouter une notif de success
 		}
 	}
 
@@ -133,13 +138,14 @@ export function AccountSettings() {
 			return
 		}
 
+		// ajouter convertion base64
 		if (picture.length > 0) {
 			const { error } = await authClient.updateUser({
 				image: picture,
 			})
 
 			if (error)
-				setErrors({ form: error.message ?? "Update username failed" })
+				setErrors({ form: t("settings_err_updt_picture") })
 			else {
 				setPicture('')
 				HideModal('pictureModal')
@@ -180,7 +186,7 @@ export function AccountSettings() {
 		})
 
 		if (error)
-			setErrors({ form: error.message ?? "Remove picture failed" })
+			setErrors({ form: t("settings_err_rmv_picture") })
 	}
 
 	async function handleChangeUsername() {
@@ -190,14 +196,20 @@ export function AccountSettings() {
 			return
 
 		if (username.length === 0)
-			newErrors.username = "Username is empty!"
+			newErrors.username = t("txt_err_user_empty")
 		else {
 			const { data, error } = await authClient.isUsernameAvailable({
 				username
 			})
 
-			if (!data?.available)
-				newErrors.username = error?.message ?? "Username alredy use!"
+			if (!data?.available) {
+				if (error?.code === "USERNAME_TOO_SHORT")
+					newErrors.username = t("txt_err_user_short")
+				else if (error?.code === "INVALID_USERNAME")
+					newErrors.username = t("txt_err_user_invalid")
+				else
+					newErrors.username = t("txt_err_user_exist")
+			}
 		}
 
 		setErrors(newErrors)
@@ -212,7 +224,7 @@ export function AccountSettings() {
 		})
 
 		if (error)
-			setErrors({ username: "Update username failed" })
+			setErrors({ username: t("settings_err_updt_user") })
 	}
 
 	const handleChangeLanguage = async (lang: string) => {
@@ -224,27 +236,30 @@ export function AccountSettings() {
 		if (lang === session?.user.language)
 			return
 
+		const newErrors: Errors = {}
 		const { error } = await authClient.updateUser({
 			language: lang
 		})
 
 		if (error) {
-			console.log("Error during language update")
+			newErrors.lang = t("settings_err_updt_lang")
+			setErrors(newErrors)
 			return
 		}
 		setTranslationLanguage(lang)
 		location.reload()
-		// ajouter une notif d'erreur
+		// ajouter une notif de success
 	}
 
 	async function handleDeleteAccount() {
 		const { error } = await authClient.deleteUser();
 
 		HideModal("deleteModal")
-		if (error)
-			setErrors({ form: error.message ?? "delete account failed" })
-		else
-			navigate('/')
+		if (error) {
+			setErrors({ form: t("settings_err_rmv_user") })
+			return
+		}
+		navigate('/')
 		// Ajouter une notif
 	}
 
@@ -269,7 +284,7 @@ export function AccountSettings() {
 							onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
 					</InputWithText>
 					<InputWithText text={t("settings_ds_lg")}>
-						<select className="select outline-none focus:border-info w-full bg-abyss-700 mt-2 mb-2" value={language ?? "en"} onChange={e => {
+						<select className={`select outline-none focus:border-info ${errors.lang ? "border-error" : ""} w-full bg-abyss-700 mt-2 mb-2`} value={language ?? "en"} onChange={e => {
 							const lang = e.target.value
 							setLanguage(lang)
 							handleChangeLanguage(lang)
@@ -277,6 +292,7 @@ export function AccountSettings() {
 							<option value="fr">{t("lg_fr")}</option>
 							<option value="en">{t("lg_en")}</option>
 						</select>
+						{errors.lang && <span className="text-error block pb-2 pl-2">{errors.lang}</span>}
 					</InputWithText>
 				</div>
 				<div className="pt-3 md:pt-0">
@@ -544,7 +560,7 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 
 		{step === "verify" && totpURI && <form onSubmit={handleSubmitVerify}>
 			<div className="flex flex-col items-center">
-				<p className="pb-2 text-sm text-neutral-content/60">Scan the QR Code, then enter the 6-digit code</p>
+				<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_qrcode_enable_desc")}</p>
 
 				<div className="p-2 opacity-75">
 					<QRCodeSVG value={totpURI} size={200} />
@@ -562,8 +578,8 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 					{errors.code && <span className="text-error block">{errors.code}</span>}
 				</div>
 				<div className="flex gap-2 mt-4">
-					<button type="button" onClick={close} className="btn btn-neutral">Cancel</button>
-					<button className="btn btn-info btn-outline">Verify</button>
+					<button type="button" onClick={close} className="btn btn-neutral">{t("btn_cancel")}</button>
+					<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
 				</div>
 			</div>
 		</form>}
@@ -624,17 +640,17 @@ function RecoveryCodes() {
 
 	return <Modal id="ShowCodesModal">
 		<div className="flex items-center justify-between pb-4">
-			<p className="font-bold text-lg">Recovery codes</p>
-			<p className="text-xs text-neutral-content/60">Step {step === "password" ? '1' : '2'}/2</p>
+			<p className="font-bold text-lg">{t("settings_modal_show_code_title")}</p>
+			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
 		</div>
 		{step === "password" && <form onSubmit={handleSubmitPwd}>
-			<p className="pb-2 text-sm text-neutral-content/60">Enter your password to view codes</p>
+			<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_show_code_pwd")}</p>
 			<InputWithText>
-				<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+				<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
 			</InputWithText>
 			<div className="flex gap-2 justify-end">
-				<button onClick={close} type="button" className="btn btn-neutral">Cancel</button>
-				<button className="btn btn-info btn-outline">Confirm</button>
+				<button onClick={close} type="button" className="btn btn-neutral">{t("btn_cancel")}</button>
+				<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
 			</div>
 		</form>}
 
@@ -647,8 +663,8 @@ function RecoveryCodes() {
 				))}
 			</div>
 			<div className="flex">
-				<button onClick={close} type="button" className="m-2 btn btn-neutral flex-1/2">Close</button>
-				<button type="button" className="m-2 btn btn-outline btn-info flex-1/2" onClick={handleCopyAll}>Copy all</button>
+				<button onClick={close} type="button" className="m-2 btn btn-neutral flex-1/2">{t("btn_close")}</button>
+				<button type="button" className="m-2 btn btn-outline btn-info flex-1/2" onClick={handleCopyAll}>{t("btn_copy_all")}</button>
 			</div>
 		</div>}
 	</Modal>
@@ -697,17 +713,17 @@ function ReScan2FA() {
 
 	return <Modal id="ReScan2FAModal">
 		<div className="flex items-center justify-between pb-4">
-			<p className="font-bold text-lg">Re-Scan Qr-code</p>
-			<p className="text-xs text-neutral-content/60">Step {step === "password" ? '1' : '2'}/2</p>
+			<p className="font-bold text-lg">{t("settings_modal_rescan_title")}</p>
+			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
 		</div>
 		{step === "password" && <form onSubmit={handleSubmitPwd}>
-			<p className="pb-2 text-sm text-neutral-content/60">Enter your password to re-scan QR code</p>
+			<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_rescan_pwd")}</p>
 			<InputWithText>
-				<Input type="password" name="confirmPwd" label="Password" autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+				<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
 			</InputWithText>
 			<div className="flex gap-2 justify-end">
-				<button onClick={close} type="button" className="btn btn-neutral">Cancel</button>
-				<button className="btn btn-info btn-outline">Confirm</button>
+				<button onClick={close} type="button" className="btn btn-neutral">{t("btn_cancel")}</button>
+				<button className="btn btn-info btn-outline">{t("btn_close")}</button>
 			</div>
 		</form>}
 
@@ -716,7 +732,7 @@ function ReScan2FA() {
 				<QRCodeSVG value={totpURI} size={200} />
 			</div>
 			<div className="flex gap-2 mt-4">
-				<button type="button" onClick={close} className="btn btn-neutral">Close</button>
+				<button type="button" onClick={close} className="btn btn-neutral">{t("btn_close")}</button>
 			</div>
 		</div>}
 	</Modal>

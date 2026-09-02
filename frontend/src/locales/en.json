@@ -12,6 +12,8 @@
 	"btn_upload": "Upload",
 	"btn_cancel": "Cancel",
 	"btn_confirm": "Confirm",
+	"btn_close": "Close",
+	"btn_copy_all": "Copy All",
 
 	"txt_enabled": "Enabled",
 	"txt_disabled": "Disabled",
@@ -21,8 +23,13 @@
 	"txt_password_confirm": "Confirm password",
 	"txt_step": "Step",
 
+	"txt_err_user_empty": "Username is empty!",
+	"txt_err_user_short": "Username is too short!",
+	"txt_err_user_invalid": "Username is invalid!",
+	"txt_err_user_exist": "Username already taken!",
 	"txt_err_pwd_empty": "Password is empty!",
 	"txt_err_pwd_invalid": "Password is invalid!",
+	"txt_err_pwd_not_match": "Passwords do not match!",
 	"txt_err_2fa_empty": "Code is empty!",
 	"txt_err_2fa_size": "Code must contain 6 digits!",
 	"txt_err_2fa_invalid": "Code is invalid!",
@@ -70,5 +77,16 @@
 	"settings_modal_upl_pic_link": "Image link",
 	"settings_modal_dlt_user": "Are you sure you want to delete your account?",
 	"settings_modal_enabled_2fa": "Enter your password to enabled 2FA",
-	"settings_modal_disabled_2fa": "Enter your password to disable 2FA"
+	"settings_modal_disabled_2fa": "Enter your password to disable 2FA",
+	"settings_modal_qrcode_enable_desc": "Scan the QR Code, then enter the 6-digit code",
+	"settings_modal_show_code_title": "Recovery codes",
+	"settings_modal_show_code_pwd": "Enter your password to view code",
+	"settings_modal_rescan_title": "Re-Scan QR code",
+	"settings_modal_rescan_pwd": "Enter your password to re-scan QR code",
+	"settings_err_updt_pwd": "Update password failed",
+	"settings_err_updt_picture": "Update picture failed",
+	"settings_err_updt_lang": "Update language failed",
+	"settings_err_updt_user": "Update username failed",
+	"settings_err_rmv_picture": "Remove picture failed",
+	"settings_err_rmv_user": "Remove account failed"
 }
