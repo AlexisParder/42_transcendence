@@ -3,12 +3,18 @@ import { auth } from "../auth.ts"
 import type { Request, Response } from "express"
 
 export async function checkPwdHandler(req: Request, res: Response) {
-	const { currPassword } = await req.body
+	const { password } = req.body
 
-	const check = await auth.api.verifyPassword({
-		body: { password: currPassword },
-		headers: fromNodeHeaders(req.headers)
-	})
+	if (!password)
+		return res.status(400).json({ ok: false })
 
-	res.json({ ok: check })
+	try {
+		const check = await auth.api.verifyPassword({
+			body: { password },
+			headers: fromNodeHeaders(req.headers)
+		})
+		res.json({ ok: check.status })
+	} catch {
+		res.status(401).json({ ok: false })
+	}
 }

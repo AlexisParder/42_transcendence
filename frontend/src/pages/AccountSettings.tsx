@@ -23,6 +23,7 @@ type Errors = {
 	confirmPwd?: string
 	form?: string
 	lang?: string
+	code?: string
 }
 
 export function AccountSettings() {
@@ -251,7 +252,46 @@ export function AccountSettings() {
 		// ajouter une notif de success
 	}
 
-	async function handleDeleteAccount() {
+	const handleDeleteAccount: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+
+		const form = e.currentTarget
+		const formElem = new FormData(form)
+		const password = formElem.get("password")?.toString() ?? ""
+
+		if (password.length <= 0) {
+			setErrors({ confirmPwd: t("txt_err_pwd_empty") })
+			return
+		}
+
+		const res = await fetch("/api/check-pwd", {
+			method: "POST",
+			headers: { "Content-type": "application/json" },
+			body: JSON.stringify({ password }),
+		})
+
+		if (!res.ok) {
+			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
+			return
+		}
+
+		if (session?.user.twoFactorEnabled) {
+			const code = formElem.get("code")?.toString().trim() as string
+			if (code.length <= 0) {
+				setErrors({ code: t("txt_err_2fa_empty") })
+				return
+			} else if (code.length !== 6) {
+				setErrors({ code: t("txt_err_2fa_size") })
+				return
+			}
+
+			const { error } = await authClient.twoFactor.verifyTotp({ code })
+			if (error) {
+				setErrors({ code: t("txt_err_2fa_invalid") })
+				return
+			}
+		}
+
 		const { error } = await authClient.deleteUser();
 
 		HideModal("deleteModal")
@@ -259,6 +299,7 @@ export function AccountSettings() {
 			setErrors({ form: t("settings_err_rmv_user") })
 			return
 		}
+		setErrors({})
 		navigate('/')
 		// Ajouter une notif
 	}
@@ -274,7 +315,10 @@ export function AccountSettings() {
 				<div className="flex gap-4 md:gap-2 items-center">
 					<Avatar username={session?.user.username} image={session?.user.image} size={64} />
 					<div className="flex gap-2 flex-col md:flex-row">
-						<button className="btn btn-outline border-neutral" onClick={() => ShowModal('pictureModal')}>{t("btn_upload")}</button>
+						<button className="btn btn-outline border-neutral" onClick={() => {
+							setErrors({})
+							ShowModal('pictureModal')
+						}}>{t("btn_upload")}</button>
 						<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>{t("btn_remove")}</button>
 					</div>
 				</div>
@@ -326,10 +370,22 @@ export function AccountSettings() {
 			<SectionSetting title={t("settings_2fa_title")} description={`${t("settings_2fa_desc")}.`} hasDividerBottom={true}>
 				<SectionOTP isEnabled={isOTPEnabled} />
 				<div className="flex gap-2 pt-3 pb-3 flex-col lg:flex-row">
-					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => ShowModal('ShowCodesModal')}>{t("settings_2fa_show_code")}</button>}
-					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => ShowModal('ReScan2FAModal')}>{t("settings_2fa_qr_code")}</button>}
-					{isOTPEnabled && <button className="btn btn-outline btn-error" onClick={() => ShowModal('Disable2FAModal')}>{t("settings_2fa_disable")}</button>}
-					{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => ShowModal('Enable2FAModal')} disabled={hasPwd !== true}>{t("settings_2fa_enable")}</button>}
+					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => {
+						setErrors({})
+						ShowModal('ShowCodesModal')
+					}}>{t("settings_2fa_show_code")}</button>}
+					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => {
+						setErrors({})
+						ShowModal('ReScan2FAModal')
+					}}>{t("settings_2fa_qr_code")}</button>}
+					{isOTPEnabled && <button className="btn btn-outline btn-error" onClick={() => {
+						setErrors({})
+						ShowModal('Disable2FAModal')
+					}}>{t("settings_2fa_disable")}</button>}
+					{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => {
+						setErrors({})
+						ShowModal('Enable2FAModal')
+					}} disabled={hasPwd !== true}>{t("settings_2fa_enable")}</button>}
 				</div>
 				{!isOTPEnabled && hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_2fa_need_pwd_1")}.<br />{t("settings_2fa_need_pwd_2")}.</span></p>}
 				{isOTPEnabled && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_2fa_warning_1_disabled")}.<br />{t("settings_2fa_warning_2_disabled")}.</span></p>}
@@ -358,7 +414,10 @@ export function AccountSettings() {
 						<p className="text-xs text-neutral-content/60">{t("settings_danger_dlt_desc")}.</p>
 					</div>
 					<div>
-						<button onClick={() => ShowModal("deleteModal")} className="btn btn-outline btn-error border-error btn-sm">{t("settings_danger_dlt_btn")}</button>
+						<button onClick={() => {
+							setErrors({})
+							ShowModal("deleteModal")
+						}} className="btn btn-outline btn-error border-error btn-sm">{t("settings_danger_dlt_btn")}</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</div>
 				</div>
@@ -377,10 +436,28 @@ export function AccountSettings() {
 		</Modal>
 		<Modal id="deleteModal">
 			<p className="pb-2">{t("settings_modal_dlt_user")}</p>
-			<div className="flex gap-2 pt-2">
-				<button onClick={() => HideModal("deleteModal")} className="btn btn-success">{t("btn_cancel")}</button>
-				<button onClick={handleDeleteAccount} className="btn btn-error btn-outline">{t("btn_confirm")}</button>
-			</div>
+			<form onSubmit={handleDeleteAccount}>
+				<InputWithText>
+					<Input type="password" name="password" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
+				</InputWithText>
+				{session?.user.twoFactorEnabled && <div>
+					<p className="text-neutral-content/40 text-xs mt-2">{t("otp_desc")}.</p>
+					<label className="otp otp-info otp-lg mt-2">
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+						<input type="text" name="code" autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
+					</label>
+					{errors.code && <span className="text-error block">{errors.code}</span>}
+				</div>}
+				<div className="flex gap-2 pt-4">
+					<button onClick={() => HideModal("deleteModal")} type="button" className="btn btn-success">{t("btn_cancel")}</button>
+					<button className="btn btn-error btn-outline">{t("btn_confirm")}</button>
+				</div>
+			</form>
 		</Modal>
 		<Modal id="Disable2FAModal">
 			<div className="flex items-center justify-between pb-4">
