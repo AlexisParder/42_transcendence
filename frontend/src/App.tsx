@@ -4,7 +4,6 @@ import { Register } from './pages/Register'
 import { authClient } from './lib/auth-client'
 import { Terms } from './pages/Terms'
 import { Privacy } from './pages/Privacy'
-import { OTP } from './pages/OTP'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
@@ -15,6 +14,7 @@ import { Tournaments } from './pages/Tournaments'
 import { Leaderboard } from './pages/Leaderboard'
 import { Friends } from './pages/Friends'
 import { History } from './pages/History'
+import { TwoFactor } from './pages/TwoFactor'
 
 const router = createBrowserRouter([
 	{
@@ -43,8 +43,8 @@ const router = createBrowserRouter([
 				element: <Privacy />
 			},
 			{
-				path: 'otp',
-				element: <OTP />
+				path: 'two-factor',
+				element: <TwoFactor />
 			},
 			{
 				path: 'verified',
