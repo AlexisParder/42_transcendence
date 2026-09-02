@@ -125,6 +125,7 @@
 	"settings_modal_disabled_2fa": "Enter your password to disable 2FA",
 	"settings_modal_qrcode_enable_desc": "Scan the QR Code, then enter the 6-digit code",
 	"settings_modal_show_code_title": "Recovery codes",
+	"settings_modal_show_code_desc": "Each recovery code can be used only once. Once all 10 codes have been used, new codes will be automatically generated. You can then simply request to have them displayed to view them",
 	"settings_modal_show_code_pwd": "Enter your password to view code",
 	"settings_modal_rescan_title": "Re-Scan QR code",
 	"settings_modal_rescan_pwd": "Enter your password to re-scan QR code",

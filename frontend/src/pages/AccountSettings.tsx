@@ -627,9 +627,18 @@ function RecoveryCodes() {
 			return
 		}
 
+		if (body.backupCodes.length <= 0) {
+			const { data: newData } = await authClient.twoFactor.generateBackupCodes({
+				password
+			})
+
+			if (newData)
+				setBackupCodes(newData.backupCodes)
+		} else
+			setBackupCodes(body.backupCodes)
+
 		setErrors({})
 		formElem.reset()
-		setBackupCodes(body.backupCodes)
 		setStep("show")
 	}
 
@@ -643,6 +652,9 @@ function RecoveryCodes() {
 			<p className="font-bold text-lg">{t("settings_modal_show_code_title")}</p>
 			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
 		</div>
+
+		{step === "show" && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 mb-2"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_modal_show_code_desc")}.</span></p>}
+
 		{step === "password" && <form onSubmit={handleSubmitPwd}>
 			<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_show_code_pwd")}</p>
 			<InputWithText>
