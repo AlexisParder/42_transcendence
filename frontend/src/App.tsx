@@ -13,8 +13,8 @@ import { Play } from './pages/Play'
 import { Tournaments } from './pages/Tournaments'
 import { Leaderboard } from './pages/Leaderboard'
 import { Friends } from './pages/Friends'
-import { History } from './pages/History'
 import { TwoFactor } from './pages/TwoFactor'
+import { Profile } from './pages/Profile'
 
 const router = createBrowserRouter([
 	{
@@ -78,8 +78,8 @@ const router = createBrowserRouter([
 		errorElement: <PageError />
 	},
 	{
-		path: '/history',
-		element: <History />,
+		path: '/profile',
+		element: <Profile />,
 		errorElement: <PageError />
 	}
 ])

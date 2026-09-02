@@ -1,12 +1,12 @@
 import type { IconType } from "react-icons";
-import { FaHistory, FaRegCircle, FaUserFriends, FaDoorOpen } from "react-icons/fa";
+import { FaRegCircle, FaUserFriends, FaDoorOpen } from "react-icons/fa";
 import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled, TbTournament } from "react-icons/tb";
 import { NavLink } from "react-router-dom";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
-import { FaBars } from "react-icons/fa6";
+import { FaBars, FaUser } from "react-icons/fa6";
 import { Avatar } from "./Avatar";
 import { t } from "../lib/translate";
 
@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
 	{ to: "/tournaments", icon: TbTournament, label: t("tournaments_title") },
 	{ to: "/leaderboard", icon: MdLeaderboard, label: t("leaderboard_title") },
 	{ to: "/friends", icon: FaUserFriends, label: t("friends_title") },
-	{ to: "/history", icon: FaHistory, label: t("history_title") },
+	{ to: "/profile", icon: FaUser, label: t("profile_title") },
 	{ to: "/settings", icon: TbSettingsFilled, label: t("settings_title") },
 	{ to: "/", icon: FaDoorOpen, label: t("quit_title") }
 ]
