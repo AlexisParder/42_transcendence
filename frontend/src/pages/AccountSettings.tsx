@@ -246,7 +246,6 @@ export function AccountSettings() {
 
 		if (email === session?.user.email || !session?.user.emailVerified)
 		{
-			console.log("caca")
 			setErrors({})
 			return
 		}
