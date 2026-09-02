@@ -23,7 +23,7 @@ const navItems: NavItem[] = [
 	{ to: "/leaderboard", icon: MdLeaderboard, label: t("leaderboard_title") },
 	{ to: "/friends", icon: FaUserFriends, label: t("friends_title") },
 	{ to: "/history", icon: FaHistory, label: t("history_title") },
-	{ to: "/account_settings", icon: TbSettingsFilled, label: t("settings_title") },
+	{ to: "/settings", icon: TbSettingsFilled, label: t("settings_title") },
 	{ to: "/", icon: FaDoorOpen, label: t("quit_title") }
 ]
 

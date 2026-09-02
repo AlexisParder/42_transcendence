@@ -13,6 +13,8 @@ import { Avatar } from "../components/Avatar"
 import { IoWarning } from "react-icons/io5"
 import { QRCodeSVG } from "qrcode.react"
 import { setTranslationLanguage, t } from "../lib/translate"
+import { useDocumentTitle } from "../hooks/useDocumentTitle"
+import { isValidEmail } from "../lib/isValideEmail"
 
 type Errors = {
 	username?: string
@@ -27,6 +29,7 @@ type Errors = {
 }
 
 export function AccountSettings() {
+	useDocumentTitle(t("settings_title"))
 	const navigate = useNavigate()
 	const { data: session } = authClient.useSession()
 	const { sessions, revokeSession, revokeOthers } = useSessions()
@@ -39,6 +42,8 @@ export function AccountSettings() {
 	const [picture, setPicture] = useState('')
 	const [username, setUsername] = useState(session?.user.username ?? "")
 	const [prevUsername, setPrevUsername] = useState(session?.user.username)
+	const [email, setEmail] = useState(session?.user.email ?? "")
+	const [prevEmail, setPrevEmail] = useState(session?.user.email)
 	const [language, setLanguage] = useState(session?.user.language ?? "en")
 	const [prevLanguage, setPrevLanguage] = useState(session?.user.language)
 	const [hasPwd, setHasPwd] = useState<boolean | null>()
@@ -59,6 +64,11 @@ export function AccountSettings() {
 	if (session?.user.language !== prevLanguage) {
 		setPrevLanguage(session?.user.language)
 		setLanguage(session?.user.language ?? "en")
+	}
+
+	if (session?.user.email !== prevEmail) {
+		setPrevEmail(session?.user.email)
+		setEmail(session?.user.email ?? "")
 	}
 
 	const handleSubmitChangePwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -194,7 +204,10 @@ export function AccountSettings() {
 		const newErrors: Errors = {}
 
 		if (username === session?.user.username)
+		{
+			setErrors({})
 			return
+		}
 
 		if (username.length === 0)
 			newErrors.username = t("txt_err_user_empty")
@@ -227,6 +240,50 @@ export function AccountSettings() {
 		if (error)
 			setErrors({ username: t("settings_err_updt_user") })
 	}
+
+	async function handleChangeEmail() {
+		const newErrors: Errors = {}
+
+		if (email === session?.user.email || !session?.user.emailVerified)
+		{
+			console.log("caca")
+			setErrors({})
+			return
+		}
+
+		if (email.length <= 0)
+			newErrors.email = t("txt_err_email_empty")
+		else if (!isValidEmail(email))
+			newErrors.email = t("txt_err_email_invalid")
+		// else {
+		// 	const { data } = await authClient.isUsernameAvailable({
+		// 		email,
+		// 		callbackURL: "/settings"
+		// 	})
+
+		// 	if (!data?.available)
+		// 		newErrors.email = t("txt_err_email_exist")
+		// }
+
+		setErrors(newErrors)
+
+		if (Object.keys(newErrors).length > 0)
+			return
+
+		const { error } = await authClient.changeEmail({
+			newEmail: email,
+			callbackURL: "/settings"
+		})
+
+		if (error)
+		{
+			setErrors({ email: t("settings_err_updt_email") })
+			return;
+		}
+		// setErrors({})
+		// ajouter une notif avec t("settings_updt_email_wait", {email: session?.user.email ?? ""})
+	}
+
 
 	const handleChangeLanguage = async (lang: string) => {
 		if (lang !== "en" && lang !== "fr") {
@@ -324,8 +381,7 @@ export function AccountSettings() {
 				</div>
 				<div className="flex mt-2 flex-col md:flex-row w-full gap-2">
 					<InputWithText text={t("settings_profile_callsign")}>
-						<Input type="text" name="username" label={t("txt_username")} defaultValue={session?.user.username ?? ''} useLabel={false}
-							onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
+						<Input type="text" name="username" label={t("txt_username")} defaultValue={session?.user.username ?? ''} useLabel={false} onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
 					</InputWithText>
 					<InputWithText text={t("settings_ds_lg")}>
 						<select className={`select outline-none focus:border-info ${errors.lang ? "border-error" : ""} w-full bg-abyss-700 mt-2 mb-2`} value={language ?? "en"} onChange={e => {
@@ -341,7 +397,7 @@ export function AccountSettings() {
 				</div>
 				<div className="pt-3 md:pt-0">
 					<InputWithText text={t("txt_email")}>
-						<Input type="email" name="email" label={t("txt_email")} defaultValue={session?.user.email ?? ''} useLabel={false} />
+						<Input type="email" name="email" label={t("txt_email")} defaultValue={session?.user.email ?? ''} useLabel={false} onChange={e => setEmail(e.target.value.trim())} onBlur={handleChangeEmail} errorMsg={errors.email} />
 					</InputWithText>
 				</div>
 			</SectionSetting>

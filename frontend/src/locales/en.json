@@ -133,6 +133,8 @@
 	"settings_err_updt_picture": "Update picture failed",
 	"settings_err_updt_lang": "Update language failed",
 	"settings_err_updt_user": "Update username failed",
+	"settings_err_updt_email": "Update email failed",
 	"settings_err_rmv_picture": "Remove picture failed",
-	"settings_err_rmv_user": "Remove account failed"
+	"settings_err_rmv_user": "Remove account failed",
+	"settings_updt_email_wait": "Pending change to {{email}} - confirm it from your inbox"
 }

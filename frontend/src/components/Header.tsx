@@ -29,7 +29,7 @@ function SignLinks() {
 
 	if (currentSession)
 		return <>
-			<a className="btn btn-info btn-outline mr-2" href="/account_settings"><TbSettingsFilled /></a>
+			<a className="btn btn-info btn-outline mr-2" href="/settings"><TbSettingsFilled /></a>
 			<button className="btn btn-info mr-2" onClick={handleSignOut}>{t("btn_sign_out")}</button>
 		</>
 

@@ -38,6 +38,9 @@ export const auth = betterAuth({
 		}
 	},
 	user: {
+		changeEmail: {
+			enabled: true
+		},
 		deleteUser: {
 			enabled: true,
 			beforeDelete: async(user, request) => {

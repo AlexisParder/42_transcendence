@@ -53,7 +53,7 @@ const router = createBrowserRouter([
 		]
 	},
 	{
-		path: '/account_settings',
+		path: '/settings',
 		element: <AccountSettings />,
 		errorElement: <PageError />
 	},
