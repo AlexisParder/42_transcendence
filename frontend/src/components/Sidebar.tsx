@@ -53,9 +53,10 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 							<li key={to}>
 								<NavLink to={to} end={end} className={({ isActive }) => (isActive ? "font-bold bg-info/15" : "")} >
 									{({ isActive }) => (
-										<>
+										<div className="flex items-center gap-2">
 											<Icon className={isActive ? "text-info" : ""} /> {label}
-										</>
+											{to === "/friends" && <span className="badge badge-soft badge-warning badge-sm">+99999</span>}
+										</div>
 									)}
 								</NavLink>
 							</li>
