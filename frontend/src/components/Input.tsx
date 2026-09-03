@@ -6,6 +6,6 @@ export function Input({ type, label, name, errorMsg, useLabel = true, customStyl
 			{useLabel && <span className={customLabelStyle.length > 0 ? `${customLabelStyle}` : "bg-base-200"}>{label}</span>}
 			<input type={type} name={name} placeholder={label} {...props} className={customStyle.length > 0 ? `${customStyle} ${errorMsg ? 'border-error' : 'border-neutral mb-2'}` : `input input-md outline-0 input-info ${errorMsg ? 'border-error' : 'border-neutral mb-2'} focus:border-info w-full bg-base-200`} />
 		</label>
-		{errorMsg && <span className="text-error block pb-2 pl-2">{errorMsg}</span>}
+		{errorMsg && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs">{errorMsg}</span>}
 	</div>
 }
