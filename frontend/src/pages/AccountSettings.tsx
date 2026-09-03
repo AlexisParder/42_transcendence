@@ -14,6 +14,7 @@ import { IoWarning } from "react-icons/io5"
 import { QRCodeSVG } from "qrcode.react"
 import { setTranslationLanguage, t } from "../lib/translate"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
+import { Togglebox } from "../components/Togglebox"
 
 type Errors = {
 	username?: string
@@ -87,13 +88,13 @@ function NotifLine({ title, desc, inputName }: { title: string, desc: string, in
 			<p className="text-xs text-neutral-content/40">{desc}</p>
 		</th>
 		<td>
-			<input type="checkbox" name={`app_${inputName}`} className="toggle toggle-info" />
+			<Togglebox name={`app_${inputName}`} type="info" />
 		</td>
 		{/* <td>
-			<input type="checkbox" name={`push_${inputName}`} className="toggle toggle-info" />
+			<Togglebox name={`push_${inputName}`} type="info" />
 		</td> */}
 		<td>
-			<input type="checkbox" name={`email_${inputName}`} className="toggle toggle-info" />
+			<Togglebox name={`email_${inputName}`} type="info" />
 		</td>
 	</tr>
 }
