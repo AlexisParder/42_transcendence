@@ -559,7 +559,7 @@ function InputWithText({ text = "", children }: { text?: string, children: React
 
 function SectionSetting({ title, titleColor = "", description, hasDividerBottom = false, children }: { title: string, titleColor?: string, description: string, hasDividerBottom?: boolean, children: React.ReactNode }) {
 	return <>
-		<div className="flex justify">
+		<div className="flex">
 			<div className="flex-1/3 max-w-100">
 				<h2 className={`text-sm font-semibold ${titleColor.length > 0 ? titleColor : ''}`}>{title}</h2>
 				<p className="text-xs text-neutral-content/40">{description}</p>
