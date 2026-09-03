@@ -27,12 +27,82 @@ type Errors = {
 	code?: string
 }
 
+type SettingsCategory = "account" | "notifications"
 export function AccountSettings() {
 	useDocumentTitle(t("settings_title"))
-	const navigate = useNavigate()
-	const { data: session } = authClient.useSession()
-	const { sessions, revokeSession, revokeOthers } = useSessions()
+	const [category, setCategory] = useState<SettingsCategory>('account')
 
+	return <Sidebar>
+		<div className="p-4">
+			<h1 className="text-xl font-bold">{category === "account" ? t("settings_title") : t("settings_notif_title")}</h1>
+			<p className="text-sm text-neutral-content/40">{category === "account" ? t("settings_desc") : t("settings_notif_desc")}.</p>
+
+			<div className="join mt-4">
+				<input className="join-item btn" type="radio" defaultChecked={category === "account"} name="options" onClick={() => {
+					if (category !== "account")
+						setCategory("account")
+				}} aria-label={t("settings_acc_title")} onChange={() => { }} />
+				<input className="join-item btn" type="radio" defaultChecked={category === "notifications"} name="options" onClick={() => {
+					if (category !== "notifications")
+						setCategory("notifications")
+				}} aria-label={t("settings_notif_title")} onChange={() => { }} />
+			</div>
+			<div className="divider text-neutral-content/40 m-0 mt-3 mb-3"></div>
+
+			{category === "account" && <SettingsCat />}
+			{category === "notifications" && <SettingsNotif />}
+		</div>
+	</Sidebar>
+}
+
+function SettingsNotif() {
+	return <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 max-w-200">
+		<table className="table">
+			<thead>
+				<tr>
+					<th>{t("settings_notif_lbl_event").toUpperCase()}</th>
+					<th>{t("settings_notif_lbl_app").toUpperCase()}</th>
+					{/* <th>{t("settings_notif_lbl_push").toUpperCase()}</th> */}
+					<th>{t("txt_email").toUpperCase()}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<NotifLine title={t("settings_notif_title_1")} desc={t("settings_notif_desc_1")} inputName="turn" />
+				<NotifLine title={t("settings_notif_title_2")} desc={t("settings_notif_desc_2")} inputName="match" />
+				<NotifLine title={t("settings_notif_title_3")} desc={t("settings_notif_desc_3")} inputName="friend" />
+				<NotifLine title={t("settings_notif_title_4")} desc={t("settings_notif_desc_4")} inputName="chat" />
+				<NotifLine title={t("settings_notif_title_5")} desc={t("settings_notif_desc_5")} inputName="tournament" />
+				<NotifLine title={t("settings_notif_title_6")} desc={t("settings_notif_desc_6")} inputName="rank" />
+				<NotifLine title={t("settings_notif_title_7")} desc={t("settings_notif_desc_7")} inputName="achievements" />
+				<NotifLine title={t("settings_notif_title_8")} desc={t("settings_notif_desc_8")} inputName="security" />
+			</tbody>
+		</table>
+	</div>
+}
+
+function NotifLine({ title, desc, inputName }: { title: string, desc: string, inputName: string }) {
+	return <tr>
+		<th>
+			<p>{title}</p>
+			<p className="text-xs text-neutral-content/40">{desc}</p>
+		</th>
+		<td>
+			<input type="checkbox" name={`app_${inputName}`} className="toggle toggle-info" />
+		</td>
+		{/* <td>
+			<input type="checkbox" name={`push_${inputName}`} className="toggle toggle-info" />
+		</td> */}
+		<td>
+			<input type="checkbox" name={`email_${inputName}`} className="toggle toggle-info" />
+		</td>
+	</tr>
+}
+
+function SettingsCat() {
+	const { data: session } = authClient.useSession()
+
+	const navigate = useNavigate()
+	const { sessions, revokeSession, revokeOthers } = useSessions()
 	const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
 	const [currPassword, setCurrPassword] = useState('')
@@ -40,18 +110,11 @@ export function AccountSettings() {
 	const [password2, setPassword2] = useState('')
 	const [picture, setPicture] = useState('')
 	const [username, setUsername] = useState(session?.user.username ?? "")
-	const [prevUsername, setPrevUsername] = useState(session?.user.username)
 	const [language, setLanguage] = useState(session?.user.language ?? "en")
-	const [prevLanguage, setPrevLanguage] = useState(session?.user.language)
 	const [hasPwd, setHasPwd] = useState<boolean | null>()
-
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
-
-	useEffect(() => {
-		authClient.listAccounts().then(({ data }) => {
-			setHasPwd(!!data?.some(acc => acc.providerId === "credential"))
-		})
-	}, [])
+	const [prevUsername, setPrevUsername] = useState(session?.user.username)
+	const [prevLanguage, setPrevLanguage] = useState(session?.user.language)
 
 	if (session?.user.username !== prevUsername) {
 		setPrevUsername(session?.user.username)
@@ -62,6 +125,12 @@ export function AccountSettings() {
 		setPrevLanguage(session?.user.language)
 		setLanguage(session?.user.language ?? "en")
 	}
+
+	useEffect(() => {
+		authClient.listAccounts().then(({ data }) => {
+			setHasPwd(!!data?.some(acc => acc.providerId === "credential"))
+		})
+	}, [])
 
 	const handleSubmitChangePwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -195,8 +264,7 @@ export function AccountSettings() {
 	async function handleChangeUsername() {
 		const newErrors: Errors = {}
 
-		if (username === session?.user.username)
-		{
+		if (username === session?.user.username) {
 			setErrors({})
 			return
 		}
@@ -309,119 +377,114 @@ export function AccountSettings() {
 		// Ajouter une notif
 	}
 
-	return <Sidebar>
-		<div className="p-4">
-			<h1 className="text-xl font-bold">{t("settings_title")}</h1>
-			<p className="text-sm text-neutral-content/40">{t("settings_desc")}.</p>
-
-			<div className="divider text-neutral-content/40 m-0 mt-3 mb-3"></div>
-
-			<SectionSetting title={t("settings_profile_title")} description={`${t("settings_profile_desc")}.`} hasDividerBottom={true}>
-				<div className="flex gap-4 md:gap-2 items-center">
-					<Avatar username={session?.user.username} image={session?.user.image} size={64} />
-					<div className="flex gap-2 flex-col md:flex-row">
-						<button className="btn btn-outline border-neutral" onClick={() => {
-							setErrors({})
-							ShowModal('pictureModal')
-						}}>{t("btn_upload")}</button>
-						<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>{t("btn_remove")}</button>
-					</div>
+	return <>
+		<SectionSetting title={t("settings_profile_title")} description={`${t("settings_profile_desc")}.`} hasDividerBottom={true}>
+			<div className="flex gap-4 md:gap-2 items-center">
+				<Avatar username={session?.user.username} image={session?.user.image} size={64} />
+				<div className="flex gap-2 flex-col md:flex-row">
+					<button className="btn btn-outline border-neutral" onClick={() => {
+						setErrors({})
+						ShowModal('pictureModal')
+					}}>{t("btn_upload")}</button>
+					<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>{t("btn_remove")}</button>
 				</div>
-				<div className="flex mt-2 flex-col md:flex-row w-full gap-2">
-					<InputWithText text={t("settings_profile_callsign")}>
-						<Input type="text" name="username" label={t("txt_username")} defaultValue={session?.user.username ?? ''} useLabel={false} onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
+			</div>
+			<div className="flex mt-2 flex-col md:flex-row w-full gap-2">
+				<InputWithText text={t("settings_profile_callsign")}>
+					<Input type="text" name="username" label={t("txt_username")} defaultValue={session?.user.username ?? ''} useLabel={false} onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
+				</InputWithText>
+				<InputWithText text={t("settings_ds_lg")}>
+					<select className={`select outline-none focus:border-info ${errors.lang ? "border-error" : ""} w-full bg-abyss-700 mt-2 mb-2`} value={language ?? "en"} onChange={e => {
+						const lang = e.target.value
+						setLanguage(lang)
+						handleChangeLanguage(lang)
+					}}>
+						<option value="fr">{t("lg_fr")}</option>
+						<option value="en">{t("lg_en")}</option>
+					</select>
+					{errors.lang && <span className="text-error block pb-2 pl-2">{errors.lang}</span>}
+				</InputWithText>
+			</div>
+		</SectionSetting>
+
+		<SectionSetting title={t("txt_password")} description={`${t("settings_password_desc")}.`} hasDividerBottom={true}>
+			<form onSubmit={handleSubmitChangePwd}>
+				<input type="text" name="username" className="hidden" hidden={true} autoComplete="username" readOnly={true} />
+
+				{hasPwd === true && <div>
+					<InputWithText>
+						<Input type="password" name="currPassword" label={t("settings_password_curr")} onChange={e => setCurrPassword(e.target.value)} value={currPassword} autoComplete="current-password" errorMsg={errors.currPassword} customLabelStyle="bg-base-100" />
 					</InputWithText>
-					<InputWithText text={t("settings_ds_lg")}>
-						<select className={`select outline-none focus:border-info ${errors.lang ? "border-error" : ""} w-full bg-abyss-700 mt-2 mb-2`} value={language ?? "en"} onChange={e => {
-							const lang = e.target.value
-							setLanguage(lang)
-							handleChangeLanguage(lang)
-						}}>
-							<option value="fr">{t("lg_fr")}</option>
-							<option value="en">{t("lg_en")}</option>
-						</select>
-						{errors.lang && <span className="text-error block pb-2 pl-2">{errors.lang}</span>}
+				</div>}
+				<div className="flex flex-col md:flex-row md:gap-2">
+					<InputWithText>
+						<Input type="password" name="password" label={hasPwd === true ? t("settings_password_new") : t("txt_password")} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
+					</InputWithText>
+					<InputWithText>
+						<Input type="password" name="password2" label={t("txt_password_confirm")} onChange={e => setPassword2(e.target.value)} value={password2} autoComplete="new-password" errorMsg={errors.password2} customLabelStyle="bg-base-100" />
 					</InputWithText>
 				</div>
-			</SectionSetting>
+				{isFocused && <PasswordBar password={password} />}
+				<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2 w-full md:w-auto">{hasPwd === true ? t("settings_password_updt") : t("settings_password_add")}</button>
+				{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
+			</form>
+		</SectionSetting>
 
-			<SectionSetting title={t("txt_password")} description={`${t("settings_password_desc")}.`} hasDividerBottom={true}>
-				<form onSubmit={handleSubmitChangePwd}>
-					{hasPwd === true && <div>
-						<InputWithText>
-							<Input type="password" name="currPassword" label={t("settings_password_curr")} onChange={e => setCurrPassword(e.target.value)} value={currPassword} autoComplete="current-password" errorMsg={errors.currPassword} customLabelStyle="bg-base-100" />
-						</InputWithText>
-					</div>}
-					<div className="flex flex-col md:flex-row md:gap-2">
-						<InputWithText>
-							<Input type="password" name="password" label={hasPwd === true ? t("settings_password_new") : t("txt_password")} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} value={password} autoComplete="new-password" errorMsg={errors.password} customLabelStyle="bg-base-100" />
-						</InputWithText>
-						<InputWithText>
-							<Input type="password" name="password2" label={t("txt_password_confirm")} onChange={e => setPassword2(e.target.value)} value={password2} autoComplete="new-password" errorMsg={errors.password2} customLabelStyle="bg-base-100" />
-						</InputWithText>
-					</div>
-					{isFocused && <PasswordBar password={password} />}
-					<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2 w-full md:w-auto">{hasPwd === true ? t("settings_password_updt") : t("settings_password_add")}</button>
+		<SectionSetting title={t("settings_2fa_title")} description={`${t("settings_2fa_desc")}.`} hasDividerBottom={true}>
+			<SectionOTP isEnabled={isOTPEnabled} />
+			<div className="flex gap-2 pt-3 pb-3 flex-col lg:flex-row">
+				{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => {
+					setErrors({})
+					ShowModal('ShowCodesModal')
+				}}>{t("settings_2fa_show_code")}</button>}
+				{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => {
+					setErrors({})
+					ShowModal('ReScan2FAModal')
+				}}>{t("settings_2fa_qr_code")}</button>}
+				{isOTPEnabled && <button className="btn btn-outline btn-error" onClick={() => {
+					setErrors({})
+					ShowModal('Disable2FAModal')
+				}}>{t("settings_2fa_disable")}</button>}
+				{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => {
+					setErrors({})
+					ShowModal('Enable2FAModal')
+				}} disabled={hasPwd !== true}>{t("settings_2fa_enable")}</button>}
+			</div>
+			{!isOTPEnabled && hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_2fa_need_pwd_1")}.<br />{t("settings_2fa_need_pwd_2")}.</span></p>}
+			{isOTPEnabled && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_2fa_warning_1_disabled")}.<br />{t("settings_2fa_warning_2_disabled")}.</span></p>}
+		</SectionSetting>
+
+		<SectionSetting title={t("settings_session_title")} description={`${t("settings_session_desc")}.`} hasDividerBottom={true}>
+			<div className="max-h-40 overflow-y-auto scrollbar-thin">
+				<SessionsDisplay sessions={sessions} onRevoke={revokeSession} />
+			</div>
+			<button onClick={revokeOthers} className="link-error text-xs font-bold cursor-pointer">{t("settings_session_revoke_others")}</button>
+		</SectionSetting>
+
+		<SectionSetting title={t("settings_danger_title")} titleColor="text-error" description={`${t("settings_danger_desc")}.`} >
+			<div className="flex border border-neutral rounded-md p-4 items-center mt-2">
+				<div className="flex-1">
+					<p className="text-sm">{t("settings_danger_dl_data")}</p>
+					<p className="text-xs text-neutral-content/60">{t("settings_danger_dl_desc")}.</p>
+				</div>
+				<div>
+					<button className="btn btn-outline border-neutral btn-sm">{t("settings_danger_dl_btn")}</button>
+				</div>
+			</div>
+			<div className="flex border border-error bg-error/10 rounded-md p-4 items-center mt-2">
+				<div className="flex-1">
+					<p className="text-sm">{t("settings_danger_dlt_user")}</p>
+					<p className="text-xs text-neutral-content/60">{t("settings_danger_dlt_desc")}.</p>
+				</div>
+				<div>
+					<button onClick={() => {
+						setErrors({})
+						ShowModal("deleteModal")
+					}} className="btn btn-outline btn-error border-error btn-sm">{t("settings_danger_dlt_btn")}</button>
 					{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
-				</form>
-			</SectionSetting>
-
-			<SectionSetting title={t("settings_2fa_title")} description={`${t("settings_2fa_desc")}.`} hasDividerBottom={true}>
-				<SectionOTP isEnabled={isOTPEnabled} />
-				<div className="flex gap-2 pt-3 pb-3 flex-col lg:flex-row">
-					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => {
-						setErrors({})
-						ShowModal('ShowCodesModal')
-					}}>{t("settings_2fa_show_code")}</button>}
-					{isOTPEnabled && <button className="btn btn-outline border-neutral" onClick={() => {
-						setErrors({})
-						ShowModal('ReScan2FAModal')
-					}}>{t("settings_2fa_qr_code")}</button>}
-					{isOTPEnabled && <button className="btn btn-outline btn-error" onClick={() => {
-						setErrors({})
-						ShowModal('Disable2FAModal')
-					}}>{t("settings_2fa_disable")}</button>}
-					{!isOTPEnabled && <button className="btn btn-outline btn-info" onClick={() => {
-						setErrors({})
-						ShowModal('Enable2FAModal')
-					}} disabled={hasPwd !== true}>{t("settings_2fa_enable")}</button>}
 				</div>
-				{!isOTPEnabled && hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_2fa_need_pwd_1")}.<br />{t("settings_2fa_need_pwd_2")}.</span></p>}
-				{isOTPEnabled && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_2fa_warning_1_disabled")}.<br />{t("settings_2fa_warning_2_disabled")}.</span></p>}
-			</SectionSetting>
-
-			<SectionSetting title={t("settings_session_title")} description={`${t("settings_session_desc")}.`} hasDividerBottom={true}>
-				<div className="max-h-40 overflow-y-auto scrollbar-thin">
-					<SessionsDisplay sessions={sessions} onRevoke={revokeSession} />
-				</div>
-				<button onClick={revokeOthers} className="link-error text-xs font-bold cursor-pointer">{t("settings_session_revoke_others")}</button>
-			</SectionSetting>
-
-			<SectionSetting title={t("settings_danger_title")} titleColor="text-error" description={`${t("settings_danger_desc")}.`} >
-				<div className="flex border border-neutral rounded-md p-4 items-center mt-2">
-					<div className="flex-1">
-						<p className="text-sm">{t("settings_danger_dl_data")}</p>
-						<p className="text-xs text-neutral-content/60">{t("settings_danger_dl_desc")}.</p>
-					</div>
-					<div>
-						<button className="btn btn-outline border-neutral btn-sm">{t("settings_danger_dl_btn")}</button>
-					</div>
-				</div>
-				<div className="flex border border-error bg-error/10 rounded-md p-4 items-center mt-2">
-					<div className="flex-1">
-						<p className="text-sm">{t("settings_danger_dlt_user")}</p>
-						<p className="text-xs text-neutral-content/60">{t("settings_danger_dlt_desc")}.</p>
-					</div>
-					<div>
-						<button onClick={() => {
-							setErrors({})
-							ShowModal("deleteModal")
-						}} className="btn btn-outline btn-error border-error btn-sm">{t("settings_danger_dlt_btn")}</button>
-						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
-					</div>
-				</div>
-			</SectionSetting>
-		</div>
+			</div>
+		</SectionSetting>
 
 		<Modal id="pictureModal">
 			<p className="pb-2">{t("settings_modal_upl_pic")}</p>
@@ -436,6 +499,8 @@ export function AccountSettings() {
 		<Modal id="deleteModal">
 			<p className="pb-2">{t("settings_modal_dlt_user")}</p>
 			<form onSubmit={handleDeleteAccount}>
+				<input type="text" name="username" className="hidden" hidden={true} autoComplete="username" readOnly={true} />
+
 				<InputWithText>
 					<Input type="password" name="password" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
 				</InputWithText>
@@ -463,6 +528,8 @@ export function AccountSettings() {
 				<p className="font-bold text-lg">{t("settings_2fa_disable")}</p>
 			</div>
 			<form onSubmit={handleDisable2FA}>
+				<input type="text" name="username" className="hidden" hidden={true} autoComplete="username" readOnly={true} />
+
 				<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_disabled_2fa")}</p>
 				<InputWithText>
 					<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
@@ -479,7 +546,7 @@ export function AccountSettings() {
 		<Enable2FA hasPwd={hasPwd} />
 		<RecoveryCodes />
 		<ReScan2FA />
-	</Sidebar>
+	</>
 }
 
 function InputWithText({ text = "", children }: { text?: string, children: React.ReactNode }) {
@@ -624,6 +691,8 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
 		</div>
 		{step === "password" && <form onSubmit={handleSubmitPwd}>
+			<input type="text" name="username" className="hidden" hidden={true} autoComplete="username" readOnly={true} />
+
 			<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_enabled_2fa")}</p>
 			<InputWithText>
 				<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
@@ -732,6 +801,9 @@ function RecoveryCodes() {
 		{step === "show" && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 mb-2"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_modal_show_code_desc")}.</span></p>}
 
 		{step === "password" && <form onSubmit={handleSubmitPwd}>
+			<input type="text" name="username" className="hidden" hidden={true} autoComplete="username" readOnly={true} />
+
+
 			<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_show_code_pwd")}</p>
 			<InputWithText>
 				<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
@@ -805,6 +877,8 @@ function ReScan2FA() {
 			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
 		</div>
 		{step === "password" && <form onSubmit={handleSubmitPwd}>
+			<input type="text" name="username" className="hidden" hidden={true} autoComplete="username" readOnly={true} />
+
 			<p className="pb-2 text-sm text-neutral-content/60">{t("settings_modal_rescan_pwd")}</p>
 			<InputWithText>
 				<Input type="password" name="confirmPwd" label={t("txt_password")} autoComplete="current-password" errorMsg={errors.confirmPwd} customLabelStyle="bg-base-100" />
