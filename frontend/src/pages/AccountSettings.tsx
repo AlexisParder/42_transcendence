@@ -382,7 +382,7 @@ function SettingsCat() {
 		<SectionSetting title={t("settings_profile_title")} description={`${t("settings_profile_desc")}.`} hasDividerBottom={true}>
 			<div className="flex gap-4 md:gap-2 items-center">
 				<Avatar username={session?.user.username} image={session?.user.image} size={64} />
-				<div className="flex gap-2 flex-col md:flex-row">
+				<div className="flex gap-2">
 					<button className="btn btn-outline border-neutral" onClick={() => {
 						setErrors({})
 						ShowModal('pictureModal')
@@ -559,10 +559,10 @@ function InputWithText({ text = "", children }: { text?: string, children: React
 
 function SectionSetting({ title, titleColor = "", description, hasDividerBottom = false, children }: { title: string, titleColor?: string, description: string, hasDividerBottom?: boolean, children: React.ReactNode }) {
 	return <>
-		<div className="flex">
+		<div className="flex flex-col sm:flex-row">
 			<div className="flex-1/3 max-w-100">
 				<h2 className={`text-sm font-semibold ${titleColor.length > 0 ? titleColor : ''}`}>{title}</h2>
-				<p className="text-xs text-neutral-content/40">{description}</p>
+				<p className="text-xs text-neutral-content/40 pb-4">{description}</p>
 			</div>
 			<div className="flex-2/3 max-w-200">
 				{children}
