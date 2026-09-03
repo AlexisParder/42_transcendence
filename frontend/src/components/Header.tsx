@@ -9,7 +9,7 @@ function Links() {
 		<li><a href="/play">{t("play_title")}</a></li>
 		<li><a href="/leaderboard">{t("leaderboard_title")}</a></li>
 		<li><a href="/tournaments">{t("tournaments_title")}</a></li>
-		<li><a href="/rules">{t("rules_title")}</a></li>
+		<li><a href="/terms">{t("rules_title")}</a></li>
 	</>
 }
 
