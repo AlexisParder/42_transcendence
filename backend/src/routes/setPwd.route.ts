@@ -3,7 +3,7 @@ import { auth } from "../auth.ts"
 import type {Request, Response} from "express"
 
 export async function setPwdHandler(req: Request, res: Response) {
-	const {newPassword} = await req.body
+	const {newPassword} = req.body
 
 	await auth.api.setPassword({
 		body: {newPassword},

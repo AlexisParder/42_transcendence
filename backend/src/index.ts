@@ -9,6 +9,7 @@ import { createServer } from "node:http"
 import { Server } from "socket.io"
 import type { ClienToServerEvents, ServerToClientEvents, SocketData } from "./events.ts"
 import { prisma } from "./db/client.ts"
+import { getConvHistoryHandler } from "./routes/getConvHistory.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -38,6 +39,7 @@ app.get("/api/test", (req, res) => {
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
 app.post("/api/view-codes", getBackupCodesHandler)
+app.post("/api/get-conv-history", getConvHistoryHandler)
 
 io.use(async (socket, next) => {
 	try {
@@ -61,6 +63,7 @@ io.on("connection", (socket) => {
 			const fromUserId = socket.data.userId
 			const toUserId = payload.toUserId
 			const message = payload.message?.trim()
+
 			if (!message || message.length > 1000)
 				return
 

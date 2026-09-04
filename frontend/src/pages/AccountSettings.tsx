@@ -179,6 +179,7 @@ function SettingsCat() {
 			const res = await fetch("/api/set-pwd", {
 				method: "POST",
 				headers: { "Content-type": "application/json" },
+				credentials: "include",
 				body: JSON.stringify({ newPassword: password }),
 			})
 
@@ -341,6 +342,7 @@ function SettingsCat() {
 		const res = await fetch("/api/check-pwd", {
 			method: "POST",
 			headers: { "Content-type": "application/json" },
+			credentials: "include",
 			body: JSON.stringify({ password }),
 		})
 
@@ -763,6 +765,7 @@ function RecoveryCodes() {
 		const res = await fetch("/api/view-codes", {
 			method: "POST",
 			headers: { "Content-type": "application/json" },
+			credentials: "include",
 			body: JSON.stringify({ password }),
 		})
 

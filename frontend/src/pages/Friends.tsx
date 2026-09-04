@@ -17,20 +17,47 @@ export function Friends() {
 	const [messages, setMessages] = useState<Message[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
-	// useEffect(() => {
-	// 	fetch("/api/...")
-	// 		.then((res) => res.json())
-	// 		.then((data) => setMessages(data));
-	// }, [])
+	const peerId = "X6y74u2Zg7AvIxNFTpJnPkaO863AhIRu"
+
+	useEffect(() => {
+		if (!peerId)
+			return
+		let cancelled = false
+
+		async function loadHistory() {
+			try {
+				const res = await fetch("/api/get-conv-history", {
+					method: "POST",
+					headers: { "Content-type": "application/json" },
+					credentials: "include",
+					body: JSON.stringify({ peerId }),
+				})
+
+				if (!res.ok)
+					return
+
+				const data = await res.json()
+
+				if (cancelled)
+					return
+				setMessages(data.messages ?? [])
+			} catch (error) {
+				if (!cancelled)
+					console.error("load history:", error)
+			}
+		}
+
+		loadHistory()
+		return () => {
+			cancelled = true
+		}
+	}, [peerId])
 
 	useLayoutEffect(() => {
 		const el = scrollRef.current;
 		if (el)
 			el.scrollTop = el.scrollHeight
 	}, [messages])
-
-
-	const peerId = "JiTZsMxZ375Yr7VpU34MJ54BNYMiz2eP"
 
 	function handleSend() {
 		const message = sendInput.trim()

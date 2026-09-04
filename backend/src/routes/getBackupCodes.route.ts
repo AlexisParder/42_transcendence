@@ -3,7 +3,7 @@ import { auth } from "../auth.ts"
 import type { Request, Response } from "express"
 
 export async function getBackupCodesHandler(req: Request, res: Response) {
-	const { password } = await req.body
+	const { password } = req.body
 
 	try {
 		const session = await auth.api.getSession({
