@@ -48,6 +48,14 @@ module.exports = {
     'toggle-error',
     'toggle-info',
     'toggle-neutral',
+    'status-primary',
+    'status-secondary',
+    'status-accent',
+    'status-success',
+    'status-warning',
+    'status-error',
+    'status-info',
+    'status-neutral',
     'peer-checked:bg-success',
     'peer-checked:border-success',
     'peer-checked:text-success-content',
@@ -59,8 +67,10 @@ module.exports = {
     'peer-checked:text-error-content',
     'w-16',
     'w-10',
+    'w-8',
     'h-16',
     'h-10',
+    'h-8'
   ],
   theme: {
     extend: {
