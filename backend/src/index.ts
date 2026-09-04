@@ -60,8 +60,8 @@ io.on("connection", (socket) => {
 		try {
 			const fromUserId = socket.data.userId
 			const toUserId = payload.toUserId
-			const content = payload.content?.trim()
-			if (!content || content.length > 1000)
+			const message = payload.message?.trim()
+			if (!message || message.length > 1000)
 				return
 
 			if (toUserId === fromUserId)
@@ -71,8 +71,8 @@ io.on("connection", (socket) => {
 				where: {
 					isAccepted: true,
 					OR: [
-						{ userId: fromUserId, friendId: toUserId},
-						{ userId: toUserId, friendId: fromUserId},
+						{ userId: fromUserId, targetId: toUserId},
+						{ userId: toUserId, targetId: fromUserId},
 					]
 				}
 			})
@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
 				data: {
 					userId: fromUserId,
 					targetId: toUserId,
-					message: content
+					message: message
 				}
 			})
 
@@ -99,7 +99,7 @@ io.on("connection", (socket) => {
 				id: row.id,
 				fromUserId: row.userId,
 				toUserId: row.targetId,
-				content: row.message,
+				message: row.message,
 				createdAt: row.sendAt.toISOString(),
 			}
 

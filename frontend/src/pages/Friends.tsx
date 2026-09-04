@@ -1,5 +1,4 @@
-// import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Avatar } from "../components/Avatar";
 import { Input } from "../components/Input";
 import { Sidebar } from "../components/Sidebar";
@@ -11,7 +10,8 @@ import { authClient } from "../lib/auth-client";
 // import { t } from "../lib/translate";
 
 export function Friends() {
-	const {data: session} = authClient.useSession()
+	const socket = useSocket()
+	const { data: session } = authClient.useSession()
 	const [sendInput, setSendInput] = useState("")
 	// const [peerId, setPeerId] = useState<string | null>(null)
 	const [messages, setMessages] = useState<Message[]>([])
@@ -23,22 +23,21 @@ export function Friends() {
 	// 		.then((data) => setMessages(data));
 	// }, [])
 
-	// useLayoutEffect(() => {
-	// 	const el = scrollRef.current;
-	// 	if (el)
-	// 		el.scrollTop = el.scrollHeight
-	// }, [messages])
+	useLayoutEffect(() => {
+		const el = scrollRef.current;
+		if (el)
+			el.scrollTop = el.scrollHeight
+	}, [messages])
 
-	const socket = useSocket()
 
-	const peerId = ""
+	const peerId = "JiTZsMxZ375Yr7VpU34MJ54BNYMiz2eP"
 
 	function handleSend() {
-		const content = sendInput.trim()
-		if (!content)
+		const message = sendInput.trim()
+		if (!message)
 			return
 
-		socket.emit("send_message", {toUserId: peerId, content})
+		socket.emit("send_message", { toUserId: peerId, message })
 		setSendInput("")
 	}
 
@@ -81,40 +80,17 @@ export function Friends() {
 				{/* tchat */}
 				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full">
-						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.content} isMine={msg.fromUserId === session?.user.id} />)}
-
-						<DisplayMessage isMine={false} message="What kind of nonsense is this" />
-						<DisplayMessage isMine={false} message="Put me on the Council and not make me a Master!?" />
-						<DisplayMessage isMine={false} message="That's never been done in the history of the Jedi." />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="It's insulting!" />
-						<DisplayMessage isMine={false} message="Put me on the Council and not make me a Master!?" />
-						<DisplayMessage isMine={true} message="Calm down, Anakin." />
-						<DisplayMessage isMine={false} message="Put me on the Council and not make me a Master!?" />
+						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} />)}
 					</div>
 				</div>
 
 				{/* bas */}
 				<div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 					<div className="w-full pl-2">
-						<Input type="text" name="message" label="Message" onChange={(e) => setSendInput(e.target.value)} />
+						<Input type="text" name="message" label="Message" value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+							if (e.key === "Enter")
+								handleSend()
+						}} />
 					</div>
 					<button className="btn btn-outline btn-info" onClick={handleSend}>Send</button>
 				</div>

@@ -1,5 +1,5 @@
 export interface ClienToServerEvents {
-	send_message: (payload: { toUserId: string, content: string }) => void
+	send_message: (payload: { toUserId: string, message: string }) => void
 	send_friend_request: (payload: { toUserId: string }) => void
 }
 
@@ -16,6 +16,6 @@ export interface Message {
 	id: string,
 	fromUserId: string,
 	toUserId: string,
-	content: string,
+	message: string,
 	createdAt: string,
 }
