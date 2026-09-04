@@ -101,7 +101,7 @@ export function Register() {
 			else
 				setErrors({ form: t("sign_up_failed") })
 		} else {
-			navigate('/verified')
+			navigate('/verified', {state: {email}})
 		}
 	}
 
