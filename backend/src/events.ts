@@ -19,3 +19,9 @@ export interface Message {
 	message: string,
 	createdAt: string,
 }
+
+export interface Friend {
+	id: string,
+	username: string| null,
+	image: string | null | undefined
+}

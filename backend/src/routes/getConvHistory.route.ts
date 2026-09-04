@@ -6,12 +6,11 @@ import type { Message } from "../events.ts"
 
 export async function getConvHistoryHandler(req: Request, res: Response) {
 	const { peerId } = req.body
-	console.log("[history] peerId recu:", peerId)
+
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
 		})
-		console.log("[history] session:", session ? session.user.id : "AUCUNE")
 
 		if (!session)
 			return res.status(401).json({ ok: false })

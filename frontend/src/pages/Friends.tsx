@@ -5,7 +5,7 @@ import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
-import type { Message } from "../../../backend/src/events";
+import type { Friend, Message } from "../../../backend/src/events";
 import { authClient } from "../lib/auth-client";
 // import { t } from "../lib/translate";
 
@@ -13,11 +13,32 @@ export function Friends() {
 	const socket = useSocket()
 	const { data: session } = authClient.useSession()
 	const [sendInput, setSendInput] = useState("")
-	// const [peerId, setPeerId] = useState<string | null>(null)
+	const [peerId, setPeerId] = useState<string | null>(null)
 	const [messages, setMessages] = useState<Message[]>([])
+	const [friends, setFriends] = useState<Friend[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
-	const peerId = "X6y74u2Zg7AvIxNFTpJnPkaO863AhIRu"
+	useEffect(() => {
+		async function loadFriends() {
+			try {
+				const res = await fetch("/api/get-friends", {
+					method: "GET",
+					headers: { "Content-type": "application/json" },
+					credentials: "include"
+				})
+
+				if (!res.ok)
+					return
+
+				const data = await res.json()
+				setFriends(data.friends ?? [])
+			} catch (error) {
+				console.error("load friends:", error)
+			}
+		}
+
+		loadFriends()
+	}, [])
 
 	useEffect(() => {
 		if (!peerId)
@@ -60,6 +81,9 @@ export function Friends() {
 	}, [messages])
 
 	function handleSend() {
+		if (!peerId)
+			return
+
 		const message = sendInput.trim()
 		if (!message)
 			return
@@ -87,7 +111,7 @@ export function Friends() {
 	return <Sidebar>
 		<div className="flex">
 			{/* Centre (tchat) */}
-			<div className="flex flex-1 flex-col h-screen">
+			<div className="flex flex-1 flex-col h-screen min-w-0">
 				{/* haut */}
 				<div className="flex items-center justify-between p-4 bg-base-200">
 					<div className="flex items-center w-full gap-2">
@@ -134,7 +158,18 @@ export function Friends() {
 					<div className="min-h-full">
 						<ConversationsSection />
 						<RequestsSection />
-						<OnlineSection />
+						{/* <OnlineSection /> */}
+						<ul className="menu bg-base-200 w-full">
+							<li className="uppercase">online</li>
+							{friends.map(friend => (
+								<li key={friend.id} className="py-0.5">
+									<button onClick={() => setPeerId(friend.id)} className={peerId === friend.id ? "bg-info/15" : ""}>
+										<Avatar username={friend.username} image={friend.image} size={32} />
+										<span className="first-letter:uppercase">{friend.username ?? "?"}</span>
+									</button>
+								</li>
+							))}
+						</ul>
 						<OfflineSection />
 					</div>
 				</div>
@@ -149,7 +184,7 @@ export function Friends() {
 
 function DisplayMessage({ message, isMine }: { message: string, isMine: boolean }) {
 	return <div className={`chat chat-${isMine ? 'end' : 'start'}`}>
-		<div className={`chat-bubble ${isMine ? 'bg-info/25' : 'bg-neutral-content/15'}`}>{message}</div>
+		<div className={`chat-bubble max-w-[70%] whitespace-pre-wrap break-all ${isMine ? 'bg-info/25' : 'bg-neutral-content/15'}`}>{message}</div>
 	</div>
 }
 

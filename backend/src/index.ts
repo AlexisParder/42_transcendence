@@ -10,6 +10,7 @@ import { Server } from "socket.io"
 import type { ClienToServerEvents, ServerToClientEvents, SocketData } from "./events.ts"
 import { prisma } from "./db/client.ts"
 import { getConvHistoryHandler } from "./routes/getConvHistory.route.ts"
+import { getFriendsHandler } from "./routes/getFriends.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -35,6 +36,8 @@ app.use(express.json())
 app.get("/api/test", (req, res) => {
 	res.json({ status: "ok" })
 })
+app.get("/api/get-friends", getFriendsHandler)
+
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
