@@ -14,6 +14,7 @@ import { Leaderboard } from './pages/Leaderboard'
 import { Friends } from './pages/Friends'
 import { TwoFactor } from './pages/TwoFactor'
 import { Profile } from './pages/Profile'
+import { SocketProvider } from './provider/SocketProvider'
 
 const router = createBrowserRouter([
 	{
@@ -107,7 +108,9 @@ function Root() {
 }
 
 function App() {
-	return <RouterProvider router={router} />
+	return <SocketProvider>
+		<RouterProvider router={router} />
+	</SocketProvider>
 }
 
 export default App

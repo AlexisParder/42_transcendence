@@ -1,17 +1,19 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+// import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "../components/Avatar";
 import { Input } from "../components/Input";
 import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
+import { useSocket } from "../components/socketContext";
+import type { Message } from "../../../backend/src/events";
+import { authClient } from "../lib/auth-client";
 // import { t } from "../lib/translate";
 
-type Message = {
-	id: number,
-	content: string,
-	isMine: boolean,
-}
 export function Friends() {
+	const {data: session} = authClient.useSession()
+	const [sendInput, setSendInput] = useState("")
+	// const [peerId, setPeerId] = useState<string | null>(null)
 	const [messages, setMessages] = useState<Message[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -21,11 +23,40 @@ export function Friends() {
 	// 		.then((data) => setMessages(data));
 	// }, [])
 
-	useLayoutEffect(() => {
-		const el = scrollRef.current;
-		if (el)
-			el.scrollTop = el.scrollHeight
-	}, [messages])
+	// useLayoutEffect(() => {
+	// 	const el = scrollRef.current;
+	// 	if (el)
+	// 		el.scrollTop = el.scrollHeight
+	// }, [messages])
+
+	const socket = useSocket()
+
+	const peerId = ""
+
+	function handleSend() {
+		const content = sendInput.trim()
+		if (!content)
+			return
+
+		socket.emit("send_message", {toUserId: peerId, content})
+		setSendInput("")
+	}
+
+	useEffect(() => {
+		function onNewMessage(msg: Message) {
+			const concernsThisChat = msg.fromUserId === peerId || msg.toUserId === peerId
+
+			if (!concernsThisChat)
+				return
+			setMessages(prev => [...prev, msg])
+		}
+
+		socket.on("new_message", onNewMessage)
+
+		return () => {
+			socket.off("new_message", onNewMessage)
+		}
+	}, [socket, peerId])
 
 	return <Sidebar>
 		<div className="flex">
@@ -50,7 +81,7 @@ export function Friends() {
 				{/* tchat */}
 				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full">
-						{/* {messages.map((msg) => <DisplayMessage key={msg.id} message={msg.content} isMine={msg.isMine} />)} */}
+						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.content} isMine={msg.fromUserId === session?.user.id} />)}
 
 						<DisplayMessage isMine={false} message="What kind of nonsense is this" />
 						<DisplayMessage isMine={false} message="Put me on the Council and not make me a Master!?" />
@@ -83,9 +114,9 @@ export function Friends() {
 				{/* bas */}
 				<div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 					<div className="w-full pl-2">
-						<Input type="text" name="message" label="Message" />
+						<Input type="text" name="message" label="Message" onChange={(e) => setSendInput(e.target.value)} />
 					</div>
-					<button className="btn btn-outline btn-info">Send</button>
+					<button className="btn btn-outline btn-info" onClick={handleSend}>Send</button>
 				</div>
 			</div>
 
@@ -115,7 +146,7 @@ export function Friends() {
 
 function DisplayMessage({ message, isMine }: { message: string, isMine: boolean }) {
 	return <div className={`chat chat-${isMine ? 'end' : 'start'}`}>
-		<div className={`chat-bubble bg-${isMine ? 'info/25' : 'neutral-content/15'}`}>{message}</div>
+		<div className={`chat-bubble ${isMine ? 'bg-info/25' : 'bg-neutral-content/15'}`}>{message}</div>
 	</div>
 }
 

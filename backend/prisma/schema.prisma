@@ -33,6 +33,15 @@ model User {
   twoFactorEnabled Boolean?    @default(false)
   twofactors       TwoFactor[]
 
+  sentFriends       Friends[] @relation("SentFriends")
+  ReceivedFriends       Friends[] @relation("ReceivedFriends")
+
+  sentMsg       Conversations[] @relation("SentMsg")
+  ReceivedMsg       Conversations[] @relation("ReceivedMsg")
+
+  sentBlock       UserBlocked[] @relation("SentBlock")
+  ReceivedBlock       UserBlocked[] @relation("ReceivedBlock")
+
   @@map("user")
   @@unique([username])
 }
@@ -99,4 +108,46 @@ model TwoFactor {
   @@index([secret])
   @@index([userId])
   @@map("twoFactor")
+}
+
+model Friends {
+  id        String  @id @default(cuid())
+  userId    String
+  targetId  String
+  isAccepted Boolean @default(false)
+  user      User    @relation("SentFriends", fields: [userId], references: [id], onDelete: Cascade)
+  target      User    @relation("ReceivedFriends", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([targetId])
+  @@map("friends")
+}
+
+model Conversations {
+  id  String  @id @default(cuid())
+  userId    String
+  targetId  String
+  message  String
+  sendAt    DateTime  @default(now())
+  isRead    Boolean  @default(false)
+
+  user      User    @relation("SentMsg", fields: [userId], references: [id], onDelete: Cascade)
+  target      User    @relation("ReceivedMsg", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([targetId])
+  @@map("conversations")
+}
+
+model UserBlocked {
+  id  String  @id @default(cuid())
+  userId    String
+  targetId  String
+
+  user      User    @relation("SentBlock", fields: [userId], references: [id], onDelete: Cascade)
+  target      User    @relation("ReceivedBlock", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([targetId])
+  @@map("userblocked")
 }

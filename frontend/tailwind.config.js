@@ -65,6 +65,8 @@ module.exports = {
     'peer-checked:bg-error',
     'peer-checked:border-error',
     'peer-checked:text-error-content',
+    'chat-start',
+    'chat-end',
     'w-16',
     'w-10',
     'w-8',
