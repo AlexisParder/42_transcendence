@@ -1,15 +1,15 @@
 import { FaRegCircle } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TbSettingsFilled } from "react-icons/tb";
 import { t } from "../lib/translate";
 
 function Links() {
 	return <>
-		<li><a href="/play">{t("play_title")}</a></li>
-		<li><a href="/leaderboard">{t("leaderboard_title")}</a></li>
-		<li><a href="/tournaments">{t("tournaments_title")}</a></li>
-		<li><a href="/terms">{t("rules_title")}</a></li>
+		<li><Link to="/play">{t("play_title")}</Link></li>
+		<li><Link to="/leaderboard">{t("leaderboard_title")}</Link></li>
+		<li><Link to="/tournaments">{t("tournaments_title")}</Link></li>
+		<li><Link to="/terms">{t("rules_title")}</Link></li>
 	</>
 }
 
@@ -29,13 +29,13 @@ function SignLinks() {
 
 	if (currentSession)
 		return <>
-			<a className="btn btn-info btn-outline mr-2" href="/settings"><TbSettingsFilled /></a>
+			<Link className="btn btn-info btn-outline mr-2" to="/settings"><TbSettingsFilled /></Link>
 			<button className="btn btn-info mr-2" onClick={handleSignOut}>{t("btn_sign_out")}</button>
 		</>
 
 	return <>
-		<a className="btn btn-info btn-outline mr-2" href="/login">{t("btn_sign_in")}</a>
-		<a className="btn btn-info" href="/register">{t("btn_sign_up")}</a>
+		<Link className="btn btn-info btn-outline mr-2" to="/login">{t("btn_sign_in")}</Link>
+		<Link className="btn btn-info" to="/register">{t("btn_sign_up")}</Link>
 	</>
 }
 
@@ -53,7 +53,7 @@ export function Header() {
 					<Links />
 				</ul>
 			</div>
-			<a className="btn btn-ghost text-xl tracking-brand" href="/"><FaRegCircle className="text-info mr-2 size-6" />SONAR</a>
+			<Link className="btn btn-ghost text-xl tracking-brand" to="/"><FaRegCircle className="text-info mr-2 size-6" />SONAR</Link>
 		</div>
 		<div className="navbar-center hidden md:flex">
 			<ul className="menu menu-horizontal px-1">

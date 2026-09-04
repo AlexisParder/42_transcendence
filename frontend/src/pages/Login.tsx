@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../components/Input";
 import { authClient } from "../lib/auth-client";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { isValidEmail } from "../lib/isValideEmail";
 import { SignGoogle } from "../lib/SignGoogle";
 import { SignDiscord } from "../lib/SignDiscord";
@@ -87,14 +87,14 @@ export function Login() {
 								<input type="checkbox" name="remember" className="checkbox checkbox-sm checked:checkbox-info" />
 								<span className="text-neutral-content/40 select-none">{t("sign_in_keep")}</span>
 							</label>
-							<a href="forgot" className="link-primary">{t("sign_in_forgot_pwd")}</a>
+							<Link to="/forgot" className="link-primary">{t("sign_in_forgot_pwd")}</Link>
 						</div>
 
 						<button className="btn btn-soft btn-info border-neutral hover:border-info w-full">{t("btn_sign_in")}</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>
 
-					<p className="text-neutral-content/40 mt-3 text-center">{t("sign_in_no_acc_1")} <a href="register" className="link-primary">{t("sign_in_no_acc_2")}</a></p>
+					<p className="text-neutral-content/40 mt-3 text-center">{t("sign_in_no_acc_1")} <Link to="/register" className="link-primary">{t("sign_in_no_acc_2")}</Link></p>
 				</fieldset>
 			</div>
 		</div>

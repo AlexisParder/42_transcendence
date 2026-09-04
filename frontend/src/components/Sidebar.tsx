@@ -3,7 +3,7 @@ import { FaRegCircle, FaUserFriends, FaDoorOpen } from "react-icons/fa";
 import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled, TbTournament } from "react-icons/tb";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
 import { FaBars, FaUser } from "react-icons/fa6";
@@ -71,8 +71,8 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 						</div>
 					</div>
 					<div className="flex gap-2">
-						<a href="privacy" className="link-primary text-xs">{t("privacy_short_title")}</a>
-						<a href="terms" className="link-primary text-xs">{t("terms_short_title")}</a>
+						<Link to="/privacy" className="link-primary text-xs">{t("privacy_short_title")}</Link>
+						<Link to="/terms" className="link-primary text-xs">{t("terms_short_title")}</Link>
 					</div>
 				</ul>
 			</div>

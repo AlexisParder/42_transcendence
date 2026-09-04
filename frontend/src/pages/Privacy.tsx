@@ -1,6 +1,7 @@
 import type React from "react"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { t } from "../lib/translate"
+import { Link } from "react-router-dom"
 
 export function Privacy() {
 	useDocumentTitle(t("privacy_title"))
@@ -33,10 +34,10 @@ export function Privacy() {
 		</PrivacySection>
 		<PrivacySection title={`6. ${t("privacy_rights_title")}`}>
 			<p className="text-sm text-neutral-content/60 pb-2">{t("privacy_rights_desc")}.</p>
-			<a className="btn btn-info btn-outline btn-sm" href="/settings">{t("settings_title")}</a>
+			<Link className="btn btn-info btn-outline btn-sm" to="/settings">{t("settings_title")}</Link>
 		</PrivacySection>
 		<PrivacySection title={`7. ${t("privacy_contact_title")}`}>
-			<p className="text-sm text-neutral-content/60 pb-2">{t("privacy_contact_desc")} <a className="link-info" href="mailto:ft.sonar42@gmail.com" target="_blank">ft.sonar42@gmail.com</a>.</p>
+			<p className="text-sm text-neutral-content/60 pb-2">{t("privacy_contact_desc")} <Link className="link-info" to="mailto:ft.sonar42@gmail.com" target="_blank">ft.sonar42@gmail.com</Link>.</p>
 		</PrivacySection>
 	</div>
 }

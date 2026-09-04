@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { t } from "../lib/translate"
 import type React from "react"
@@ -39,7 +40,7 @@ export function Terms() {
 			<p className="text-sm text-neutral-content/60 pb-2">{t("terms_content_desc")}.</p>
 		</TermsSection>
 		<TermsSection title={`8. ${t("terms_contact_title")}`}>
-			<p className="text-sm text-neutral-content/60 pb-2">{t("terms_contact_desc")} <a className="link-info" href="mailto:ft.sonar42@gmail.com" target="_blank">ft.sonar42@gmail.com</a>.</p>
+			<p className="text-sm text-neutral-content/60 pb-2">{t("terms_contact_desc")} <Link className="link-info" to="mailto:ft.sonar42@gmail.com" target="_blank">ft.sonar42@gmail.com</Link>.</p>
 		</TermsSection>
 	</div>
 }

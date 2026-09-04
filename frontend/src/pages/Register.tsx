@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../components/Input";
 import { authClient } from "../lib/auth-client";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { isValidEmail } from "../lib/isValideEmail";
 import { PasswordBar } from "../components/PasswordBar";
 import { SignGoogle } from "../lib/SignGoogle";
@@ -131,7 +131,7 @@ export function Register() {
 						<div className="mt-3 mb-5">
 							<label className="label">
 								<input type="checkbox" name="agree" className="checkbox checkbox-sm checked:checkbox-info" />
-								<span className="text-neutral-content/40 select-none">{t("sign_up_agree_1")} <a href="/terms" className="link-primary">{t("terms_title")}</a> {t("sign_up_agree_2")} <a href="/privacy" className="link-primary">{t("privacy_title")}</a>.</span>
+								<span className="text-neutral-content/40 select-none">{t("sign_up_agree_1")} <Link to="/terms" className="link-primary">{t("terms_title")}</Link> {t("sign_up_agree_2")} <Link to="/privacy" className="link-primary">{t("privacy_title")}</Link>.</span>
 							</label>
 							{errors.agree && <span className="text-error block pb-2 pl-2">{errors.agree}</span>}
 						</div>
@@ -140,7 +140,7 @@ export function Register() {
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>
 
-					<p className="text-neutral-content/40 mt-3 text-center">{t("sign_up_already_acc")} <a href="login" className="link-primary">{t("btn_sign_in")}</a></p>
+					<p className="text-neutral-content/40 mt-3 text-center">{t("sign_up_already_acc")} <Link to="/login" className="link-primary">{t("btn_sign_in")}</Link></p>
 				</fieldset>
 			</div>
 		</div>

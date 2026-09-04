@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SonarTitle } from "../components/SonarTitle";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { t } from "../lib/translate";
 import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -121,7 +121,7 @@ export function TwoFactor() {
 						setStep("app")
 						setErrors({})
 					}} className="link-primary">{t("otp_use_app_code")}</button>}
-					<p className="text-neutral-content/40 mt-1 text-center">{t("otp_lost_device")} <a href="mailto:ft.sonar42@gmail.com" className="link-primary" target="_blank">ft.sonar42@gmail.com</a></p>
+					<p className="text-neutral-content/40 mt-1 text-center">{t("otp_lost_device")} <Link to="mailto:ft.sonar42@gmail.com" className="link-primary" target="_blank">ft.sonar42@gmail.com</Link></p>
 				</fieldset>
 			</div>
 		</div>

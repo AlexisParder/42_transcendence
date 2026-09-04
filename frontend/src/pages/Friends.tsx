@@ -15,11 +15,11 @@ export function Friends() {
 	const [messages, setMessages] = useState<Message[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
 
-	useEffect(() => {
-		fetch("/api/...")
-			.then((res) => res.json())
-			.then((data) => setMessages(data));
-	}, [])
+	// useEffect(() => {
+	// 	fetch("/api/...")
+	// 		.then((res) => res.json())
+	// 		.then((data) => setMessages(data));
+	// }, [])
 
 	useLayoutEffect(() => {
 		const el = scrollRef.current;
@@ -49,8 +49,8 @@ export function Friends() {
 
 				{/* tchat */}
 				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
-					<div className="flex flex-col justify-end min-h-full">
-						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.content} isMine={msg.isMine} />)}
+					<div className="flex flex-col min-h-full">
+						{/* {messages.map((msg) => <DisplayMessage key={msg.id} message={msg.content} isMine={msg.isMine} />)} */}
 
 						<DisplayMessage isMine={false} message="What kind of nonsense is this" />
 						<DisplayMessage isMine={false} message="Put me on the Council and not make me a Master!?" />
@@ -115,7 +115,7 @@ export function Friends() {
 
 function DisplayMessage({ message, isMine }: { message: string, isMine: boolean }) {
 	return <div className={`chat chat-${isMine ? 'end' : 'start'}`}>
-		<div className={`chat-bubble bg-${isMine ? 'bg-info/25' : 'neutral-content/15'}`}>{message}</div>
+		<div className={`chat-bubble bg-${isMine ? 'info/25' : 'neutral-content/15'}`}>{message}</div>
 	</div>
 }
 
