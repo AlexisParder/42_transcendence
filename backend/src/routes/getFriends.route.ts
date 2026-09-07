@@ -29,12 +29,22 @@ export async function getFriendsHandler(req: Request, res: Response) {
 			}
 		})
 
+		const onlineUsers = req.app.get("onlineUsers") as Map<string, number>
+		const activityStatus = req.app.get("activityStatus") as Map<string, "available" | "away">
+
+		function effectiveStatus(id: string): "available" | "away" | "offline" {
+			if (!onlineUsers.has(id))
+				return "offline"
+			return activityStatus.get(id) ?? "available"
+		}
+
 		const friends: Friend[] = rows.map(row => {
 			const friend = row.userId === userId ? row.target : row.user
 			return {
 				id: friend.id,
 				username: friend.username,
 				image: friend.image,
+				status: effectiveStatus(friend.id)
 			}
 		})
 		res.json({ friends })

@@ -18,6 +18,8 @@ import { getFriendsPendingHandler } from "./routes/getFriendsPending.route.ts"
 
 const app = express()
 const server = createServer(app)
+const onlineUsers = new Map<string, number>()
+const activityStatus = new Map<string, "available" | "away">()
 /**
  * Server<Event ecouté, Event Emis, inter-serveur, type de socket.data>
  */
@@ -29,6 +31,8 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData
 })
 
 app.set("io", io)
+app.set("onlineUsers", onlineUsers)
+app.set("activityStatus", activityStatus)
 
 app.use(cors({
 	origin: "http://localhost:5173", // front Vite
@@ -69,7 +73,7 @@ io.use(async (socket, next) => {
 	}
 })
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
 	socket.on("send_message", async (payload) => {
 		try {
 			const fromUserId = socket.data.userId
@@ -125,15 +129,55 @@ io.on("connection", (socket) => {
 		}
 	})
 
+	const userId = socket.data.userId
 
+	socket.join(userId)
 
-	socket.join(socket.data.userId)
-	console.log("Client connected: ", socket.data.userId)
+	const before = onlineUsers.get(userId) ?? 0
+	onlineUsers.set(userId, before + 1)
 
-	socket.on("disconnect", () => {
-		console.log("Client disconnected: ", socket.data.userId)
+	if (before === 0)
+	{
+		activityStatus.set(userId, "available")
+		await notifyFriendsOfPresence(userId, "available")
+	}
+
+	socket.on("set_activity", async (payload) => {
+		if (!onlineUsers.has(userId))
+			return
+
+		activityStatus.set(userId, payload.status)
+		await notifyFriendsOfPresence(userId, payload.status)
+	})
+
+	socket.on("disconnect", async () => {
+		const count = onlineUsers.get(userId) ?? 0
+		if (count <= 1) {
+			onlineUsers.delete(userId)
+			activityStatus.delete(userId)
+			await notifyFriendsOfPresence(userId, "offline")
+		} else
+			onlineUsers.set(userId, count - 1)
 	})
 })
 
 const PORT = 3000
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}`))
+
+async function notifyFriendsOfPresence(userId: string, status: "available" | "away" | "offline") {
+	const rows = await prisma.friends.findMany({
+		where: {
+			isAccepted: true,
+			OR: [
+				{userId},
+				{targetId: userId}
+			]
+		},
+		select: {userId: true, targetId: true}
+	})
+
+	for (const row of rows) {
+		const friendId = row.userId === userId ? row.targetId : row.userId
+		io.to(friendId).emit("presence_update", {userId, status})
+	}
+}

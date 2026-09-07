@@ -5,7 +5,7 @@ import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
-import type { Friend, FriendRequest, FriendRequestAccept, Message } from "../../../backend/src/events";
+import type { Friend, FriendRequest, FriendRequestAccept, Message, PresenceStatus, PresenceUpdate } from "../../../backend/src/events";
 import { authClient } from "../lib/auth-client";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { t } from "../lib/translate";
@@ -20,6 +20,18 @@ export function Friends() {
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const [errors, setErrors] = useState<{ username?: string }>({})
 	const [requests, setRequests] = useState<FriendRequest[]>([])
+	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
+
+	useEffect(() => {
+		function onPresence(payload: PresenceUpdate) {
+			setPresence(prev => ({ ...prev, [payload.userId]: payload.status }))
+		}
+		socket.on("presence_update", onPresence)
+
+		return () => {
+			socket.off("presence_update", onPresence)
+		}
+	}, [socket])
 
 	useEffect(() => {
 		async function loadFriends() {
@@ -35,6 +47,11 @@ export function Friends() {
 
 				const data = await res.json()
 				setFriends(data.friends ?? [])
+
+				const initialPresence: Record<string, PresenceStatus> = {}
+				for (const f of data.friends ?? [])
+					initialPresence[f.id] = f.status
+				setPresence(initialPresence)
 			} catch (error) {
 				console.error("load friends:", error)
 			}
@@ -122,7 +139,8 @@ export function Friends() {
 			setFriends(prev => [...prev, {
 				id: payload.friendId,
 				username: payload.username,
-				image: payload.image
+				image: payload.image,
+				status: "available"
 			}])
 		}
 
@@ -211,7 +229,8 @@ export function Friends() {
 				setFriends(prev => [...prev, {
 					id: accepted.fromUserId,
 					username: accepted.username,
-					image: accepted.image
+					image: accepted.image,
+					status: "available"
 				}])
 		} catch (error) {
 			console.error("accept:", error)
@@ -293,9 +312,17 @@ export function Friends() {
 							<li className="uppercase">online</li>
 							{friends.map(friend => (
 								<li key={friend.id} className="py-0.5">
-									<button onClick={() => setPeerId(friend.id)} className={peerId === friend.id ? "bg-info/15" : ""}>
+									<button onClick={() => {
+										if (peerId === friend.id)
+										{
+											setPeerId("")
+											setMessages([])
+										}
+										else
+											setPeerId(friend.id)
+									}} className={peerId === friend.id ? "bg-info/15" : ""}>
 										<Avatar username={friend.username} image={friend.image} size={32} />
-										<span>{friend.username ?? "?"}</span>
+										<span>{friend.username ?? "?"} {presence[friend.id]}</span>
 									</button>
 								</li>
 							))}
@@ -356,9 +383,9 @@ function ConversationFriendDisplay({ friends, peerId }: { friends: Friend[], pee
 			</div>
 		</div>
 		<div className="flex items-center gap-2">
-			<button className="btn btn-outline btn-neutral text-neutral-content">Profile</button>
-			<button className="btn btn-outline btn-neutral text-neutral-content">Invite</button>
-			<button className="btn btn-outline btn-error">Block</button>
+			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">Profile</button>
+			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">Invite</button>
+			<button className="btn btn-outline btn-error btn-sm">Block</button>
 		</div>
 	</div>
 }

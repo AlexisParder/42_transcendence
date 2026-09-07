@@ -1,13 +1,17 @@
 export interface ClientToServerEvents {
 	send_message: (payload: { toUserId: string, message: string }) => void
 	send_friend_request: (payload: { toUserId: string }) => void
+	set_activity: (payload: {status: "available" | "away"}) => void
 }
 
 export interface ServerToClientEvents {
 	new_message: (payload: Message) => void
 	friend_request_received: (payload: FriendRequest) => void
 	friend_request_accepted: (payload: FriendRequestAccept) => void
+	presence_update: (payload: PresenceUpdate) => void
 }
+
+export type PresenceStatus = "available" | "offline" | "away"
 
 export interface SocketData {
 	userId: string
@@ -24,7 +28,8 @@ export interface Message {
 export interface Friend {
 	id: string,
 	username: string | null | undefined,
-	image: string | null | undefined
+	image: string | null | undefined,
+	status: PresenceStatus
 }
 
 export interface FriendRequest {
@@ -38,4 +43,9 @@ export interface FriendRequestAccept {
 	friendId: string, 
 	username: string | null | undefined, 
 	image: string | null | undefined
+}
+
+export interface PresenceUpdate {
+	userId: string,
+	status: PresenceStatus
 }
