@@ -21,7 +21,6 @@ export function Friends() {
 	const [errors, setErrors] = useState<{ username?: string }>({})
 	const [requests, setRequests] = useState<FriendRequest[]>([])
 
-
 	useEffect(() => {
 		async function loadFriends() {
 			try {
@@ -42,6 +41,28 @@ export function Friends() {
 		}
 
 		loadFriends()
+	}, [])
+
+	useEffect(() => {
+		async function loadFriendsPending() {
+			try {
+				const res = await fetch("/api/get-friends-pending", {
+					method: "GET",
+					headers: { "Content-type": "application/json" },
+					credentials: "include"
+				})
+
+				if (!res.ok)
+					return
+
+				const data = await res.json()
+				setRequests(data.requests ?? [])
+			} catch (error) {
+				console.error("load friends pending:", error)
+			}
+		}
+
+		loadFriendsPending()
 	}, [])
 
 	useEffect(() => {

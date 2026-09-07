@@ -14,6 +14,7 @@ import { getFriendsHandler } from "./routes/getFriends.route.ts"
 import { sendFriendRequestHandler } from "./routes/sendFriendRequest.route.ts"
 import { acceptFriendRequestHandler } from "./routes/acceptFriendRequest.route.ts"
 import { declineFriendRequestHandler } from "./routes/declineFriendRequest.route.ts"
+import { getFriendsPendingHandler } from "./routes/getFriendsPending.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -42,6 +43,7 @@ app.get("/api/test", (req, res) => {
 	res.json({ status: "ok" })
 })
 app.get("/api/get-friends", getFriendsHandler)
+app.get("/api/get-friends-pending", getFriendsPendingHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
