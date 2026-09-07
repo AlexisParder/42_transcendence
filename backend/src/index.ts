@@ -12,6 +12,8 @@ import { prisma } from "./db/client.ts"
 import { getConvHistoryHandler } from "./routes/getConvHistory.route.ts"
 import { getFriendsHandler } from "./routes/getFriends.route.ts"
 import { sendFriendRequestHandler } from "./routes/sendFriendRequest.route.ts"
+import { acceptFriendRequestHandler } from "./routes/acceptFriendRequest.route.ts"
+import { declineFriendRequestHandler } from "./routes/declineFriendRequest.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -46,6 +48,8 @@ app.post("/api/check-pwd", checkPwdHandler)
 app.post("/api/view-codes", getBackupCodesHandler)
 app.post("/api/get-conv-history", getConvHistoryHandler)
 app.post("/api/send-friend-request", sendFriendRequestHandler)
+app.post("/api/accept-friend-request", acceptFriendRequestHandler)
+app.post("/api/decline-friend-request", declineFriendRequestHandler)
 
 io.use(async (socket, next) => {
 	try {

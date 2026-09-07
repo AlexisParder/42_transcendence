@@ -6,6 +6,7 @@ export interface ClientToServerEvents {
 export interface ServerToClientEvents {
 	new_message: (payload: Message) => void
 	friend_request_received: (payload: FriendRequest) => void
+	friend_request_accepted: (payload: FriendRequestAccept) => void
 }
 
 export interface SocketData {
@@ -22,7 +23,7 @@ export interface Message {
 
 export interface Friend {
 	id: string,
-	username: string | null,
+	username: string | null | undefined,
 	image: string | null | undefined
 }
 
@@ -30,5 +31,11 @@ export interface FriendRequest {
 	id: string,
 	fromUserId: string,
 	username: string | null | undefined,
+	image: string | null | undefined
+}
+
+export interface FriendRequestAccept {
+	friendId: string, 
+	username: string | null | undefined, 
 	image: string | null | undefined
 }

@@ -5,7 +5,7 @@ import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
-import type { Friend, FriendRequest, Message } from "../../../backend/src/events";
+import type { Friend, FriendRequest, FriendRequestAccept, Message } from "../../../backend/src/events";
 import { authClient } from "../lib/auth-client";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { t } from "../lib/translate";
@@ -88,11 +88,26 @@ export function Friends() {
 		function onFriendRequest(req: FriendRequest) {
 			setRequests(prev => [...prev, req])
 		}
-		
+
 		socket.on("friend_request_received", onFriendRequest)
 
 		return () => {
 			socket.off("friend_request_received", onFriendRequest)
+		}
+	}, [socket])
+
+	useEffect(() => {
+		function onAccepted(payload: FriendRequestAccept) {
+			setFriends(prev => [...prev, {
+				id: payload.friendId,
+				username: payload.username,
+				image: payload.image
+			}])
+		}
+
+		socket.on("friend_request_accepted", onAccepted)
+		return () => {
+			socket.off("friend_request_accepted", onAccepted)
 		}
 	}, [socket])
 
@@ -124,7 +139,7 @@ export function Friends() {
 		}
 	}, [socket, peerId])
 
-	const SendRequestFriendHandle: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+	const handleSendRequestFriend: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 		const formElem = e.currentTarget
 
@@ -151,6 +166,55 @@ export function Friends() {
 		setErrors({})
 		formElem.reset()
 		// Ajouter une notif de success
+	}
+
+	async function handleAccept(requestId: string) {
+		try {
+			const res = await fetch("/api/accept-friend-request", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ requestId })
+			})
+
+			const body = await res.json()
+			if (!res.ok) {
+				setErrors({ username: t(body.error) })
+				return
+			}
+
+			const accepted = requests.find(r => r.id === requestId)
+			setRequests(prev => prev.filter(r => r.id !== requestId))
+
+			if (accepted)
+				setFriends(prev => [...prev, {
+					id: accepted.fromUserId,
+					username: accepted.username,
+					image: accepted.image
+				}])
+		} catch (error) {
+			console.error("accept:", error)
+		}
+	}
+
+	async function handleDecline(requestId: string) {
+		try {
+			const res = await fetch("/api/decline-friend-request", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ requestId })
+			})
+
+			const body = await res.json()
+			if (!res.ok) {
+				setErrors({ username: t(body.error) })
+				return
+			}
+			setRequests(prev => prev.filter(r => r.id !== requestId))
+		} catch (error) {
+			console.error("decline:", error)
+		}
 	}
 
 	return <Sidebar>
@@ -209,7 +273,9 @@ export function Friends() {
 								<li key={req.id} className="py-0.5">
 									<div className="flex items-center gap-2">
 										<Avatar username={req.username} image={req.image} size={32} />
-										<span className="first-letter:uppercase">{req.username ?? "?"}</span>
+										<span>{req.username ?? "?"}</span>
+										<button onClick={() => handleAccept(req.id)}>Accept</button>
+										<button onClick={() => handleDecline(req.id)}>Decline</button>
 									</div>
 								</li>
 							))}
@@ -221,7 +287,7 @@ export function Friends() {
 								<li key={friend.id} className="py-0.5">
 									<button onClick={() => setPeerId(friend.id)} className={peerId === friend.id ? "bg-info/15" : ""}>
 										<Avatar username={friend.username} image={friend.image} size={32} />
-										<span className="first-letter:uppercase">{friend.username ?? "?"}</span>
+										<span>{friend.username ?? "?"}</span>
 									</button>
 								</li>
 							))}
@@ -243,7 +309,7 @@ export function Friends() {
 			<div className="flex items-center justify-between pb-4">
 				<p className="font-bold text-lg">Add a friend</p>
 			</div>
-			<form onSubmit={SendRequestFriendHandle}>
+			<form onSubmit={handleSendRequestFriend}>
 				<InputWithText>
 					<Input type="text" name="username" label={t("txt_username")} autoComplete="off" errorMsg={errors.username} customLabelStyle="bg-base-100" />
 				</InputWithText>
