@@ -243,20 +243,7 @@ export function Friends() {
 			{/* Centre (tchat) */}
 			<div className="flex flex-1 flex-col h-screen min-w-0">
 				{/* haut */}
-				<div className="flex items-center justify-between p-4 bg-base-200">
-					<div className="flex items-center w-full gap-2">
-						<Avatar username="Tom" image={``} size={40} />
-						<div>
-							<p className="text-sm">Tom</p>
-							<p className="text-sm text-info">IN A MATCH - 2 v 2</p>
-						</div>
-					</div>
-					<div className="flex items-center gap-2">
-						<button className="btn btn-outline btn-neutral text-neutral-content">Profile</button>
-						<button className="btn btn-outline btn-neutral text-neutral-content">Invite</button>
-						<button className="btn btn-outline btn-error">Block</button>
-					</div>
-				</div>
+				<ConversationFriendDisplay friends={friends} peerId={peerId} />
 
 				{/* tchat */}
 				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
@@ -266,7 +253,7 @@ export function Friends() {
 				</div>
 
 				{/* bas */}
-				<div className="flex items-center justify-between p-2 bg-base-200 gap-4">
+				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 					<div className="w-full pl-2">
 						<Input type="text" name="message" label="Message" value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
 							if (e.key === "Enter")
@@ -274,7 +261,7 @@ export function Friends() {
 						}} />
 					</div>
 					<button className="btn btn-outline btn-info" onClick={handleSend}>Send</button>
-				</div>
+				</div>}
 			</div>
 
 			{/* Droite */}
@@ -349,6 +336,30 @@ export function Friends() {
 function DisplayMessage({ message, isMine }: { message: string, isMine: boolean }) {
 	return <div className={`chat chat-${isMine ? 'end' : 'start'}`}>
 		<div className={`chat-bubble max-w-[70%] whitespace-pre-wrap break-all ${isMine ? 'bg-info/25' : 'bg-neutral-content/15'}`}>{message}</div>
+	</div>
+}
+
+function ConversationFriendDisplay({ friends, peerId }: { friends: Friend[], peerId: string | null }) {
+	if (!peerId)
+		return
+
+	const friend = friends.find(f => f.id === peerId)
+	if (!friend)
+		return
+
+	return <div className="flex items-center justify-between p-4 bg-base-200">
+		<div className="flex items-center w-full gap-2">
+			<Avatar username={friend?.username} image={friend?.image} size={40} />
+			<div>
+				<p className="text-sm">{friend?.username}</p>
+				<p className="text-sm text-info">IN A MATCH - 2 v 2</p>
+			</div>
+		</div>
+		<div className="flex items-center gap-2">
+			<button className="btn btn-outline btn-neutral text-neutral-content">Profile</button>
+			<button className="btn btn-outline btn-neutral text-neutral-content">Invite</button>
+			<button className="btn btn-outline btn-error">Block</button>
+		</div>
 	</div>
 }
 
