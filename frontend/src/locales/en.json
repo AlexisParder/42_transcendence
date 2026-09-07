@@ -49,6 +49,11 @@
 	"txt_err_2fa_invalid": "Code is invalid!",
 	"txt_err_agree_terms": "You must accept the terms!",
 
+	"friend_err_user_not_found": "User not found!",
+	"friend_err_user_self": "You can't send a friend request to yourself!",
+	"friend_err_user_aready_friends": "You are already friends with this user!",
+	"friend_err_user_already_pending": "A friend request is already pending for this user!",
+
 	"privacy_title": "Privacy Policy",
 	"privacy_short_title": "Privacy",
 	"privacy_desc": "Sonar is a student project built for the Transcendence curriculum at 42 School. This page explains what data we collect, why, and how you stay in control of it",

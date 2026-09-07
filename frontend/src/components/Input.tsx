@@ -9,3 +9,10 @@ export function Input({ type, label, name, errorMsg, useLabel = true, customStyl
 		{errorMsg && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs">{errorMsg}</span>}
 	</div>
 }
+
+export function InputWithText({ text = "", children }: { text?: string, children: React.ReactNode }) {
+	return <div className="w-full">
+		{text.length > 0 && <p className="tracking-brand text-xs">{text.toUpperCase()}</p>}
+		{children}
+	</div>
+}

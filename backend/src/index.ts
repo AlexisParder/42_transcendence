@@ -7,22 +7,25 @@ import { checkPwdHandler } from "./routes/checkPwd.route.ts"
 import { getBackupCodesHandler } from "./routes/getBackupCodes.route.ts"
 import { createServer } from "node:http"
 import { Server } from "socket.io"
-import type { ClienToServerEvents, ServerToClientEvents, SocketData } from "./events.ts"
+import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "./events.ts"
 import { prisma } from "./db/client.ts"
 import { getConvHistoryHandler } from "./routes/getConvHistory.route.ts"
 import { getFriendsHandler } from "./routes/getFriends.route.ts"
+import { sendFriendRequestHandler } from "./routes/sendFriendRequest.route.ts"
 
 const app = express()
 const server = createServer(app)
 /**
  * Server<Event ecouté, Event Emis, inter-serveur, type de socket.data>
  */
-const io = new Server<ClienToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
+const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
 	cors: {
 		origin: "http://localhost:5173",
 		credentials: true
 	}
 })
+
+app.set("io", io)
 
 app.use(cors({
 	origin: "http://localhost:5173", // front Vite
@@ -38,11 +41,11 @@ app.get("/api/test", (req, res) => {
 })
 app.get("/api/get-friends", getFriendsHandler)
 
-
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
 app.post("/api/view-codes", getBackupCodesHandler)
 app.post("/api/get-conv-history", getConvHistoryHandler)
+app.post("/api/send-friend-request", sendFriendRequestHandler)
 
 io.use(async (socket, next) => {
 	try {

@@ -1,13 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Avatar } from "../components/Avatar";
-import { Input } from "../components/Input";
+import { Input, InputWithText } from "../components/Input";
 import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
-import type { Friend, Message } from "../../../backend/src/events";
+import type { Friend, FriendRequest, Message } from "../../../backend/src/events";
 import { authClient } from "../lib/auth-client";
-// import { t } from "../lib/translate";
+import { HideModal, Modal, ShowModal } from "../components/Modal";
+import { t } from "../lib/translate";
 
 export function Friends() {
 	const socket = useSocket()
@@ -17,6 +18,9 @@ export function Friends() {
 	const [messages, setMessages] = useState<Message[]>([])
 	const [friends, setFriends] = useState<Friend[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
+	const [errors, setErrors] = useState<{ username?: string }>({})
+	const [requests, setRequests] = useState<FriendRequest[]>([])
+
 
 	useEffect(() => {
 		async function loadFriends() {
@@ -80,6 +84,18 @@ export function Friends() {
 			el.scrollTop = el.scrollHeight
 	}, [messages])
 
+	useEffect(() => {
+		function onFriendRequest(req: FriendRequest) {
+			setRequests(prev => [...prev, req])
+		}
+		
+		socket.on("friend_request_received", onFriendRequest)
+
+		return () => {
+			socket.off("friend_request_received", onFriendRequest)
+		}
+	}, [socket])
+
 	function handleSend() {
 		if (!peerId)
 			return
@@ -107,6 +123,35 @@ export function Friends() {
 			socket.off("new_message", onNewMessage)
 		}
 	}, [socket, peerId])
+
+	const SendRequestFriendHandle: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
+		e.preventDefault()
+		const formElem = e.currentTarget
+
+		const username = new FormData(formElem).get("username")?.toString().trim() ?? ''
+		if (username.length === 0) {
+			setErrors({ username: t("txt_err_user_empty") })
+			return
+		}
+
+		const res = await fetch("/api/send-friend-request", {
+			method: "POST",
+			headers: { "Content-type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ username }),
+		})
+
+		const body = await res.json()
+		if (!res.ok) {
+			setErrors({ username: t(body.error) })
+			return
+		}
+
+		HideModal("SendFriendRequestModal")
+		setErrors({})
+		formElem.reset()
+		// Ajouter une notif de success
+	}
 
 	return <Sidebar>
 		<div className="flex">
@@ -157,7 +202,18 @@ export function Friends() {
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
 						<ConversationsSection />
-						<RequestsSection />
+						{/* <RequestsSection /> */}
+						<ul className="menu bg-base-200 w-full">
+							<li className="uppercase">requests</li>
+							{requests.map(req => (
+								<li key={req.id} className="py-0.5">
+									<div className="flex items-center gap-2">
+										<Avatar username={req.username} image={req.image} size={32} />
+										<span className="first-letter:uppercase">{req.username ?? "?"}</span>
+									</div>
+								</li>
+							))}
+						</ul>
 						{/* <OnlineSection /> */}
 						<ul className="menu bg-base-200 w-full">
 							<li className="uppercase">online</li>
@@ -174,11 +230,32 @@ export function Friends() {
 					</div>
 				</div>
 				{/* Bas */}
-				<div className="p-6">
-					<button className="flex items-center gap-2"><FaPlus /> Add a friend</button>
+				<div className="p-4">
+					<button className="btn btn-outline border-neutral w-full" onClick={() => {
+						setErrors({})
+						ShowModal('SendFriendRequestModal')
+					}}><FaPlus /> Add a friend</button>
 				</div>
 			</div>
 		</div>
+
+		<Modal id="SendFriendRequestModal">
+			<div className="flex items-center justify-between pb-4">
+				<p className="font-bold text-lg">Add a friend</p>
+			</div>
+			<form onSubmit={SendRequestFriendHandle}>
+				<InputWithText>
+					<Input type="text" name="username" label={t("txt_username")} autoComplete="off" errorMsg={errors.username} customLabelStyle="bg-base-100" />
+				</InputWithText>
+				<div className="flex gap-2 justify-end">
+					<button onClick={() => {
+						setErrors({})
+						HideModal('SendFriendRequestModal')
+					}} type="button" className="btn btn-neutral">{t("btn_cancel")}</button>
+					<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
+				</div>
+			</form>
+		</Modal>
 	</Sidebar>
 }
 

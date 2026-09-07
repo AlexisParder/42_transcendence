@@ -1,6 +1,6 @@
 import type React from "react"
 import type { SessionRow } from "../hooks/useSessions"
-import { Input } from "../components/Input"
+import { Input, InputWithText } from "../components/Input"
 import { Sidebar } from "../components/Sidebar"
 import { PasswordBar } from "../components/PasswordBar"
 import { useEffect, useState } from "react"
@@ -550,13 +550,6 @@ function SettingsCat() {
 		<RecoveryCodes />
 		<ReScan2FA />
 	</>
-}
-
-function InputWithText({ text = "", children }: { text?: string, children: React.ReactNode }) {
-	return <div className="w-full">
-		{text.length > 0 && <p className="tracking-brand text-xs">{text.toUpperCase()}</p>}
-		{children}
-	</div>
 }
 
 function SectionSetting({ title, titleColor = "", description, hasDividerBottom = false, children }: { title: string, titleColor?: string, description: string, hasDividerBottom?: boolean, children: React.ReactNode }) {
