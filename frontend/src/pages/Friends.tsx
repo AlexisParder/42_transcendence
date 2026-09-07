@@ -22,6 +22,9 @@ export function Friends() {
 	const [requests, setRequests] = useState<FriendRequest[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
 
+	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
+	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline")
+
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
 			setPresence(prev => ({ ...prev, [payload.userId]: payload.status }))
@@ -293,41 +296,9 @@ export function Friends() {
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
 						<ConversationsSection />
-						{/* <RequestsSection /> */}
-						<ul className="menu bg-base-200 w-full">
-							<li className="uppercase">requests</li>
-							{requests.map(req => (
-								<li key={req.id} className="py-0.5">
-									<div className="flex items-center gap-2">
-										<Avatar username={req.username} image={req.image} size={32} />
-										<span>{req.username ?? "?"}</span>
-										<button onClick={() => handleAccept(req.id)}>Accept</button>
-										<button onClick={() => handleDecline(req.id)}>Decline</button>
-									</div>
-								</li>
-							))}
-						</ul>
-						{/* <OnlineSection /> */}
-						<ul className="menu bg-base-200 w-full">
-							<li className="uppercase">online</li>
-							{friends.map(friend => (
-								<li key={friend.id} className="py-0.5">
-									<button onClick={() => {
-										if (peerId === friend.id)
-										{
-											setPeerId("")
-											setMessages([])
-										}
-										else
-											setPeerId(friend.id)
-									}} className={peerId === friend.id ? "bg-info/15" : ""}>
-										<Avatar username={friend.username} image={friend.image} size={32} />
-										<span>{friend.username ?? "?"} {presence[friend.id]}</span>
-									</button>
-								</li>
-							))}
-						</ul>
-						<OfflineSection />
+						<RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />
+						<OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} />
+						<OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} />
 					</div>
 				</div>
 				{/* Bas */}
@@ -425,56 +396,70 @@ function ConversationsItem({ username, image, lastMsg, lastTimeMsg, isMine, isRe
 	</li>
 }
 
-function RequestsSection() {
+function RequestsSection({requests, onAccept, onDecline}: {
+	requests: FriendRequest[],
+	onAccept: (requestId: string) => void,
+	onDecline: (requestId: string) => void,
+}) {
 	const [isOpened, setIsOpened] = useState(true)
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>requests</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
-				<RequestsItem username={"alexis"} image={``} />
-				<RequestsItem username={"alexis"} image={``} />
-				<RequestsItem username={"alexis"} image={``} />
+				{requests.map(req => (
+					<RequestsItem key={req.id} username={req.username} image={req.image} onAccept={() => onAccept(req.id)} onDecline={() => onDecline(req.id)} />
+				))}
 			</ul>
 		</li>
 	</ul>
 }
 
-function RequestsItem({ username, image }: { username: string, image: string | null | undefined }) {
+function RequestsItem({ username, image, onAccept, onDecline }: { 
+	username: string | null | undefined, 
+	image: string | null | undefined,
+	onAccept: () => void,
+	onDecline: () => void,
+}) {
 	return <li className="py-0.5">
 		<div className="flex">
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} />
 				<div>
-					<p>{username}</p>
+					<p>{username ?? '?'}</p>
 				</div>
 			</div>
 			<div className="flex gap-1">
-				<button className="btn btn-xs bg-info/10 border border-info/50"><FaCheck className="text-info font-light" /></button>
-				<button className="btn btn-xs bg-error/10 border border-error/50"><RxCross1 className="text-error" /></button>
+				<button onClick={onAccept} className="btn btn-xs bg-info/10 border border-info/50"><FaCheck className="text-info font-light" /></button>
+				<button onClick={onDecline} className="btn btn-xs bg-error/10 border border-error/50"><RxCross1 className="text-error" /></button>
 			</div>
 		</div>
 	</li>
 }
 
-function OnlineSection() {
+function OnlineSection({ friends, presence, onSelect, peerId }: {
+	friends: Friend[],
+	presence: Record<string, PresenceStatus>,
+	onSelect: (id: string) => void,
+	peerId: string | null
+}) {
 	const [isOpened, setIsOpened] = useState(true)
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>online</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
-				<OnlineItem username={"gael"} image={``} status={"in a match"} />
-				<OnlineItem username={"gael"} image={``} status={"available"} />
-				<OnlineItem username={"gael"} image={``} status={"away"} />
+				{friends.map(f => (
+					<OnlineItem key={f.id} username={f.username} image={f.image} status={presence[f.id] ?? "available"} isSelected={peerId === f.id} onSelect={() => onSelect(f.id)} />
+				))}
 			</ul>
 		</li>
 	</ul>
 }
 
-function OnlineItem({ username, image, status }: { username: string, image: string | null | undefined, status: "available" | "in a match" | "away" }) {
+function OnlineItem({ username, image, status, isSelected, onSelect }: { username: string | null | undefined, image: string | null | undefined, status: "available" | "in a match" | "away" | "offline", isSelected: boolean, onSelect: () => void }) {
 	return <li className="py-0.5">
-		<div className="flex">
+		<div className={`flex ${isSelected ? "bg-info/15" : ""}`} onClick={onSelect}>
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} status={status} />
 				<div>
@@ -489,24 +474,28 @@ function OnlineItem({ username, image, status }: { username: string, image: stri
 	</li>
 }
 
-function OfflineSection() {
+function OfflineSection({ friends, onSelect, peerId }: {
+	friends: Friend[],
+	onSelect: (id: string) => void,
+	peerId: string | null
+}) {
 	const [isOpened, setIsOpened] = useState(false)
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>offline</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
-				<OfflineItem username={"tiben"} image={``} />
-				<OfflineItem username={"tiben"} image={``} />
-				<OfflineItem username={"tiben"} image={``} />
+				{friends.map(f => (
+					<OfflineItem key={f.id} username={f.username} image={f.image} isSelected={peerId === f.id} onSelect={() => onSelect(f.id)} />
+				))}
 			</ul>
 		</li>
 	</ul>
 }
 
-function OfflineItem({ username, image }: { username: string, image: string | null | undefined }) {
+function OfflineItem({ username, image, isSelected, onSelect }: { username: string | null | undefined, image: string | null | undefined, isSelected: boolean, onSelect: () => void }) {
 	return <li className="py-0.5">
-		<div className="flex opacity-50">
+		<div className={`flex opacity-50 ${isSelected ? "bg-info/15" : ""}`} onClick={onSelect}>
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} status="offline" />
 				<p>{username}</p>
