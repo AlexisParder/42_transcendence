@@ -384,7 +384,7 @@ function ConversationsItem({ username, image, lastMsg, lastTimeMsg, isMine, isRe
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} />
 				<div>
-					<p className="first-letter:uppercase">{username}</p>
+					<p>{username}</p>
 					<p className={`text-xs opacity-60 ${!isMine && !isRead ? "font-semibold" : ""}`}>{lastMsg}</p>
 				</div>
 			</div>
@@ -419,7 +419,7 @@ function RequestsItem({ username, image }: { username: string, image: string | n
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} />
 				<div>
-					<p className="first-letter:uppercase">{username}</p>
+					<p>{username}</p>
 				</div>
 			</div>
 			<div className="flex gap-1">
@@ -451,7 +451,7 @@ function OnlineItem({ username, image, status }: { username: string, image: stri
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} status={status} />
 				<div>
-					<p className="first-letter:uppercase">{username}</p>
+					<p>{username}</p>
 					<p className="text-xs opacity-60">{status}</p>
 				</div>
 			</div>
@@ -482,7 +482,7 @@ function OfflineItem({ username, image }: { username: string, image: string | nu
 		<div className="flex opacity-50">
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} status="offline" />
-				<p className="first-letter:uppercase">{username}</p>
+				<p>{username}</p>
 			</div>
 		</div>
 	</li>
