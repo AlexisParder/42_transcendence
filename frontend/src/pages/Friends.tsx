@@ -309,19 +309,13 @@ export function Friends() {
 
 	return <Sidebar>
 		<div className="flex">
-			{/* Centre (tchat) */}
 			<div className="flex flex-1 flex-col h-screen min-w-0">
-				{/* haut */}
 				<ConversationFriendDisplay friends={friends} peerId={peerId} />
-
-				{/* tchat */}
 				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full">
 						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} />)}
 					</div>
 				</div>
-
-				{/* bas */}
 				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 					<div className="w-full pl-2">
 						<Input type="text" name="message" label="Message" value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
@@ -333,13 +327,10 @@ export function Friends() {
 				</div>}
 			</div>
 
-			{/* Droite */}
 			<div className="flex flex-col bg-base-200 h-screen">
-				{/* Haut */}
 				<div className="p-2">
 					<Input type="text" name="search" label="Search friends..." />
 				</div>
-				{/* Milieu */}
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
 						<ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} />
@@ -348,7 +339,6 @@ export function Friends() {
 						<OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} />
 					</div>
 				</div>
-				{/* Bas */}
 				<div className="p-4">
 					<button className="btn btn-outline border-neutral w-full" onClick={() => {
 						setErrors({})
@@ -531,7 +521,7 @@ function OfflineSection({ friends, onSelect, peerId }: {
 	onSelect: (id: string) => void,
 	peerId: string | null
 }) {
-	const [isOpened, setIsOpened] = useState(false)
+	const [isOpened, setIsOpened] = useState(true)
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
