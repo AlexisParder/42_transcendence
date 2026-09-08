@@ -15,6 +15,7 @@ import { sendFriendRequestHandler } from "./routes/sendFriendRequest.route.ts"
 import { acceptFriendRequestHandler } from "./routes/acceptFriendRequest.route.ts"
 import { declineFriendRequestHandler } from "./routes/declineFriendRequest.route.ts"
 import { getFriendsPendingHandler } from "./routes/getFriendsPending.route.ts"
+import { getConverstionsHandler } from "./routes/getConversations.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -56,6 +57,7 @@ app.post("/api/get-conv-history", getConvHistoryHandler)
 app.post("/api/send-friend-request", sendFriendRequestHandler)
 app.post("/api/accept-friend-request", acceptFriendRequestHandler)
 app.post("/api/decline-friend-request", declineFriendRequestHandler)
+app.post("/api/get-conversations", getConverstionsHandler)
 
 io.use(async (socket, next) => {
 	try {

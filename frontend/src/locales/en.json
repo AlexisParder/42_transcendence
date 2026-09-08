@@ -38,6 +38,7 @@
 	"txt_in a match": "in a match",
 	"txt_away": "away",
 	"txt_offline": "offline",
+	"txt_day_u": "d",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",

@@ -1,7 +1,7 @@
 export interface ClientToServerEvents {
 	send_message: (payload: { toUserId: string, message: string }) => void
 	send_friend_request: (payload: { toUserId: string }) => void
-	set_activity: (payload: {status: "available" | "away"}) => void
+	set_activity: (payload: { status: "available" | "away" }) => void
 }
 
 export interface ServerToClientEvents {
@@ -40,12 +40,22 @@ export interface FriendRequest {
 }
 
 export interface FriendRequestAccept {
-	friendId: string, 
-	username: string | null | undefined, 
+	friendId: string,
+	username: string | null | undefined,
 	image: string | null | undefined
 }
 
 export interface PresenceUpdate {
 	userId: string,
 	status: PresenceStatus
+}
+
+export interface ConversationSummary {
+	peerId: string
+	username: string | null | undefined
+	image: string | null | undefined
+	lastMessage: string
+	lastAt: string
+	isMine: boolean
+	unreadCount: number
 }

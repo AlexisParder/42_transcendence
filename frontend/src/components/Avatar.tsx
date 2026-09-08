@@ -25,7 +25,7 @@ export function Avatar({ username, image, size, status = null }: { username: str
 		{status !== null && <span className={`indicator-item indicator-bottom status status-${statusColor}`}></span>}
 		<div className="grid place-items-center">
 			<div className={`flex rounded-md w-${size / 4} h-${size / 4} shrink-0 bg-info/15 border border-info/50`}>
-				<p className={`flex flex-1 justify-center items-center font-bold text-lg`}>{username && username.length > 0 ? username.charAt(0).toUpperCase() : '-'}</p>
+				<p className={`flex flex-1 justify-center items-center font-bold text-lg`}>{username && username.length > 0 ? username.charAt(0).toUpperCase() : '?'}</p>
 			</div>
 		</div>
 	</div>

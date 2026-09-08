@@ -5,11 +5,12 @@ import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
-import type { Friend, FriendRequest, FriendRequestAccept, Message, PresenceStatus, PresenceUpdate } from "../../../backend/src/events";
+import type { ConversationSummary, Friend, FriendRequest, FriendRequestAccept, Message, PresenceStatus, PresenceUpdate } from "../../../backend/src/events";
 import { authClient } from "../lib/auth-client";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { t } from "../lib/translate";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { formatTime } from "../lib/formatTime";
 
 export function Friends() {
 	useDocumentTitle(t("friends_title"))
@@ -23,6 +24,7 @@ export function Friends() {
 	const [errors, setErrors] = useState<{ username?: string }>({})
 	const [requests, setRequests] = useState<FriendRequest[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
+	const [conversations, setConversations] = useState<ConversationSummary[]>([])
 
 	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
 	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline")
@@ -85,6 +87,28 @@ export function Friends() {
 		}
 
 		loadFriendsPending()
+	}, [])
+
+	useEffect(() => {
+		async function loadConversations() {
+			try {
+				const res = await fetch("/api/get-conversations", {
+					method: "POST",
+					headers: { "Content-type": "application/json" },
+					credentials: "include",
+				})
+
+				if (!res.ok)
+					return
+
+				const data = await res.json()
+				setConversations(data.conversations ?? [])
+			} catch (error) {
+				console.error("load conversations:", error)
+			}
+		}
+
+		loadConversations()
 	}, [])
 
 	useEffect(() => {
@@ -155,6 +179,43 @@ export function Friends() {
 		}
 	}, [socket])
 
+	function updateConversationList(prev: ConversationSummary[], msg: Message, myId: string, openPeerId: string | null): ConversationSummary[] {
+		const otherId = msg.fromUserId === myId ? msg.toUserId : msg.fromUserId
+		const isMine = msg.fromUserId === myId
+		const isReceived = msg.toUserId === myId
+		const countsAsUnread = isReceived && otherId !== openPeerId
+		const existing = prev.find(c => c.peerId === otherId)
+		const others = prev.filter(c => c.peerId !== otherId)
+		const updated: ConversationSummary = {
+			peerId: otherId,
+			username: existing?.username ?? null,
+			image: existing?.image ?? null,
+			lastMessage: msg.message,
+			lastAt: msg.createdAt,
+			isMine,
+			unreadCount: (existing?.unreadCount ?? 0) + (countsAsUnread ? 1 : 0)
+		}
+
+		return [updated, ...others]
+	}
+
+	useEffect(() => {
+		function onNewMessage(msg: Message) {
+			const concernsThisChat = msg.fromUserId === peerId || msg.toUserId === peerId
+
+			if (concernsThisChat)
+				setMessages(prev => [...prev, msg])
+
+			setConversations(prev => updateConversationList(prev, msg, session?.user.id ?? "", peerId))
+		}
+
+		socket.on("new_message", onNewMessage)
+
+		return () => {
+			socket.off("new_message", onNewMessage)
+		}
+	}, [socket, peerId, session])
+
 	function handleSend() {
 		if (!peerId)
 			return
@@ -166,22 +227,6 @@ export function Friends() {
 		socket.emit("send_message", { toUserId: peerId, message })
 		setSendInput("")
 	}
-
-	useEffect(() => {
-		function onNewMessage(msg: Message) {
-			const concernsThisChat = msg.fromUserId === peerId || msg.toUserId === peerId
-
-			if (!concernsThisChat)
-				return
-			setMessages(prev => [...prev, msg])
-		}
-
-		socket.on("new_message", onNewMessage)
-
-		return () => {
-			socket.off("new_message", onNewMessage)
-		}
-	}, [socket, peerId])
 
 	const handleSendRequestFriend: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -297,7 +342,7 @@ export function Friends() {
 				{/* Milieu */}
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
-						<ConversationsSection />
+						<ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} />
 						<RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />
 						<OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} />
 						<OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} />
@@ -363,24 +408,28 @@ function ConversationFriendDisplay({ friends, peerId }: { friends: Friend[], pee
 	</div>
 }
 
-function ConversationsSection() {
+function ConversationsSection({ conversations, onSelect, peerId }: {
+	conversations: ConversationSummary[],
+	onSelect: (id: string) => void,
+	peerId: string | null
+}) {
 	const [isOpened, setIsOpened] = useState(true)
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_conversations_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
-				<ConversationsItem username="tom" image={``} lastMsg="J'ai pas à manger" lastTimeMsg="2 min" isMine={false} isRead={false} />
-				<ConversationsItem username="tom" image={``} lastMsg="J'ai pas à manger" lastTimeMsg="2 min" isMine={true} isRead={true} />
-				<ConversationsItem username="tom" image={``} lastMsg="J'ai pas à manger" lastTimeMsg="2 min" isMine={true} isRead={false} />
+				{conversations.map(conv => (
+					<ConversationsItem key={conv.peerId} username={conv.username} image={conv.image} lastMsg={conv.lastMessage} lastTimeMsg={formatTime(conv.lastAt)} isMine={conv.isMine} isRead={conv.unreadCount === 0} isSelected={peerId === conv.peerId} onSelect={() => onSelect(conv.peerId)} />
+				))}
 			</ul>
 		</li>
 	</ul>
 }
 
-function ConversationsItem({ username, image, lastMsg, lastTimeMsg, isMine, isRead }: { username: string, image: string | null | undefined, lastMsg: string, lastTimeMsg: string, isMine: boolean, isRead: boolean }) {
+function ConversationsItem({ username, image, lastMsg, lastTimeMsg, isMine, isRead, isSelected, onSelect }: { username: string | null | undefined, image: string | null | undefined, lastMsg: string, lastTimeMsg: string, isMine: boolean, isRead: boolean, isSelected: boolean, onSelect: () => void }) {
 	return <li className="py-0.5">
-		<div className="flex">
+		<div className={`flex ${isSelected ? "bg-info/15" : ""}`} onClick={onSelect}>
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} />
 				<div>
@@ -398,7 +447,7 @@ function ConversationsItem({ username, image, lastMsg, lastTimeMsg, isMine, isRe
 	</li>
 }
 
-function RequestsSection({requests, onAccept, onDecline}: {
+function RequestsSection({ requests, onAccept, onDecline }: {
 	requests: FriendRequest[],
 	onAccept: (requestId: string) => void,
 	onDecline: (requestId: string) => void,
@@ -417,8 +466,8 @@ function RequestsSection({requests, onAccept, onDecline}: {
 	</ul>
 }
 
-function RequestsItem({ username, image, onAccept, onDecline }: { 
-	username: string | null | undefined, 
+function RequestsItem({ username, image, onAccept, onDecline }: {
+	username: string | null | undefined,
 	image: string | null | undefined,
 	onAccept: () => void,
 	onDecline: () => void,
@@ -460,7 +509,7 @@ function OnlineSection({ friends, presence, onSelect, peerId }: {
 }
 
 function OnlineItem({ username, image, status, isSelected, onSelect }: { username: string | null | undefined, image: string | null | undefined, status: "available" | "in a match" | "away" | "offline", isSelected: boolean, onSelect: () => void }) {
-	
+
 	return <li className="py-0.5">
 		<div className={`flex ${isSelected ? "bg-info/15" : ""}`} onClick={onSelect}>
 			<div className="flex items-center w-full gap-2">
