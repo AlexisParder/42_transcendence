@@ -9,8 +9,10 @@ import type { Friend, FriendRequest, FriendRequestAccept, Message, PresenceStatu
 import { authClient } from "../lib/auth-client";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { t } from "../lib/translate";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 export function Friends() {
+	useDocumentTitle(t("friends_title"))
 	const socket = useSocket()
 	const { data: session } = authClient.useSession()
 	const [sendInput, setSendInput] = useState("")
@@ -350,13 +352,13 @@ function ConversationFriendDisplay({ friends, peerId }: { friends: Friend[], pee
 			<Avatar username={friend?.username} image={friend?.image} size={40} />
 			<div>
 				<p className="text-sm">{friend?.username}</p>
-				<p className="text-sm text-info">IN A MATCH - 2 v 2</p>
+				<p className="text-xs text-info">IN A MATCH - 2 v 2</p>
 			</div>
 		</div>
 		<div className="flex items-center gap-2">
-			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">Profile</button>
-			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">Invite</button>
-			<button className="btn btn-outline btn-error btn-sm">Block</button>
+			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("settings_profile_title")}</button>
+			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("btn_invite")}</button>
+			<button className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>
 		</div>
 	</div>
 }
@@ -366,7 +368,7 @@ function ConversationsSection() {
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
-			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>conversations</span>
+			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_conversations_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				<ConversationsItem username="tom" image={``} lastMsg="J'ai pas à manger" lastTimeMsg="2 min" isMine={false} isRead={false} />
 				<ConversationsItem username="tom" image={``} lastMsg="J'ai pas à manger" lastTimeMsg="2 min" isMine={true} isRead={true} />
@@ -405,7 +407,7 @@ function RequestsSection({requests, onAccept, onDecline}: {
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
-			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>requests</span>
+			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_requests_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				{requests.map(req => (
 					<RequestsItem key={req.id} username={req.username} image={req.image} onAccept={() => onAccept(req.id)} onDecline={() => onDecline(req.id)} />
@@ -447,7 +449,7 @@ function OnlineSection({ friends, presence, onSelect, peerId }: {
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
-			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>online</span>
+			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_online_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				{friends.map(f => (
 					<OnlineItem key={f.id} username={f.username} image={f.image} status={presence[f.id] ?? "available"} isSelected={peerId === f.id} onSelect={() => onSelect(f.id)} />
@@ -458,17 +460,18 @@ function OnlineSection({ friends, presence, onSelect, peerId }: {
 }
 
 function OnlineItem({ username, image, status, isSelected, onSelect }: { username: string | null | undefined, image: string | null | undefined, status: "available" | "in a match" | "away" | "offline", isSelected: boolean, onSelect: () => void }) {
+	
 	return <li className="py-0.5">
 		<div className={`flex ${isSelected ? "bg-info/15" : ""}`} onClick={onSelect}>
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} status={status} />
 				<div>
 					<p>{username}</p>
-					<p className="text-xs opacity-60">{status}</p>
+					<p className="text-xs opacity-60">{t(`txt_${status}`)}</p>
 				</div>
 			</div>
 			{status !== "in a match" && <div>
-				<button className="btn btn-xs btn-neutral btn-outline text-neutral-content">Invite</button>
+				<button className="btn btn-xs btn-neutral btn-outline text-neutral-content">{t("btn_invite")}</button>
 			</div>}
 		</div>
 	</li>
@@ -483,7 +486,7 @@ function OfflineSection({ friends, onSelect, peerId }: {
 
 	return <ul className="menu menu-paged bg-base-200 w-full">
 		<li>
-			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>offline</span>
+			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_offline_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				{friends.map(f => (
 					<OfflineItem key={f.id} username={f.username} image={f.image} isSelected={peerId === f.id} onSelect={() => onSelect(f.id)} />
