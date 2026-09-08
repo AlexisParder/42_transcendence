@@ -10,9 +10,9 @@ export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("ht
 })
 
 socket.on("connect", () => {
-	console.log("Connecté au serveur, id: ", socket.id)
+	// console.log("Connecté au serveur, id: ", socket.id)
 })
 
 socket.on("connect_error", (err) => {
-	console.log("Erreur de connexion: ", err.message)
+	console.log("Connection error: ", err.message)
 })
