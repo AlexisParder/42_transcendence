@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Avatar } from "../components/Avatar";
 import { Input, InputWithText } from "../components/Input";
 import { Sidebar } from "../components/Sidebar";
@@ -29,6 +29,9 @@ export function Friends() {
 	const conversationsRef = useRef<ConversationSummary[]>([])
 	const [blocked, setBlocked] = useState<Friend[]>([])
 	const [blockTarget, setBlockTarget] = useState<string | null>(null)
+	const [hasMore, setHasMore] = useState(true)
+	const prevScrollHeightRef = useRef<number | null>(null)
+	const loadingMoreRef = useRef(false)
 
 	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
 	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline")
@@ -166,6 +169,8 @@ export function Friends() {
 	useEffect(() => {
 		if (!peerId)
 			return
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setHasMore(true)
 		let cancelled = false
 
 		async function loadHistory() {
@@ -200,11 +205,74 @@ export function Friends() {
 		}
 	}, [peerId])
 
+	const loadOlderMessages = useCallback(async () => {
+		if (!peerId || !hasMore)
+			return
+
+		if (loadingMoreRef.current)
+			return
+
+		if (messages.length === 0)
+			return
+
+		loadingMoreRef.current = true
+		try {
+			const oldest = messages[0]
+			const res = await fetch("/api/get-conv-history", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ peerId, before: oldest.createdAt })
+			})
+			if (!res.ok)
+				return
+
+			const data = await res.json()
+			const older: Message[] = data.messages ?? []
+
+			if (older.length < 50)
+				setHasMore(false)
+
+			if (older.length > 0)
+			{
+				const el = scrollRef.current
+				prevScrollHeightRef.current = el ? el.scrollHeight : null
+				setMessages(prev => [...older, ...prev])
+			}
+		} catch (error) {
+			console.error("load older:", error)
+		} finally {
+			loadingMoreRef.current = false
+		}
+	}, [peerId, hasMore, messages])
+
 	useLayoutEffect(() => {
-		const el = scrollRef.current;
-		if (el)
+		const el = scrollRef.current
+		if (!el)
+			return
+
+		if (prevScrollHeightRef.current !== null){
+			el.scrollTop = el.scrollHeight - prevScrollHeightRef.current
+			prevScrollHeightRef.current = null
+		} else
 			el.scrollTop = el.scrollHeight
 	}, [messages])
+
+	useEffect(() => {
+		const el = scrollRef.current;
+		if (!el)
+			return
+
+		function onScroll() {
+			if (el!.scrollTop < 100)
+				loadOlderMessages()
+		}
+
+		el.addEventListener("scroll", onScroll)
+		return () => {
+			el.removeEventListener("scroll", onScroll)
+		}
+	}, [loadOlderMessages])
 
 	useEffect(() => {
 		function onFriendRequest(req: FriendRequest) {
@@ -472,8 +540,8 @@ export function Friends() {
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
 						{conversations.length > 0 && <ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
-						{requests.length> 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
-						{onlineFriends.length > 0 &&  <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+						{requests.length > 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
+						{onlineFriends.length > 0 && <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
 						{offlineFriends.length > 0 && <OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
 						{blocked.length > 0 && <BlockSection blocked={blocked} onUnblock={handleUnblock} />}
 					</div>
@@ -529,8 +597,8 @@ export function Friends() {
 function DisplayMessage({ message, isMine, createdAt }: { message: string, isMine: boolean, createdAt: string }) {
 	return <div className={`chat chat-${isMine ? 'end' : 'start'}`}>
 		<div className={`chat-bubble max-w-[70%] whitespace-pre-wrap break-all ${isMine ? 'bg-info/25' : 'bg-neutral-content/15'}`}>
-		{message}
-		<p className="text-xs text-neutral-content/60">{formatTimeMsg(createdAt)}</p>
+			{message}
+			<p className="text-xs text-neutral-content/60">{formatTimeMsg(createdAt)}</p>
 		</div>
 	</div>
 }

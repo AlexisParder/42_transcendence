@@ -5,7 +5,7 @@ import { prisma } from "../db/client.ts"
 import type { Message } from "../events.ts"
 
 export async function getConvHistoryHandler(req: Request, res: Response) {
-	const { peerId } = req.body
+	const { peerId, before } = req.body
 
 	try {
 		const session = await auth.api.getSession({
@@ -22,7 +22,8 @@ export async function getConvHistoryHandler(req: Request, res: Response) {
 				OR: [
 					{ userId, targetId: peerId },
 					{ userId: peerId, targetId: userId }
-				]
+				],
+				...(before ? { sendAt: { lt: new Date(before) } } : {})
 			},
 			orderBy: { sendAt: "desc" },
 			take: 50
