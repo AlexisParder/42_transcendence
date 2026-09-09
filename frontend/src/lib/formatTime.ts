@@ -13,3 +13,9 @@ export function formatTime(iso: string): string {
 		return `${h} h`
 	return `${Math.floor(h / 24)} ${t("txt_day_u")}`
 }
+
+export function formatTimeMsg(iso: string): string {
+	const date = new Date(iso).toLocaleString()
+
+	return date
+}
