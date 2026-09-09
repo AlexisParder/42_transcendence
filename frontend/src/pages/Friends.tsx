@@ -65,74 +65,75 @@ export function Friends() {
 		}
 	}, [socket])
 
-	useEffect(() => {
-		async function loadFriends() {
-			try {
-				const res = await fetch("/api/get-friends", {
-					method: "GET",
-					headers: { "Content-type": "application/json" },
-					credentials: "include"
-				})
+	async function loadFriends() {
+		try {
+			const res = await fetch("/api/get-friends", {
+				method: "GET",
+				headers: { "Content-type": "application/json" },
+				credentials: "include"
+			})
 
-				if (!res.ok)
-					return
+			if (!res.ok)
+				return
 
-				const data = await res.json()
-				setFriends(data.friends ?? [])
+			const data = await res.json()
+			setFriends(data.friends ?? [])
 
-				const initialPresence: Record<string, PresenceStatus> = {}
-				for (const f of data.friends ?? [])
-					initialPresence[f.id] = f.status
-				setPresence(initialPresence)
-			} catch (error) {
-				console.error("load friends:", error)
-			}
+			const initialPresence: Record<string, PresenceStatus> = {}
+			for (const f of data.friends ?? [])
+				initialPresence[f.id] = f.status
+			setPresence(initialPresence)
+		} catch (error) {
+			console.error("load friends:", error)
 		}
+	}
 
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		loadFriends()
 	}, [])
 
-	useEffect(() => {
-		async function loadFriendsPending() {
-			try {
-				const res = await fetch("/api/get-friends-pending", {
-					method: "GET",
-					headers: { "Content-type": "application/json" },
-					credentials: "include"
-				})
+	async function loadFriendsPending() {
+		try {
+			const res = await fetch("/api/get-friends-pending", {
+				method: "GET",
+				headers: { "Content-type": "application/json" },
+				credentials: "include"
+			})
 
-				if (!res.ok)
-					return
+			if (!res.ok)
+				return
 
-				const data = await res.json()
-				setRequests(data.requests ?? [])
-			} catch (error) {
-				console.error("load friends pending:", error)
-			}
+			const data = await res.json()
+			setRequests(data.requests ?? [])
+		} catch (error) {
+			console.error("load friends pending:", error)
 		}
-
+	}
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		loadFriendsPending()
 	}, [])
 
-	useEffect(() => {
-		async function loadBlocked() {
-			try {
-				const res = await fetch("/api/get-blocked", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include"
-				})
+	async function loadBlocked() {
+		try {
+			const res = await fetch("/api/get-blocked", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include"
+			})
 
-				if (!res.ok)
-					return
+			if (!res.ok)
+				return
 
-				const data = await res.json()
-				setBlocked(data.blocked ?? [])
-			} catch (error) {
-				console.error("load blocked:", error)
-			}
+			const data = await res.json()
+			setBlocked(data.blocked ?? [])
+		} catch (error) {
+			console.error("load blocked:", error)
 		}
-
+	}
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		loadBlocked()
 	}, [])
 
@@ -184,44 +185,44 @@ export function Friends() {
 		}
 	}
 
+	const loadHistory = useCallback(async (cancelled: boolean) => {
+		try {
+			const res = await fetch("/api/get-conv-history", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ peerId }),
+			})
+
+			if (!res.ok)
+				return
+
+			const data = await res.json()
+
+			if (cancelled)
+				return
+			setMessages(data.messages ?? [])
+		} catch (error) {
+			if (!cancelled)
+				console.error("load history:", error)
+		}
+	}, [peerId])
+
 	useEffect(() => {
 		if (!peerId)
 			return
+
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setHasMore(true)
 		let cancelled = false
 
-		async function loadHistory() {
-			try {
-				const res = await fetch("/api/get-conv-history", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({ peerId }),
-				})
-
-				if (!res.ok)
-					return
-
-				const data = await res.json()
-
-				if (cancelled)
-					return
-				setMessages(data.messages ?? [])
-			} catch (error) {
-				if (!cancelled)
-					console.error("load history:", error)
-			}
-		}
-
-		loadHistory()
-		// eslint-disable-next-line react-hooks/set-state-in-effect
+		loadHistory(cancelled)
 		setRead(peerId)
 
 		return () => {
 			cancelled = true
 		}
-	}, [peerId])
+	}, [peerId, loadHistory])
 
 	const loadOlderMessages = useCallback(async () => {
 		if (!peerId || !hasMore)
@@ -460,7 +461,7 @@ export function Friends() {
 	}
 
 	function closeCurrentConv() {
-		setPeerId("")
+		setPeerId(null)
 		setHasMore(true)
 		prevScrollHeightRef.current = null
 		loadingMoreRef.current = false
@@ -532,6 +533,24 @@ export function Friends() {
 		setBlockTarget(targetId)
 		ShowModal("BlockConfirmModal")
 	}
+
+	useEffect(() => {
+		function onReconnect() {
+			loadFriends()
+			reloadConversations()
+			loadFriendsPending()
+			loadBlocked()
+			if (peerId) {
+				setHasMore(true)
+				loadHistory(false)
+			}
+		}
+
+		socket.io.on("reconnect", onReconnect)
+		return () => {
+			socket.io.off("reconnect", onReconnect)
+		}
+	}, [socket, peerId, loadHistory])
 
 	return <Sidebar>
 		<div className="flex">
