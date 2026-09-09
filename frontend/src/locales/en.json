@@ -21,6 +21,7 @@
 	"btn_sign_up": "Sign up",
 	"btn_sign_out": "Sign out",
 	"btn_add_friend": "Add a friend",
+	"btn_send": "Send",
 
 	"txt_footer": "Transcendence project, 42 School",
 	"txt_enabled": "Enabled",
@@ -41,6 +42,7 @@
 	"txt_away": "away",
 	"txt_offline": "offline",
 	"txt_day_u": "d",
+	"txt_message": "Message",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",

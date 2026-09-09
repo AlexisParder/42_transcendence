@@ -456,12 +456,12 @@ export function Friends() {
 				</div>
 				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 					<div className="w-full pl-2">
-						<Input type="text" name="message" label="Message" value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+						<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
 							if (e.key === "Enter")
 								handleSend()
 						}} />
 					</div>
-					<button className="btn btn-outline btn-info" onClick={handleSend}>Send</button>
+					<button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>
 				</div>}
 			</div>
 
