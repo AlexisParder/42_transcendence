@@ -25,6 +25,7 @@ export function Friends() {
 	const [requests, setRequests] = useState<FriendRequest[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
 	const [conversations, setConversations] = useState<ConversationSummary[]>([])
+	const conversationsRef = useRef<ConversationSummary[]>([])
 
 	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
 	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline")
@@ -90,26 +91,52 @@ export function Friends() {
 	}, [])
 
 	useEffect(() => {
-		async function loadConversations() {
-			try {
-				const res = await fetch("/api/get-conversations", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include",
-				})
+		conversationsRef.current = conversations
+	}, [conversations])
 
-				if (!res.ok)
-					return
+	async function reloadConversations() {
+		try {
+			const res = await fetch("/api/get-conversations", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+			})
 
-				const data = await res.json()
-				setConversations(data.conversations ?? [])
-			} catch (error) {
-				console.error("load conversations:", error)
-			}
+			if (!res.ok)
+				return
+
+			const data = await res.json()
+			setConversations(data.conversations ?? [])
+		} catch (error) {
+			console.error("load conversations:", error)
 		}
+	}
 
-		loadConversations()
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		reloadConversations()
 	}, [])
+
+	async function setRead(peer: string | null | undefined) {
+		if (!peer)
+			return
+
+		try {
+			const res = await fetch("/api/set-read", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ peer }),
+			})
+
+			if (!res.ok)
+				return
+
+			setConversations(prev => prev.map(c => c.peerId === peer ? { ...c, unreadCount: 0 } : c))
+		} catch (error) {
+			console.error("setRead:", error)
+		}
+	}
 
 	useEffect(() => {
 		if (!peerId)
@@ -140,6 +167,9 @@ export function Friends() {
 		}
 
 		loadHistory()
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setRead(peerId)
+
 		return () => {
 			cancelled = true
 		}
@@ -201,16 +231,25 @@ export function Friends() {
 
 	useEffect(() => {
 		function onNewMessage(msg: Message) {
+			const myId = session?.user.id
 			const concernsThisChat = msg.fromUserId === peerId || msg.toUserId === peerId
 
 			if (concernsThisChat)
 				setMessages(prev => [...prev, msg])
 
-			setConversations(prev => updateConversationList(prev, msg, session?.user.id ?? "", peerId))
+			if (msg.toUserId === myId && msg.fromUserId === peerId)
+				setRead(peerId)
+
+			const otherId = msg.fromUserId === myId ? msg.toUserId : msg.fromUserId
+			const isNew = !conversationsRef.current.some(c => c.peerId === otherId)
+
+			if (isNew)
+				reloadConversations()
+			else
+				setConversations(prev => updateConversationList(prev, msg, myId ?? "", peerId))
 		}
 
 		socket.on("new_message", onNewMessage)
-
 		return () => {
 			socket.off("new_message", onNewMessage)
 		}
@@ -307,6 +346,11 @@ export function Friends() {
 		}
 	}
 
+	function closeCurrentConv() {
+		setPeerId("")
+		setMessages([])
+	}
+
 	return <Sidebar>
 		<div className="flex">
 			<div className="flex flex-1 flex-col h-screen min-w-0">
@@ -333,10 +377,10 @@ export function Friends() {
 				</div>
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
-						<ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} />
+						<ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />
 						<RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />
-						<OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} />
-						<OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} />
+						<OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />
+						<OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />
 					</div>
 				</div>
 				<div className="p-4">
@@ -398,9 +442,10 @@ function ConversationFriendDisplay({ friends, peerId }: { friends: Friend[], pee
 	</div>
 }
 
-function ConversationsSection({ conversations, onSelect, peerId }: {
+function ConversationsSection({ conversations, onSelect, closeConv, peerId }: {
 	conversations: ConversationSummary[],
 	onSelect: (id: string) => void,
+	closeConv: () => void,
 	peerId: string | null
 }) {
 	const [isOpened, setIsOpened] = useState(true)
@@ -410,7 +455,12 @@ function ConversationsSection({ conversations, onSelect, peerId }: {
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_conversations_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				{conversations.map(conv => (
-					<ConversationsItem key={conv.peerId} username={conv.username} image={conv.image} lastMsg={conv.lastMessage} lastTimeMsg={formatTime(conv.lastAt)} isMine={conv.isMine} isRead={conv.unreadCount === 0} isSelected={peerId === conv.peerId} onSelect={() => onSelect(conv.peerId)} />
+					<ConversationsItem key={conv.peerId} username={conv.username} image={conv.image} lastMsg={conv.lastMessage} lastTimeMsg={formatTime(conv.lastAt)} isMine={conv.isMine} isRead={conv.unreadCount === 0} isSelected={peerId === conv.peerId} onSelect={() => {
+						if (peerId === conv.peerId)
+							closeConv()
+						else
+							onSelect(conv.peerId)
+					}} />
 				))}
 			</ul>
 		</li>
@@ -478,10 +528,11 @@ function RequestsItem({ username, image, onAccept, onDecline }: {
 	</li>
 }
 
-function OnlineSection({ friends, presence, onSelect, peerId }: {
+function OnlineSection({ friends, presence, onSelect, closeConv, peerId }: {
 	friends: Friend[],
 	presence: Record<string, PresenceStatus>,
 	onSelect: (id: string) => void,
+	closeConv: () => void,
 	peerId: string | null
 }) {
 	const [isOpened, setIsOpened] = useState(true)
@@ -491,7 +542,12 @@ function OnlineSection({ friends, presence, onSelect, peerId }: {
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_online_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				{friends.map(f => (
-					<OnlineItem key={f.id} username={f.username} image={f.image} status={presence[f.id] ?? "available"} isSelected={peerId === f.id} onSelect={() => onSelect(f.id)} />
+					<OnlineItem key={f.id} username={f.username} image={f.image} status={presence[f.id] ?? "available"} isSelected={peerId === f.id} onSelect={() => {
+						if (peerId === f.id)
+							closeConv()
+						else
+							onSelect(f.id)
+					}} />
 				))}
 			</ul>
 		</li>
@@ -516,9 +572,10 @@ function OnlineItem({ username, image, status, isSelected, onSelect }: { usernam
 	</li>
 }
 
-function OfflineSection({ friends, onSelect, peerId }: {
+function OfflineSection({ friends, onSelect, closeConv, peerId }: {
 	friends: Friend[],
 	onSelect: (id: string) => void,
+	closeConv: () => void,
 	peerId: string | null
 }) {
 	const [isOpened, setIsOpened] = useState(true)
@@ -528,7 +585,12 @@ function OfflineSection({ friends, onSelect, peerId }: {
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_offline_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				{friends.map(f => (
-					<OfflineItem key={f.id} username={f.username} image={f.image} isSelected={peerId === f.id} onSelect={() => onSelect(f.id)} />
+					<OfflineItem key={f.id} username={f.username} image={f.image} isSelected={peerId === f.id} onSelect={() => {
+						if (peerId === f.id)
+							closeConv()
+						else
+							onSelect(f.id)
+					}} />
 				))}
 			</ul>
 		</li>
