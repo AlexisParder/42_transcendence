@@ -32,9 +32,14 @@ export function Friends() {
 	const [hasMore, setHasMore] = useState(true)
 	const prevScrollHeightRef = useRef<number | null>(null)
 	const loadingMoreRef = useRef(false)
+	const [search, setSearch] = useState("")
 
-	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
-	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline")
+	const matchesSearch = (username: string | null | undefined) => (username ?? "").toLowerCase().includes(search.trim().toLowerCase())
+
+	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline").filter(f => matchesSearch(f.username))
+	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline").filter(f => matchesSearch(f.username))
+	const filteredConversations = conversations.filter(c => matchesSearch(c.username))
+	const filteredBlocked = blocked.filter(b => matchesSearch(b.username))
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
@@ -233,8 +238,7 @@ export function Friends() {
 			if (older.length < 50)
 				setHasMore(false)
 
-			if (older.length > 0)
-			{
+			if (older.length > 0) {
 				const el = scrollRef.current
 				prevScrollHeightRef.current = el ? el.scrollHeight : null
 				setMessages(prev => [...older, ...prev])
@@ -251,7 +255,7 @@ export function Friends() {
 		if (!el)
 			return
 
-		if (prevScrollHeightRef.current !== null){
+		if (prevScrollHeightRef.current !== null) {
 			el.scrollTop = el.scrollHeight - prevScrollHeightRef.current
 			prevScrollHeightRef.current = null
 		} else
@@ -444,6 +448,9 @@ export function Friends() {
 
 	function closeCurrentConv() {
 		setPeerId("")
+		setHasMore(true)
+		prevScrollHeightRef.current = null
+		loadingMoreRef.current = false
 		setMessages([])
 	}
 
@@ -535,15 +542,15 @@ export function Friends() {
 
 			<div className="flex flex-col bg-base-200 h-screen">
 				<div className="p-2">
-					<Input type="text" name="search" label="Search friends..." />
+					<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
 				</div>
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
-						{conversations.length > 0 && <ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+						{conversations.length > 0 && <ConversationsSection conversations={filteredConversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
 						{requests.length > 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
 						{onlineFriends.length > 0 && <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
 						{offlineFriends.length > 0 && <OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
-						{blocked.length > 0 && <BlockSection blocked={blocked} onUnblock={handleUnblock} />}
+						{blocked.length > 0 && <BlockSection blocked={filteredBlocked} onUnblock={handleUnblock} />}
 					</div>
 				</div>
 				<div className="p-4">
