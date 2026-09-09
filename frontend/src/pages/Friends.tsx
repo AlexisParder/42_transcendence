@@ -33,13 +33,26 @@ export function Friends() {
 	const prevScrollHeightRef = useRef<number | null>(null)
 	const loadingMoreRef = useRef(false)
 	const [search, setSearch] = useState("")
+	const [, setTick] = useState(0)
 
-	const matchesSearch = (username: string | null | undefined) => (username ?? "").toLowerCase().includes(search.trim().toLowerCase())
+	function matchesSearch(username: string | null | undefined) {
+		return (username ?? "").toLowerCase().includes(search.trim().toLowerCase())
+	}
 
 	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline").filter(f => matchesSearch(f.username))
 	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline").filter(f => matchesSearch(f.username))
 	const filteredConversations = conversations.filter(c => matchesSearch(c.username))
 	const filteredBlocked = blocked.filter(b => matchesSearch(b.username))
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setTick(t => t + 1)
+		}, 60000)
+
+		return () => {
+			clearInterval(interval)
+		}
+	}, [])
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
