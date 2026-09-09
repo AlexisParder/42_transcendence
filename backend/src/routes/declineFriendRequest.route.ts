@@ -20,10 +20,10 @@ export async function declineFriendRequestHandler(req: Request, res: Response) {
 		})
 
 		if (!request)
-			return res.status(404).json({ ok: false, error: "friend_req_not_found" })
+			return res.status(404).json({ ok: false, error: "friend_err_user_not_found" })
 
 		if (request.targetId !== userId)
-			return res.status(403).json({ ok: false, error: "friend_req_forbidden" })
+			return res.status(403).json({ ok: false, error: "friend_err_forbidden" })
 
 		await prisma.friends.delete({
 			where: { id: requestId }

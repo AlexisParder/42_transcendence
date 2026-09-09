@@ -9,6 +9,7 @@ import { authClient } from "../lib/auth-client";
 import { FaBars, FaUser } from "react-icons/fa6";
 import { Avatar } from "./Avatar";
 import { t } from "../lib/translate";
+import { truncateText } from "../lib/truncateText";
 
 interface NavItem {
 	to: string,
@@ -66,7 +67,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 					<div className="flex items-end mb-5 p-1.5 border border-neutral rounded-md">
 						<Avatar username={session?.user.username} image={session?.user.image} size={40} />
 						<div className="ml-3">
-							<p className="font-bold">{truncateUsername(username)}</p>
+							<p className="font-bold">{truncateText(username, 11)}</p>
 							<p className="text-warning">1,254 {t("txt_pts")}</p>
 						</div>
 					</div>
@@ -78,8 +79,4 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 			</div>
 		</div>}
 	</>
-}
-
-function truncateUsername(username: string): string {
-	return username.length > 11 ? (username.slice(0, 11) + "..") : username
 }

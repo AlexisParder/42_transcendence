@@ -9,6 +9,7 @@ export interface ServerToClientEvents {
 	friend_request_received: (payload: FriendRequest) => void
 	friend_request_accepted: (payload: FriendRequestAccept) => void
 	presence_update: (payload: PresenceUpdate) => void
+	friend_removed: (payload: { userId: string }) => void
 }
 
 export type PresenceStatus = "available" | "offline" | "away"

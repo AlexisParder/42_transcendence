@@ -11,6 +11,7 @@ import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { t } from "../lib/translate";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { formatTime } from "../lib/formatTime";
+import { truncateText } from "../lib/truncateText";
 
 export function Friends() {
 	useDocumentTitle(t("friends_title"))
@@ -21,11 +22,13 @@ export function Friends() {
 	const [messages, setMessages] = useState<Message[]>([])
 	const [friends, setFriends] = useState<Friend[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
-	const [errors, setErrors] = useState<{ username?: string }>({})
+	const [errors, setErrors] = useState<{ username?: string, block?: string }>({})
 	const [requests, setRequests] = useState<FriendRequest[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
 	const [conversations, setConversations] = useState<ConversationSummary[]>([])
 	const conversationsRef = useRef<ConversationSummary[]>([])
+	const [blocked, setBlocked] = useState<Friend[]>([])
+	const [blockTarget, setBlockTarget] = useState<string | null>(null)
 
 	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
 	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline")
@@ -88,6 +91,28 @@ export function Friends() {
 		}
 
 		loadFriendsPending()
+	}, [])
+
+	useEffect(() => {
+		async function loadBlocked() {
+			try {
+				const res = await fetch("/api/get-blocked", {
+					method: "POST",
+					headers: { "Content-type": "application/json" },
+					credentials: "include"
+				})
+
+				if (!res.ok)
+					return
+
+				const data = await res.json()
+				setBlocked(data.blocked ?? [])
+			} catch (error) {
+				console.error("load blocked:", error)
+			}
+		}
+
+		loadBlocked()
 	}, [])
 
 	useEffect(() => {
@@ -275,6 +300,9 @@ export function Friends() {
 		if (username.length === 0) {
 			setErrors({ username: t("txt_err_user_empty") })
 			return
+		} else if (blocked.find(b => b.username === username)) {
+			setErrors({ username: t("friend_block_err_blocked") })
+			return
 		}
 
 		const res = await fetch("/api/send-friend-request", {
@@ -351,10 +379,76 @@ export function Friends() {
 		setMessages([])
 	}
 
+	async function handleBlock(targetId: string) {
+		try {
+			const res = await fetch("/api/block-user", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ targetId })
+			})
+
+			const body = await res.json()
+			if (!res.ok) {
+				setErrors({ block: t(body.error) })
+				return
+			}
+
+			const person = friends.find(f => f.id === targetId)
+			setFriends(prev => prev.filter(f => f.id !== targetId))
+
+			if (peerId === targetId)
+				closeCurrentConv()
+
+			if (person)
+				setBlocked(prev => [...prev, { ...person, status: "offline" }])
+		} catch (error) {
+			console.error("block:", error)
+		}
+	}
+
+	async function handleUnblock(targetId: string) {
+		try {
+			const res = await fetch("/api/unblock-user", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ targetId })
+			})
+
+			const body = await res.json()
+			if (!res.ok) {
+				setErrors({ block: t(body.error) })
+				return
+			}
+			setBlocked(prev => prev.filter(b => b.id !== targetId))
+		} catch (error) {
+			console.error("unblock:", error)
+		}
+	}
+
+	useEffect(() => {
+		function onFriendRemoved(payload: { userId: string }) {
+			setFriends(prev => prev.filter(f => f.id !== payload.userId))
+			if (peerId === payload.userId)
+				closeCurrentConv()
+		}
+
+		socket.on("friend_removed", onFriendRemoved)
+		return () => {
+			socket.off("friend_removed", onFriendRemoved)
+		}
+	}, [socket, peerId])
+
+	function askBlock(targetId: string) {
+		setBlockTarget(targetId)
+		ShowModal("BlockConfirmModal")
+	}
+
 	return <Sidebar>
 		<div className="flex">
 			<div className="flex flex-1 flex-col h-screen min-w-0">
-				<ConversationFriendDisplay friends={friends} peerId={peerId} />
+				<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} />
 				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full">
 						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} />)}
@@ -377,24 +471,25 @@ export function Friends() {
 				</div>
 				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
 					<div className="min-h-full">
-						<ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />
-						<RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />
-						<OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />
-						<OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />
+						{conversations.length > 0 && <ConversationsSection conversations={conversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+						{requests.length> 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
+						{onlineFriends.length > 0 &&  <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+						{offlineFriends.length > 0 && <OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+						{blocked.length > 0 && <BlockSection blocked={blocked} onUnblock={handleUnblock} />}
 					</div>
 				</div>
 				<div className="p-4">
 					<button className="btn btn-outline border-neutral w-full" onClick={() => {
 						setErrors({})
 						ShowModal('SendFriendRequestModal')
-					}}><FaPlus /> Add a friend</button>
+					}}><FaPlus /> {t("btn_add_friend")}</button>
 				</div>
 			</div>
 		</div>
 
 		<Modal id="SendFriendRequestModal">
 			<div className="flex items-center justify-between pb-4">
-				<p className="font-bold text-lg">Add a friend</p>
+				<p className="font-bold text-lg">{t("btn_add_friend")}</p>
 			</div>
 			<form onSubmit={handleSendRequestFriend}>
 				<InputWithText>
@@ -404,10 +499,29 @@ export function Friends() {
 					<button onClick={() => {
 						setErrors({})
 						HideModal('SendFriendRequestModal')
-					}} type="button" className="btn btn-neutral">{t("btn_cancel")}</button>
+					}} type="reset" className="btn btn-neutral">{t("btn_cancel")}</button>
 					<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
 				</div>
 			</form>
+		</Modal>
+
+		<Modal id="BlockConfirmModal">
+			<div className="pb-4">
+				<p className="font-bold text-lg">{t("friend_block_confirm_title")}</p>
+				<p className="text-sm opacity-60">{t("friend_block_confirm_desc")}</p>
+			</div>
+			<div className="flex gap-2 justify-end">
+				<button onClick={() => {
+					setBlockTarget(null)
+					HideModal('BlockConfirmModal')
+				}} type="reset" className="btn btn-neutral">{t("btn_cancel")}</button>
+				<button className="btn btn-info btn-outline" onClick={() => {
+					if (blockTarget)
+						handleBlock(blockTarget ?? "")
+					setBlockTarget(null)
+					HideModal('BlockConfirmModal')
+				}}>{t("btn_confirm")}</button>
+			</div>
 		</Modal>
 	</Sidebar>
 }
@@ -418,7 +532,7 @@ function DisplayMessage({ message, isMine }: { message: string, isMine: boolean 
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, peerId }: { friends: Friend[], peerId: string | null }) {
+function ConversationFriendDisplay({ friends, peerId, onBlock }: { friends: Friend[], peerId: string | null, onBlock: (id: string) => void }) {
 	if (!peerId)
 		return
 
@@ -437,7 +551,7 @@ function ConversationFriendDisplay({ friends, peerId }: { friends: Friend[], pee
 		<div className="flex items-center gap-2">
 			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("settings_profile_title")}</button>
 			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("btn_invite")}</button>
-			<button className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>
+			<button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>
 		</div>
 	</div>
 }
@@ -473,8 +587,8 @@ function ConversationsItem({ username, image, lastMsg, lastTimeMsg, isMine, isRe
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} />
 				<div>
-					<p>{username}</p>
-					<p className={`text-xs opacity-60 ${!isMine && !isRead ? "font-semibold" : ""}`}>{lastMsg}</p>
+					<p>{truncateText(username ?? "", 11)}</p>
+					<p className={`text-xs opacity-60 ${!isMine && !isRead ? "font-semibold" : ""}`}>{truncateText(lastMsg, 10)}</p>
 				</div>
 			</div>
 			<div className="flex flex-col gap-2 items-end">
@@ -517,7 +631,7 @@ function RequestsItem({ username, image, onAccept, onDecline }: {
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} />
 				<div>
-					<p>{username ?? '?'}</p>
+					<p>{truncateText(username ?? "", 11)}</p>
 				</div>
 			</div>
 			<div className="flex gap-1">
@@ -561,7 +675,7 @@ function OnlineItem({ username, image, status, isSelected, onSelect }: { usernam
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} status={status} />
 				<div>
-					<p>{username}</p>
+					<p>{truncateText(username ?? "", 11)}</p>
 					<p className="text-xs opacity-60">{t(`txt_${status}`)}</p>
 				</div>
 			</div>
@@ -602,7 +716,41 @@ function OfflineItem({ username, image, isSelected, onSelect }: { username: stri
 		<div className={`flex opacity-50 ${isSelected ? "bg-info/15" : ""}`} onClick={onSelect}>
 			<div className="flex items-center w-full gap-2">
 				<Avatar username={username} image={image} size={32} status="offline" />
-				<p>{username}</p>
+				<p>{truncateText(username ?? "", 11)}</p>
+			</div>
+		</div>
+	</li>
+}
+
+function BlockSection({ blocked, onUnblock }: {
+	blocked: Friend[],
+	onUnblock: (id: string) => void
+}) {
+	const [isOpened, setIsOpened] = useState(false)
+
+	return <ul className="menu menu-paged bg-base-200 w-full">
+		<li>
+			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_block_title")}</span>
+			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
+				{blocked.map(f => (
+					<BlockItem key={f.id} username={f.username} image={f.image} onUnblock={() => onUnblock(f.id)} />
+				))}
+			</ul>
+		</li>
+	</ul>
+}
+
+function BlockItem({ username, image, onUnblock }: { username: string | null | undefined, image: string | null | undefined, onUnblock: () => void }) {
+	return <li className="py-0.5">
+		<div className="flex">
+			<div className="flex items-center w-full gap-2">
+				<Avatar username={username} image={image} size={32} status={null} />
+				<div>
+					<p>{username}</p>
+				</div>
+			</div>
+			<div>
+				<button className="btn btn-xs btn-neutral btn-outline text-neutral-content" onClick={onUnblock}>{t("btn_unblock")}</button>
 			</div>
 		</div>
 	</li>

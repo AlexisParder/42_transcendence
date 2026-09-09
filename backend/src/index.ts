@@ -17,6 +17,9 @@ import { declineFriendRequestHandler } from "./routes/declineFriendRequest.route
 import { getFriendsPendingHandler } from "./routes/getFriendsPending.route.ts"
 import { getConverstionsHandler } from "./routes/getConversations.route.ts"
 import { setReadHandler } from "./routes/setRead.route.ts"
+import { blockUserHandler } from "./routes/blockUserhandler.route.ts"
+import { unblockUserHandler } from "./routes/unblockUserhandler.route.ts"
+import { getBlockedHandler } from "./routes/getBlocked.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -60,6 +63,9 @@ app.post("/api/accept-friend-request", acceptFriendRequestHandler)
 app.post("/api/decline-friend-request", declineFriendRequestHandler)
 app.post("/api/get-conversations", getConverstionsHandler)
 app.post("/api/set-read", setReadHandler)
+app.post("/api/block-user", blockUserHandler)
+app.post("/api/unblock-user", unblockUserHandler)
+app.post("/api/get-blocked", getBlockedHandler)
 
 io.use(async (socket, next) => {
 	try {

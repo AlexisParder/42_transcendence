@@ -22,13 +22,13 @@ export async function acceptFriendRequestHandler(req: Request, res: Response) {
 		})
 
 		if (!request)
-			return res.status(404).json({ ok: false, error: "friend_req_not_found" })
+			return res.status(404).json({ ok: false, error: "friend_err_user_not_found" })
 
 		if (request.targetId !== userId)
-			return res.status(403).json({ ok: false, error: "friend_req_forbidden" })
+			return res.status(403).json({ ok: false, error: "friend_err_forbidden" })
 
 		if (request.isAccepted)
-			return res.status(409).json({ ok: false, error: "friend_request_already_accepted" })
+			return res.status(409).json({ ok: false, error: "friend_err_user_aready_friends" })
 
 		await prisma.friends.update({
 			where: { id: requestId },
