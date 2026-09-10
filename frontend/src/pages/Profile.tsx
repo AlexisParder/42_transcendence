@@ -14,7 +14,7 @@ export function Profile() {
 		{isPending && <p>Loading...</p>}
 		{!isPending && <div className="p-2">
 			{/* Haut */}
-			<div className="flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4">
+			<div className="flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
 				{/* gauche */}
 				<div className="flex items-center gap-2">
 					<Avatar username={"alexis"} image={session?.user.image} size={88} />
@@ -31,21 +31,21 @@ export function Profile() {
 			</div>
 
 			{/* Milieu */}
-			<div className="grid grid-cols-2 text-center md:grid-cols-4 border-b border-base-300">
+			<div className="grid grid-cols-2 text-center md:text-left md:grid-cols-4 border-b border-base-300">
 				<div className="flex-1/4 p-4">
-					<p className="font-bold text-2xl">128</p>
+					<p className="font-bold text-2xl font-mono">128</p>
 					<p className="text-xs text-neutral-content/50">matches</p>
 				</div>
 				<div className="flex-1/4 p-4 border-l border-base-300">
-					<p className="font-bold text-2xl text-info">61 %</p>
+					<p className="font-bold text-2xl text-info font-mono">61 %</p>
 					<p className="text-xs text-neutral-content/50">win rate</p>
 				</div>
 				<div className="flex-1/4 p-4 md:border-l border-base-300">
-					<p className="font-bold text-2xl">44 %</p>
+					<p className="font-bold text-2xl font-mono">44 %</p>
 					<p className="text-xs text-neutral-content/50">shot accuracy</p>
 				</div>
 				<div className="flex-1/4 p-4 border-l border-base-300">
-					<p className="font-bold text-2xl text-warning">3</p>
+					<p className="font-bold text-2xl text-warning font-mono">3</p>
 					<p className="text-xs text-neutral-content/50">tournaments won</p>
 				</div>
 			</div>
