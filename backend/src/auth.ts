@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./db/client.ts"
 import { sendMail } from "./lib/mail.ts"
-import { twoFactor, username } from "better-auth/plugins"
+import { twoFactor, username, emailOTP } from "better-auth/plugins"
 
 export const auth = betterAuth({
 	appName: "Sonar",
@@ -28,14 +28,6 @@ export const auth = betterAuth({
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
 		expiresIn: 3600,
-		sendVerificationEmail: async ({user, token}) => {
-			const link = `${process.env.BETTER_AUTH_URL}/api/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent("http://localhost:5173/")}`
-			await sendMail({
-				to: user.email,
-				subject: "Confirm your address",
-				html: `<a href="${link}">Confirm my address</a>`,
-			})
-		}
 	},
 	user: {
 		deleteUser: {
@@ -64,7 +56,18 @@ export const auth = betterAuth({
 			minUsernameLength: 3,
 			maxUsernameLength: 25,
 		}),
-		twoFactor()
+		twoFactor(),
+		emailOTP({
+			otpLength: 6,
+			expiresIn: 600,
+			sendVerificationOTP: async ({email, otp}) => {
+				await sendMail({
+					to: email,
+					subject: "Your Sonar code",
+					html: `<p>Your code: <strong>${otp}</strong></p>`,
+				})
+			},
+		})
 	],
 	databaseHooks: {
 		user: {

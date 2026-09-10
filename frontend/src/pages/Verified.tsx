@@ -1,11 +1,12 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SonarTitle } from "../components/SonarTitle";
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { IoMailUnreadOutline } from "react-icons/io5";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { authClient } from "../lib/auth-client";
+import { t } from "../lib/translate";
 
-const COOLDOWN = 60
+const COOLDOWN = 2
 
 function formatMS(total: number) {
 	return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`
@@ -14,11 +15,39 @@ function formatMS(total: number) {
 export function Verified() {
 	useDocumentTitle("Verifed email")
 
+	const navigate = useNavigate()
 	const location = useLocation()
 	const email = (location.state as { email?: string } | null)?.email
 
 	const [left, setLeft] = useState(COOLDOWN)
 	const [sending, setSending] = useState(false)
+
+	const [code, setCode] = useState("")
+	const [errors, setErrors] = useState<{ code?: string }>({})
+	const [verifying, setVerifying] = useState(false)
+
+	const verify = useCallback(async (otp: string) => {
+		if (verifying) return
+		setVerifying(true)
+
+		const { error } = await authClient.emailOtp.verifyEmail({ email: email!, otp })
+
+		if (error) {
+			if (error.code == "INVALID_OTP" || error.status == 400)
+				setErrors({ code: t("invalid_otp") })
+			setCode("")
+			setVerifying(false)
+			return
+		}
+		navigate("/", { replace: true })
+	}, [email, navigate, verifying])
+
+	useEffect(() => {
+		if (code.length != 6) return
+	
+		const id = setTimeout(() => verify(code), 0)
+		return () => clearTimeout(id)
+	}, [code, verify])
 
 	useEffect(() => {
 		if (left <= 0) return
@@ -26,27 +55,30 @@ export function Verified() {
 		return () => clearTimeout(id)
 	}, [left])
 
-	// useEffect(() => {
-	// 	const id = setInterval(async () => {
-	// 		const {data} = await authClient.getSession({
-	// 			query: { disableCookieCache: true }
-	// 		})
-	// 		if (data?.user.emailVerified)
-	// 			return <Navigate to="/" replace />
-	// 	}, 5000)
-	// 	return () => clearTimeout(id)
-	// }, [Navigate])
-
 	async function resend() {
-		if (!email) return
+		if (!email || sending || left > 0) return
+		
 		setSending(true)
-		await authClient.sendVerificationEmail({email, callbackURL: "/login"})
+		setErrors({})
+		setCode("")
+
+		const {error} = await authClient.emailOtp.sendVerificationOtp({
+			email,
+			type: "email-verification"
+		})
+
 		setSending(false)
+
+		if (error) {
+			setErrors({code: t("erreur envoie email")})
+			return
+		}
+		
 		setLeft(COOLDOWN)
 	}
 
 	if (!email)
-		return <Navigate to="/register" replace />
+		return navigate("/register", { replace: true })
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
 		<div className="card bg-base-200 max-w-md w-full shadow-xl border border-neutral">
@@ -70,6 +102,33 @@ export function Verified() {
 							</div>
 							<button className="text-info hover:link">Wrong address?</button>
 						</div>
+
+						<div className="text-center">
+							<p className="text-neutral-content/40 text-xs mt-2">Code de verif</p>
+							<label className="otp otp-info otp-lg m-2">
+								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
+								<input
+									value={code}
+									onChange={(e) => {
+										setErrors({})
+										setCode(e.target.value.replace(/\D/g, ""))
+									}}
+									disabled={verifying}
+									type="text"
+									autoComplete="one-time-code"
+									inputMode="numeric"
+									maxLength={6}
+									pattern="[0-9]{6}"
+								/>
+							</label>
+							{errors.code && <span className="text-error block">{errors.code}</span>}
+						</div>
+
 						<button onClick={resend} disabled={left > 0 || sending} className="btn btn-outline border-neutral text-neutral-content/50 hover:text-neutral-content hover:border-neutral-content/60">Resend the mail</button>
 						{left > 0 && <p className="text-center text-white/50">Available again in {formatMS(left)}</p>}
 					</div>

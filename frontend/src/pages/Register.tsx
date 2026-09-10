@@ -101,6 +101,10 @@ export function Register() {
 			else
 				setErrors({ form: t("sign_up_failed") })
 		} else {
+			await authClient.emailOtp.sendVerificationOtp({
+				email,
+				type: "email-verification",
+			})
 			navigate('/verified', {state: {email}})
 		}
 	}
