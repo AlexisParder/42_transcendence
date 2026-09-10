@@ -4,7 +4,6 @@ import { Sidebar } from "../components/Sidebar";
 import { t } from "../lib/translate";
 import { FaRegCircle } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
-import { formatTimeMsg } from "../lib/formatTime";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 export function Profile() {
@@ -21,7 +20,7 @@ export function Profile() {
 					<Avatar username={"alexis"} image={session?.user.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
 						<p className="text-3xl flex items-center gap-2 font-bold">{session?.user.username} <span className="badge badge-info badge-outline badge-sm">CAPTAIN</span></p>
-						<p className="text-sm text-neutral-content/50">Joined {formatTimeMsg(session!.user.createdAt.toString())}</p>
+						<p className="text-sm text-neutral-content/50">Joined {session!.user.createdAt.toDateString()}</p>
 					</div>
 				</div>
 				{/* droite */}
