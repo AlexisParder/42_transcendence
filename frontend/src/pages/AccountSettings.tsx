@@ -116,6 +116,7 @@ function SettingsCat() {
 	const isOTPEnabled = session?.user.twoFactorEnabled ? true : false
 	const [prevUsername, setPrevUsername] = useState(session?.user.username)
 	const [prevLanguage, setPrevLanguage] = useState(session?.user.language)
+	const [code, setCode] = useState("")
 
 	if (session?.user.username !== prevUsername) {
 		setPrevUsername(session?.user.username)
@@ -352,7 +353,6 @@ function SettingsCat() {
 		}
 
 		if (session?.user.twoFactorEnabled) {
-			const code = formElem.get("code")?.toString().trim() as string
 			if (code.length <= 0) {
 				setErrors({ code: t("txt_err_2fa_empty") })
 				return
@@ -516,7 +516,7 @@ function SettingsCat() {
 						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
-						<input type="text" name="code" autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
+						<input type="text" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
 					</label>
 					{errors.code && <span className="text-error block">{errors.code}</span>}
 				</div>}
@@ -607,6 +607,7 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 	const [step, setStep] = useState<Enable2FAStep>('password')
 	const [totpURI, setTotpURI] = useState<string | null>(null)
 	const [errors, setErrors] = useState<{ confirmPwd?: string, code?: string }>({})
+	const [code, setCode] = useState("")
 
 	const reset = () => {
 		setStep('password')
@@ -663,7 +664,6 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 			return
 		}
 
-		const code = new FormData(formElem).get("code")?.toString().trim() as string
 		if (code.length <= 0) {
 			setErrors({ code: t("txt_err_2fa_empty") })
 			return
@@ -714,7 +714,7 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 						<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
-						<input type="text" name="code" autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
+						<input type="text" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
 					</label>
 					{errors.code && <span className="text-error block">{errors.code}</span>}
 				</div>
