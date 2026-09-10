@@ -16,25 +16,25 @@ export function TwoFactor() {
 	useDocumentTitle(t("otp_title"))
 	const [step, setStep] = useState<OTPType>('app')
 	const [errors, setErrors] = useState<Errors>({})
+	const [codeTotp, setCodeTotp] = useState("")
 	const navigate = useNavigate()
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
 		const form = e.currentTarget
-		const code = new FormData(form).get("code")?.toString().trim() as string
 		const trustDevice = new FormData(form).get('trust') ? true : false
 
-		if (code.length <= 0) {
+		if (codeTotp.length <= 0) {
 			setErrors({ code: t("txt_err_2fa_empty") })
 			return
-		} else if (code.length !== 6) {
+		} else if (codeTotp.length !== 6) {
 			setErrors({ code: t("txt_err_2fa_size") })
 			return
 		}
 
 		const { error } = await authClient.twoFactor.verifyTotp({
-			code,
+			code: codeTotp,
 			trustDevice
 		})
 
@@ -86,7 +86,7 @@ export function TwoFactor() {
 							<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 							<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 							<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
-							<input type="text" name="code" autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
+							<input type="text" value={codeTotp} onChange={(e) => setCodeTotp(e.target.value.replace(/\D/g, ""))} autoComplete="one-time-code" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" />
 						</label>
 						{errors.code && <span className="text-error block pl-2">{errors.code}</span>}
 
