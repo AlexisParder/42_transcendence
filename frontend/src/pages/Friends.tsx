@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Avatar } from "../components/Avatar";
 import { Input, InputWithText } from "../components/Input";
 import { Sidebar } from "../components/Sidebar";
@@ -12,6 +12,7 @@ import { t } from "../lib/translate";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { formatTime, formatTimeMsg } from "../lib/formatTime";
 import { truncateText } from "../lib/truncateText";
+import { GoKebabHorizontal } from "react-icons/go";
 
 export function Friends() {
 	useDocumentTitle(t("friends_title"))
@@ -552,85 +553,144 @@ export function Friends() {
 		}
 	}, [socket, peerId, loadHistory])
 
+	function ClearAndOpenFriendModal()
+	{
+		setErrors({})
+		ShowModal('SendFriendRequestModal')
+	}
+
 	return <Sidebar>
-		<div className="flex">
-			<div className="flex flex-1 flex-col h-screen min-w-0">
-				<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} />
-				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
-					<div className="flex flex-col min-h-full">
-						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
+		{/* , , , setPeerId, peerId, closeCurrentConv, requests, handleAccept, handleDecline, onlineFriends, offlineFriends, filteredBlocked, presence, handleUnblock */}
+		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
+			<div className="flex">
+				<div className="flex flex-1 flex-col h-screen min-w-0">
+					<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} />
+					<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+						<div className="flex flex-col min-h-full">
+							{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
+						</div>
 					</div>
+					{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
+						<div className="w-full pl-2">
+							<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+								if (e.key === "Enter")
+									handleSend()
+							}} />
+						</div>
+						<button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>
+					</div>}
 				</div>
-				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
-					<div className="w-full pl-2">
-						<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
-							if (e.key === "Enter")
-								handleSend()
-						}} />
+
+				{/* <div className="flex flex-col bg-base-200 h-screen">
+					<div className="p-2">
+						<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
 					</div>
-					<button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>
-				</div>}
+					<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
+						<div className="min-h-full">
+							{conversations.length > 0 && <ConversationsSection conversations={filteredConversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+							{requests.length > 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
+							{onlineFriends.length > 0 && <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+							{offlineFriends.length > 0 && <OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+							{blocked.length > 0 && <BlockSection blocked={filteredBlocked} onUnblock={handleUnblock} />}
+						</div>
+					</div>
+					<div className="p-4">
+						<button className="btn btn-outline border-neutral w-full" onClick={() => {
+							setErrors({})
+							ShowModal('SendFriendRequestModal')
+						}}><FaPlus /> {t("btn_add_friend")}</button>
+					</div>
+				</div> */}
 			</div>
 
-			<div className="flex flex-col bg-base-200 h-screen">
-				<div className="p-2">
-					<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
+			<Modal id="SendFriendRequestModal">
+				<div className="flex items-center justify-between pb-4">
+					<p className="font-bold text-lg">{t("btn_add_friend")}</p>
 				</div>
-				<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
-					<div className="min-h-full">
-						{conversations.length > 0 && <ConversationsSection conversations={filteredConversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
+				<form onSubmit={handleSendRequestFriend}>
+					<InputWithText>
+						<Input type="text" name="username" label={t("txt_username")} autoComplete="off" errorMsg={errors.username} customLabelStyle="bg-base-100" />
+					</InputWithText>
+					<div className="flex gap-2 justify-end">
+						<button onClick={() => {
+							setErrors({})
+							HideModal('SendFriendRequestModal')
+						}} type="reset" className="btn btn-neutral">{t("btn_cancel")}</button>
+						<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
+					</div>
+				</form>
+			</Modal>
+
+			<Modal id="BlockConfirmModal">
+				<div className="pb-4">
+					<p className="font-bold text-lg">{t("friend_block_confirm_title")}</p>
+					<p className="text-sm opacity-60">{t("friend_block_confirm_desc")}</p>
+				</div>
+				<div className="flex gap-2 justify-end">
+					<button onClick={() => {
+						setBlockTarget(null)
+						HideModal('BlockConfirmModal')
+					}} type="reset" className="btn btn-neutral">{t("btn_cancel")}</button>
+					<button className="btn btn-info btn-outline" onClick={() => {
+						if (blockTarget)
+							handleBlock(blockTarget ?? "")
+						setBlockTarget(null)
+						HideModal('BlockConfirmModal')
+					}}>{t("btn_confirm")}</button>
+				</div>
+			</Modal>
+		</SidebarRight>
+	</Sidebar>
+}
+
+function SidebarRight({ children, search, setSearch, filteredConversations, setPeerId, peerId, closeCurrentConv, requests, handleAccept, handleDecline, onlineFriends, offlineFriends, filteredBlocked, presence, handleUnblock, ClearAndOpenFriendModal }: {
+	children: React.ReactNode,
+	search: string,
+	setSearch: (value: string) => void,
+	filteredConversations: ConversationSummary[],
+	setPeerId: (id: string) => void,
+	peerId: string | null,
+	closeCurrentConv: () => void,
+	requests: FriendRequest[],
+	handleAccept: (id: string) => void,
+	handleDecline: (id: string) => void,
+	onlineFriends: Friend[],
+	offlineFriends: Friend[],
+	filteredBlocked: Friend[],
+	presence: Record<string, PresenceStatus>,
+	handleUnblock: (id: string) => void,
+	ClearAndOpenFriendModal: () => void
+}) {
+	return <>
+		<div className={`drawer drawer-end md:drawer-open min-h-screen`}>
+			<input id="sidebarRightDrawer" type="checkbox" className="drawer-toggle hidden" />
+			<div className="drawer-content">
+				<label htmlFor="sidebarRightDrawer" className="btn btn-ghost drawer-button md:hidden">
+					<GoKebabHorizontal className="size-5" />
+				</label>
+				{children}
+			</div>
+			<div className="drawer-side">
+				<label htmlFor="sidebarRightDrawer" aria-label="close sidebar" className="drawer-overlay"></label>
+				<ul className="menu bg-base-200 min-h-full w-65 max-w-65 p-2 gap-1">
+					<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
+
+					<div className="flex flex-col flex-1 gap-1">
+						{filteredConversations.length > 0 && <ConversationsSection conversations={filteredConversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
 						{requests.length > 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
 						{onlineFriends.length > 0 && <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
 						{offlineFriends.length > 0 && <OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
-						{blocked.length > 0 && <BlockSection blocked={filteredBlocked} onUnblock={handleUnblock} />}
+						{filteredBlocked.length > 0 && <BlockSection blocked={filteredBlocked} onUnblock={handleUnblock} />}
 					</div>
-				</div>
-				<div className="p-4">
-					<button className="btn btn-outline border-neutral w-full" onClick={() => {
-						setErrors({})
-						ShowModal('SendFriendRequestModal')
-					}}><FaPlus /> {t("btn_add_friend")}</button>
-				</div>
+
+
+					<div className="p-2">
+						<button className="btn btn-outline border-neutral w-full" onClick={ClearAndOpenFriendModal}><FaPlus /> {t("btn_add_friend")}</button>
+					</div>
+				</ul>
 			</div>
 		</div>
-
-		<Modal id="SendFriendRequestModal">
-			<div className="flex items-center justify-between pb-4">
-				<p className="font-bold text-lg">{t("btn_add_friend")}</p>
-			</div>
-			<form onSubmit={handleSendRequestFriend}>
-				<InputWithText>
-					<Input type="text" name="username" label={t("txt_username")} autoComplete="off" errorMsg={errors.username} customLabelStyle="bg-base-100" />
-				</InputWithText>
-				<div className="flex gap-2 justify-end">
-					<button onClick={() => {
-						setErrors({})
-						HideModal('SendFriendRequestModal')
-					}} type="reset" className="btn btn-neutral">{t("btn_cancel")}</button>
-					<button className="btn btn-info btn-outline">{t("btn_confirm")}</button>
-				</div>
-			</form>
-		</Modal>
-
-		<Modal id="BlockConfirmModal">
-			<div className="pb-4">
-				<p className="font-bold text-lg">{t("friend_block_confirm_title")}</p>
-				<p className="text-sm opacity-60">{t("friend_block_confirm_desc")}</p>
-			</div>
-			<div className="flex gap-2 justify-end">
-				<button onClick={() => {
-					setBlockTarget(null)
-					HideModal('BlockConfirmModal')
-				}} type="reset" className="btn btn-neutral">{t("btn_cancel")}</button>
-				<button className="btn btn-info btn-outline" onClick={() => {
-					if (blockTarget)
-						handleBlock(blockTarget ?? "")
-					setBlockTarget(null)
-					HideModal('BlockConfirmModal')
-				}}>{t("btn_confirm")}</button>
-			</div>
-		</Modal>
-	</Sidebar>
+	</>
 }
 
 function DisplayMessage({ message, isMine, createdAt }: { message: string, isMine: boolean, createdAt: string }) {
