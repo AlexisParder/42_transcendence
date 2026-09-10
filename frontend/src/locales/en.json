@@ -3,7 +3,6 @@
 	"tournaments_title": "Tournaments",
 	"rules_title": "Rules",
 	"leaderboard_title": "Leaderboard",
-	"profile_title": "Profile",
 	"quit_title": "Quit",
 	"contact_title": "Contact",
 
@@ -32,6 +31,7 @@
 	"txt_password_confirm": "Confirm password",
 	"txt_step": "Step",
 	"txt_pts": "pts",
+	"txt_points": "points",
 	"txt_pwd_weak": "weak",
 	"txt_pwd_medium": "medium",
 	"txt_pwd_strong": "strong",
@@ -43,6 +43,9 @@
 	"txt_offline": "offline",
 	"txt_day_u": "d",
 	"txt_message": "Message",
+	"txt_win": "win",
+	"txt_loss": "loss",
+	"txt_unranked": "unranked",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
@@ -58,6 +61,15 @@
 	"txt_err_2fa_size": "Code must contain 6 digits!",
 	"txt_err_2fa_invalid": "Code is invalid!",
 	"txt_err_agree_terms": "You must accept the terms!",
+
+	"profile_title": "Profile",
+	"profile_txt_joined": "joined",
+	"profiles_txt_matches": "matches",
+	"profile_txt_win_rate": "win rate",
+	"profile_txt_shot_accuracy": "shot accuracy",
+	"profile_txt_tournaments_won": "tournaments won",
+	"profile_matches_title": "recent matches",
+	"profile_achievements_title": "achievements",
 
 	"friends_title": "Friends",
 	"friends_conversations_title": "conversations",

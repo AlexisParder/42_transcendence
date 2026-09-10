@@ -5,10 +5,11 @@ import { t } from "../lib/translate";
 import { FaRegCircle } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { truncateText } from "../lib/truncateText";
 
 export function Profile() {
 	useDocumentTitle(t("profile_title"))
-	const {data: session, isPending} = authClient.useSession()
+	const { data: session, isPending } = authClient.useSession()
 
 	return <Sidebar>
 		{isPending && <p>Loading...</p>}
@@ -19,14 +20,14 @@ export function Profile() {
 				<div className="flex items-center gap-2">
 					<Avatar username={"alexis"} image={session?.user.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
-						<p className="text-3xl flex items-center gap-2 font-bold">{session?.user.username} <span className="badge badge-info badge-outline badge-sm">CAPTAIN</span></p>
-						<p className="text-sm text-neutral-content/50">Joined {session!.user.createdAt.toDateString()}</p>
+						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(session?.user.username, 9)} <span className="badge badge-info badge-outline badge-sm">CAPTAIN</span></p>
+						<p className="text-sm text-neutral-content/50 first-letter:uppercase">{t("profile_txt_joined")} {session!.user.createdAt.toDateString()}</p>
 					</div>
 				</div>
 				{/* droite */}
 				<div>
 					<p className="text-4xl text-info font-bold font-mono text-center md:text-right">1,254</p>
-					<p className="flex items-center text-xs gap-1 text-neutral-content/50">points <TbPointFilled className="size-1" /> 14th worldwide</p>
+					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> 14th worldwide</p>
 				</div>
 			</div>
 
@@ -34,26 +35,26 @@ export function Profile() {
 			<div className="grid grid-cols-2 text-center md:text-left md:grid-cols-4 border-b border-base-300">
 				<div className="flex-1/4 p-4">
 					<p className="font-bold text-2xl font-mono">128</p>
-					<p className="text-xs text-neutral-content/50">matches</p>
+					<p className="text-xs text-neutral-content/50">{t("profiles_txt_matches")}</p>
 				</div>
 				<div className="flex-1/4 p-4 border-l border-base-300">
 					<p className="font-bold text-2xl text-info font-mono">61 %</p>
-					<p className="text-xs text-neutral-content/50">win rate</p>
+					<p className="text-xs text-neutral-content/50">{t("profile_txt_win_rate")}</p>
 				</div>
 				<div className="flex-1/4 p-4 md:border-l border-base-300">
 					<p className="font-bold text-2xl font-mono">44 %</p>
-					<p className="text-xs text-neutral-content/50">shot accuracy</p>
+					<p className="text-xs text-neutral-content/50">{t("profile_txt_shot_accuracy")}</p>
 				</div>
 				<div className="flex-1/4 p-4 border-l border-base-300">
 					<p className="font-bold text-2xl text-warning font-mono">3</p>
-					<p className="text-xs text-neutral-content/50">tournaments won</p>
+					<p className="text-xs text-neutral-content/50">{t("profile_txt_tournaments_won")}</p>
 				</div>
 			</div>
 
 			{/* Bas */}
 			<div className="flex flex-col lg:flex-row">
 				<div className="flex-2/3 p-4">
-					<p className="text-xs uppercase py-2 text-neutral-content/50">recent matches</p>
+					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_matches_title")}</p>
 					<div className="flex flex-col gap-2">
 						<MatchesItem result="win" desc="vs tom" matchType="1 v 1" matchTime="8 min" points={24} />
 						<MatchesItem result="loss" desc="FFA - 3rd place" matchType="4p" matchTime="21 min" points={11} />
@@ -65,7 +66,7 @@ export function Profile() {
 					</div>
 				</div>
 				<div className="flex-1/3 lg:border-l border-base-300 p-4">
-					<p className="text-xs uppercase py-2 text-neutral-content/50">achievements</p>
+					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_achievements_title")}</p>
 					<div className="flex flex-col gap-2">
 						<AchivementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
 						<AchivementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
@@ -106,10 +107,10 @@ function MatchesItem({ result, desc, matchType, matchTime, points }: {
 	}
 
 	return <div className={`flex items-center justify-between ${colorBg} p-2.5 rounded-md border-l-3 ${colorBd}`}>
-		<p className={`text-sm ${colorTxt} font-bold`}>{result.toUpperCase()}</p>
+		<p className={`text-sm ${colorTxt} font-bold uppercase`}>{t(`txt_${result}`)}</p>
 		<p className="text-xs">{desc}</p>
 		<p className="flex items-center gap-1 text-xs">{matchType} <TbPointFilled className="size-1" /> {matchTime}</p>
-		<p className={`text-xs ${colorTxt} font-bold`}>{pointsTxt}</p>
+		<p className={`text-xs ${colorTxt} font-bold`}>{pointsTxt === "unranked" ? t("txt_unranked") : pointsTxt}</p>
 	</div>
 }
 
