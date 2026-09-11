@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SonarTitle } from "../components/SonarTitle";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { t } from "../lib/translate";
 import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -14,10 +14,15 @@ type Errors = {
 type OTPType = "app" | "recovery"
 export function TwoFactor() {
 	useDocumentTitle(t("otp_title"))
+	const { data: session, isPending } = authClient.useSession()
 	const [step, setStep] = useState<OTPType>('app')
 	const [errors, setErrors] = useState<Errors>({})
 	const [codeTotp, setCodeTotp] = useState("")
+	const location = useLocation()
 	const navigate = useNavigate()
+
+	if (session && !isPending)
+		return <Navigate to="/" state={{ from: location }} replace />
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
