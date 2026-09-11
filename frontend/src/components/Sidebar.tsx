@@ -3,7 +3,7 @@ import { FaRegCircle, FaUserFriends, FaDoorOpen } from "react-icons/fa";
 import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled, TbTournament } from "react-icons/tb";
-import { Link, NavLink } from "react-router-dom";
+import { Link, Navigate, NavLink, useLocation } from "react-router-dom";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
 import { FaBars, FaUser } from "react-icons/fa6";
@@ -30,13 +30,16 @@ const navItems: NavItem[] = [
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
 	const { data: session, isPending } = authClient.useSession()
+	const location = useLocation()
 
-	if (!session && !isPending)
-		return <p>Pas connecté</p>
+	if (isPending)
+		return <p>Loading...</p>
+
+	if (!session)
+		return <Navigate to="/login" state={{from: location}} replace />
 
 	const username = session?.user.username ? session?.user.username : ""
 	return <>
-		{isPending && <p>Loading...</p>}
 		{!isPending && <div className="drawer md:drawer-open min-h-screen">
 			<input id="sidebarDrawer" type="checkbox" className="drawer-toggle hidden" />
 			<div className="drawer-content">

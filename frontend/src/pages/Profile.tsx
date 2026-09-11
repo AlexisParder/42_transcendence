@@ -13,7 +13,7 @@ export function Profile() {
 
 	return <Sidebar>
 		{isPending && <p>Loading...</p>}
-		{!isPending && <div className="p-2">
+		{!isPending && session && <div className="p-2">
 			{/* Haut */}
 			<div className="flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
 				{/* gauche */}
