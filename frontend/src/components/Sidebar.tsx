@@ -36,7 +36,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 		return <p>Loading...</p>
 
 	if (!session)
-		return <Navigate to="/login" state={{from: location}} replace />
+		return <Navigate to="/login" state={{ from: location }} replace />
 
 	const username = session?.user.username ? session?.user.username : ""
 	return <>
@@ -71,7 +71,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 						<Avatar username={session?.user.username} image={session?.user.image} size={40} />
 						<div className="ml-3">
 							<p className="font-bold">{truncateText(username, 11)}</p>
-							<p className="text-warning">1,254 {t("txt_pts")}</p>
+							<p className="text-warning">{session.user.points?.toLocaleString()} {t("txt_pts")}</p>
 						</div>
 					</div>
 					<div className="flex gap-2">

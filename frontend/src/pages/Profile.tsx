@@ -26,7 +26,7 @@ export function Profile() {
 				</div>
 				{/* droite */}
 				<div>
-					<p className="text-4xl text-info font-bold font-mono text-center md:text-right">1,254</p>
+					<p className={`text-4xl ${(session.user.points ?? 0) >= 0 ? "text-info" : "text-error"} font-bold font-mono text-center md:text-right`}>{session.user.points?.toLocaleString()}</p>
 					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> 14th worldwide</p>
 				</div>
 			</div>

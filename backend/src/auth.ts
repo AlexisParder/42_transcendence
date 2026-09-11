@@ -32,7 +32,7 @@ export const auth = betterAuth({
 	user: {
 		deleteUser: {
 			enabled: true,
-			beforeDelete: async(user, request) => {
+			beforeDelete: async (user, request) => {
 				// ajouter la logique pour les historiques en mettant "Anonyme"
 			},
 		},
@@ -41,6 +41,12 @@ export const auth = betterAuth({
 				type: "string",
 				required: false,
 				defaultValue: "en",
+				input: true
+			},
+			points: {
+				type: "number",
+				required: false,
+				defaultValue: 0,
 				input: true
 			}
 		}
@@ -60,7 +66,7 @@ export const auth = betterAuth({
 		emailOTP({
 			otpLength: 6,
 			expiresIn: 600,
-			sendVerificationOTP: async ({email, otp}) => {
+			sendVerificationOTP: async ({ email, otp }) => {
 				await sendMail({
 					to: email,
 					subject: "Your Sonar code",
