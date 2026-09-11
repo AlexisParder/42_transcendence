@@ -67,14 +67,6 @@ module.exports = {
     'peer-checked:text-error-content',
     'chat-start',
     'chat-end',
-    'w-22',
-    'w-16',
-    'w-10',
-    'w-8',
-    'h-22',
-    'h-16',
-    'h-10',
-    'h-8'
   ],
   theme: {
     extend: {

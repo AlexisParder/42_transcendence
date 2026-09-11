@@ -553,18 +553,16 @@ export function Friends() {
 		}
 	}, [socket, peerId, loadHistory])
 
-	function ClearAndOpenFriendModal()
-	{
+	function ClearAndOpenFriendModal() {
 		setErrors({})
 		ShowModal('SendFriendRequestModal')
 	}
 
 	return <Sidebar>
-		{/* , , , setPeerId, peerId, closeCurrentConv, requests, handleAccept, handleDecline, onlineFriends, offlineFriends, filteredBlocked, presence, handleUnblock */}
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex">
 				<div className="flex flex-1 flex-col h-screen min-w-0">
-					<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} />
+					<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} status={presence[peerId ?? ""]} />
 					<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 						<div className="flex flex-col min-h-full">
 							{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
@@ -702,7 +700,7 @@ function DisplayMessage({ message, isMine, createdAt }: { message: string, isMin
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, peerId, onBlock }: { friends: Friend[], peerId: string | null, onBlock: (id: string) => void }) {
+function ConversationFriendDisplay({ friends, peerId, onBlock, status }: { friends: Friend[], peerId: string | null, onBlock: (id: string) => void, status: "available" | "in a match" | "away" | "offline" }) {
 	if (!peerId)
 		return
 
@@ -715,7 +713,7 @@ function ConversationFriendDisplay({ friends, peerId, onBlock }: { friends: Frie
 			<Avatar username={friend?.username} image={friend?.image} size={40} />
 			<div>
 				<p className="text-sm">{friend?.username}</p>
-				<p className="text-xs text-info">IN A MATCH - 2 v 2</p>
+				<p className="text-xs text-info">{t(`txt_${status}`)}</p>
 			</div>
 		</div>
 		<div className="flex items-center gap-2">
