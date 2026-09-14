@@ -474,19 +474,20 @@ function SettingsCat() {
 					<button className="btn btn-outline border-neutral btn-sm">{t("settings_danger_dl_btn")}</button>
 				</div>
 			</div>
-			<div className="flex border border-error bg-error/10 rounded-md p-4 items-center mt-2">
+			<div className="flex border border-error bg-error/10 rounded-md p-4 items-center my-2">
 				<div className="flex-1">
 					<p className="text-sm">{t("settings_danger_dlt_user")}</p>
 					<p className="text-xs text-neutral-content/60">{t("settings_danger_dlt_desc")}.</p>
 				</div>
 				<div>
-					<button onClick={() => {
+					<button disabled={!hasPwd} onClick={() => {
 						setErrors({})
 						ShowModal("deleteModal")
 					}} className="btn btn-outline btn-error border-error btn-sm">{t("settings_danger_dlt_btn")}</button>
 					{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 				</div>
 			</div>
+			{hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_danger_dlt_need_pwd")}.<br />{t("settings_2fa_need_pwd_2")}.</span></p>}
 		</SectionSetting>
 
 		<Modal id="pictureModal">
