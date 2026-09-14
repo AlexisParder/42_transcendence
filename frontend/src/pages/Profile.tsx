@@ -68,11 +68,11 @@ export function Profile() {
 				<div className="flex-1/3 lg:border-l border-base-300 p-4">
 					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_achievements_title")}</p>
 					<div className="flex flex-col gap-2">
-						<AchivementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
-						<AchivementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
-						<AchivementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
-						<AchivementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
-						<AchivementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
+						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
 					</div>
 				</div>
 			</div>
@@ -114,7 +114,7 @@ function MatchesItem({ result, desc, matchType, matchTime, points }: {
 	</div>
 }
 
-function AchivementsItem({ title, desc, difficulty }: {
+function AchievementsItem({ title, desc, difficulty }: {
 	title: string,
 	desc: string,
 	difficulty: "easy" | "medium" | "hard",
