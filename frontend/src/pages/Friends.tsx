@@ -23,7 +23,7 @@ export function Friends() {
 	const [messages, setMessages] = useState<Message[]>([])
 	const [friends, setFriends] = useState<Friend[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
-	const [errors, setErrors] = useState<{ username?: string, block?: string }>({})
+	const [errors, setErrors] = useState<{ username?: string, block?: string, messages?: string }>({})
 	const [requests, setRequests] = useState<FriendRequest[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
 	const [conversations, setConversations] = useState<ConversationSummary[]>([])
@@ -375,8 +375,12 @@ export function Friends() {
 		if (!message)
 			return
 
+		if (message.length > 1000)
+			return setErrors({ messages: t("friend_err_msg_to_long") })
+
 		socket.emit("send_message", { toUserId: peerId, message })
 		setSendInput("")
+		setErrors({})
 	}
 
 	const handleSendRequestFriend: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -570,7 +574,7 @@ export function Friends() {
 					</div>
 					{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 						<div className="w-full pl-2">
-							<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+							<Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
 								if (e.key === "Enter")
 									handleSend()
 							}} />
@@ -578,27 +582,6 @@ export function Friends() {
 						<button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>
 					</div>}
 				</div>
-
-				{/* <div className="flex flex-col bg-base-200 h-screen">
-					<div className="p-2">
-						<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
-					</div>
-					<div className="flex-1 md:min-w-65 lg:min-w-75 overflow-y-auto">
-						<div className="min-h-full">
-							{conversations.length > 0 && <ConversationsSection conversations={filteredConversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
-							{requests.length > 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
-							{onlineFriends.length > 0 && <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
-							{offlineFriends.length > 0 && <OfflineSection friends={offlineFriends} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
-							{blocked.length > 0 && <BlockSection blocked={filteredBlocked} onUnblock={handleUnblock} />}
-						</div>
-					</div>
-					<div className="p-4">
-						<button className="btn btn-outline border-neutral w-full" onClick={() => {
-							setErrors({})
-							ShowModal('SendFriendRequestModal')
-						}}><FaPlus /> {t("btn_add_friend")}</button>
-					</div>
-				</div> */}
 			</div>
 
 			<Modal id="SendFriendRequestModal">

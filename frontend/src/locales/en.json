@@ -88,6 +88,7 @@
 	"friend_block_err_self": "You can't block yourself!",
 	"friend_block_err_already": "This user is already blocked!",
 	"friend_block_err_blocked": "This user is blocked!",
+	"friend_err_msg_to_long": "Your message is too long, It must not exceed 1000 characters.",
 
 	"privacy_title": "Privacy Policy",
 	"privacy_short_title": "Privacy",
