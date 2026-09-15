@@ -6,10 +6,35 @@ import { FaRegCircle } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
+import { useEffect, useState } from "react";
 
 export function Profile() {
 	useDocumentTitle(t("profile_title"))
 	const { data: session, isPending } = authClient.useSession()
+	const [rank, setRank] = useState("")
+
+	useEffect(() => {
+		async function loadUserRank() {
+			try {
+				const res = await fetch("/api/get-user-rank", {
+					method: "GET",
+					headers: { "Content-type": "application/json" },
+					credentials: "include"
+				})
+
+				if (!res.ok)
+					return
+
+				const data = await res.json()
+				if (data.rank)
+					setRank(session?.user.language === "fr" ? data.rank.fr_label : data.rank.en_label)
+			} catch (error) {
+				console.error("load user rank:", error)
+			}
+		}
+
+		loadUserRank()
+	}, [session])
 
 	return <Sidebar>
 		{isPending && <p>Loading...</p>}
@@ -20,7 +45,7 @@ export function Profile() {
 				<div className="flex items-center gap-2">
 					<Avatar username={"alexis"} image={session?.user.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
-						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(session?.user.username, 9)} <span className="badge badge-info badge-outline badge-sm">CAPTAIN</span></p>
+						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(session?.user.username, 9)} {rank && <span className="badge badge-info badge-outline badge-sm uppercase">{rank}</span>}</p>
 						<p className="text-sm text-neutral-content/50 first-letter:uppercase">{t("profile_txt_joined")} {session!.user.createdAt.toDateString()}</p>
 					</div>
 				</div>

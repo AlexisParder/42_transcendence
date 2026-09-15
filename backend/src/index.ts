@@ -20,6 +20,7 @@ import { setReadHandler } from "./routes/setRead.route.ts"
 import { blockUserHandler } from "./routes/blockUserhandler.route.ts"
 import { unblockUserHandler } from "./routes/unblockUserhandler.route.ts"
 import { getBlockedHandler } from "./routes/getBlocked.route.ts"
+import { getUserRankHandler } from "./routes/getUserRank.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -53,6 +54,7 @@ app.get("/api/test", (req, res) => {
 })
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
+app.get("/api/get-user-rank", getUserRankHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
@@ -95,13 +97,13 @@ io.on("connection", async (socket) => {
 
 			if (toUserId === fromUserId)
 				return
-			
+
 			const areFriends = await prisma.friends.findFirst({
 				where: {
 					isAccepted: true,
 					OR: [
-						{ userId: fromUserId, targetId: toUserId},
-						{ userId: toUserId, targetId: fromUserId},
+						{ userId: fromUserId, targetId: toUserId },
+						{ userId: toUserId, targetId: fromUserId },
 					]
 				}
 			})
@@ -110,7 +112,7 @@ io.on("connection", async (socket) => {
 				return
 
 			const blocked = await prisma.userBlocked.findFirst({
-				where: {userId: toUserId, targetId: fromUserId},
+				where: { userId: toUserId, targetId: fromUserId },
 			})
 
 			if (blocked)
@@ -146,8 +148,7 @@ io.on("connection", async (socket) => {
 	const before = onlineUsers.get(userId) ?? 0
 	onlineUsers.set(userId, before + 1)
 
-	if (before === 0)
-	{
+	if (before === 0) {
 		activityStatus.set(userId, "available")
 		await notifyFriendsOfPresence(userId, "available")
 	}
@@ -179,15 +180,15 @@ async function notifyFriendsOfPresence(userId: string, status: "available" | "aw
 		where: {
 			isAccepted: true,
 			OR: [
-				{userId},
-				{targetId: userId}
+				{ userId },
+				{ targetId: userId }
 			]
 		},
-		select: {userId: true, targetId: true}
+		select: { userId: true, targetId: true }
 	})
 
 	for (const row of rows) {
 		const friendId = row.userId === userId ? row.targetId : row.userId
-		io.to(friendId).emit("presence_update", {userId, status})
+		io.to(friendId).emit("presence_update", { userId, status })
 	}
 }
