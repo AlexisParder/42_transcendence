@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Space+Grotesk:wght@300..700&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
+@custom-variant home-compact (@media (width < 48rem) and (height < 740px));
 
 @plugin "daisyui/theme" {
   name: "sonar";
@@ -69,16 +70,23 @@
   --animate-sweep: sweep 4.5s linear infinite;
   --animate-blip: blip 1.4s ease-in-out infinite;
   --animate-blip-slow: blip 2.8s ease-in-out infinite;
+  --animate-radar-echo: radar-echo 4.5s linear infinite;
 }
 
 @keyframes sweep { to { transform: rotate(360deg); } }
 @keyframes blip { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 
+@keyframes radar-echo {
+  0% { opacity: 1; box-shadow: 0 0 12px currentColor; }
+  12% { opacity: 0.8; box-shadow: 0 0 6px currentColor; }
+  45%, 100% { opacity: 0.2; box-shadow: 0 0 0 transparent; }
+}
+
 @utility grid-cols-14 { grid-template-columns: repeat(14, minmax(0, 1fr)); }
 @utility grid-rows-14 { grid-template-rows: repeat(14, minmax(0, 1fr)); }
 
 @utility bg-radar-sweep {
-  background-image: conic-gradient(from 0deg, rgb(79 214 207 / 0.30), rgb(79 214 207 / 0) 55%);
+  background-image: conic-gradient(from 0deg, transparent 0deg 285deg, rgb(79 214 207 / 0.08) 320deg, rgb(79 214 207 / 0.30) 360deg);
 }
 @utility bg-radar-glow {
   background-image: radial-gradient(circle, rgb(79 214 207 / 0.13), rgb(6 19 26 / 0) 68%);
