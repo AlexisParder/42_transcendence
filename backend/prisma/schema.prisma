@@ -170,6 +170,8 @@ model Matchs {
   startedAt DateTime       @default(now())
   endedAt   DateTime?
   players   MatchPlayers[]
+
+  @@map("matchs")
 }
 
 model MatchPlayers {
@@ -187,6 +189,7 @@ model MatchPlayers {
   status    PlayerStatus @default(PLAYED)
 
   @@unique([matchsId, userId])
+  @@map("matchplayers")
 }
 
 enum MatchMode {

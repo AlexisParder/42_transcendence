@@ -81,13 +81,13 @@ export function Profile() {
 				<div className="flex-2/3 p-4">
 					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_matches_title")}</p>
 					<div className="flex flex-col gap-2">
-						<MatchesItem result="win" desc="vs tom" matchType="1 v 1" matchTime="8 min" points={24} />
-						<MatchesItem result="loss" desc="FFA - 3rd place" matchType="4p" matchTime="21 min" points={11} />
-						<MatchesItem result="win" desc="Duo wih gael" matchType="2 v 2" matchTime="17 min" points={18} />
-						<MatchesItem result="win" desc="vs Bot - hard" matchType="1 v 1" matchTime="6 min" points={"unranked"} />
-						<MatchesItem result="win" desc="vs Bot - hard" matchType="1 v 1" matchTime="6 min" points={"unranked"} />
-						<MatchesItem result="loss" desc="vs Bob" matchType="1 v 1" matchTime="6 min" points={13} />
-						<MatchesItem result="win" desc="vs Bot - hard" matchType="1 v 1" matchTime="6 min" points={"unranked"} />
+						<MatchesItem result="win" desc="vs tom" matchType="ONE_V_ONE" matchTime="8 min" points={24} />
+						<MatchesItem result="loss" desc="FFA - 3rd place" matchType="FOUR_FFA" matchTime="21 min" points={11} />
+						<MatchesItem result="win" desc="Duo wih gael" matchType="TWO_V_TWO" matchTime="17 min" points={18} />
+						<MatchesItem result="win" desc="vs Bot - hard" matchType="ONE_V_ONE" matchTime="6 min" points={"unranked"} />
+						<MatchesItem result="win" desc="vs Bot - hard" matchType="ONE_V_ONE" matchTime="6 min" points={"unranked"} />
+						<MatchesItem result="loss" desc="vs Bob" matchType="ONE_V_ONE" matchTime="6 min" points={13} />
+						<MatchesItem result="win" desc="vs Bot - hard" matchType="ONE_V_ONE" matchTime="6 min" points={"unranked"} />
 					</div>
 				</div>
 				<div className="flex-1/3 lg:border-l border-base-300 p-4">
@@ -108,10 +108,18 @@ export function Profile() {
 function MatchesItem({ result, desc, matchType, matchTime, points }: {
 	result: "win" | "loss",
 	desc: string,
-	matchType: "1 v 1" | "4p" | "3p" | "2 v 2",
+	matchType: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
 	matchTime: string,
 	points: number | "unranked"
 }) {
+	let type = "4p"
+	if (matchType === "ONE_V_ONE")
+		type = "1 v 1"
+	else if (matchType === "TWO_V_TWO")
+		type = "2 v 2"
+	else if (matchType === "THREE_FFA")
+		type = "3p"
+
 	let pointsTxt = points.toString()
 	let colorTxt = "text-neutral-content/50"
 	let colorBg = "bg-neutral/20"
@@ -134,7 +142,7 @@ function MatchesItem({ result, desc, matchType, matchTime, points }: {
 	return <div className={`grid grid-cols-[3.5rem_1fr_1fr_5rem] items-center gap-2 ${colorBg} p-2.5 rounded-md border-l-3 ${colorBd}`}>
 		<p className={`text-sm ${colorTxt} font-bold uppercase`}>{t(`txt_${result}`)}</p>
 		<p className="text-xs text-center">{desc}</p>
-		<p className="flex items-center justify-center gap-1 text-xs">{matchType} <TbPointFilled className="size-1" /> {matchTime}</p>
+		<p className="flex items-center justify-center gap-1 text-xs">{type} <TbPointFilled className="size-1" /> {matchTime}</p>
 		<p className={`text-xs ${colorTxt} font-bold text-right`}>{pointsTxt === "unranked" ? t("txt_unranked") : pointsTxt}</p>
 	</div>
 }
