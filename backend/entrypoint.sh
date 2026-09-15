@@ -18,5 +18,8 @@ until pnpm prisma migrate deploy; do
 	sleep 2
 done
 
+echo "Seeding database..."
+pnpm prisma db seed
+
 echo "Migrations applied. Starting server..."
 exec pnpm dev

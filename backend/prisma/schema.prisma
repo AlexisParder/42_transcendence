@@ -158,7 +158,7 @@ model Ranks {
   id       String @id @default(cuid())
   en_label String
   fr_label String
-  min      Int
+  min      Int    @unique
 
   @@map("ranks")
 }
