@@ -186,6 +186,7 @@ model MatchPlayers {
   team      Int
   placement Int?
   points    Int          @default(0)
+  leftAt    DateTime?
   status    PlayerStatus @default(PLAYED)
 
   @@unique([matchsId, userId])
