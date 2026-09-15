@@ -34,17 +34,18 @@ model User {
   twoFactorEnabled Boolean?    @default(false)
   twofactors       TwoFactor[]
 
-  sentFriends       Friends[] @relation("SentFriends")
-  ReceivedFriends       Friends[] @relation("ReceivedFriends")
+  sentFriends     Friends[] @relation("SentFriends")
+  ReceivedFriends Friends[] @relation("ReceivedFriends")
 
-  sentMsg       Conversations[] @relation("SentMsg")
-  ReceivedMsg       Conversations[] @relation("ReceivedMsg")
+  sentMsg     Conversations[] @relation("SentMsg")
+  ReceivedMsg Conversations[] @relation("ReceivedMsg")
 
-  sentBlock       UserBlocked[] @relation("SentBlock")
-  ReceivedBlock       UserBlocked[] @relation("ReceivedBlock")
+  sentBlock     UserBlocked[]  @relation("SentBlock")
+  ReceivedBlock UserBlocked[]  @relation("ReceivedBlock")
+  matchPlayers  MatchPlayers[]
 
-  @@map("user")
   @@unique([username])
+  @@map("user")
 }
 
 model Session {
@@ -112,12 +113,12 @@ model TwoFactor {
 }
 
 model Friends {
-  id        String  @id @default(cuid())
-  userId    String
-  targetId  String
+  id         String  @id @default(cuid())
+  userId     String
+  targetId   String
   isAccepted Boolean @default(false)
-  user      User    @relation("SentFriends", fields: [userId], references: [id], onDelete: Cascade)
-  target      User    @relation("ReceivedFriends", fields: [targetId], references: [id], onDelete: Cascade)
+  user       User    @relation("SentFriends", fields: [userId], references: [id], onDelete: Cascade)
+  target     User    @relation("ReceivedFriends", fields: [targetId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([targetId])
@@ -125,15 +126,15 @@ model Friends {
 }
 
 model Conversations {
-  id  String  @id @default(cuid())
-  userId    String
-  targetId  String
+  id       String   @id @default(cuid())
+  userId   String
+  targetId String
   message  String
-  sendAt    DateTime  @default(now())
-  isRead    Boolean  @default(false)
+  sendAt   DateTime @default(now())
+  isRead   Boolean  @default(false)
 
-  user      User    @relation("SentMsg", fields: [userId], references: [id], onDelete: Cascade)
-  target      User    @relation("ReceivedMsg", fields: [targetId], references: [id], onDelete: Cascade)
+  user   User @relation("SentMsg", fields: [userId], references: [id], onDelete: Cascade)
+  target User @relation("ReceivedMsg", fields: [targetId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([targetId])
@@ -141,14 +142,61 @@ model Conversations {
 }
 
 model UserBlocked {
-  id  String  @id @default(cuid())
-  userId    String
-  targetId  String
+  id       String @id @default(cuid())
+  userId   String
+  targetId String
 
-  user      User    @relation("SentBlock", fields: [userId], references: [id], onDelete: Cascade)
-  target      User    @relation("ReceivedBlock", fields: [targetId], references: [id], onDelete: Cascade)
+  user   User @relation("SentBlock", fields: [userId], references: [id], onDelete: Cascade)
+  target User @relation("ReceivedBlock", fields: [targetId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([targetId])
   @@map("userblocked")
+}
+
+model Ranks {
+  id       String @id @default(cuid())
+  en_label String
+  fr_label String
+  min      Int
+
+  @@map("ranks")
+}
+
+model Matchs {
+  id        String         @id @default(cuid())
+  mode      MatchMode
+  isRanked  Boolean        @default(true)
+  startedAt DateTime       @default(now())
+  endedAt   DateTime?
+  players   MatchPlayers[]
+}
+
+model MatchPlayers {
+  id       String  @id @default(cuid())
+  matchs   Matchs? @relation(fields: [matchsId], references: [id])
+  matchsId String?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+  isBot  Boolean @default(true)
+
+  team      Int
+  placement Int?
+  points    Int          @default(0)
+  status    PlayerStatus @default(PLAYED)
+
+  @@unique([matchsId, userId])
+}
+
+enum MatchMode {
+  ONE_V_ONE
+  TWO_V_TWO
+  THREE_FFA
+  FOUR_FFA
+}
+
+enum PlayerStatus {
+  PLAYED
+  LEFT
 }
