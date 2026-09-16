@@ -67,7 +67,7 @@ export function Profile() {
 			<div className="flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
 				{/* gauche */}
 				<div className="flex items-center gap-2">
-					<Avatar username={"alexis"} image={session?.user.image} size={88} />
+					<Avatar username={session.user.username} image={session?.user.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
 						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(session?.user.username, 9)} {rank && <span className="badge badge-info badge-outline badge-sm uppercase">{rank}</span>}</p>
 						<p className="text-sm text-neutral-content/50 first-letter:uppercase">{t("profile_txt_joined")} {session!.user.createdAt.toDateString()}</p>
