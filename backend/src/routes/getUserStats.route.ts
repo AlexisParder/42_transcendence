@@ -16,7 +16,7 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 
 		const userId = session.user.id
 
-		const [rows, total, wins] = await Promise.all([
+		const [rows, total, wins, shots] = await Promise.all([
 			prisma.matchPlayers.findMany({
 				where: { userId },
 				orderBy: {
@@ -60,12 +60,17 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 						{ matchs: { isRanked: false }, placement: 1 }
 					]
 				}
+			}),
+			prisma.matchPlayers.aggregate({
+				where: { userId },
+				_sum: { shotsHit: true, shotsTotal: true }
 			})
 		])
+
 		const stats: Stat = {
 			total,
 			winRate: total ? Math.round((wins / total) * 100) : 0,
-			shotAccuracy: null,
+			shotAccuracy: shots._sum.shotsTotal ? Math.round((shots._sum.shotsHit! / shots._sum.shotsTotal!) * 100) : 0,
 			tournamentsWon: null,
 		}
 

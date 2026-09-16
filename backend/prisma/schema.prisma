@@ -189,6 +189,9 @@ model MatchPlayers {
   leftAt    DateTime?
   status    PlayerStatus @default(PLAYED)
 
+  shotsHit   Int @default(0)
+  shotsTotal Int @default(0)
+
   @@unique([matchsId, userId])
   @@map("matchplayers")
 }

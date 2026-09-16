@@ -74,6 +74,6 @@ export interface Match {
 export interface Stat {
 	total: number,
 	winRate: number,
-	shotAccuracy: number | null,
+	shotAccuracy: number,
 	tournamentsWon: number | null,
 }

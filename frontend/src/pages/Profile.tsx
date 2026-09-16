@@ -15,7 +15,7 @@ export function Profile() {
 	const [rank, setRank] = useState("")
 	const [matches, setMatches] = useState<Match[]>([])
 	const [stats, setStats] = useState<Stat>()
-       
+
 	useEffect(() => {
 		async function loadUserRank() {
 			try {
@@ -84,22 +84,22 @@ export function Profile() {
 
 			{/* Milieu */}
 			<div className="grid grid-cols-2 text-center md:text-left md:grid-cols-4 border-b border-base-300">
-				{stats?.total && <div className="flex-1/4 p-4">
-					<p className="font-bold text-2xl font-mono">{stats.total}</p>
+				<div className="flex-1/4 p-4">
+					<p className="font-bold text-2xl font-mono">{stats?.total}</p>
 					<p className="text-xs text-neutral-content/50">{t("profiles_txt_matches")}</p>
-				</div>}
-				{stats?.winRate && <div className="flex-1/4 p-4 border-l border-base-300">
-					<p className="font-bold text-2xl text-info font-mono">{stats.winRate} %</p>
+				</div>
+				<div className="flex-1/4 p-4 border-l border-base-300">
+					<p className="font-bold text-2xl text-info font-mono">{stats?.winRate} %</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_win_rate")}</p>
-				</div>}
-				{stats?.shotAccuracy && <div className="flex-1/4 p-4 md:border-l border-base-300">
-					<p className="font-bold text-2xl font-mono">{stats.shotAccuracy} %</p>
+				</div>
+				<div className="flex-1/4 p-4 md:border-l border-base-300">
+					<p className="font-bold text-2xl font-mono">{stats?.shotAccuracy} %</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_shot_accuracy")}</p>
-				</div>}
-				{stats?.tournamentsWon && <div className="flex-1/4 p-4 border-l border-base-300">
-					<p className="font-bold text-2xl text-warning font-mono">{stats.tournamentsWon}</p>
+				</div>
+				<div className="flex-1/4 p-4 border-l border-base-300">
+					<p className="font-bold text-2xl text-warning font-mono">{stats?.tournamentsWon}</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_tournaments_won")}</p>
-				</div>}
+				</div>
 			</div>
 
 			{/* Bas */}
