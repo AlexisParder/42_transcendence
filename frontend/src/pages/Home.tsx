@@ -41,7 +41,7 @@ export function Home() {
 					<section className="relative grid flex-1 items-center gap-3 py-3 md:grid-cols-[1.2fr_1fr] md:gap-8 md:py-[clamp(0.75rem,3dvh,2.5rem)]">
 						<div className="flex min-w-0 flex-col justify-center">
 							<p className="mb-2 sm:mb-3 home-compact:pr-20 font-mono text-xs sm:text-sm font-semibold tracking-label text-primary">
-								42 - TRANSCENDANCE
+								42 - TRANSCENDENCE
 							</p>
 
 							<h1 className="home-compact:pr-20 max-w-3xl text-[clamp(1.75rem,4.5dvh,2.75rem)] md:text-[clamp(2rem,7dvh,4.5rem)] font-bold leading-[1.05] tracking-tight text-base-content">
