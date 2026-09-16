@@ -60,3 +60,13 @@ export interface ConversationSummary {
 	isMine: boolean
 	unreadCount: number
 }
+
+export interface Match {
+	id: string,
+	result: 'win' | 'loss',
+	desc: string,
+	matchType: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
+	matchTime: string,
+	ranked: boolean,
+	points: number | 'unranked',
+}

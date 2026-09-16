@@ -2,6 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express";
 import { auth } from "../auth.ts";
 import { prisma } from "../db/client.ts";
+import { formatMatch } from "../lib/matchFormat.ts";
 
 export async function getUserMatchsHandler(req: Request, res: Response) {
 	try {
@@ -48,7 +49,7 @@ export async function getUserMatchsHandler(req: Request, res: Response) {
 			}
 		})
 
-		res.json({ ok: true, data })
+		res.json({ ok: true, matchs: data.map(row => formatMatch(row, userId)) })
 	} catch (error) {
 		console.error("get-user-rank error:", error)
 		res.status(500).json({ ok: false })

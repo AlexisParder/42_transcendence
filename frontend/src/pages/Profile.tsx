@@ -7,11 +7,13 @@ import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { useEffect, useState } from "react";
+import type { Match } from "../../../backend/src/events";
 
 export function Profile() {
 	useDocumentTitle(t("profile_title"))
 	const { data: session, isPending } = authClient.useSession()
 	const [rank, setRank] = useState("")
+	const [matches, setMatches] = useState<Match[]>([])
 
 	useEffect(() => {
 		async function loadUserRank() {
@@ -35,6 +37,28 @@ export function Profile() {
 
 		loadUserRank()
 	}, [session])
+
+	useEffect(() => {
+		async function loadUserMatches() {
+			try {
+				const res = await fetch("/api/get-user-matchs", {
+					method: "GET",
+					headers: { "Content-type": "application/json" },
+					credentials: "include"
+				})
+
+				if (!res.ok)
+					return
+
+				const data = await res.json()
+				setMatches(data.matchs ?? [])
+			} catch (error) {
+				console.error("load user rank:", error)
+			}
+		}
+		loadUserMatches()
+
+	}, [])
 
 	return <Sidebar>
 		{isPending && <p>Loading...</p>}
@@ -81,13 +105,9 @@ export function Profile() {
 				<div className="flex-2/3 p-4">
 					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_matches_title")}</p>
 					<div className="flex flex-col gap-2">
-						<MatchesItem result="win" desc="vs tom" matchType="ONE_V_ONE" matchTime="8 min" points={24} />
-						<MatchesItem result="loss" desc="FFA - 3rd place" matchType="FOUR_FFA" matchTime="21 min" points={11} />
-						<MatchesItem result="win" desc="Duo wih gael" matchType="TWO_V_TWO" matchTime="17 min" points={18} />
-						<MatchesItem result="win" desc="vs Bot - hard" matchType="ONE_V_ONE" matchTime="6 min" points={"unranked"} />
-						<MatchesItem result="win" desc="vs Bot - hard" matchType="ONE_V_ONE" matchTime="6 min" points={"unranked"} />
-						<MatchesItem result="loss" desc="vs Bob" matchType="ONE_V_ONE" matchTime="6 min" points={13} />
-						<MatchesItem result="win" desc="vs Bot - hard" matchType="ONE_V_ONE" matchTime="6 min" points={"unranked"} />
+						{matches.map(m => (
+							<MatchesItem key={m.id} {...m} />
+						))}
 					</div>
 				</div>
 				<div className="flex-1/3 lg:border-l border-base-300 p-4">
