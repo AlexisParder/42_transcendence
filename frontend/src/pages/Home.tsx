@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom"
-import { useDocumentTitle } from "../hooks/useDocumentTitle"
 
 const features = [
 	{
@@ -28,8 +27,6 @@ const radarEchoes = [
 ]
 
 export function Home() {
-	useDocumentTitle("Sonar")
-
 	return (
 		<>
 
