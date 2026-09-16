@@ -12,7 +12,7 @@ export async function getUserRankHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const rank = await prisma.ranks.findFirst({
+		let rank = await prisma.ranks.findFirst({
 			where: {
 				min: {
 					lte: session.user.points ?? 0
@@ -20,6 +20,14 @@ export async function getUserRankHandler(req: Request, res: Response) {
 			},
 			orderBy: { min: 'desc' }
 		})
+
+		if (!rank)
+			rank = {
+				id: "custom",
+				en_label: "cabin boy",
+				fr_label: "mousse",
+				min: -99999999999
+			}
 
 		res.json({ ok: true, rank })
 	} catch (error) {
