@@ -50,9 +50,6 @@ app.all("/api/auth/*splat", toNodeHandler(auth))
 
 app.use(express.json())
 
-app.get("/api/test", (req, res) => {
-	res.json({ status: "ok" })
-})
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/get-user-rank", getUserRankHandler)
