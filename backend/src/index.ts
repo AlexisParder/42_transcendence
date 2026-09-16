@@ -21,7 +21,7 @@ import { blockUserHandler } from "./routes/blockUserhandler.route.ts"
 import { unblockUserHandler } from "./routes/unblockUserhandler.route.ts"
 import { getBlockedHandler } from "./routes/getBlocked.route.ts"
 import { getUserRankHandler } from "./routes/getUserRank.route.ts"
-import { getUserMatchsHandler } from "./routes/getUserMatchs.route.ts"
+import { getUserStatsHandler } from "./routes/getUserStats.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -53,7 +53,7 @@ app.use(express.json())
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/get-user-rank", getUserRankHandler)
-app.get("/api/get-user-matchs", getUserMatchsHandler)
+app.get("/api/get-user-stats", getUserStatsHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)

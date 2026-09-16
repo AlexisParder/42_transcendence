@@ -1,0 +1,77 @@
+import { fromNodeHeaders } from "better-auth/node";
+import type { Request, Response } from "express";
+import { auth } from "../auth.ts";
+import { prisma } from "../db/client.ts";
+import { formatMatch } from "../lib/matchFormat.ts";
+import type { Stat } from "../events.ts";
+
+export async function getUserStatsHandler(req: Request, res: Response) {
+	try {
+		const session = await auth.api.getSession({
+			headers: fromNodeHeaders(req.headers)
+		})
+
+		if (!session)
+			return res.status(401).json({ ok: false })
+
+		const userId = session.user.id
+
+		const [rows, total, wins] = await Promise.all([
+			prisma.matchPlayers.findMany({
+				where: { userId },
+				orderBy: {
+					matchs: { startedAt: 'desc' }
+				},
+				select: {
+					id: true,
+					team: true,
+					placement: true,
+					points: true,
+					leftAt: true,
+					matchs: {
+						select: {
+							id: true,
+							mode: true,
+							isRanked: true,
+							startedAt: true,
+							endedAt: true,
+							players: {
+								select: {
+									userId: true,
+									isBot: true,
+									team: true,
+									placement: true,
+									points: true,
+									user: {
+										select: { id: true, username: true }
+									}
+								}
+							}
+						}
+					}
+				}
+			}),
+			prisma.matchPlayers.count({ where: { userId } }),
+			prisma.matchPlayers.count({
+				where: {
+					userId,
+					OR: [
+						{ matchs: { isRanked: true }, points: { gt: 0 } },
+						{ matchs: { isRanked: false }, placement: 1 }
+					]
+				}
+			})
+		])
+		const stats: Stat = {
+			total,
+			winRate: total ? Math.round((wins / total) * 100) : 0,
+			shotAccuracy: null,
+			tournamentsWon: null,
+		}
+
+		res.json({ ok: true, stats, matchs: rows.map(row => formatMatch(row, userId)) })
+	} catch (error) {
+		console.error("get-user-stats error:", error)
+		res.status(500).json({ ok: false })
+	}
+}

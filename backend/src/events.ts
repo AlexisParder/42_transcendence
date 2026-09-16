@@ -70,3 +70,10 @@ export interface Match {
 	ranked: boolean,
 	points: number | 'unranked',
 }
+
+export interface Stat {
+	total: number,
+	winRate: number,
+	shotAccuracy: number | null,
+	tournamentsWon: number | null,
+}

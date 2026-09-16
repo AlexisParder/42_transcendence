@@ -7,14 +7,15 @@ import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { useEffect, useState } from "react";
-import type { Match } from "../../../backend/src/events";
+import type { Match, Stat } from "../../../backend/src/events";
 
 export function Profile() {
 	useDocumentTitle(t("profile_title"))
 	const { data: session, isPending } = authClient.useSession()
 	const [rank, setRank] = useState("")
 	const [matches, setMatches] = useState<Match[]>([])
-
+	const [stats, setStats] = useState<Stat>()
+       
 	useEffect(() => {
 		async function loadUserRank() {
 			try {
@@ -39,9 +40,9 @@ export function Profile() {
 	}, [session])
 
 	useEffect(() => {
-		async function loadUserMatches() {
+		async function loadUserStats() {
 			try {
-				const res = await fetch("/api/get-user-matchs", {
+				const res = await fetch("/api/get-user-stats", {
 					method: "GET",
 					headers: { "Content-type": "application/json" },
 					credentials: "include"
@@ -52,12 +53,13 @@ export function Profile() {
 
 				const data = await res.json()
 				setMatches(data.matchs ?? [])
+				setStats(data.stats)
 			} catch (error) {
-				console.error("load user rank:", error)
+				console.error("load user stats:", error)
 			}
 		}
-		loadUserMatches()
 
+		loadUserStats()
 	}, [])
 
 	return <Sidebar>
@@ -66,7 +68,7 @@ export function Profile() {
 			{/* Haut */}
 			<div className="flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
 				{/* gauche */}
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-4">
 					<Avatar username={session.user.username} image={session?.user.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
 						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(session?.user.username, 9)} {rank && <span className="badge badge-info badge-outline badge-sm uppercase">{rank}</span>}</p>
@@ -82,22 +84,22 @@ export function Profile() {
 
 			{/* Milieu */}
 			<div className="grid grid-cols-2 text-center md:text-left md:grid-cols-4 border-b border-base-300">
-				<div className="flex-1/4 p-4">
-					<p className="font-bold text-2xl font-mono">128</p>
+				{stats?.total && <div className="flex-1/4 p-4">
+					<p className="font-bold text-2xl font-mono">{stats.total}</p>
 					<p className="text-xs text-neutral-content/50">{t("profiles_txt_matches")}</p>
-				</div>
-				<div className="flex-1/4 p-4 border-l border-base-300">
-					<p className="font-bold text-2xl text-info font-mono">61 %</p>
+				</div>}
+				{stats?.winRate && <div className="flex-1/4 p-4 border-l border-base-300">
+					<p className="font-bold text-2xl text-info font-mono">{stats.winRate} %</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_win_rate")}</p>
-				</div>
-				<div className="flex-1/4 p-4 md:border-l border-base-300">
-					<p className="font-bold text-2xl font-mono">44 %</p>
+				</div>}
+				{stats?.shotAccuracy && <div className="flex-1/4 p-4 md:border-l border-base-300">
+					<p className="font-bold text-2xl font-mono">{stats.shotAccuracy} %</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_shot_accuracy")}</p>
-				</div>
-				<div className="flex-1/4 p-4 border-l border-base-300">
-					<p className="font-bold text-2xl text-warning font-mono">3</p>
+				</div>}
+				{stats?.tournamentsWon && <div className="flex-1/4 p-4 border-l border-base-300">
+					<p className="font-bold text-2xl text-warning font-mono">{stats.tournamentsWon}</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_tournaments_won")}</p>
-				</div>
+				</div>}
 			</div>
 
 			{/* Bas */}
