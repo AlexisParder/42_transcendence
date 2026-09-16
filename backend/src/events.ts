@@ -75,5 +75,5 @@ export interface Stat {
 	total: number,
 	winRate: number,
 	shotAccuracy: number,
-	tournamentsWon: number | null,
+	tournamentsWon: number,
 }

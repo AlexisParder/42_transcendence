@@ -71,7 +71,7 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 			total,
 			winRate: total ? Math.round((wins / total) * 100) : 0,
 			shotAccuracy: shots._sum.shotsTotal ? Math.round((shots._sum.shotsHit! / shots._sum.shotsTotal!) * 100) : 0,
-			tournamentsWon: null,
+			tournamentsWon: 0,
 		}
 
 		res.json({ ok: true, stats, matchs: rows.map(row => formatMatch(row, userId)) })
