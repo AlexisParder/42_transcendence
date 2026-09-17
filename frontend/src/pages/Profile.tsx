@@ -107,9 +107,11 @@ export function Profile() {
 				<div className="flex-2/3 p-4">
 					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_matches_title")}</p>
 					<div className="flex flex-col gap-2">
-						{matches.map(m => (
+						{matches.length > 0 && matches.map(m => (
 							<MatchesItem key={m.id} {...m} />
 						))}
+
+						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
 				</div>
 				<div className="flex-1/3 lg:border-l border-base-300 p-4">
