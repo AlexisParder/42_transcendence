@@ -25,9 +25,7 @@ export const auth = betterAuth({
 		requireEmailVerification: true
 	},
 	emailVerification: {
-		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
-		expiresIn: 3600,
 	},
 	user: {
 		deleteUser: {
@@ -47,7 +45,7 @@ export const auth = betterAuth({
 				type: "number",
 				required: false,
 				defaultValue: 0,
-				input: true
+				input: false
 			}
 		}
 	},
