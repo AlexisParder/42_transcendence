@@ -20,8 +20,8 @@ import { setReadHandler } from "./routes/setRead.route.ts"
 import { blockUserHandler } from "./routes/blockUserhandler.route.ts"
 import { unblockUserHandler } from "./routes/unblockUserhandler.route.ts"
 import { getBlockedHandler } from "./routes/getBlocked.route.ts"
-import { getUserRankHandler } from "./routes/getUserRank.route.ts"
 import { getUserStatsHandler } from "./routes/getUserStats.route.ts"
+import { getUserInfoHandler } from "./routes/getUserInfo.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -52,8 +52,6 @@ app.use(express.json())
 
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
-app.get("/api/get-user-rank", getUserRankHandler)
-app.get("/api/get-user-stats", getUserStatsHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
@@ -67,6 +65,8 @@ app.post("/api/set-read", setReadHandler)
 app.post("/api/block-user", blockUserHandler)
 app.post("/api/unblock-user", unblockUserHandler)
 app.post("/api/get-blocked", getBlockedHandler)
+app.post("/api/get-user-info", getUserInfoHandler)
+app.post("/api/get-user-stats", getUserStatsHandler)
 
 io.use(async (socket, next) => {
 	try {

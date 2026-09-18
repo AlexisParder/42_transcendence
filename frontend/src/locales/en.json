@@ -65,6 +65,7 @@
 	"txt_err_agree_terms": "You must accept the terms!",
 
 	"profile_title": "Profile",
+	"profile_of_title": "{{username}}'s profile",
 	"profile_txt_joined": "joined",
 	"profiles_txt_matches": "matches",
 	"profile_txt_win_rate": "win rate",

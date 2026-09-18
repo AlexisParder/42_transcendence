@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { authClient } from "../lib/auth-client";
 import { t } from "../lib/translate";
 
-const COOLDOWN = 60
+const COOLDOWN = 2
 
 function formatMS(total: number) {
 	return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`
@@ -20,7 +20,6 @@ export function Verified() {
 	const email = (location.state as { email?: string } | null)?.email
 
 	const [left, setLeft] = useState(COOLDOWN)
-	const [sentTime, setSentTime] = useState(1)
 	const [sending, setSending] = useState(false)
 
 	const [code, setCode] = useState("")
@@ -56,12 +55,6 @@ export function Verified() {
 		return () => clearTimeout(id)
 	}, [left])
 
-	useEffect(() => {
-		if (sentTime <= 0) return
-		const id = setTimeout(() => setSentTime(sentTime + 1), 1000)
-		return () => clearTimeout(id)
-	}, [sentTime])
-
 	async function resend() {
 		if (!email || sending || left > 0) return
 		
@@ -77,7 +70,7 @@ export function Verified() {
 		setSending(false)
 
 		if (error) {
-			setErrors({code: t("Erreur echec de l'envoie du mail")})
+			setErrors({code: t("erreur envoie email")})
 			return
 		}
 		
@@ -85,11 +78,7 @@ export function Verified() {
 	}
 
 	if (!email)
-	{
-		console.log("No email provided, redirecting to register page")
-		navigate("/register", { replace: true })
-		return
-	}
+		return navigate("/register", { replace: true })
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
 		<div className="card bg-base-200 max-w-md w-full shadow-xl border border-neutral">
@@ -109,13 +98,13 @@ export function Verified() {
 							<IoMailUnreadOutline className="text-info size-5" />
 							<div className="flex-1">
 								<p className="font-bold text-sm">{email}</p>
-								<p className="text-white/50 text-[0.8rem]">Sent {sentTime} seconds ago</p>
+								<p className="text-white/50 text-[0.8rem]">Sent 12 seconds ago</p>
 							</div>
-							<button onClick={() => navigate("/register")} className="text-info hover:link">Wrong address?</button>
+							<button className="text-info hover:link">Wrong address?</button>
 						</div>
 
 						<div className="text-center">
-							<p className="text-neutral-content/40 text-xs mt-2">Verification code</p>
+							<p className="text-neutral-content/40 text-xs mt-2">Code de verif</p>
 							<label className="otp otp-info otp-lg m-2">
 								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
@@ -148,7 +137,7 @@ export function Verified() {
 							<span className="flex h-6 shrink-0 items-center">
 								<span className="size-1 rounded-full bg-info" />
 							</span>
-							<p>The code expires in 24 hours.</p>
+							<p>The link expires in 24 hours.</p>
 						</div>
 						<div className="flex items-center gap-2">
 							<span className="flex h-6 shrink-0 items-center">

@@ -6,6 +6,11 @@ import { formatMatch } from "../lib/matchFormat.ts";
 import type { Stat } from "../events.ts";
 
 export async function getUserStatsHandler(req: Request, res: Response) {
+	const { targetId } = req.body
+
+	if (targetId !== undefined && typeof targetId !== "string")
+		return res.status(400).json({ ok: false })
+
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
@@ -14,7 +19,14 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const userId = session.user.id
+		let userId = session.user.id
+		if (targetId) {
+			const target = await prisma.user.findUnique({
+				where: { id: targetId },
+				select: { id: true }
+			})
+			userId = target?.id ?? session.user.id
+		}
 
 		const [rows, total, wins, shots] = await Promise.all([
 			prisma.matchPlayers.findMany({

@@ -77,3 +77,18 @@ export interface Stat {
 	shotAccuracy: number,
 	tournamentsWon: number,
 }
+
+export interface Rank {
+	id: string,
+	en_label: string,
+	fr_label: string,
+	min: number
+}
+
+export interface UserInfo {
+	points: number,
+	username: string | null | undefined,
+	image: string | null | undefined,
+	createdAt: string,
+	isMine: boolean
+}

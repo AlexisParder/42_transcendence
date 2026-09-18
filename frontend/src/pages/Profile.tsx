@@ -7,45 +7,44 @@ import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { useEffect, useState } from "react";
-import type { Match, Stat } from "../../../backend/src/events";
+import type { Match, Rank, Stat, UserInfo } from "../../../backend/src/events";
 
 export function Profile() {
-	useDocumentTitle(t("profile_title"))
 	const { data: session, isPending } = authClient.useSession()
-	const [rank, setRank] = useState("")
+	const [rank, setRank] = useState<Rank>()
+	const [targetInfo, setTargetInfo] = useState<UserInfo>()
 	const [matches, setMatches] = useState<Match[]>([])
 	const [stats, setStats] = useState<Stat>()
+	const targetId = ""
 
 	useEffect(() => {
-		async function loadUserRank() {
+		async function loadUserInfo() {
 			try {
-				const res = await fetch("/api/get-user-rank", {
-					method: "GET",
+				const res = await fetch("/api/get-user-info", {
+					method: "POST",
 					headers: { "Content-type": "application/json" },
-					credentials: "include"
+					credentials: "include",
+					body: JSON.stringify({ targetId }),
 				})
 
 				if (!res.ok)
 					return
 
 				const data = await res.json()
-				if (data.rank)
-					setRank(session?.user.language === "fr" ? data.rank.fr_label : data.rank.en_label)
+				setRank(data.rank)
+				setTargetInfo(data.userInfo)
 			} catch (error) {
-				console.error("load user rank:", error)
+				console.error("load user info:", error)
 			}
 		}
 
-		loadUserRank()
-	}, [session])
-
-	useEffect(() => {
 		async function loadUserStats() {
 			try {
 				const res = await fetch("/api/get-user-stats", {
-					method: "GET",
+					method: "POST",
 					headers: { "Content-type": "application/json" },
-					credentials: "include"
+					credentials: "include",
+					body: JSON.stringify({ targetId }),
 				})
 
 				if (!res.ok)
@@ -59,8 +58,11 @@ export function Profile() {
 			}
 		}
 
+		loadUserInfo()
 		loadUserStats()
-	}, [])
+	}, [targetId])
+
+	useDocumentTitle(targetInfo?.isMine === true ? t("profile_title") : t("profile_of_title", { username: targetInfo?.username ?? "?" }))
 
 	return <Sidebar>
 		{isPending && <p>Loading...</p>}
@@ -69,15 +71,15 @@ export function Profile() {
 			<div className="flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
 				{/* gauche */}
 				<div className="flex items-center gap-4">
-					<Avatar username={session.user.username} image={session?.user.image} size={88} />
+					<Avatar username={targetInfo?.username} image={session?.user.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
-						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(session?.user.username, 9)} {rank && <span className="badge badge-info badge-outline badge-sm uppercase">{rank}</span>}</p>
-						<p className="text-sm text-neutral-content/50 first-letter:uppercase">{t("profile_txt_joined")} {session!.user.createdAt.toDateString()}</p>
+						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(targetInfo?.username, 9)} {rank && <span className="badge badge-info badge-outline badge-sm uppercase">{session?.user.language === "fr" ? rank.fr_label : rank.en_label}</span>}</p>
+						<p className="text-sm text-neutral-content/50 first-letter:uppercase">{t("profile_txt_joined")} {targetInfo?.createdAt}</p>
 					</div>
 				</div>
 				{/* droite */}
 				<div>
-					<p className={`text-4xl ${(session.user.points ?? 0) >= 0 ? "text-info" : "text-error"} font-bold font-mono text-center md:text-right`}>{session.user.points?.toLocaleString()}</p>
+					<p className={`text-4xl ${(targetInfo?.points ?? 0) >= 0 ? "text-info" : "text-error"} font-bold font-mono text-center md:text-right`}>{targetInfo?.points.toLocaleString()}</p>
 					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> 14th worldwide</p>
 				</div>
 			</div>
