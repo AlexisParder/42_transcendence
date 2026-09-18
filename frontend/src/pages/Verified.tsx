@@ -157,12 +157,6 @@ export function Verified() {
 							</span>
 							<p>{t("verified_no_mail")}</p>
 						</div>
-						<div className="flex items-center gap-2">
-							<span className="flex h-6 shrink-0 items-center">
-								<span className="size-1 rounded-full bg-info" />
-							</span>
-							<p>{t("verified_email_change")}</p>
-						</div>
 					</div>
 				</fieldset>
 			</div>

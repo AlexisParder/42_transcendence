@@ -262,9 +262,8 @@
 	"verified_verification_code": "Verification code",
 	"verified_resend_email": "Resend the email",
 	"verified_resend_email_cooldown": "Available again in {{left}}",
-	"verified_code_expiration": "The code expires in 24 hours.",
+	"verified_code_expiration": "The code is valid for 10 minutes.",
 	"verified_no_mail": "Nothing arrived? Check your spam folder, then try resending.",
-	"verified_email_change": "Changing your email in Settings starts this over - your old address stays active the new one is confirmed.",
 	"verified_err_resend_email": "Resend email failed",
 	"verified_err_verify_code": "Verification code is invalid"
 }
