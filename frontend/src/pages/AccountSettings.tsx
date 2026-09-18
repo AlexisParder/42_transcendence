@@ -213,18 +213,33 @@ function SettingsCat() {
 			return
 		}
 
-		// ajouter convertion base64
-		if (picture.length > 0) {
-			const { error } = await authClient.updateUser({
-				image: picture,
-			})
+		if (picture.length === 0)
+			return
 
-			if (error)
-				setErrors({ form: t("settings_err_updt_picture") })
-			else {
-				setPicture('')
-				HideModal('pictureModal')
-			}
+		let base64: string
+		try {
+			const res = await fetch(picture)
+			const blob = await res.blob()
+			base64 = await new Promise<string>((resolve, reject) => {
+				const reader = new FileReader()
+				reader.onloadend = () => resolve(reader.result as string)
+				reader.onerror = reject
+				reader.readAsDataURL(blob)
+			})
+		} catch {
+			setErrors({ form: t("settings_err_updt_picture") })
+			return
+		}
+
+		const { error } = await authClient.updateUser({
+			image: base64,
+		})
+
+		if (error)
+			setErrors({ form: t("settings_err_updt_picture") })
+		else {
+			setPicture('')
+			HideModal('pictureModal')
 		}
 	}
 
