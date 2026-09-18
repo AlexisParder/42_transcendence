@@ -6,20 +6,21 @@ import { useCallback, useEffect, useState } from "react";
 import { authClient } from "../lib/auth-client";
 import { t } from "../lib/translate";
 
-const COOLDOWN = 2
+const COOLDOWN = 60
 
 function formatMS(total: number) {
 	return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`
 }
 
 export function Verified() {
-	useDocumentTitle("Verifed email")
+	useDocumentTitle(t("verified_page_title"))
 
 	const navigate = useNavigate()
 	const location = useLocation()
 	const email = (location.state as { email?: string } | null)?.email
 
 	const [left, setLeft] = useState(COOLDOWN)
+	const [sentTime, setSentTime] = useState(1)
 	const [sending, setSending] = useState(false)
 
 	const [code, setCode] = useState("")
@@ -34,7 +35,7 @@ export function Verified() {
 
 		if (error) {
 			if (error.code == "INVALID_OTP" || error.status == 400)
-				setErrors({ code: t("invalid_otp") })
+				setErrors({ code: t("verified_err_verify_code") })
 			setCode("")
 			setVerifying(false)
 			return
@@ -55,6 +56,12 @@ export function Verified() {
 		return () => clearTimeout(id)
 	}, [left])
 
+	useEffect(() => {
+		if (sentTime <= 0) return
+		const id = setTimeout(() => setSentTime(sentTime + 1), 1000)
+		return () => clearTimeout(id)
+	}, [sentTime])
+
 	async function resend() {
 		if (!email || sending || left > 0) return
 		
@@ -70,7 +77,7 @@ export function Verified() {
 		setSending(false)
 
 		if (error) {
-			setErrors({code: t("erreur envoie email")})
+			setErrors({code: t("verified_err_resend_email")})
 			return
 		}
 		
@@ -78,7 +85,17 @@ export function Verified() {
 	}
 
 	if (!email)
-		return navigate("/register", { replace: true })
+	{
+		navigate("/register", { replace: true })
+		return
+	}
+
+	const { data: session, isPending } = authClient.useSession()
+	if (session && !isPending)
+	{
+		navigate("/", { replace: true })
+		return
+	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
 		<div className="card bg-base-200 max-w-md w-full shadow-xl border border-neutral">
@@ -90,21 +107,21 @@ export function Verified() {
 						<div className="bg-info/10 border border-info/50 rounded-full">
 							<IoMailUnreadOutline className="text-info size-10 m-6" />
 						</div>
-						<h2 className="font-bold text-neutral-content text-2xl">Check your inbox</h2>
-						<p className="text-neutral-content/50 text-[0.9rem]">We've sent a confirmation link to your address. Click it to active your account - you can't sign in util it's verified.</p>
+						<h2 className="font-bold text-neutral-content text-2xl">{t("verified_title")}</h2>
+						<p className="text-neutral-content/50 text-[0.9rem]">{t("verified_desc")}</p>
 					</div>
 					<div className="w-full mt-3 grid gap-3 pb-2 border-b-2 border-white/10">
 						<div className="flex bg-info/10 border border-info/50 rounded-lg p-3 items-center gap-3">
 							<IoMailUnreadOutline className="text-info size-5" />
 							<div className="flex-1">
 								<p className="font-bold text-sm">{email}</p>
-								<p className="text-white/50 text-[0.8rem]">Sent 12 seconds ago</p>
+								<p className="text-white/50 text-[0.8rem]">{t("verified_sent_cooldown", { sentTime })}</p>
 							</div>
-							<button className="text-info hover:link">Wrong address?</button>
+							<button onClick={() => navigate("/register")} className="text-info hover:link">{t("verified_wrong_address")}</button>
 						</div>
 
 						<div className="text-center">
-							<p className="text-neutral-content/40 text-xs mt-2">Code de verif</p>
+							<p className="text-neutral-content/40 text-xs mt-2">{t("verified_verification_code")}</p>
 							<label className="otp otp-info otp-lg m-2">
 								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
 								<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
@@ -129,27 +146,27 @@ export function Verified() {
 							{errors.code && <span className="text-error block">{errors.code}</span>}
 						</div>
 
-						<button onClick={resend} disabled={left > 0 || sending} className="btn btn-outline border-neutral text-neutral-content/50 hover:text-neutral-content hover:border-neutral-content/60">Resend the mail</button>
-						{left > 0 && <p className="text-center text-white/50">Available again in {formatMS(left)}</p>}
+						<button onClick={resend} disabled={left > 0 || sending} className="btn btn-outline border-neutral text-neutral-content/50 hover:text-neutral-content hover:border-neutral-content/60">{t("verified_resend_email")}</button>
+						{left > 0 && <p className="text-center text-white/50">{t("verified_resend_email_cooldown", { left: formatMS(left) })}</p>}
 					</div>
 					<div className="text-white/50">
 						<div className="flex items-center gap-2">
 							<span className="flex h-6 shrink-0 items-center">
 								<span className="size-1 rounded-full bg-info" />
 							</span>
-							<p>The link expires in 24 hours.</p>
+							<p>{t("verified_code_expiration")}</p>
 						</div>
 						<div className="flex items-center gap-2">
 							<span className="flex h-6 shrink-0 items-center">
 								<span className="size-1 rounded-full bg-info" />
 							</span>
-							<p>Nothing arrived? Check your spam folder, then try resending.</p>
+							<p>{t("verified_no_mail")}</p>
 						</div>
 						<div className="flex items-center gap-2">
 							<span className="flex h-6 shrink-0 items-center">
 								<span className="size-1 rounded-full bg-info" />
 							</span>
-							<p>Changing your email in Settings starts this over - your old address stays active the new one is confirmed.</p>
+							<p>{t("verified_email_change")}</p>
 						</div>
 					</div>
 				</fieldset>

@@ -252,5 +252,19 @@
 	"settings_err_updt_email": "Update email failed",
 	"settings_err_rmv_picture": "Remove picture failed",
 	"settings_err_rmv_user": "Remove account failed",
-	"settings_updt_email_wait": "Pending change to {{email}} - confirm it from your inbox"
+	"settings_updt_email_wait": "Pending change to {{email}} - confirm it from your inbox",
+
+	"verified_page_title": "Verify Account",
+	"verified_title": "Check your inbox",
+	"verified_desc": "We've sent a confirmation link to your address. Click it to active your account - you can't sign in util it's verified.",
+	"verified_sent_cooldown": "Sent {{sentTime}} seconds ago",
+	"verified_wrong_address": "Wrong address?",
+	"verified_verification_code": "Verification code",
+	"verified_resend_email": "Resend the email",
+	"verified_resend_email_cooldown": "Available again in {{left}}",
+	"verified_code_expiration": "The code expires in 24 hours.",
+	"verified_no_mail": "Nothing arrived? Check your spam folder, then try resending.",
+	"verified_email_change": "Changing your email in Settings starts this over - your old address stays active the new one is confirmed.",
+	"verified_err_resend_email": "Resend email failed",
+	"verified_err_verify_code": "Verification code is invalid"
 }
