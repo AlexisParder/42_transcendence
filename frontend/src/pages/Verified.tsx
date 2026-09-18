@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { SonarTitle } from "../components/SonarTitle";
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { IoMailUnreadOutline } from "react-icons/io5";
@@ -26,6 +26,8 @@ export function Verified() {
 	const [code, setCode] = useState("")
 	const [errors, setErrors] = useState<{ code?: string }>({})
 	const [verifying, setVerifying] = useState(false)
+
+	const { data: session, isPending } = authClient.useSession()
 
 	const verify = useCallback(async (otp: string) => {
 		if (verifying) return
@@ -85,17 +87,10 @@ export function Verified() {
 	}
 
 	if (!email)
-	{
-		navigate("/register", { replace: true })
-		return
-	}
+		return <Navigate to="/register" replace />
 
-	const { data: session, isPending } = authClient.useSession()
 	if (session && !isPending)
-	{
-		navigate("/", { replace: true })
-		return
-	}
+		return <Navigate to="/" replace />
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
 		<div className="card bg-base-200 max-w-md w-full shadow-xl border border-neutral">
