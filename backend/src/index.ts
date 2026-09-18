@@ -22,6 +22,7 @@ import { unblockUserHandler } from "./routes/unblockUserhandler.route.ts"
 import { getBlockedHandler } from "./routes/getBlocked.route.ts"
 import { getUserStatsHandler } from "./routes/getUserStats.route.ts"
 import { getUserInfoHandler } from "./routes/getUserInfo.route.ts"
+import { getSentHandler, setSentHandler } from "./routes/optCooldown.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -67,6 +68,8 @@ app.post("/api/unblock-user", unblockUserHandler)
 app.post("/api/get-blocked", getBlockedHandler)
 app.post("/api/get-user-info", getUserInfoHandler)
 app.post("/api/get-user-stats", getUserStatsHandler)
+app.post("/api/opt/cooldown", getSentHandler)
+app.post("/api/opt/send", setSentHandler)
 
 io.use(async (socket, next) => {
 	try {

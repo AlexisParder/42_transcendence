@@ -19,8 +19,8 @@ export function Verified() {
 	const location = useLocation()
 	const email = (location.state as { email?: string } | null)?.email
 
-	const [left, setLeft] = useState(COOLDOWN)
-	const [sentTime, setSentTime] = useState(1)
+	const [sentAt, setSentAt] = useState<number | null>(null)
+	const [now, setNow] = useState(() => Date.now())
 	const [sending, setSending] = useState(false)
 
 	const [code, setCode] = useState("")
@@ -28,6 +28,8 @@ export function Verified() {
 	const [verifying, setVerifying] = useState(false)
 
 	const { data: session, isPending } = authClient.useSession()
+
+	const left = sentAt ? Math.max(0, COOLDOWN - Math.floor((now - sentAt) / 1000)) : 0
 
 	const verify = useCallback(async (otp: string) => {
 		if (verifying) return
@@ -46,23 +48,30 @@ export function Verified() {
 	}, [email, navigate, verifying])
 
 	useEffect(() => {
+		if (!email) return
+		(async () => {
+			const res = await fetch(`/api/opt/cooldown`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email })
+			})
+			const data = await res.json()
+			if (data.ok)
+				setSentAt(data.left > 0 ? Date.now() - (COOLDOWN - data.left) * 1000 : 0)
+		})()
+	}, [email])
+
+	useEffect(() => {
+		const id = setInterval(() => setNow(Date.now()), 1000)
+		return () => clearInterval(id)
+	}, [])
+
+	useEffect(() => {
 		if (code.length != 6) return
 	
 		const id = setTimeout(() => verify(code), 0)
 		return () => clearTimeout(id)
 	}, [code, verify])
-
-	useEffect(() => {
-		if (left <= 0) return
-		const id = setTimeout(() => setLeft(left - 1), 1000)
-		return () => clearTimeout(id)
-	}, [left])
-
-	useEffect(() => {
-		if (sentTime <= 0) return
-		const id = setTimeout(() => setSentTime(sentTime + 1), 1000)
-		return () => clearTimeout(id)
-	}, [sentTime])
 
 	async function resend() {
 		if (!email || sending || left > 0) return
@@ -71,19 +80,24 @@ export function Verified() {
 		setErrors({})
 		setCode("")
 
-		const {error} = await authClient.emailOtp.sendVerificationOtp({
-			email,
-			type: "email-verification"
-		})
-
-		setSending(false)
-
-		if (error) {
-			setErrors({code: t("verified_err_resend_email")})
-			return
+		try {
+			const res = await fetch(`/api/opt/send`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email })
+			})
+			const data = await res.json()
+			if (!data.ok) {
+				if (data.error == "cooldown")
+					setErrors({ code: t("verified_err_resend_cooldown") })
+				else
+					setErrors({ code: t("verified_err_resend_email") })
+				return
+			}
+			setSentAt(Date.now())
+		} catch {
+			setErrors({ code: t("verified_err_resend_email") })
 		}
-		
-		setLeft(COOLDOWN)
 	}
 
 	if (!email)
@@ -110,7 +124,6 @@ export function Verified() {
 							<IoMailUnreadOutline className="text-info size-5" />
 							<div className="flex-1">
 								<p className="font-bold text-sm">{email}</p>
-								<p className="text-white/50 text-[0.8rem]">{t("verified_sent_cooldown", { sentTime })}</p>
 							</div>
 							<button onClick={() => navigate("/register")} className="text-info hover:link">{t("verified_wrong_address")}</button>
 						</div>
