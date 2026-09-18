@@ -8,6 +8,7 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { useEffect, useState } from "react";
 import type { Match, Rank, Stat, UserInfo } from "../../../backend/src/events";
+import { useLocation } from "react-router-dom";
 
 export function Profile() {
 	const { data: session, isPending } = authClient.useSession()
@@ -15,7 +16,9 @@ export function Profile() {
 	const [targetInfo, setTargetInfo] = useState<UserInfo>()
 	const [matches, setMatches] = useState<Match[]>([])
 	const [stats, setStats] = useState<Stat>()
-	const targetId = ""
+
+	const location = useLocation()
+	const targetId = (location.state as { targetId?: string } | null)?.targetId
 
 	useEffect(() => {
 		async function loadUserInfo() {

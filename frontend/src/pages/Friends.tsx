@@ -13,6 +13,7 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { formatTime, formatTimeMsg } from "../lib/formatTime";
 import { truncateText } from "../lib/truncateText";
 import { GoKebabHorizontal } from "react-icons/go";
+import { useNavigate } from "react-router-dom";
 
 export function Friends() {
 	useDocumentTitle(t("friends_title"))
@@ -35,6 +36,8 @@ export function Friends() {
 	const loadingMoreRef = useRef(false)
 	const [search, setSearch] = useState("")
 	const [, setTick] = useState(0)
+
+	const navigate = useNavigate()
 
 	function matchesSearch(username: string | null | undefined) {
 		return (username ?? "").toLowerCase().includes(search.trim().toLowerCase())
@@ -562,11 +565,15 @@ export function Friends() {
 		ShowModal('SendFriendRequestModal')
 	}
 
+	function handleProfile(id: string) {
+		navigate('/profile', { state: { targetId: id } })
+	}
+
 	return <Sidebar>
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex">
 				<div className="flex flex-1 flex-col h-screen min-w-0">
-					<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} status={presence[peerId ?? ""]} />
+					<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} onProfile={handleProfile} status={presence[peerId ?? ""]} />
 					<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 						<div className="flex flex-col min-h-full">
 							{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
@@ -683,7 +690,7 @@ function DisplayMessage({ message, isMine, createdAt }: { message: string, isMin
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, peerId, onBlock, status }: { friends: Friend[], peerId: string | null, onBlock: (id: string) => void, status: "available" | "in a match" | "away" | "offline" }) {
+function ConversationFriendDisplay({ friends, peerId, onBlock, onProfile, status }: { friends: Friend[], peerId: string | null, onBlock: (id: string) => void, onProfile: (id: string) => void, status: "available" | "in a match" | "away" | "offline" }) {
 	if (!peerId)
 		return
 
@@ -700,7 +707,7 @@ function ConversationFriendDisplay({ friends, peerId, onBlock, status }: { frien
 			</div>
 		</div>
 		<div className="flex items-center gap-2">
-			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("settings_profile_title")}</button>
+			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={() => onProfile(peerId)}>{t("settings_profile_title")}</button>
 			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("btn_invite")}</button>
 			<button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>
 		</div>
