@@ -68,7 +68,7 @@ export function Home() {
 										type="text"
 										aria-label="Match code"
 										placeholder="CODE - - - - -"
-										className="input join-item h-10 min-w-0 flex-1 bg-base-200 px-4 font-mono text-sm uppercase tracking-label placeholder:text-base-content/40 w-28 sm:w-40 sm:flex-none"
+										className="input join-item h-10 min-w-0 flex-1 bg-base-200 px-4 font-mono text-sm uppercase tracking-label placeholder:text-base-content/40 w-28 sm:w-40 sm:flex-none outline-none"
 									/>
 									<button className="btn join-item h-10 bg-base-300 px-5">
 										Join
