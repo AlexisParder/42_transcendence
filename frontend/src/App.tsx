@@ -15,6 +15,7 @@ import { Friends } from './pages/Friends'
 import { TwoFactor } from './pages/TwoFactor'
 import { Profile } from './pages/Profile'
 import { SocketProvider } from './provider/SocketProvider'
+import { Notification } from './components/Notification'
 
 const router = createBrowserRouter([
 	{
@@ -108,9 +109,12 @@ function Root() {
 }
 
 function App() {
-	return <SocketProvider>
-		<RouterProvider router={router} />
-	</SocketProvider>
+	return (
+		<SocketProvider>
+			<Notification />
+			<RouterProvider router={router} />
+		</SocketProvider>
+	)
 }
 
 export default App
