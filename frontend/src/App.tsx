@@ -14,6 +14,7 @@ import { Leaderboard } from './pages/Leaderboard'
 import { Friends } from './pages/Friends'
 import { TwoFactor } from './pages/TwoFactor'
 import { Profile } from './pages/Profile'
+import { Notifications } from './pages/Notifications'
 import { SocketProvider } from './provider/SocketProvider'
 import { Notification } from './components/Notification'
 
@@ -81,6 +82,11 @@ const router = createBrowserRouter([
 	{
 		path: '/profile',
 		element: <Profile />,
+		errorElement: <PageError />
+	},
+	{
+		path: '/notifications',
+		element: <Notifications />,
 		errorElement: <PageError />
 	}
 ])

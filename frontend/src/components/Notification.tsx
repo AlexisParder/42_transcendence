@@ -1,50 +1,45 @@
 import { useEffect, useState } from "react"
 import { FaCheck, FaXmark } from "react-icons/fa6"
 import { useSocket } from "./socketContext"
-import type { FriendRequest } from "../../../backend/src/events"
-
-type StoredNotification = {
-	id: string
-	type: string
-	message: string
-	read: boolean
-	createdAt: string
-}
+import { authClient } from "../lib/auth-client"
+import type { FriendRequest, Message } from "../../../backend/src/events"
 
 export function Notification() {
 	const socket = useSocket()
-	const [notifications, setNotifications] = useState<StoredNotification[]>([])
+	const { data: session } = authClient.useSession()
 	const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
-
-	useEffect(() => {
-		async function loadNotifications() {
-			try {
-				const response = await fetch("/api/notifications", {
-					credentials: "include"
-				})
-
-				if (!response.ok)
-					return
-
-				const data = await response.json()
-				setNotifications(data.notifications ?? [])
-			} catch (error) {
-				console.error("load notifications:", error)
-			}
-		}
-
-		loadNotifications()
-	}, [])
+	const [liveMessages, setLiveMessages] = useState<Message[]>([])
 
 	useEffect(() => {
 		function onFriendRequest(request: FriendRequest) {
 			setFriendRequests(prev => [...prev, request])
+			setTimeout(() => {
+				setFriendRequests(prev => prev.filter(item => item.id !== request.id))
+			}, 5000)
 		}
 		socket.on("friend_request_received", onFriendRequest)
 		return () => {
 			socket.off("friend_request_received", onFriendRequest)
 		}
 	}, [socket])
+
+	useEffect(() => {
+		function onNewMessage(message: Message) {
+			if (message.toUserId !== session?.user.id)
+				return
+
+			setLiveMessages(prev => [...prev, message])
+			setTimeout(() => {
+				setLiveMessages(prev => prev.filter(item => item.id !== message.id))
+			}, 5000)
+		}
+
+		socket.on("new_message", onNewMessage)
+
+		return () => {
+			socket.off("new_message", onNewMessage)
+		}
+	}, [socket, session?.user.id])
 
 	async function answerFriendRequest(requestId: string, action: "accept" | "decline") {
 		const endpoint = action === "accept"
@@ -62,46 +57,14 @@ export function Notification() {
 			setFriendRequests(prev => prev.filter(request => request.id !== requestId))
 	}
 
-	async function markNotificationRead(notificationId: string) {
-		try {
-			const response = await fetch("/api/notifications/read", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ notificationId })
-			})
-
-			if (response.ok)
-				setNotifications(prev => prev.map(notification =>
-					notification.id === notificationId
-						? { ...notification, read: true }
-						: notification
-				))
-		} catch (error) {
-			console.error("mark notification read:", error)
-		}
-	}
-
 	return (
 		<div className="fixed bottom-20 right-4 z-50 w-80 space-y-2">
-			{notifications.map(notification => (
-				<button
-					type="button"
-					key={notification.id}
-					className={`w-full rounded-box border border-neutral bg-base-100/95 p-3 text-left shadow-lg backdrop-blur-sm ${notification.read ? "opacity-60" : "cursor-pointer"}`}
-					onClick={() => {
-						if (!notification.read)
-							markNotificationRead(notification.id)
-					}}
-				>
-					<p className="font-bold text-info">
-						{notification.type === "FRIEND_REQUEST" ? "Friend request" : "Notification"}
-					</p>
-					<p className="text-sm">{notification.message}</p>
-					<p className="text-xs text-base-content/60">
-						{new Date(notification.createdAt).toLocaleString()}
-					</p>
-				</button>
+			{liveMessages.map(message => (
+				<div key={message.id} className="rounded-box border border-info bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">
+					<p className="font-bold text-info">New message</p>
+					<p className="text-sm">{message.message}</p>
+					<p className="text-xs text-base-content/60">Just now</p>
+				</div>
 			))}
 
 			{friendRequests.map(request => (

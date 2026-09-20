@@ -6,7 +6,7 @@ import { TbSettingsFilled, TbTournament } from "react-icons/tb";
 import { Link, Navigate, NavLink, useLocation } from "react-router-dom";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
-import { FaBars, FaUser } from "react-icons/fa6";
+import { FaBars, FaBell, FaUser } from "react-icons/fa6";
 import { Avatar } from "./Avatar";
 import { t } from "../lib/translate";
 import { truncateText } from "../lib/truncateText";
@@ -23,6 +23,7 @@ const navItems: NavItem[] = [
 	{ to: "/tournaments", icon: TbTournament, label: t("tournaments_title") },
 	{ to: "/leaderboard", icon: MdLeaderboard, label: t("leaderboard_title") },
 	{ to: "/friends", icon: FaUserFriends, label: t("friends_title") },
+	{ to: "/notifications", icon: FaBell, label: "Notifications" },
 	{ to: "/profile", icon: FaUser, label: t("profile_title") },
 	{ to: "/settings", icon: TbSettingsFilled, label: t("settings_title") },
 	{ to: "/", icon: FaDoorOpen, label: t("quit_title") }

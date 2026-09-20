@@ -132,6 +132,14 @@ io.on("connection", async (socket) => {
 				}
 			})
 
+			await prisma.notification.create({
+				data: {
+					userId: toUserId,
+					type: "MESSAGE",
+					message: `New message: ${message}`
+				}
+			})
+
 			const wire = {
 				id: row.id,
 				fromUserId: row.userId,
