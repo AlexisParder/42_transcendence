@@ -3,21 +3,37 @@ import { FaCheck, FaXmark } from "react-icons/fa6"
 import { useSocket } from "./socketContext"
 import type { FriendRequest } from "../../../backend/src/events"
 
-const messageNotification = {
-	title: "Test notification",
-	message: "The notification system is working.",
-	date: "Just now"
+type StoredNotification = {
+	id: string
+	type: string
+	message: string
+	read: boolean
+	createdAt: string
 }
 
 export function Notification() {
 	const socket = useSocket()
-	const [showMessage, setShowMessage] = useState(true)
+	const [notifications, setNotifications] = useState<StoredNotification[]>([])
 	const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
 
 	useEffect(() => {
-		const timer = setTimeout(() => setShowMessage(false), 5000)
+		async function loadNotifications() {
+			try {
+				const response = await fetch("/api/notifications", {
+					credentials: "include"
+				})
 
-		return () => clearTimeout(timer)
+				if (!response.ok)
+					return
+
+				const data = await response.json()
+				setNotifications(data.notifications ?? [])
+			} catch (error) {
+				console.error("load notifications:", error)
+			}
+		}
+
+		loadNotifications()
 	}, [])
 
 	useEffect(() => {
@@ -45,13 +61,48 @@ export function Notification() {
 		if (response.ok)
 			setFriendRequests(prev => prev.filter(request => request.id !== requestId))
 	}
+
+	async function markNotificationRead(notificationId: string) {
+		try {
+			const response = await fetch("/api/notifications/read", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ notificationId })
+			})
+
+			if (response.ok)
+				setNotifications(prev => prev.map(notification =>
+					notification.id === notificationId
+						? { ...notification, read: true }
+						: notification
+				))
+		} catch (error) {
+			console.error("mark notification read:", error)
+		}
+	}
+
 	return (
 		<div className="fixed bottom-20 right-4 z-50 w-80 space-y-2">
-			{showMessage && <div className="rounded-box border border-neutral bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">
-				<p className="font-bold text-info">{messageNotification.title}</p>
-				<p className="text-sm">{messageNotification.message}</p>
-				<p className="text-xs text-base-content/60">{messageNotification.date}</p>
-			</div>}
+			{notifications.map(notification => (
+				<button
+					type="button"
+					key={notification.id}
+					className={`w-full rounded-box border border-neutral bg-base-100/95 p-3 text-left shadow-lg backdrop-blur-sm ${notification.read ? "opacity-60" : "cursor-pointer"}`}
+					onClick={() => {
+						if (!notification.read)
+							markNotificationRead(notification.id)
+					}}
+				>
+					<p className="font-bold text-info">
+						{notification.type === "FRIEND_REQUEST" ? "Friend request" : "Notification"}
+					</p>
+					<p className="text-sm">{notification.message}</p>
+					<p className="text-xs text-base-content/60">
+						{new Date(notification.createdAt).toLocaleString()}
+					</p>
+				</button>
+			))}
 
 			{friendRequests.map(request => (
 				<div key={request.id} className="rounded-box border border-neutral bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">

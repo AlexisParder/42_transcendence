@@ -48,6 +48,13 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 			}
 		})
 
+		await prisma.notification.create({
+			data: {
+				userId: target.id,
+				type: "FRIEND_REQUEST",
+				message: `${session.user.username ?? "Someone"} sent you a friend request`
+			}
+		})
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		io.to(target.id).emit("friend_request_received", {
 			id: request.id,

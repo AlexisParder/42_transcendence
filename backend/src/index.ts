@@ -23,6 +23,8 @@ import { getBlockedHandler } from "./routes/getBlocked.route.ts"
 import { getUserStatsHandler } from "./routes/getUserStats.route.ts"
 import { getUserInfoHandler } from "./routes/getUserInfo.route.ts"
 import { getSentHandler, setSentHandler } from "./routes/optCooldown.route.ts"
+import { getNotificationsHandler } from "./routes/getNotifications.route.ts"
+import { setNotificationReadHandler } from "./routes/setNotificationRead.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -53,6 +55,7 @@ app.use(express.json())
 
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
+app.get("/api/notifications", getNotificationsHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
@@ -63,6 +66,7 @@ app.post("/api/accept-friend-request", acceptFriendRequestHandler)
 app.post("/api/decline-friend-request", declineFriendRequestHandler)
 app.post("/api/get-conversations", getConverstionsHandler)
 app.post("/api/set-read", setReadHandler)
+app.post("/api/notifications/read", setNotificationReadHandler)
 app.post("/api/block-user", blockUserHandler)
 app.post("/api/unblock-user", unblockUserHandler)
 app.post("/api/get-blocked", getBlockedHandler)
