@@ -93,3 +93,16 @@ export interface UserInfo {
 	leaderboardPos: string,
 	isMine: boolean
 }
+
+export interface LeaderboardInfo {
+	id: string,
+	points: number,
+	username: string | null | undefined,
+	image: string | null | undefined,
+	isMine: boolean,
+	pos: number,
+	matches: number,
+	win: number,
+	lose: number,
+	accuracy: number
+}
