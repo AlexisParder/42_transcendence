@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { FaTrash } from "react-icons/fa6"
 import { Sidebar } from "../components/Sidebar"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 
@@ -50,11 +51,60 @@ export function Notifications() {
 			))
 	}
 
+	async function markAllAsRead() {
+		const response = await fetch("/api/notifications/read-all", {
+			method: "POST",
+			credentials: "include"
+		})
+
+		if (response.ok)
+			setNotifications(prev => prev.map(notification => ({ ...notification, read: true })))
+	}
+
+	async function deleteNotification(notificationId: string) {
+		const response = await fetch("/api/notifications/delete", {
+			method: "POST",
+			headers: { "Content-type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ notificationId })
+		})
+
+		if (response.ok)
+			setNotifications(prev => prev.filter(notification => notification.id !== notificationId))
+	}
+
+	async function deleteAllNotifications() {
+		if (!window.confirm("Delete all notifications?"))
+			return
+
+		const response = await fetch("/api/notifications/delete-all", {
+			method: "POST",
+			credentials: "include"
+		})
+
+		if (response.ok)
+			setNotifications([])
+	}
+
 	return (
 		<Sidebar>
 			<div className="p-4">
 				<h1 className="text-xl font-bold text-info">Notifications</h1>
 				<p className="mt-1 text-sm text-neutral-content/60">Your notification history</p>
+				<button
+					type="button"
+					className="btn btn-info btn-sm mt-4"
+					onClick={markAllAsRead}
+				>
+					Mark all as read
+				</button>
+				<button
+					type="button"
+					className="btn btn-error btn-sm ml-2 mt-4"
+					onClick={deleteAllNotifications}
+				>
+					Delete all
+				</button>
 
 				<div className="mt-6 space-y-3">
 					{notifications.length === 0 && (
@@ -64,8 +114,7 @@ export function Notifications() {
 					)}
 
 					{notifications.map(notification => (
-						<button
-							type="button"
+						<div
 							key={notification.id}
 							onClick={() => {
 								if (!notification.read)
@@ -77,13 +126,26 @@ export function Notifications() {
 								<p className="font-bold text-info">
 									{notification.type === "FRIEND_REQUEST" ? "Friend request" : "Notification"}
 								</p>
-								{!notification.read && <span className="badge badge-warning badge-sm">Unread</span>}
+								<div className="flex items-center gap-2">
+									{!notification.read && <span className="badge badge-warning badge-sm">Unread</span>}
+									<button
+										type="button"
+										className="btn btn-error btn-ghost btn-sm btn-circle"
+										onClick={event => {
+											event.stopPropagation()
+											deleteNotification(notification.id)
+										}}
+										aria-label="Delete notification"
+									>
+										<FaTrash />
+									</button>
+								</div>
 							</div>
 							<p className="mt-2 text-sm">{notification.message}</p>
 							<p className="mt-2 text-xs text-base-content/60">
 								{new Date(notification.createdAt).toLocaleString()}
 							</p>
-						</button>
+						</div>
 					))}
 				</div>
 			</div>

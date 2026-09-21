@@ -25,6 +25,9 @@ import { getUserInfoHandler } from "./routes/getUserInfo.route.ts"
 import { getSentHandler, setSentHandler } from "./routes/optCooldown.route.ts"
 import { getNotificationsHandler } from "./routes/getNotifications.route.ts"
 import { setNotificationReadHandler } from "./routes/setNotificationRead.route.ts"
+import { setAllNotificationsReadHandler } from "./routes/setAllNotificationsRead.route.ts"
+import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
+import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
 import { leaderboardLimit } from "./rateLimit.ts"
 
@@ -69,6 +72,9 @@ app.post("/api/decline-friend-request", declineFriendRequestHandler)
 app.post("/api/get-conversations", getConverstionsHandler)
 app.post("/api/set-read", setReadHandler)
 app.post("/api/notifications/read", setNotificationReadHandler)
+app.post("/api/notifications/read-all", setAllNotificationsReadHandler)
+app.post("/api/notifications/delete", deleteNotificationHandler)
+app.post("/api/notifications/delete-all", deleteAllNotificationsHandler)
 app.post("/api/block-user", blockUserHandler)
 app.post("/api/unblock-user", unblockUserHandler)
 app.post("/api/get-blocked", getBlockedHandler)
