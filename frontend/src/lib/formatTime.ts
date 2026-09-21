@@ -14,6 +14,19 @@ export function formatTime(iso: string): string {
 	return `${Math.floor(h / 24)} ${t("txt_day_u")}`
 }
 
+export function formatTimeProfile(min: string): string {
+	const minNb = Number(min)
+	if (minNb < 1)
+		return "now"
+	if (minNb < 60)
+		return `${minNb} min`
+
+	const h = Math.floor(minNb / 60)
+	if (h < 24)
+		return `${h} h`
+	return `${Math.floor(h / 24)} ${t("txt_day_u")}`
+}
+
 export function formatTimeMsg(iso: string): string {
 	const date = new Date(iso).toLocaleString()
 

@@ -38,7 +38,7 @@ export function formatMatch(row: any, userId: string) {
 		result,
 		desc,
 		matchType: match.mode as Mode,
-		matchTime: `${min} min`,
+		matchTime: min,
 		ranked: match.isRanked,
 		points: (match.isRanked ? Math.abs(me.points) : 'unranked') as number | 'unranked',
 	}

@@ -9,6 +9,7 @@ import { truncateText } from "../lib/truncateText";
 import { useEffect, useState } from "react";
 import type { Match, Rank, Stat, UserInfo } from "../../../backend/src/events";
 import { useLocation } from "react-router-dom";
+import { formatTimeProfile } from "../lib/formatTime";
 
 export function Profile() {
 	const { data: session, isPending } = authClient.useSession()
@@ -171,7 +172,7 @@ function MatchesItem({ result, desc, matchType, matchTime, points }: {
 	return <div className={`grid grid-cols-[3.5rem_1fr_1fr_5rem] items-center gap-2 ${colorBg} p-2.5 rounded-md border-l-3 ${colorBd}`}>
 		<p className={`text-sm ${colorTxt} font-bold uppercase`}>{t(`txt_${result}`)}</p>
 		<p className="text-xs text-center">{desc}</p>
-		<p className="flex items-center justify-center gap-1 text-xs">{type} <TbPointFilled className="size-1" /> {matchTime}</p>
+		<p className="flex items-center justify-center gap-1 text-xs">{type} <TbPointFilled className="size-1" /> {formatTimeProfile(matchTime)}</p>
 		<p className={`text-xs ${colorTxt} font-bold text-right`}>{pointsTxt === "unranked" ? t("txt_unranked") : pointsTxt}</p>
 	</div>
 }

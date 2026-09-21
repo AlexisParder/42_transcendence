@@ -42,11 +42,11 @@ export function AccountSettings() {
 				<input className="join-item btn" type="radio" defaultChecked={category === "account"} name="options" onClick={() => {
 					if (category !== "account")
 						setCategory("account")
-				}} aria-label={t("settings_acc_title")} onChange={() => { }} />
+				}} aria-label={t("settings_acc_title")} />
 				<input className="join-item btn" type="radio" defaultChecked={category === "notifications"} name="options" onClick={() => {
 					if (category !== "notifications")
 						setCategory("notifications")
-				}} aria-label={t("settings_notif_title")} onChange={() => { }} />
+				}} aria-label={t("settings_notif_title")} />
 			</div>
 			<div className="divider text-neutral-content/40 m-0 mt-3 mb-3"></div>
 

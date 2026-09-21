@@ -2,7 +2,6 @@
 	"play_title": "Play",
 	"tournaments_title": "Tournaments",
 	"rules_title": "Rules",
-	"leaderboard_title": "Leaderboard",
 	"quit_title": "Quit",
 	"contact_title": "Contact",
 
@@ -65,6 +64,9 @@
 	"txt_err_2fa_invalid": "Code is invalid!",
 	"txt_err_agree_terms": "You must accept the terms!",
 	"txt_err_too_many_requests": "Too many requests. Please wait 1 minute before trying again",
+
+	"leaderboard_title": "Leaderboard",
+	"leaderboard_global_title": "Global",
 
 	"profile_title": "Profile",
 	"profile_of_title": "{{username}}'s profile",

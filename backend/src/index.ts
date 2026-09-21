@@ -58,7 +58,6 @@ app.use(express.json())
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/notifications", getNotificationsHandler)
-app.get("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
@@ -77,6 +76,7 @@ app.post("/api/get-user-info", getUserInfoHandler)
 app.post("/api/get-user-stats", getUserStatsHandler)
 app.post("/api/opt/cooldown", getSentHandler)
 app.post("/api/opt/send", setSentHandler)
+app.post("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHandler)
 
 io.use(async (socket, next) => {
 	try {

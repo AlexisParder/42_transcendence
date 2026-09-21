@@ -5,6 +5,9 @@ import { prisma } from "../db/client.ts";
 import type { LeaderboardInfo } from "../events.ts";
 
 export async function getLeaderboardInfosHandler(req: Request, res: Response) {
+	const { offset, filter } = req.body
+	const skip = Number(offset) || 0
+
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
@@ -15,24 +18,31 @@ export async function getLeaderboardInfosHandler(req: Request, res: Response) {
 
 		const userId = session.user.id
 
-		const [rows, totals, wins] = await Promise.all([
-			prisma.user.findMany({
-				select: {
-					id: true,
-					username: true,
-					image: true,
-					points: true
-				},
-				orderBy: { points: "desc" }
-			}),
+		const rows = await prisma.user.findMany({
+			select: {
+				id: true,
+				username: true,
+				image: true,
+				points: true
+			},
+			orderBy: [{ points: "desc" }, { id: "asc" }],
+			skip,
+			take: 20
+		})
+
+		const pageIds = rows.map(r => r.id)
+
+		const [totals, wins] = await Promise.all([
 			prisma.matchPlayers.groupBy({
 				by: ['userId'],
+				where: { userId: { in: pageIds } },
 				_count: { _all: true },
 				_sum: { shotsHit: true, shotsTotal: true }
 			}),
 			prisma.matchPlayers.groupBy({
 				by: ['userId'],
 				where: {
+					userId: { in: pageIds },
 					OR: [
 						{ matchs: { isRanked: true }, points: { gt: 0 } },
 						{ matchs: { isRanked: false }, placement: 1 }
@@ -58,7 +68,7 @@ export async function getLeaderboardInfosHandler(req: Request, res: Response) {
 				image: row.image,
 				points: row.points,
 				isMine: row.id === userId,
-				pos: index + 1,
+				pos: offset + index + 1,
 				matches,
 				win,
 				lose: matches - win,
