@@ -83,7 +83,7 @@ export function Profile() {
 				{/* droite */}
 				<div>
 					<p className={`text-4xl ${(targetInfo?.points ?? 0) >= 0 ? "text-info" : "text-error"} font-bold font-mono text-center md:text-right`}>{targetInfo?.points.toLocaleString()}</p>
-					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> 14th worldwide</p>
+					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> {targetInfo?.leaderboardPos} {t("txt_worldwide")}</p>
 				</div>
 			</div>
 

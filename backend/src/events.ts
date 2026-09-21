@@ -90,5 +90,6 @@ export interface UserInfo {
 	username: string | null | undefined,
 	image: string | null | undefined,
 	createdAt: string,
+	leaderboardPos: string,
 	isMine: boolean
 }

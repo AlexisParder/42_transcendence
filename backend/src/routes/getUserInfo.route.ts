@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { auth } from "../auth.ts";
 import { prisma } from "../db/client.ts";
 import type { Rank, UserInfo } from "../events.ts";
+import { ordinal } from "../lib/matchFormat.ts";
 
 const FALLBACK_RANK: Rank = {
 	id: "custom",
@@ -30,6 +31,7 @@ export async function getUserInfoHandler(req: Request, res: Response) {
 		let createdAt: Date
 		let points: number
 		let isMine: boolean
+		let ldbPos: number
 
 		if (targetId) {
 			const target = await prisma.user.findUnique({
@@ -63,11 +65,16 @@ export async function getUserInfoHandler(req: Request, res: Response) {
 			orderBy: { min: "desc" }
 		})) ?? FALLBACK_RANK
 
+		ldbPos = (await prisma.user.count({
+			where: { points: { gt: points } }
+		})) + 1
+
 		const userInfo: UserInfo = {
 			points,
 			username,
 			image,
 			createdAt: createdAt.toDateString(),
+			leaderboardPos: ordinal(ldbPos),
 			isMine
 		}
 
