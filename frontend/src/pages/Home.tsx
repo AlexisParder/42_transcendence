@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom"
 import { RadarEchoes } from "../components/RadarEchoes"
+import { IoTrophy } from "react-icons/io5"
+import { IoLogoGameControllerB, IoIosStats } from "react-icons/io"
+import { FaUserGroup } from "react-icons/fa6"
+import { RiMenuFill } from "react-icons/ri"
 
 const features = [
 	{
@@ -25,7 +29,7 @@ export function Home() {
 		<>
 			<div className="flex flex-1 w-full justify-center bg-base-100 text-base-content">
 				<div
-					className="flex w-full max-w-7xl flex-col px-5 sm:px-8 lg:px-12"
+					className="flex w-full max-w-7xl flex-col px-5 sm:px-8 lg:px-12 pb-17 md:pb-0"
 				>
 					<div className="flex flex-1 flex-col">
 					<section className="relative grid flex-1 items-center gap-3 py-3 md:grid-cols-[1.2fr_1fr] md:gap-8 md:py-[clamp(0.75rem,3dvh,2.5rem)]">
@@ -108,6 +112,33 @@ export function Home() {
 							</div>
 						))}
 					</section>
+
+					<div className="dock md:hidden mb-1">
+						<button className="dock-active">
+							<IoLogoGameControllerB className="size-[1.2em]" />
+							<span className="dock-label">Play</span>
+						</button>
+						
+						<button>
+							<IoTrophy className="size-[1.2em]" />
+							<span className="dock-label">Tournaments</span>
+						</button>
+						
+						<button>
+							<IoIosStats className="size-[1.2em]" />
+							<span className="dock-label">Leaderboard</span>
+						</button>
+
+						<button>
+							<FaUserGroup className="size-[1.2em]" />
+							<span className="dock-label">Friends</span>
+						</button>
+						
+						<button>
+							<RiMenuFill className="size-[1.2em]" />
+							<span className="dock-label">Menu</span>
+						</button>
+						</div>
 					</div>
 				</div>
 			</div>
