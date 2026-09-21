@@ -3,7 +3,7 @@ import { t } from "../lib/translate"
 import { Link } from "react-router-dom"
 
 export function Footer() {
-	return <footer className="footer md:footer-horizontal bg-base-200 items-center p-4">
+	return <footer className="footer md:footer-horizontal bg-base-200 items-center p-4 hidden md:grid">
 		<aside className="grid-flow-col items-center">
 			<FaRegCircle className="text-info size-5" />
 			<p className="text-neutral-content/40">Sonar - {t("txt_footer")} - 2026</p>
