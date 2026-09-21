@@ -52,7 +52,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 			<div className="drawer-side">
 				<label htmlFor="sidebarDrawer" aria-label="close sidebar" className="drawer-overlay"></label>
 				<ul className="menu bg-base-200 min-h-full w-50 max-w-50 p-4 gap-1">
-					<p className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</p>
+					<Link to="/" className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</Link>
 					<div className="flex flex-col flex-1 gap-1">
 						{navItems.map(({ to, icon: Icon, label, end }) => (
 							<li key={to}>
