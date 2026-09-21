@@ -64,6 +64,7 @@
 	"txt_err_2fa_size": "Code must contain 6 digits!",
 	"txt_err_2fa_invalid": "Code is invalid!",
 	"txt_err_agree_terms": "You must accept the terms!",
+	"txt_err_too_many_requests": "Too many requests. Please wait 1 minute before trying again",
 
 	"profile_title": "Profile",
 	"profile_of_title": "{{username}}'s profile",

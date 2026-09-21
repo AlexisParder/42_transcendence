@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 export function Leaderboard() {
 	useDocumentTitle(t("leaderboard_title"))
 	const [ldbInfos, setLdbInfos] = useState<LeaderboardInfo[]>([])
+	const [reqError, setReqError] = useState("")
 	const navigate = useNavigate()
 
 	useEffect(() => {
@@ -21,11 +22,10 @@ export function Leaderboard() {
 					headers: { "Content-type": "application/json" },
 					credentials: "include",
 				})
-
-				if (!res.ok)
-					return
-
 				const data = await res.json()
+				if (!res.ok)
+					return setReqError(data.error)
+
 				setLdbInfos(data.ldbInfos ?? [])
 			} catch (error) {
 				console.error("load leaderboard info:", error)
@@ -43,7 +43,7 @@ export function Leaderboard() {
 		<div className="p-4">
 			<h1 className="text-xl font-bold">{t("leaderboard_title")}</h1>
 			<p className="flex items-center gap-1 text-xs text-neutral-content/50">Season 2.</p>
-
+			{reqError && <p className="text-error text-sm">{t(reqError)}.</p>}
 			<LeaderboardTable ldbInfos={ldbInfos} onProfile={handleProfile} />
 		</div>
 	</Sidebar>

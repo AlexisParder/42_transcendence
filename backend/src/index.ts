@@ -26,6 +26,7 @@ import { getSentHandler, setSentHandler } from "./routes/optCooldown.route.ts"
 import { getNotificationsHandler } from "./routes/getNotifications.route.ts"
 import { setNotificationReadHandler } from "./routes/setNotificationRead.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
+import { leaderboardLimit } from "./rateLimit.ts"
 
 const app = express()
 const server = createServer(app)
@@ -57,7 +58,7 @@ app.use(express.json())
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/notifications", getNotificationsHandler)
-app.get("/api/get-leaderboard-infos", getLeaderboardInfosHandler)
+app.get("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)

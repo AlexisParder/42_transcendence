@@ -67,6 +67,6 @@ export async function getLeaderboardInfosHandler(req: Request, res: Response) {
 		})
 		res.json({ ok: true, ldbInfos })
 	} catch (err) {
-		res.status(401).json({ ok: false })
+		res.status(500).json({ ok: false })
 	}
 }
