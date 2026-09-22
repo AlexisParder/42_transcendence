@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { FaTrash } from "react-icons/fa6"
 import { Sidebar } from "../components/Sidebar"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
+import { Modal, ShowModal, HideModal } from "../components/Modal"
 
 type NotificationItem = {
 	id: string
@@ -74,9 +75,6 @@ export function Notifications() {
 	}
 
 	async function deleteAllNotifications() {
-		if (!window.confirm("Delete all notifications?"))
-			return
-
 		const response = await fetch("/api/notifications/delete-all", {
 			method: "POST",
 			credentials: "include"
@@ -84,6 +82,8 @@ export function Notifications() {
 
 		if (response.ok)
 			setNotifications([])
+
+		HideModal("DeleteAllNotificationsModal")
 	}
 
 	return (
@@ -101,7 +101,7 @@ export function Notifications() {
 				<button
 					type="button"
 					className="btn btn-error btn-sm ml-2 mt-4"
-					onClick={deleteAllNotifications}
+					onClick={() => ShowModal("DeleteAllNotificationsModal")}
 				>
 					Delete all
 				</button>
@@ -149,6 +149,29 @@ export function Notifications() {
 					))}
 				</div>
 			</div>
+
+			<Modal id="DeleteAllNotificationsModal">
+				<h3 className="text-lg font-bold">Delete all notifications?</h3>
+				<p className="py-4 text-sm text-neutral-content/60">
+					This action cannot be undone.
+				</p>
+				<div className="flex justify-end gap-2">
+					<button
+						type="button"
+						className="btn btn-neutral"
+						onClick={() => HideModal("DeleteAllNotificationsModal")}
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						className="btn btn-error"
+						onClick={deleteAllNotifications}
+					>
+						Delete all
+					</button>
+				</div>
+			</Modal>
 		</Sidebar>
 	)
 }
