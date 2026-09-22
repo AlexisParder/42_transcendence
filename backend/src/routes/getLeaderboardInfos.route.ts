@@ -18,7 +18,28 @@ export async function getLeaderboardInfosHandler(req: Request, res: Response) {
 
 		const userId = session.user.id
 
+		let userWhere = {}
+
+		if (filter === "friends") {
+			const friendLinks = await prisma.friends.findMany({
+				where: {
+					isAccepted: true,
+					OR: [
+						{ userId },
+						{ targetId: userId },
+					]
+				},
+				select: { userId: true, targetId: true }
+			})
+
+			const friendIds = friendLinks.map(f => f.userId === userId ? f.targetId : f.userId)
+
+			friendIds.push(userId)
+			userWhere = { id: { in: friendIds } }
+		}
+
 		const rows = await prisma.user.findMany({
+			where: userWhere,
 			select: {
 				id: true,
 				username: true,

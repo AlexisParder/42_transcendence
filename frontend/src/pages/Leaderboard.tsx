@@ -129,7 +129,7 @@ export function Leaderboard() {
 					}} aria-label={t("friends_title")} />
 				</div>
 			</div>
-			<p className="flex items-center gap-1 text-xs text-neutral-content/50 shrink-0">Season 2.</p>
+			<p className="flex items-center gap-1 text-xs text-neutral-content/50 shrink-0">{t("leaderboard_txt_season", {number: 1})}.</p>
 			{reqError && <p className="text-error text-sm">{t(reqError)}.</p>}
 			<LeaderboardTable ldbInfos={ldbInfos} onProfile={handleProfile} scrollRef={scrollRef} />
 		</div>
@@ -142,11 +142,11 @@ function LeaderboardTable({ ldbInfos, onProfile, scrollRef }: { ldbInfos: Leader
 			<thead className="sticky top-0 bg-base-100 z-10">
 				<tr>
 					<th className="uppercase font-medium">#</th>
-					<th className="uppercase font-medium">player</th>
-					<th className="uppercase font-medium hidden md:table-cell">matches</th>
-					<th className="uppercase font-medium hidden lg:table-cell">w / l</th>
-					<th className="uppercase font-medium hidden md:table-cell">accuracy</th>
-					<th className="uppercase font-medium text-right">points</th>
+					<th className="uppercase font-medium">{t("txt_player")}</th>
+					<th className="uppercase font-medium hidden md:table-cell">{t("profiles_txt_matches")}</th>
+					<th className="uppercase font-medium hidden lg:table-cell">{t("leaderboard_txt_win_lose")}</th>
+					<th className="uppercase font-medium hidden md:table-cell">{t("txt_accuracy")}</th>
+					<th className="uppercase font-medium text-right">{t("txt_points")}</th>
 				</tr>
 			</thead>
 			<tbody>

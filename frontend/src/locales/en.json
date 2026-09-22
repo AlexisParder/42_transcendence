@@ -48,6 +48,8 @@
 	"txt_unranked": "unranked",
 	"txt_no_show_now": "Nothing to show for now",
 	"txt_worldwide": "worldwide",
+	"txt_player": "player",
+	"txt_accuracy": "accuracy",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
@@ -67,6 +69,8 @@
 
 	"leaderboard_title": "Leaderboard",
 	"leaderboard_global_title": "Global",
+	"leaderboard_txt_season": "Season {{number}}",
+	"leaderboard_txt_win_lose": "w / l",
 
 	"profile_title": "Profile",
 	"profile_of_title": "{{username}}'s profile",
