@@ -6,10 +6,11 @@ import { TbSettingsFilled, TbTournament } from "react-icons/tb";
 import { Link, Navigate, NavLink, useLocation } from "react-router-dom";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
-import { FaBars, FaBell, FaUser } from "react-icons/fa6";
+import { FaBell, FaUser } from "react-icons/fa6";
 import { Avatar } from "./Avatar";
 import { t } from "../lib/translate";
 import { truncateText } from "../lib/truncateText";
+import { Dockbar } from "../components/Dockbar"
 
 interface NavItem {
 	to: string,
@@ -44,10 +45,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 		{!isPending && <div className="drawer md:drawer-open min-h-screen">
 			<input id="sidebarDrawer" type="checkbox" className="drawer-toggle hidden" />
 			<div className="drawer-content">
-				<label htmlFor="sidebarDrawer" className="btn btn-ghost drawer-button md:hidden">
-					<FaBars className="size-5" />
-				</label>
-				{children}
+				<Dockbar>{children}</Dockbar>
 			</div>
 			<div className="drawer-side">
 				<label htmlFor="sidebarDrawer" aria-label="close sidebar" className="drawer-overlay"></label>
