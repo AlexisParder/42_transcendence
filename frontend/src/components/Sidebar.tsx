@@ -60,7 +60,6 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 									{({ isActive }) => (
 										<div className="flex items-center gap-2">
 											<Icon className={isActive ? "text-info" : ""} /> {label}
-											{to === "/friends" && <span className="badge badge-soft badge-warning badge-sm">+99999</span>}
 										</div>
 									)}
 								</NavLink>
