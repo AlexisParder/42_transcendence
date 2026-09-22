@@ -129,7 +129,7 @@ export function Leaderboard() {
 					}} aria-label={t("friends_title")} />
 				</div>
 			</div>
-			<p className="flex items-center gap-1 text-xs text-neutral-content/50 shrink-0">{t("leaderboard_txt_season", {number: 1})}.</p>
+			<p className="flex items-center gap-1 text-xs text-neutral-content/50 shrink-0">{t("leaderboard_txt_season", { number: 1 })}.</p>
 			{reqError && <p className="text-error text-sm">{t(reqError)}.</p>}
 			<LeaderboardTable ldbInfos={ldbInfos} onProfile={handleProfile} scrollRef={scrollRef} />
 		</div>
@@ -151,14 +151,14 @@ function LeaderboardTable({ ldbInfos, onProfile, scrollRef }: { ldbInfos: Leader
 			</thead>
 			<tbody>
 				{ldbInfos.length > 0 && ldbInfos.map(l => (
-					<LeaderboarItem key={l.pos} {...l} onProfile={onProfile} />
+					<LeaderboardItem key={l.pos} {...l} onProfile={onProfile} />
 				))}
 			</tbody>
 		</table>
 	</div>
 }
 
-function LeaderboarItem({ id, pos, username, image, matches, win, lose, accuracy, points, isMine, onProfile }: { onProfile: (id: string) => void } & LeaderboardInfo) {
+function LeaderboardItem({ id, pos, username, image, matches, win, lose, accuracy, points, isMine, onProfile }: { onProfile: (id: string) => void } & LeaderboardInfo) {
 	const posString = pos < 10 ? `0${pos}` : pos
 
 	let pointsColor = "text-neutral-content"
