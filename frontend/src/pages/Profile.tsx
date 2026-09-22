@@ -11,12 +11,15 @@ import type { Match, Rank, Stat, UserInfo } from "../../../backend/src/events";
 import { useLocation } from "react-router-dom";
 import { formatTimeProfile } from "../lib/formatTime";
 
+type categoryType = "matches" | "achievements"
 export function Profile() {
 	const { data: session, isPending } = authClient.useSession()
 	const [rank, setRank] = useState<Rank>()
 	const [targetInfo, setTargetInfo] = useState<UserInfo>()
 	const [matches, setMatches] = useState<Match[]>([])
 	const [stats, setStats] = useState<Stat>()
+	const [category, setCategory] = useState<categoryType>('matches')
+
 
 	const location = useLocation()
 	const targetId = (location.state as { targetId?: string } | null)?.targetId
@@ -109,9 +112,19 @@ export function Profile() {
 			</div>
 
 			{/* Bas */}
+			<div className="join lg:hidden pt-4 px-4">
+				<input className="join-item btn" type="radio" defaultChecked={category === "matches"} name="options" onClick={() => {
+					if (category !== "matches")
+						setCategory("matches")
+				}} aria-label={"Matches"} />
+				<input className="join-item btn" type="radio" defaultChecked={category === "achievements"} name="options" onClick={() => {
+					if (category !== "achievements")
+						setCategory("achievements")
+				}} aria-label={"Achievements"} />
+			</div>
 			<div className="flex flex-col lg:flex-row">
-				<div className="flex-2/3 p-4">
-					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_matches_title")}</p>
+				<div className="flex-2/3 pt-2 px-4 pb-4">
+					<p className="text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_matches_title")}</p>
 					<div className="flex flex-col gap-2">
 						{matches.length > 0 && matches.map(m => (
 							<MatchesItem key={m.id} {...m} />
@@ -120,8 +133,8 @@ export function Profile() {
 						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
 				</div>
-				<div className="flex-1/3 lg:border-l border-base-300 p-4">
-					<p className="text-xs uppercase py-2 text-neutral-content/50">{t("profile_achievements_title")}</p>
+				<div className="flex-1/3 lg:border-l border-base-300 pt-2 px-4 pb-4">
+					<p className="text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_achievements_title")}</p>
 					<div className="flex flex-col gap-2">
 						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
 						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
