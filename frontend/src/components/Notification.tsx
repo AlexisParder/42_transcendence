@@ -56,10 +56,13 @@ export function Notification() {
 		if (response.ok)
 			setFriendRequests(prev => prev.filter(request => request.id !== requestId))
 	}
+	const visibleFriendRequests = friendRequests.slice(-3)
+	const remainingSlots = 3 - visibleFriendRequests.length
+	const visibleMessages = liveMessages.slice(-remainingSlots)
 
 	return (
-		<div className="fixed bottom-20 right-4 z-50 w-80 space-y-2">
-			{liveMessages.map(message => (
+		<div className="fixed bottom-20 right-4 z-50 w-50 space-y-2">
+			{visibleMessages.map(message => (
 				<div key={message.id} className="rounded-box border border-info bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">
 					<p className="font-bold text-info">New message</p>
 					<p className="text-sm">{message.message}</p>
@@ -67,7 +70,7 @@ export function Notification() {
 				</div>
 			))}
 
-			{friendRequests.map(request => (
+			{visibleFriendRequests.map(request => (
 				<div key={request.id} className="rounded-box border border-neutral bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">
 					<p className="font-bold text-info">Friend request</p>
 					<p className="text-sm">{request.username ?? "A player"} wants to be your friend.</p>
