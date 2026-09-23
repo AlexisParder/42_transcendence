@@ -6,7 +6,7 @@ import { FaRegCircle } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Match, Rank, Stat, UserInfo } from "../../../backend/src/events";
 import { useLocation } from "react-router-dom";
 import { formatTimeProfile } from "../lib/formatTime";
@@ -19,11 +19,20 @@ export function Profile() {
 	const [matches, setMatches] = useState<Match[]>([])
 	const [stats, setStats] = useState<Stat>()
 	const [category, setCategory] = useState<categoryType>('matches')
+	const [hasMore, setHasMore] = useState(true)
+	const loadingMoreRef = useRef(false)
+	const scrollRef = useRef<HTMLDivElement>(null)
+	const loadedRef = useRef(0)
+
 
 	const location = useLocation()
 	const targetId = (location.state as { targetId?: string } | null)?.targetId
 
 	useEffect(() => {
+		let cancelled = false
+		loadingMoreRef.current = false
+		loadedRef.current = 0
+
 		async function loadUserInfo() {
 			try {
 				const res = await fetch("/api/get-user-info", {
@@ -44,29 +53,89 @@ export function Profile() {
 			}
 		}
 
-		async function loadUserStats() {
+		async function loadFirstUserStats() {
 			try {
 				const res = await fetch("/api/get-user-stats", {
 					method: "POST",
 					headers: { "Content-type": "application/json" },
 					credentials: "include",
-					body: JSON.stringify({ targetId }),
+					body: JSON.stringify({ targetId, offset: 0 }),
 				})
 
-				if (!res.ok)
+				const data = await res.json()
+				if (!res.ok || cancelled)
 					return
 
-				const data = await res.json()
-				setMatches(data.matchs ?? [])
+				const first: Match[] = data.matchs ?? []
+
+				setHasMore(first.length >= 20)
+				loadedRef.current = first.length
+				setMatches(first)
 				setStats(data.stats)
 			} catch (error) {
-				console.error("load user stats:", error)
+				if (!cancelled)
+					console.error("load user stats:", error)
 			}
 		}
 
 		loadUserInfo()
-		loadUserStats()
+		loadFirstUserStats()
+
+		return () => {
+			cancelled = true
+		}
 	}, [targetId])
+
+	const loadMore = useCallback(async () => {
+		if (!hasMore || loadingMoreRef.current)
+			return
+
+		loadingMoreRef.current = true
+
+		try {
+			const res = await fetch("/api/get-user-stats", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ targetId, offset: loadedRef.current }),
+			})
+
+			const data = await res.json()
+			if (!res.ok)
+				return
+
+			const next: Match[] = data.matchs ?? []
+			if (next.length < 20)
+				setHasMore(false)
+			if (next.length > 0) {
+				loadedRef.current += next.length
+				setMatches(prev => [...prev, ...next])
+			}
+		} catch (error) {
+			console.error("load more matches:", error)
+		} finally {
+			loadingMoreRef.current = false
+		}
+	}, [hasMore, targetId])
+
+	useEffect(() => {
+		const el = scrollRef.current
+		if (!el)
+			return
+
+		function onScroll() {
+			if (el!.scrollHeight - el!.scrollTop - el!.clientHeight < 150)
+				loadMore()
+		}
+
+		el.addEventListener("scroll", onScroll)
+		if (matches.length > 0)
+			onScroll()
+
+		return () => {
+			el.removeEventListener("scroll", onScroll)
+		}
+	}, [loadMore, matches.length])
 
 	useDocumentTitle(targetInfo?.isMine === true ? t("profile_title") : t("profile_of_title", { username: targetInfo?.username ?? "?" }))
 
@@ -118,9 +187,9 @@ export function Profile() {
 				}} aria-label={t("profile_achievements_title")} />
 			</div>
 			<div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-				<div className={`flex-1 min-h-0 flex flex-col lg:flex-none lg:w-2/3 pt-2 px-4 pb-4 ${category !== "matches" ? "max-lg:hidden": ""}`}>
+				<div className={`flex-1 min-h-0 flex flex-col lg:flex-none lg:w-2/3 pt-2 px-4 pb-4 ${category !== "matches" ? "max-lg:hidden" : ""}`}>
 					<p className="shrink-0 text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_matches_title")}</p>
-					<div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pr-1">
+					<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pr-1">
 						{matches.length > 0 && matches.map(m => (
 							<MatchesItem key={m.id} {...m} />
 						))}

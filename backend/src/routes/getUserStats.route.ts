@@ -6,7 +6,8 @@ import { formatMatch } from "../lib/matchFormat.ts";
 import type { Stat } from "../events.ts";
 
 export async function getUserStatsHandler(req: Request, res: Response) {
-	const { targetId } = req.body
+	const { targetId, offset } = req.body
+	const skip = Number(offset) || 0
 
 	if (targetId !== undefined && typeof targetId !== "string")
 		return res.status(400).json({ ok: false })
@@ -61,7 +62,9 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 							}
 						}
 					}
-				}
+				},
+				skip,
+				take: 20
 			}),
 			prisma.matchPlayers.count({ where: { userId } }),
 			prisma.matchPlayers.count({
