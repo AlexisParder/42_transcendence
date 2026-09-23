@@ -24,7 +24,6 @@ export function Profile() {
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const loadedRef = useRef(0)
 
-
 	const location = useLocation()
 	const targetId = (location.state as { targetId?: string } | null)?.targetId
 
@@ -124,6 +123,9 @@ export function Profile() {
 			return
 
 		function onScroll() {
+			if (el!.clientHeight === 0)
+				return
+
 			if (el!.scrollHeight - el!.scrollTop - el!.clientHeight < 150)
 				loadMore()
 		}
