@@ -20,7 +20,6 @@ export function Profile() {
 	const [stats, setStats] = useState<Stat>()
 	const [category, setCategory] = useState<categoryType>('matches')
 
-
 	const location = useLocation()
 	const targetId = (location.state as { targetId?: string } | null)?.targetId
 
@@ -73,10 +72,8 @@ export function Profile() {
 
 	return <Sidebar>
 		{isPending && <p>Loading...</p>}
-		{!isPending && session && <div className="p-2">
-			{/* Haut */}
-			<div className="flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
-				{/* gauche */}
+		{!isPending && session && <div className="p-2 h-full min-h-0 flex flex-col">
+			<div className="shrink-0 flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
 				<div className="flex items-center gap-4">
 					<Avatar username={targetInfo?.username} image={targetInfo?.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
@@ -84,15 +81,14 @@ export function Profile() {
 						<p className="text-sm text-neutral-content/50 first-letter:uppercase">{t("profile_txt_joined")} {targetInfo?.createdAt}</p>
 					</div>
 				</div>
-				{/* droite */}
+
 				<div>
 					<p className={`text-4xl ${(targetInfo?.points ?? 0) >= 0 ? "text-info" : "text-error"} font-bold font-mono text-center md:text-right`}>{targetInfo?.points.toLocaleString()}</p>
 					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> {targetInfo?.leaderboardPos} {t("txt_worldwide")}</p>
 				</div>
 			</div>
 
-			{/* Milieu */}
-			<div className="grid grid-cols-2 text-center md:text-left md:grid-cols-4 border-b border-base-300">
+			<div className="shrink-0 grid grid-cols-2 text-center md:text-left md:grid-cols-4 border-b border-base-300">
 				<div className="flex-1/4 p-4">
 					<p className="font-bold text-2xl font-mono">{stats?.total}</p>
 					<p className="text-xs text-neutral-content/50">{t("profiles_txt_matches")}</p>
@@ -111,21 +107,20 @@ export function Profile() {
 				</div>
 			</div>
 
-			{/* Bas */}
-			<div className="join lg:hidden pt-4 px-4">
-				<input className="join-item btn" type="radio" defaultChecked={category === "matches"} name="options" onClick={() => {
+			<div className="shrink-0 join lg:hidden pt-4 px-4">
+				<input className="join-item btn btn-sm" type="radio" defaultChecked={category === "matches"} name="options" onClick={() => {
 					if (category !== "matches")
 						setCategory("matches")
-				}} aria-label={"Matches"} />
-				<input className="join-item btn" type="radio" defaultChecked={category === "achievements"} name="options" onClick={() => {
+				}} aria-label={t("profiles_txt_matches")} />
+				<input className="join-item btn btn-sm" type="radio" defaultChecked={category === "achievements"} name="options" onClick={() => {
 					if (category !== "achievements")
 						setCategory("achievements")
-				}} aria-label={"Achievements"} />
+				}} aria-label={t("profile_achievements_title")} />
 			</div>
-			<div className="flex flex-col lg:flex-row">
-				<div className="flex-2/3 pt-2 px-4 pb-4">
-					<p className="text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_matches_title")}</p>
-					<div className="flex flex-col gap-2">
+			<div className="flex-1 min-h-0 flex flex-col lg:flex-row">
+				<div className={`flex-1 min-h-0 flex flex-col lg:flex-none lg:w-2/3 pt-2 px-4 pb-4 ${category !== "matches" ? "max-lg:hidden": ""}`}>
+					<p className="shrink-0 text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_matches_title")}</p>
+					<div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pr-1">
 						{matches.length > 0 && matches.map(m => (
 							<MatchesItem key={m.id} {...m} />
 						))}
@@ -133,9 +128,39 @@ export function Profile() {
 						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
 				</div>
-				<div className="flex-1/3 lg:border-l border-base-300 pt-2 px-4 pb-4">
-					<p className="text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_achievements_title")}</p>
-					<div className="flex flex-col gap-2">
+				<div className={`flex-1 min-h-0 flex flex-col lg:flex-none lg:w-1/3 lg:border-l border-base-300 pt-2 px-4 pb-4 ${category !== "achievements" ? "max-lg:hidden" : ""}`}>
+					<p className="shrink-0 text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_achievements_title")}</p>
+					<div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pr-1">
+						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
+						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
+						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
+						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
+						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
+						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
+						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
+						<AchievementsItem title="Duo" desc="win 2 matches in duo" difficulty="medium" />
+						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
 						<AchievementsItem title="not a scratch" desc="win without losing a ship" difficulty="hard" />
 						<AchievementsItem title="sharp ear" desc="10 useful scans in a row" difficulty="medium" />
 						<AchievementsItem title="admiral" desc="win 5 tournaments" difficulty="easy" />
