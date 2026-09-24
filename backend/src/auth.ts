@@ -45,7 +45,7 @@ export const auth = betterAuth({
 				type: "string",
 				required: false,
 				defaultValue: "en",
-				input: false
+				input: true
 			},
 			points: {
 				type: "number",
