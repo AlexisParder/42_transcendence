@@ -16,7 +16,7 @@ function formatMS(total: number) {
 
 type stepType = "email" | "emailOtp" | "pwd"
 export function ForgotPwd() {
-	useDocumentTitle("Forgot password")
+	useDocumentTitle(t("forgot_title"))
 
 	const navigate = useNavigate()
 	const [email, setEmail] = useState("")
@@ -178,23 +178,23 @@ export function ForgotPwd() {
 					<div className="flex items-center justify-between">
 						<SonarTitle />
 						<div>
-							{step === "email" && <p className="text-xs text-neutral-content/60">STEP 1 OF 3</p>}
-							{step === "emailOtp" && <p className="text-xs text-neutral-content/60">STEP 2 OF 3</p>}
-							{step === "pwd" && <p className="text-xs text-neutral-content/60">STEP 3 OF 3</p>}
+							{step === "email" && <p className="uppercase text-xs text-neutral-content/60">{t("forgot_step", { current: 1, max: 3 })}</p>}
+							{step === "emailOtp" && <p className="uppercase text-xs text-neutral-content/60">{t("forgot_step", { current: 2, max: 3 })}</p>}
+							{step === "pwd" && <p className="uppercase text-xs text-neutral-content/60">{t("forgot_step", { current: 3, max: 3 })}</p>}
 						</div>
 					</div>
 
-					{step === "email" && <h2 className="card-title text-neutral-content text-xl mt-2">Reset your password</h2>}
-					{step === "email" && <p className="text-neutral-content/40 mb-2">Enter the email linked to your account. We'll send you a six-digit code to reset your password.</p>}
+					{step === "email" && <h2 className="card-title text-neutral-content text-xl mt-2">{t("forgot_email_title")}</h2>}
+					{step === "email" && <p className="text-neutral-content/40 mb-2">{t("forgot_email_desc")}.</p>}
 					{step === "email" && <form onSubmit={handleEmailStep} className="min-w-full">
 						<Input type="email" label={t("txt_email")} name="email" errorMsg={errors.email} value={email} onChange={e => setEmail(e.target.value)} />
 
-						<button className="btn btn-info w-full">Send code</button>
+						<button className="btn btn-info w-full">{t("forgot_btn_send_code")}</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>}
 
-					{step === "emailOtp" && <h2 className="card-title text-neutral-content text-xl mt-2">Enter your code</h2>}
-					{step === "emailOtp" && <p className="text-neutral-content/40 mb-2">If an account exists for <span className="text-neutral-content">{email}</span>, you'll receive a six-digit code in a few moments.</p>}
+					{step === "emailOtp" && <h2 className="card-title text-neutral-content text-xl mt-2">{t("forgot_emailotp_title")}</h2>}
+					{step === "emailOtp" && <p className="text-neutral-content/40 mb-2">{t("forgot_emailotp_desc", { email })}.</p>}
 					{step === "emailOtp" && <form onSubmit={handleEmailOtpStep} className="min-w-full">
 						<label className="otp otp-info otp-lg m-2">
 							<span className={`border-${errors.code ? 'error' : 'info'} bg-${errors.code ? 'error' : 'info'}/10`}></span>
@@ -218,7 +218,7 @@ export function ForgotPwd() {
 						</label>
 						{errors.code && <span className="text-error block">{errors.code}</span>}
 
-						<button className="btn btn-info w-full">Verify code</button>
+						<button className="btn btn-info w-full">{t("btn_verify")}</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>}
 
@@ -233,31 +233,25 @@ export function ForgotPwd() {
 							</span>
 							<p>{t("verified_code_expiration")}</p>
 						</div>
-						<div className="flex items-center gap-2">
-							<span className="flex h-6 shrink-0 items-center">
-								<span className="size-1 rounded-full bg-info" />
-							</span>
-							<p>{t("verified_no_mail")}</p>
-						</div>
 					</div>}
 
-					{step === "emailOtp" && <p className="text-neutral-content/40 mt-3 text-center">Nothing arrived? Check your spam folder, or <button className="link-primary cursor-pointer" onClick={() => setStep("email")}>use a different email</button>.</p>}
+					{step === "emailOtp" && <p className="text-neutral-content/40 mt-3 text-center">{t("forgot_no_mail_1")} <button className="link-primary cursor-pointer" onClick={() => setStep("email")}>{t("forgot_no_mail_2")}</button>.</p>}
 
-					{step !== "pwd" && <p className="text-neutral-content/40 mt-3 text-center">Remembered it? <Link to="/login" className="link-primary">Back to sign in</Link></p>}
+					{step !== "pwd" && <p className="text-neutral-content/40 mt-3 text-center">{t("forgot_remember_1")} <Link to="/login" className="link-primary">{t("forgot_remember_2")}</Link></p>}
 
-					{step === "pwd" && <h2 className="card-title text-neutral-content text-xl mt-2">Choose a new password</h2>}
-					{step === "pwd" && <p className="text-neutral-content/40 mb-2">Code confirmed. Pick something you haven't used on Sonar before.</p>}
+					{step === "pwd" && <h2 className="card-title text-neutral-content text-xl mt-2">{t("forgot_pwd_title")}</h2>}
+					{step === "pwd" && <p className="text-neutral-content/40 mb-2">{t("forgot_pwd_desc")}.</p>}
 					{step === "pwd" && <form onSubmit={handlePwdStep} className="min-w-full">
 						<Input type="password" label={t("txt_password")} name="password" errorMsg={errors.password} value={password} onFocus={() => { setIsFocused(true) }} onBlur={() => { setIsFocused(false) }} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
 						{isFocused && <PasswordBar password={password} />}
 
 						<Input type="password" label={t("txt_password_confirm")} name="password2" errorMsg={errors.password2} autoComplete="new-password" />
 
-						<button className="btn btn-info w-full">Reset password</button>
+						<button className="btn btn-info w-full">{t("forgot_btn_reset_pwd")}</button>
 						{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
 					</form>}
 
-					{step === "pwd" && <p className="text-neutral-content/40 mt-3 text-center">You'll be signed out of every other device.</p>}
+					{step === "pwd" && <p className="text-neutral-content/40 mt-3 text-center">{t("forgot_signed_out")}.</p>}
 				</fieldset>
 			</div>
 		</div>
