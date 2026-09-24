@@ -92,7 +92,7 @@ export function Login() {
 								<input type="checkbox" name="remember" className="checkbox checkbox-sm checked:checkbox-info" />
 								<span className="text-neutral-content/40 select-none">{t("sign_in_keep")}</span>
 							</label>
-							<Link to="/forgot" className="link-primary">{t("sign_in_forgot_pwd")}</Link>
+							<Link to="/forgot-password" className="link-primary">{t("sign_in_forgot_pwd")}</Link>
 						</div>
 
 						<button className="btn btn-soft btn-info border-neutral hover:border-info w-full">{t("btn_sign_in")}</button>

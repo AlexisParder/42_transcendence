@@ -17,6 +17,7 @@ import { Profile } from './pages/Profile'
 import { Notifications } from './pages/Notifications'
 import { SocketProvider } from './provider/SocketProvider'
 import { Notification } from './components/Notification'
+import { ForgotPwd } from './pages/ForgotPwd'
 
 const router = createBrowserRouter([
 	{
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
 			{
 				path: 'login',
 				element: <Login />
+			},
+			{
+				path: 'forgot-password',
+				element: <ForgotPwd />
 			},
 			{
 				path: 'terms',

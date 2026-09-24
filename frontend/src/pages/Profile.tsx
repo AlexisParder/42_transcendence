@@ -137,7 +137,7 @@ export function Profile() {
 		return () => {
 			el.removeEventListener("scroll", onScroll)
 		}
-	}, [loadMore, matches.length])
+	}, [loadMore, matches.length, category])
 
 	useDocumentTitle(targetInfo?.isMine === true ? t("profile_title") : t("profile_of_title", { username: targetInfo?.username ?? "?" }))
 
