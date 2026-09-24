@@ -5,12 +5,9 @@ import { IoMailUnreadOutline } from "react-icons/io5";
 import { useCallback, useEffect, useState } from "react";
 import { authClient } from "../lib/auth-client";
 import { t } from "../lib/translate";
+import { formatMS } from "../lib/formatTime";
 
 const COOLDOWN = 60
-
-function formatMS(total: number) {
-	return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`
-}
 
 export function Verified() {
 	useDocumentTitle(t("verified_page_title"))
@@ -68,14 +65,14 @@ export function Verified() {
 
 	useEffect(() => {
 		if (code.length != 6) return
-	
+
 		const id = setTimeout(() => verify(code), 0)
 		return () => clearTimeout(id)
 	}, [code, verify])
 
 	async function resend() {
 		if (!email || sending || left > 0) return
-		
+
 		setSending(true)
 		setErrors({})
 		setCode("")
