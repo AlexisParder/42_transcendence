@@ -48,7 +48,7 @@ export function Login() {
 		const formElem = new FormData(form)
 		const email = formElem.get('email')?.toString().trim().toLowerCase() ?? ''
 		const password = formElem.get('password')?.toString() ?? ''
-		// const remember = formElem.get('remember') ? true : false
+		const rememberMe = formElem.get('remember') ? true : false
 
 		const newErrors = validateLogin(email, password)
 		setErrors(newErrors)
@@ -59,7 +59,8 @@ export function Login() {
 		// BACK 
 		const { error } = await authClient.signIn.email({
 			email,
-			password
+			password,
+			rememberMe
 		})
 
 		if (error)
