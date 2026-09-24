@@ -15,12 +15,17 @@ Bataille navale revisitée
 - Securite pour le score si une personne quitte trop vite (en mode 3j et 4j, peut etre remplacer le joueur qui quitte par un bot)
 - 
 # Commandes pour la partie dev
-- si le projet vient d'etre cloné ou qu'un membre a ajouté une dependance avec `pnpm`, rendez vous dans `backend` et faite `pnpm i` (pareil coté `frontend`)
 - Dans un premier terminal, se rendre dans le dossier `frontend` et faire `pnpm run dev`
-- Dans un second terminal, se mettre a la racine du projet et faire `make`: cela demarre le serveur (coté back) et la bdd
+- Dans un second terminal, se mettre a la racine du projet et faire `make dev`: cela demarre le serveur (coté back) et la bdd
 - Pour ajouter une table a la bdd, se rendre dans `backend/prisma/schema.prisma`
 - Apres une modification dans le fichier `prisma`, ouvrez un troisieme terminal à la racine du projet et faites `make migrate name=...` le `name` sera utilisé dans le fichier créé par prisma donc soyez explicite exemple: `add_friends_table`
 - Pour afficher le contenu de la bdd (un peu comme PhpMyAdmin ou Adminer) faite `make studio` dans un nouveau terminal (quand le serveur est demarré)
+
+# Commandes pour la partie prod
+- Dans un terminal faire la commande `make`
+- Acceder au site via `https://localhost:8443` ou `https://{HOST_IP}:8443` 
+  - (HOST_IP est l'ip de la machine qui a fait `make`)
+  - le port 8443 est une contrainte du fait de ne pas avoir les permissio sudo pour host sur 443 (port par defaut de HTTPS) 
 
 ## Roles
 * **Product Owner (PO)** : Définit la vision du produit, priorise les fonctionnalités et s'assure que le projet répond aux besoins des utilisateurs.
