@@ -5,7 +5,7 @@ import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
-import type { ConversationSummary, Friend, FriendRequest, FriendRequestAccept, Message, PresenceStatus, PresenceUpdate } from "../../../backend/src/events";
+import type { ConversationSummary, Friend, FriendRequest, FriendRequestAccept, Message, PresenceStatus, PresenceUpdate } from "../types/events";
 import { authClient } from "../lib/auth-client";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { t } from "../lib/translate";

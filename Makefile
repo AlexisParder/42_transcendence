@@ -1,28 +1,40 @@
+-include .env
+export
+
+export HOST_IP := $(shell ip route get 1.1.1.1 | awk '{print $$7; exit}')
+
 all: up
 
 up:
-	docker compose up --build
+	docker compose -f docker-compose.yml up --build
 
 detach:
-	docker compose up --build -d
+	docker compose -f docker-compose.yml up --build -d
 
 down: 
-	docker compose down
+	docker compose -f docker-compose.yml down
+
+dev:
+	docker compose -f docker-compose.dev.yml up --build
+
+dev_down: 
+	docker compose -f docker-compose.dev.yml down
 
 logs:
 	docker compose logs -f
 
 migrate:
-	docker compose exec backend pnpm prisma migrate dev --name $(name)
+	docker compose -f docker-compose.dev.yml exec backend pnpm prisma migrate dev --name $(name)
 
 studio:
-	docker compose exec backend pnpm prisma studio --browser none --port 5555
+	@cd backend && pnpm prisma studio --url="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
 
-clean: down
+clean: down dev_down
 
 fclean:
-	docker compose down -v
+	docker compose -f docker-compose.yml down -v
+	docker compose -f docker-compose.dev.yml down -v
 
 re: fclean all
 
-.PHONY: all up detach down logs migrate studio clean fclean re
+.PHONY: all up detach down dev dev_down logs migrate studio clean fclean re

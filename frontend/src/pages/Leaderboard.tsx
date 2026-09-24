@@ -5,7 +5,7 @@ import { t } from "../lib/translate";
 import { Avatar } from "../components/Avatar";
 import { truncateText } from "../lib/truncateText";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { LeaderboardInfo } from "../../../backend/src/events";
+import type { LeaderboardInfo } from "../types/events";
 import { useNavigate } from "react-router-dom";
 
 type LdbFilterType = "global" | "friends"

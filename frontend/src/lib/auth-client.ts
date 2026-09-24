@@ -1,15 +1,19 @@
 import { emailOTPClient, inferAdditionalFields, twoFactorClient, usernameClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
-import type { auth } from "../../../backend/src/auth"
 
 export const authClient = createAuthClient({
-	baseURL: "http://localhost:3000",
+	baseURL: `${window.location.origin}/api/auth`,
 	plugins: [
 		usernameClient(),
 		twoFactorClient({
 			twoFactorPage: "/two-factor"
 		}),
-		inferAdditionalFields<typeof auth>(),
+		inferAdditionalFields({
+			user: {
+				language: {type: "string"},
+				points: {type: "number"},
+			}
+		}),
 		emailOTPClient(),
 	]
 })

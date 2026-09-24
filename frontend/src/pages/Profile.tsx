@@ -7,7 +7,7 @@ import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Match, Rank, Stat, UserInfo } from "../../../backend/src/events";
+import type { Match, Rank, Stat, UserInfo } from "../types/events";
 import { useLocation } from "react-router-dom";
 import { formatTimeProfile } from "../lib/formatTime";
 

@@ -96,7 +96,9 @@ export function Register() {
 			email,
 			password,
 			name,
-			username: name
+			username: name,
+			language: "en",
+			points: 0
 		})
 
 		if (error) {

@@ -35,12 +35,13 @@ const app = express()
 const server = createServer(app)
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
+const allowedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
 /**
  * Server<Event ecouté, Event Emis, inter-serveur, type de socket.data>
  */
 const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
 	cors: {
-		origin: "http://localhost:5173",
+		origin: allowedOrigins,
 		credentials: true
 	}
 })
@@ -50,7 +51,7 @@ app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
 
 app.use(cors({
-	origin: "http://localhost:5173", // front Vite
+	origin: allowedOrigins,
 	credentials: true,
 }))
 

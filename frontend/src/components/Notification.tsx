@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { FaCheck, FaXmark } from "react-icons/fa6"
 import { useSocket } from "./socketContext"
 import { authClient } from "../lib/auth-client"
-import type { FriendRequest, Message } from "../../../backend/src/events"
+import type { FriendRequest, Message } from "../types/events"
 
 export function Notification() {
 	const socket = useSocket()

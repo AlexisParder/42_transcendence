@@ -1,4 +1,4 @@
-import { prisma } from '../src/db/client'
+import { prisma } from './db/client.ts'
 
 const ranks = [
 	{ en_label: 'seaman', fr_label: 'matelot', min: 0 },
@@ -11,8 +11,13 @@ const ranks = [
 ]
 
 async function main() {
-	await prisma.ranks.deleteMany()
-	await prisma.ranks.createMany({ data: ranks })
+	for (const rank of ranks) {
+		await prisma.ranks.upsert({
+			where: { en_label: rank.en_label },
+			update: rank,
+			create: rank
+		})
+	}
 }
 
 main()

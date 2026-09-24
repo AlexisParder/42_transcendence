@@ -158,7 +158,7 @@ model UserBlocked {
 
 model Ranks {
   id       String @id @default(cuid())
-  en_label String
+  en_label String @unique
   fr_label String
   min      Int    @unique
 

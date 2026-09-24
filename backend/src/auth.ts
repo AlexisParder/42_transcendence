@@ -4,11 +4,12 @@ import { prisma } from "./db/client.ts"
 import { sendMail } from "./lib/mail.ts"
 import { twoFactor, username, emailOTP } from "better-auth/plugins"
 
+const trustedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
 export const auth = betterAuth({
 	appName: "Sonar",
 	baseURL: process.env.BETTER_AUTH_URL,
 	database: prismaAdapter(prisma, { provider: "postgresql" }),
-	trustedOrigins: ["http://localhost:5173"],
+	trustedOrigins,
 	session: {
 		expiresIn: 60 * 60 * 24 * 30,
 		updateAge: 60 * 60 * 24
@@ -35,16 +36,16 @@ export const auth = betterAuth({
 	user: {
 		deleteUser: {
 			enabled: true,
-			beforeDelete: async (user, request) => {
-				// ajouter la logique pour les historiques en mettant "Anonyme"
-			},
+			// beforeDelete: async (user, request) => {
+			// 	// ajouter la logique pour les historiques en mettant "Anonyme"
+			// },
 		},
 		additionalFields: {
 			language: {
 				type: "string",
 				required: false,
 				defaultValue: "en",
-				input: true
+				input: false
 			},
 			points: {
 				type: "number",
