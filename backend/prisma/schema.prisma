@@ -45,6 +45,7 @@ model User {
   matchPlayers  MatchPlayers[]
 
   notifications Notification[]
+  notificationPreferences NotificationPreferences?
 
   @@unique([username])
   @@map("user")
@@ -196,6 +197,17 @@ model MatchPlayers {
 
   @@unique([matchsId, userId])
   @@map("matchplayers")
+}
+
+model NotificationPreferences {
+  userId String @id
+  app_friend Boolean @default(true)
+  app_chat Boolean @default(true)
+  email_friend Boolean @default(false)
+  email_chat Boolean @default(false)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
 
 model Notification {

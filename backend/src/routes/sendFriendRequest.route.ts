@@ -4,6 +4,7 @@ import { fromNodeHeaders } from "better-auth/node"
 import { prisma } from "../db/client.ts"
 import type {Server} from "socket.io"
 import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../events.ts"
+import { notify } from "../lib/notify.ts"
 
 export async function sendFriendRequestHandler(req: Request, res: Response) {
 	try {
@@ -48,13 +49,6 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 			}
 		})
 
-		await prisma.notification.create({
-			data: {
-				userId: target.id,
-				type: "FRIEND_REQUEST",
-				message: `${session.user.username ?? "Someone"} sent you a friend request`
-			}
-		})
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		io.to(target.id).emit("friend_request_received", {
 			id: request.id,
@@ -63,6 +57,12 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 			image: session.user.image
 		})
 
+		void notify(io, {
+			userId: target.id,
+			type: "FRIEND_REQUEST",
+			message: `${session.user.username ?? "Someone"} sent you a friend request`,
+			requestId: request.id,
+		})
 		res.json({ ok: true, request })
 	} catch (error) {
 		res.status(500).json({ ok: false })

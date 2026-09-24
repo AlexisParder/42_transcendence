@@ -30,6 +30,8 @@ import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
 import { leaderboardLimit } from "./rateLimit.ts"
+import { notificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
+import { notify } from "./lib/notify.ts"
 
 const app = express()
 const server = createServer(app)
@@ -62,6 +64,8 @@ app.use(express.json())
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/notifications", getNotificationsHandler)
+app.get("/api/notification-preferences", notificationPreferencesHandler)
+app.patch("/api/notification-preferences", notificationPreferencesHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
@@ -142,14 +146,6 @@ io.on("connection", async (socket) => {
 				}
 			})
 
-			await prisma.notification.create({
-				data: {
-					userId: toUserId,
-					type: "MESSAGE",
-					message: `New message: ${message}`
-				}
-			})
-
 			const wire = {
 				id: row.id,
 				fromUserId: row.userId,
@@ -160,6 +156,7 @@ io.on("connection", async (socket) => {
 
 			io.to(toUserId).emit("new_message", wire)
 			io.to(fromUserId).emit("new_message", wire)
+			void notify(io, { userId: toUserId, type: "MESSAGE", message: `New message: ${message}` })
 		} catch (err) {
 			console.error("send_message error:", err)
 		}

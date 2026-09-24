@@ -2,44 +2,35 @@ import { useEffect, useState } from "react"
 import { FaCheck, FaXmark } from "react-icons/fa6"
 import { useSocket } from "./socketContext"
 import { authClient } from "../lib/auth-client"
-import type { FriendRequest, Message } from "../types/events"
+import type { NotificationEvent } from "../types/events"
 
 export function Notification() {
-	const socket = useSocket()
 	const { data: session } = authClient.useSession()
-	const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
-	const [liveMessages, setLiveMessages] = useState<Message[]>([])
+	return session ? <LiveNotifications key={session.user.id} /> : null
+}
+
+function LiveNotifications() {
+	const socket = useSocket()
+	const [friendRequests, setFriendRequests] = useState<NotificationEvent[]>([])
+	const [liveMessages, setLiveMessages] = useState<NotificationEvent[]>([])
 
 	useEffect(() => {
-		function onFriendRequest(request: FriendRequest) {
-			setFriendRequests(prev => [...prev, request])
-			setTimeout(() => {
-				setFriendRequests(prev => prev.filter(item => item.id !== request.id))
+		const timers = new Set<ReturnType<typeof setTimeout>>()
+		function onNotification(notification: NotificationEvent) {
+			const setter = notification.type === "FRIEND_REQUEST" ? setFriendRequests : setLiveMessages
+			setter(prev => [...prev.filter(item => item.id !== notification.id), notification].slice(-3))
+			const timer = setTimeout(() => {
+				setter(prev => prev.filter(item => item.id !== notification.id))
+				timers.delete(timer)
 			}, 5000)
+			timers.add(timer)
 		}
-		socket.on("friend_request_received", onFriendRequest)
+		socket.on("notification_received", onNotification)
 		return () => {
-			socket.off("friend_request_received", onFriendRequest)
+			socket.off("notification_received", onNotification)
+			for (const timer of timers) clearTimeout(timer)
 		}
 	}, [socket])
-
-	useEffect(() => {
-		function onNewMessage(message: Message) {
-			if (message.toUserId !== session?.user.id)
-				return
-
-			setLiveMessages(prev => [...prev, message])
-			setTimeout(() => {
-				setLiveMessages(prev => prev.filter(item => item.id !== message.id))
-			}, 5000)
-		}
-
-		socket.on("new_message", onNewMessage)
-
-		return () => {
-			socket.off("new_message", onNewMessage)
-		}
-	}, [socket, session?.user.id])
 
 	async function answerFriendRequest(requestId: string, action: "accept" | "decline") {
 		const endpoint = action === "accept"
@@ -54,11 +45,11 @@ export function Notification() {
 		})
 
 		if (response.ok)
-			setFriendRequests(prev => prev.filter(request => request.id !== requestId))
+			setFriendRequests(prev => prev.filter(request => request.requestId !== requestId))
 	}
 	const visibleFriendRequests = friendRequests.slice(-3)
 	const remainingSlots = 3 - visibleFriendRequests.length
-	const visibleMessages = liveMessages.slice(-remainingSlots)
+	const visibleMessages = remainingSlots > 0 ? liveMessages.slice(-remainingSlots) : []
 
 	return (
 		<div className="fixed bottom-20 right-4 z-50 w-50 space-y-2">
@@ -73,19 +64,21 @@ export function Notification() {
 			{visibleFriendRequests.map(request => (
 				<div key={request.id} className="rounded-box border border-neutral bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">
 					<p className="font-bold text-info">Friend request</p>
-					<p className="text-sm">{request.username ?? "A player"} wants to be your friend.</p>
+					<p className="text-sm">{request.message}</p>
 					<p className="mt-2 text-sm">Do you want to add this player?</p>
 					<div className="mt-2 flex justify-end gap-2">
 						<button
 							className="btn btn-error btn-sm btn-circle"
-							onClick={() => answerFriendRequest(request.id, "decline")}
+							disabled={!request.requestId}
+							onClick={() => request.requestId && answerFriendRequest(request.requestId, "decline")}
 							aria-label="Decline friend request"
 						>
 							<FaXmark />
 						</button>
 						<button
 							className="btn btn-success btn-sm btn-circle"
-							onClick={() => answerFriendRequest(request.id, "accept")}
+							disabled={!request.requestId}
+							onClick={() => request.requestId && answerFriendRequest(request.requestId, "accept")}
 							aria-label="Accept friend request"
 						>
 							<FaCheck />

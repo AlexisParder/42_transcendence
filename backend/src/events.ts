@@ -5,11 +5,21 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToClientEvents {
+	notification_received: (payload: NotificationEvent) => void
 	new_message: (payload: Message) => void
 	friend_request_received: (payload: FriendRequest) => void
 	friend_request_accepted: (payload: FriendRequestAccept) => void
 	presence_update: (payload: PresenceUpdate) => void
 	friend_removed: (payload: { userId: string }) => void
+}
+
+export interface NotificationEvent {
+	id: string
+	type: string
+	message: string
+	read: boolean
+	createdAt: string
+	requestId?: string
 }
 
 export type PresenceStatus = "available" | "offline" | "away"

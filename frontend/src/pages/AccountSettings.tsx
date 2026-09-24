@@ -15,6 +15,8 @@ import { QRCodeSVG } from "qrcode.react"
 import { setTranslationLanguage, t } from "../lib/translate"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { Togglebox } from "../components/Togglebox"
+import { useNotificationPreferences } from "../hooks/useNotificationPreferences"
+import type { NotificationPreferences } from "../hooks/useNotificationPreferences"
 
 type Errors = {
 	username?: string
@@ -57,7 +59,17 @@ export function AccountSettings() {
 }
 
 function SettingsNotif() {
-	return <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 max-w-200">
+	const { data: session } = authClient.useSession()
+	return <NotificationSettingsTable key={session?.user.id ?? "anonymous"} userId={session?.user.id} />
+}
+
+function NotificationSettingsTable({ userId }: { userId?: string }) {
+	const { preferences, saving, saved, error, update } = useNotificationPreferences(userId)
+	const controls = { preferences, disabled: saving || !preferences, onChange: update }
+	return <div className="max-w-200">
+		<p className="mb-3 text-sm text-base-content/60">{t("settings_notif_help")}</p>
+		<p role="status" className="mb-3 text-sm">{error || (saving ? t("settings_notif_saving") : saved ? t("settings_notif_saved") : !preferences ? t("settings_notif_loading") : "")}</p>
+		<div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
 		<table className="table">
 			<thead>
 				<tr>
@@ -70,31 +82,46 @@ function SettingsNotif() {
 			<tbody>
 				<NotifLine title={t("settings_notif_title_1")} desc={t("settings_notif_desc_1")} inputName="turn" />
 				<NotifLine title={t("settings_notif_title_2")} desc={t("settings_notif_desc_2")} inputName="match" />
-				<NotifLine title={t("settings_notif_title_3")} desc={t("settings_notif_desc_3")} inputName="friend" />
-				<NotifLine title={t("settings_notif_title_4")} desc={t("settings_notif_desc_4")} inputName="chat" />
+				<NotifLine title={t("settings_notif_title_3")} desc={t("settings_notif_desc_3")} inputName="friend" controls={controls} />
+				<NotifLine title={t("settings_notif_title_4")} desc={t("settings_notif_desc_4")} inputName="chat" controls={controls} />
 				<NotifLine title={t("settings_notif_title_5")} desc={t("settings_notif_desc_5")} inputName="tournament" />
 				<NotifLine title={t("settings_notif_title_6")} desc={t("settings_notif_desc_6")} inputName="rank" />
 				<NotifLine title={t("settings_notif_title_7")} desc={t("settings_notif_desc_7")} inputName="achievements" />
 				<NotifLine title={t("settings_notif_title_8")} desc={t("settings_notif_desc_8")} inputName="security" />
 			</tbody>
 		</table>
+		</div>
 	</div>
 }
 
-function NotifLine({ title, desc, inputName }: { title: string, desc: string, inputName: string }) {
+function NotifLine({ title, desc, inputName, controls }: {
+	title: string, desc: string, inputName: string,
+	controls?: {
+		preferences: NotificationPreferences | null
+		disabled: boolean
+		onChange: (key: keyof NotificationPreferences, value: boolean) => Promise<void>
+	}
+}) {
 	return <tr>
 		<th>
 			<p>{title}</p>
 			<p className="text-xs text-neutral-content/40">{desc}</p>
+			{!controls && <span className="badge badge-ghost badge-sm mt-1">{t("settings_notif_unavailable")}</span>}
 		</th>
 		<td>
-			<Togglebox name={`app_${inputName}`} type="info" />
+			<Togglebox name={`app_${inputName}`} type="info" aria-label={`${title} — ${t("settings_notif_lbl_app")}`}
+				checked={controls?.preferences?.[`app_${inputName}` as keyof NotificationPreferences] ?? false}
+				disabled={!controls || controls.disabled}
+				onChange={event => controls?.onChange(`app_${inputName}` as keyof NotificationPreferences, event.target.checked)} />
 		</td>
 		{/* <td>
 			<Togglebox name={`push_${inputName}`} type="info" />
 		</td> */}
 		<td>
-			<Togglebox name={`email_${inputName}`} type="info" />
+			<Togglebox name={`email_${inputName}`} type="info" aria-label={`${title} — ${t("txt_email")}`}
+				checked={controls?.preferences?.[`email_${inputName}` as keyof NotificationPreferences] ?? false}
+				disabled={!controls || controls.disabled}
+				onChange={event => controls?.onChange(`email_${inputName}` as keyof NotificationPreferences, event.target.checked)} />
 		</td>
 	</tr>
 }
