@@ -71,11 +71,13 @@ export interface ConversationSummary {
 	unreadCount: number
 }
 
+export type matchType = "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA"
+
 export interface Match {
 	id: string,
 	result: 'win' | 'loss',
 	desc: string,
-	matchType: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
+	matchType: matchType,
 	matchTime: string,
 	ranked: boolean,
 	points: number | 'unranked',

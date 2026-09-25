@@ -109,7 +109,7 @@ function NotifLine({ title, desc, inputName, controls }: {
 			{!controls && <span className="badge badge-ghost badge-sm mt-1">{t("settings_notif_unavailable")}</span>}
 		</th>
 		<td>
-			<Togglebox name={`app_${inputName}`} type="info" aria-label={`${title} — ${t("settings_notif_lbl_app")}`}
+			<Togglebox name={`app_${inputName}`} type="info" aria-label={`${title} - ${t("settings_notif_lbl_app")}`}
 				checked={controls?.preferences?.[`app_${inputName}` as keyof NotificationPreferences] ?? false}
 				disabled={!controls || controls.disabled}
 				onChange={event => controls?.onChange(`app_${inputName}` as keyof NotificationPreferences, event.target.checked)} />
@@ -118,7 +118,7 @@ function NotifLine({ title, desc, inputName, controls }: {
 			<Togglebox name={`push_${inputName}`} type="info" />
 		</td> */}
 		<td>
-			<Togglebox name={`email_${inputName}`} type="info" aria-label={`${title} — ${t("txt_email")}`}
+			<Togglebox name={`email_${inputName}`} type="info" aria-label={`${title} - ${t("txt_email")}`}
 				checked={controls?.preferences?.[`email_${inputName}` as keyof NotificationPreferences] ?? false}
 				disabled={!controls || controls.disabled}
 				onChange={event => controls?.onChange(`email_${inputName}` as keyof NotificationPreferences, event.target.checked)} />

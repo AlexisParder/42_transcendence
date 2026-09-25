@@ -92,6 +92,7 @@
 	"friends_block_title": "blocked",
 	"friend_block_confirm_title": "Block this friend?",
 	"friend_block_confirm_desc": "They won't be able to contact you.",
+	"friend_txt_not_msg": "You can't message this person. You need to be friends to start a conversation.",
 	"friend_err_user_not_found": "User not found!",
 	"friend_err_forbidden": "You are not allowed to make that!",
 	"friend_err_user_self": "You can't send a friend request to yourself!",

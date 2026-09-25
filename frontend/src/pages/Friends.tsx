@@ -569,10 +569,11 @@ export function Friends() {
 		navigate('/profile', { state: { targetId: id } })
 	}
 
+	const areFriend = friends.find(f => f.id === peerId)
 	return <Sidebar>
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex flex-col h-full min-h-0 min-w-0">
-				<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} />
+				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} />
 				{!peerId && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full items-center justify-center">
 						<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">
@@ -589,12 +590,13 @@ export function Friends() {
 				</div>}
 				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 					<div className="w-full pl-2">
-						<Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+						{areFriend && <Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
 							if (e.key === "Enter")
 								handleSend()
-						}} />
+						}} />}
+						{!areFriend && <p className="py-2 text-sm text-neutral-content/60">{t("friend_txt_not_msg")}</p>}
 					</div>
-					<button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>
+					{areFriend && <button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>}
 				</div>}
 			</div>
 
@@ -675,8 +677,6 @@ function SidebarRight({ children, search, setSearch, filteredConversations, setP
 						{filteredBlocked.length > 0 && <BlockSection blocked={filteredBlocked} onUnblock={handleUnblock} />}
 					</div>
 
-
-
 					<div className="p-2 shrink-0">
 						<button className="btn btn-outline border-neutral w-full" onClick={ClearAndOpenFriendModal}><FaPlus /> {t("btn_add_friend")}</button>
 					</div>
@@ -695,11 +695,13 @@ function DisplayMessage({ message, isMine, createdAt }: { message: string, isMin
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, peerId, onBlock, onProfile, closeCurrentConv, status }:
+function ConversationFriendDisplay({ friends, blocked, peerId, onBlock, onUnblock, onProfile, closeCurrentConv, status }:
 	{
 		friends: Friend[],
+		blocked: Friend[],
 		peerId: string | null,
 		onBlock: (id: string) => void,
+		onUnblock: (id: string) => void,
 		onProfile: (id: string) => void,
 		closeCurrentConv: () => void,
 		status: "available" | "in a match" | "away" | "offline"
@@ -708,22 +710,22 @@ function ConversationFriendDisplay({ friends, peerId, onBlock, onProfile, closeC
 		return
 
 	const friend = friends.find(f => f.id === peerId)
-	if (!friend)
-		return
+	const blockedData = blocked.find(b => b.id === peerId)
 
 	return <div className="flex items-center justify-between p-4 bg-base-200">
 		<div className="flex items-center w-full gap-2">
 			<button className="btn btn-sm p-0 md:hidden" onClick={() => closeCurrentConv()}><BiArrowBack className="size-4" /></button>
-			<Avatar username={friend?.username} image={friend?.image} size={40} />
+			<Avatar username={friend?.username ?? blockedData?.username} image={friend?.image ?? blockedData?.image} size={40} />
 			<div>
-				<p className="text-sm">{friend?.username}</p>
-				<p className="text-xs text-info">{t(`txt_${status}`)}</p>
+				<p className="text-sm">{friend?.username ?? blockedData?.username}</p>
+				{friend && <p className="text-xs text-info">{friend && t(`txt_${status}`)}</p>}
 			</div>
 		</div>
 		<div className="flex items-center gap-2">
 			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={() => onProfile(peerId)}>{t("settings_profile_title")}</button>
-			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("btn_invite")}</button>
-			<button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>
+			{friend && !blockedData && <button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("btn_invite")}</button>}
+			{friend && !blockedData && <button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>}
+			{!friend && blockedData && <button onClick={() => onUnblock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_unblock")}</button>}
 		</div>
 	</div>
 }
