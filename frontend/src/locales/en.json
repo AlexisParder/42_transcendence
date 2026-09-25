@@ -50,6 +50,7 @@
 	"txt_worldwide": "worldwide",
 	"txt_player": "player",
 	"txt_accuracy": "accuracy",
+	"txt_all_quiet": "all quiet on the surface",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
@@ -87,6 +88,7 @@
 	"friends_requests_title": "requests",
 	"friends_online_title": "online",
 	"friends_offline_title": "offline",
+	"friends_click_conv": "click on a conversation to view it",
 	"friends_block_title": "blocked",
 	"friend_block_confirm_title": "Block this friend?",
 	"friend_block_confirm_desc": "They won't be able to contact you.",

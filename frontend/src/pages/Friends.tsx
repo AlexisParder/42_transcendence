@@ -13,7 +13,7 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { formatTime, formatTimeMsg } from "../lib/formatTime";
 import { truncateText } from "../lib/truncateText";
 import { useNavigate } from "react-router-dom";
-import { BiArrowBack } from "react-icons/bi";
+import { BiArrowBack, BiConversation } from "react-icons/bi";
 
 export function Friends() {
 	useDocumentTitle(t("friends_title"))
@@ -573,11 +573,20 @@ export function Friends() {
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex flex-col h-full min-h-0 min-w-0">
 				<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} />
-				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+				{!peerId && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+					<div className="flex flex-col min-h-full items-center justify-center">
+						<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">
+							<span className="border rounded-full p-3 text-neutral"><BiConversation className="size-5" /></span>
+							<h1 className="font-bold first-letter:uppercase">{t("txt_all_quiet")}</h1>
+							<p className="text-neutral-content/50 first-letter:uppercase">{t("friends_click_conv")}.</p>
+						</div>
+					</div>
+				</div>}
+				{peerId && <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full">
 						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
 					</div>
-				</div>
+				</div>}
 				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
 					<div className="w-full pl-2">
 						<Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
