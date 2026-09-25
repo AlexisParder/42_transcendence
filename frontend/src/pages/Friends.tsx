@@ -12,8 +12,8 @@ import { t } from "../lib/translate";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { formatTime, formatTimeMsg } from "../lib/formatTime";
 import { truncateText } from "../lib/truncateText";
-import { GoKebabHorizontal } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
+import { BiArrowBack } from "react-icons/bi";
 
 export function Friends() {
 	useDocumentTitle(t("friends_title"))
@@ -571,24 +571,22 @@ export function Friends() {
 
 	return <Sidebar>
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
-			<div className="flex">
-				<div className="flex flex-1 flex-col h-screen min-w-0">
-					<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} onProfile={handleProfile} status={presence[peerId ?? ""]} />
-					<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
-						<div className="flex flex-col min-h-full">
-							{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
-						</div>
+			<div className="flex flex-col h-full min-h-0 min-w-0">
+				<ConversationFriendDisplay friends={friends} peerId={peerId} onBlock={askBlock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} />
+				<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+					<div className="flex flex-col min-h-full">
+						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
 					</div>
-					{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
-						<div className="w-full pl-2">
-							<Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
-								if (e.key === "Enter")
-									handleSend()
-							}} />
-						</div>
-						<button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>
-					</div>}
 				</div>
+				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
+					<div className="w-full pl-2">
+						<Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+							if (e.key === "Enter")
+								handleSend()
+						}} />
+					</div>
+					<button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>
+				</div>}
 			</div>
 
 			<Modal id="SendFriendRequestModal">
@@ -650,20 +648,17 @@ function SidebarRight({ children, search, setSearch, filteredConversations, setP
 	ClearAndOpenFriendModal: () => void
 }) {
 	return <>
-		<div className={`drawer drawer-end md:drawer-open min-h-screen`}>
-			<input id="sidebarRightDrawer" type="checkbox" className="drawer-toggle hidden" />
-			<div className="drawer-content">
-				<label htmlFor="sidebarRightDrawer" className="btn btn-ghost drawer-button md:hidden">
-					<GoKebabHorizontal className="size-5" />
-				</label>
+		<div className="flex w-full h-full min-h-0">
+			<div className={`flex-1 min-w-0 min-h-0 ${!peerId ? "max-md:hidden" : ""}`}>
 				{children}
 			</div>
-			<div className="drawer-side">
-				<label htmlFor="sidebarRightDrawer" aria-label="close sidebar" className="drawer-overlay"></label>
-				<ul className="menu bg-base-200 min-h-full w-65 max-w-65 p-2 gap-1">
-					<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
+			<div className={`${peerId ? "max-md:hidden" : "max-md:w-full"} md:w-65 md:shrink-0 min-h-0`}>
+				<ul className="menu flex-nowrap bg-base-200 h-full w-full p-2 gap-1">
+					<div className="shrink-0">
+						<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
+					</div>
 
-					<div className="flex flex-col flex-1 gap-1">
+					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1">
 						{filteredConversations.length > 0 && <ConversationsSection conversations={filteredConversations} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
 						{requests.length > 0 && <RequestsSection requests={requests} onAccept={handleAccept} onDecline={handleDecline} />}
 						{onlineFriends.length > 0 && <OnlineSection friends={onlineFriends} presence={presence} onSelect={setPeerId} peerId={peerId} closeConv={closeCurrentConv} />}
@@ -672,7 +667,8 @@ function SidebarRight({ children, search, setSearch, filteredConversations, setP
 					</div>
 
 
-					<div className="p-2">
+
+					<div className="p-2 shrink-0">
 						<button className="btn btn-outline border-neutral w-full" onClick={ClearAndOpenFriendModal}><FaPlus /> {t("btn_add_friend")}</button>
 					</div>
 				</ul>
@@ -690,7 +686,15 @@ function DisplayMessage({ message, isMine, createdAt }: { message: string, isMin
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, peerId, onBlock, onProfile, status }: { friends: Friend[], peerId: string | null, onBlock: (id: string) => void, onProfile: (id: string) => void, status: "available" | "in a match" | "away" | "offline" }) {
+function ConversationFriendDisplay({ friends, peerId, onBlock, onProfile, closeCurrentConv, status }:
+	{
+		friends: Friend[],
+		peerId: string | null,
+		onBlock: (id: string) => void,
+		onProfile: (id: string) => void,
+		closeCurrentConv: () => void,
+		status: "available" | "in a match" | "away" | "offline"
+	}) {
 	if (!peerId)
 		return
 
@@ -700,6 +704,7 @@ function ConversationFriendDisplay({ friends, peerId, onBlock, onProfile, status
 
 	return <div className="flex items-center justify-between p-4 bg-base-200">
 		<div className="flex items-center w-full gap-2">
+			<button className="btn btn-sm p-0 md:hidden" onClick={() => closeCurrentConv()}><BiArrowBack className="size-4" /></button>
 			<Avatar username={friend?.username} image={friend?.image} size={40} />
 			<div>
 				<p className="text-sm">{friend?.username}</p>
