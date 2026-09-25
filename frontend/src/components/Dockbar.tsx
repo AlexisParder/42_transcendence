@@ -35,9 +35,9 @@ const navItems = [
 // 	{ to: "/", icon: FaDoorOpen, label: t("quit_title") }
 // ]
 
-export function Dockbar({ children }: { children: React.ReactNode }) {
+export function Dockbar({ children, className = "h-dvh" }: { children: React.ReactNode, className?: string }) {
 	return (
-		<div className="flex h-dvh flex-col">
+		<div className={`flex flex-col ${className}`}>
 			<main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
 				{children}
 			</main>
