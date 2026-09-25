@@ -65,7 +65,7 @@ export function Play() {
 				<h1 className="text-2xl font-bold">New match</h1>
 				<p className="text-sm text-neutral-content/40">Pick a format, then open it up or invite your crew.</p>
 
-				<div className="py-2 grid grid-cols-4 max-lg:grid-cols-2 max-md:grid-cols-1 gap-4">
+				<div className="py-2 grid grid-cols-4 max-lg:grid-cols-2 gap-4">
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "ONE_V_ONE" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "ONE_V_ONE") {
 							setSelectedMatchType("ONE_V_ONE")
@@ -147,7 +147,7 @@ export function Play() {
 				</div>
 
 				<div className=" my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
-					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - 30 s turns, abilities on</p>
+					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - 30 s turns, abilities</p>
 					<button className="btn btn-info max-lg:btn-sm">Create match</button>
 				</div>
 			</div>
@@ -167,7 +167,7 @@ function SidebarRight({ children, friends, presence }: {
 			<div className={`flex-1 min-w-0 min-h-0}`}>
 				{children}
 			</div>
-			<div className={`max-md:hidden w-85 md:shrink-0 min-h-0`}>
+			<div className={`max-md:hidden md:shrink-0 min-h-0`}>
 				<ul className="menu flex-nowrap bg-base-200 h-full w-full p-4 gap-1">
 
 					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1">
