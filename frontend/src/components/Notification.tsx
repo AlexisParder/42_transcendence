@@ -19,6 +19,9 @@ function LiveNotifications() {
 	useEffect(() => {
 		const timers = new Set<ReturnType<typeof setTimeout>>()
 		function onNotification(notification: NotificationEvent) {
+			if (notification.type === "FRIEND_REQUEST" && window.location.pathname === "/friends" && !document.hidden)
+				return
+
 			const setter = notification.type === "FRIEND_REQUEST" ? setFriendRequests : setLiveMessages
 			setter(prev => [...prev.filter(item => item.id !== notification.id), notification].slice(-3))
 			const timer = setTimeout(() => {
