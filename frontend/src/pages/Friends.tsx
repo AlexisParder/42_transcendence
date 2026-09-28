@@ -39,6 +39,23 @@ export function Friends() {
 
 	const navigate = useNavigate()
 
+	useEffect(() => {
+		function syncActiveConversation() {
+			socket.emit("set_active_conversation", document.hidden ? null : peerId)
+		}
+
+		syncActiveConversation()
+		document.addEventListener("visibilitychange", syncActiveConversation)
+		socket.on("connect", syncActiveConversation)
+
+		return () => {
+			document.removeEventListener("visibilitychange", syncActiveConversation)
+			socket.off("connect", syncActiveConversation)
+			if (socket.connected)
+				socket.emit("set_active_conversation", null)
+		}
+	}, [socket, peerId])
+
 	function matchesSearch(username: string | null | undefined) {
 		return (username ?? "").toLowerCase().includes(search.trim().toLowerCase())
 	}
@@ -415,7 +432,6 @@ export function Friends() {
 		HideModal("SendFriendRequestModal")
 		setErrors({})
 		formElem.reset()
-		// Ajouter une notif de success
 	}
 
 	async function handleAccept(requestId: string) {

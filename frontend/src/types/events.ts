@@ -1,5 +1,6 @@
 export interface ClientToServerEvents {
 	send_message: (payload: { toUserId: string, message: string }) => void
+	set_active_conversation: (peerId: string | null) => void
 	send_friend_request: (payload: { toUserId: string }) => void
 	set_activity: (payload: { status: "available" | "away" }) => void
 }

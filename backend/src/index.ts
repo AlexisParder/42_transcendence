@@ -38,9 +38,6 @@ const server = createServer(app)
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
 const allowedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
-/**
- * Server<Event ecouté, Event Emis, inter-serveur, type de socket.data>
- */
 const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
 	cors: {
 		origin: allowedOrigins,
@@ -106,6 +103,12 @@ io.use(async (socket, next) => {
 })
 
 io.on("connection", async (socket) => {
+	const userId = socket.data.userId
+
+	socket.on("set_active_conversation", (peerId) => {
+		socket.data.activeConversationPeerId = typeof peerId === "string" ? peerId : null
+	})
+
 	socket.on("send_message", async (payload) => {
 		try {
 			const fromUserId = socket.data.userId
@@ -156,13 +159,13 @@ io.on("connection", async (socket) => {
 
 			io.to(toUserId).emit("new_message", wire)
 			io.to(fromUserId).emit("new_message", wire)
-			void notify(io, { userId: toUserId, type: "MESSAGE", message: `New message: ${message}` })
+			const recipientSockets = await io.in(toUserId).fetchSockets()
+			if (!recipientSockets.some(recipient => recipient.data.activeConversationPeerId === fromUserId))
+				void notify(io, { userId: toUserId, type: "MESSAGE", message: `New message: ${message}` })
 		} catch (err) {
 			console.error("send_message error:", err)
 		}
 	})
-
-	const userId = socket.data.userId
 
 	socket.join(userId)
 
