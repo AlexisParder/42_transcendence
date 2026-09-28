@@ -166,12 +166,12 @@ export function Play() {
 					<button className="btn btn-info max-lg:btn-sm">Create match</button>
 				</div>
 
-				<div className="py-2 flex flex-col lg:flex-1 lg:min-h-0">
+				<div className="py-2 flex flex-col md:flex-1 md:min-h-0">
 					<div className="flex items-center justify-between pb-2">
 						<p className="uppercase text-neutral-content/50 text-xs">public matches</p>
 						<p className=" text-neutral-content/50 text-xs">Refresh 3 s ago</p>
 					</div>
-					<div className="flex flex-col gap-2 py-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+					<div className="flex flex-col gap-2 py-2 md:flex-1 md:min-h-0 md:overflow-y-auto">
 						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
 						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
 						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
@@ -282,7 +282,7 @@ function SidebarRight({ children, friends, presence }: {
 			<div className={`flex-1 min-w-0 min-h-0}`}>
 				{children}
 			</div>
-			<div className={`max-md:hidden md:shrink-0 min-h-0`}>
+			<div className={`max-lg:hidden lg:shrink-0 min-h-0`}>
 				<ul className="menu flex-nowrap bg-base-200 h-full w-full p-4 gap-1">
 
 					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1">
