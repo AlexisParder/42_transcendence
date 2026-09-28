@@ -1,3 +1,21 @@
 {
-	
+	"notifications_title": "Notifications",
+	"notifications_history": "Votre historique de notifications",
+	"notifications_mark_all_read": "Tout marquer comme lu",
+	"notifications_delete_all": "Tout supprimer",
+	"notifications_empty": "Aucune notification pour le moment.",
+	"notifications_friend_request": "Demande d'ami",
+	"notifications_item": "Notification",
+	"notifications_unread": "Non lu",
+	"notifications_delete_one": "Supprimer la notification",
+	"notifications_delete_confirm_title": "Supprimer toutes les notifications ?",
+	"notifications_delete_confirm_desc": "Cette action est irréversible.",
+	"notifications_new_message": "Nouveau message",
+	"notifications_just_now": "À l'instant",
+	"notifications_add_player": "Voulez-vous ajouter ce joueur ?",
+	"notifications_decline_friend_request": "Refuser la demande d'ami",
+	"notifications_accept_friend_request": "Accepter la demande d'ami",
+	"notifications_friend_request_message": "{{username}} vous a envoyé une demande d'ami",
+	"notifications_new_message_body": "Nouveau message : {{message}}",
+	"btn_cancel": "Annuler"
 }

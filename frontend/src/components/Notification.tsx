@@ -3,6 +3,8 @@ import { FaCheck, FaXmark } from "react-icons/fa6"
 import { useSocket } from "./socketContext"
 import { authClient } from "../lib/auth-client"
 import type { NotificationEvent } from "../types/events"
+import { t } from "../lib/translate"
+import { notificationMessage } from "../lib/notificationMessage"
 
 export function Notification() {
 	const { data: session } = authClient.useSession()
@@ -55,23 +57,23 @@ function LiveNotifications() {
 		<div className="fixed bottom-20 right-4 z-50 w-50 space-y-2">
 			{visibleMessages.map(message => (
 				<div key={message.id} className="rounded-box border border-info bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">
-					<p className="font-bold text-info">New message</p>
-					<p className="text-sm">{message.message}</p>
-					<p className="text-xs text-base-content/60">Just now</p>
+					<p className="font-bold text-info">{t("notifications_new_message")}</p>
+					<p className="text-sm">{notificationMessage(message.message)}</p>
+					<p className="text-xs text-base-content/60">{t("notifications_just_now")}</p>
 				</div>
 			))}
 
 			{visibleFriendRequests.map(request => (
 				<div key={request.id} className="rounded-box border border-neutral bg-base-100/95 p-3 shadow-lg backdrop-blur-sm">
-					<p className="font-bold text-info">Friend request</p>
-					<p className="text-sm">{request.message}</p>
-					<p className="mt-2 text-sm">Do you want to add this player?</p>
+					<p className="font-bold text-info">{t("notifications_friend_request")}</p>
+					<p className="text-sm">{notificationMessage(request.message)}</p>
+					<p className="mt-2 text-sm">{t("notifications_add_player")}</p>
 					<div className="mt-2 flex justify-end gap-2">
 						<button
 							className="btn btn-error btn-sm btn-circle"
 							disabled={!request.requestId}
 							onClick={() => request.requestId && answerFriendRequest(request.requestId, "decline")}
-							aria-label="Decline friend request"
+							aria-label={t("notifications_decline_friend_request")}
 						>
 							<FaXmark />
 						</button>
@@ -79,7 +81,7 @@ function LiveNotifications() {
 							className="btn btn-success btn-sm btn-circle"
 							disabled={!request.requestId}
 							onClick={() => request.requestId && answerFriendRequest(request.requestId, "accept")}
-							aria-label="Accept friend request"
+							aria-label={t("notifications_accept_friend_request")}
 						>
 							<FaCheck />
 						</button>

@@ -3,6 +3,9 @@ import { FaTrash } from "react-icons/fa6"
 import { Sidebar } from "../components/Sidebar"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { Modal, ShowModal, HideModal } from "../components/Modal"
+import { authClient } from "../lib/auth-client"
+import { t } from "../lib/translate"
+import { notificationMessage } from "../lib/notificationMessage"
 
 type NotificationItem = {
 	id: string
@@ -13,7 +16,10 @@ type NotificationItem = {
 }
 
 export function Notifications() {
-	useDocumentTitle("Notifications")
+	const { data: session } = authClient.useSession()
+	const dateLocale = session?.user.language === "fr" ? "fr-FR"
+		: session?.user.language === "en" ? "en-US" : navigator.language
+	useDocumentTitle(t("notifications_title"))
 	const [notifications, setNotifications] = useState<NotificationItem[]>([])
 
 	useEffect(() => {
@@ -89,27 +95,27 @@ export function Notifications() {
 	return (
 		<Sidebar>
 			<div className="p-4">
-				<h1 className="text-xl font-bold text-info">Notifications</h1>
-				<p className="mt-1 text-sm text-neutral-content/60">Your notification history</p>
+				<h1 className="text-xl font-bold text-info">{t("notifications_title")}</h1>
+				<p className="mt-1 text-sm text-neutral-content/60">{t("notifications_history")}</p>
 				<button
 					type="button"
 					className="btn btn-info btn-sm mt-4"
 					onClick={markAllAsRead}
 				>
-					Mark all as read
+					{t("notifications_mark_all_read")}
 				</button>
 				<button
 					type="button"
 					className="btn btn-error btn-sm ml-2 mt-4"
 					onClick={() => ShowModal("DeleteAllNotificationsModal")}
 				>
-					Delete all
+					{t("notifications_delete_all")}
 				</button>
 
 				<div className="mt-6 space-y-3">
 					{notifications.length === 0 && (
 						<div className="rounded-box border border-neutral bg-base-100 p-4 text-sm text-neutral-content/60">
-							No notifications yet.
+							{t("notifications_empty")}
 						</div>
 					)}
 
@@ -124,10 +130,10 @@ export function Notifications() {
 						>
 							<div className="flex items-center justify-between gap-3">
 								<p className="font-bold text-info">
-									{notification.type === "FRIEND_REQUEST" ? "Friend request" : "Notification"}
+									{notification.type === "FRIEND_REQUEST" ? t("notifications_friend_request") : t("notifications_item")}
 								</p>
 								<div className="flex items-center gap-2">
-									{!notification.read && <span className="badge badge-warning badge-sm">Unread</span>}
+									{!notification.read && <span className="badge badge-warning badge-sm">{t("notifications_unread")}</span>}
 									<button
 										type="button"
 										className="btn btn-error btn-ghost btn-sm btn-circle"
@@ -135,15 +141,15 @@ export function Notifications() {
 											event.stopPropagation()
 											deleteNotification(notification.id)
 										}}
-										aria-label="Delete notification"
+										aria-label={t("notifications_delete_one")}
 									>
 										<FaTrash />
 									</button>
 								</div>
 							</div>
-							<p className="mt-2 text-sm">{notification.message}</p>
+							<p className="mt-2 text-sm">{notificationMessage(notification.message)}</p>
 							<p className="mt-2 text-xs text-base-content/60">
-								{new Date(notification.createdAt).toLocaleString()}
+								{new Date(notification.createdAt).toLocaleString(dateLocale)}
 							</p>
 						</div>
 					))}
@@ -151,9 +157,9 @@ export function Notifications() {
 			</div>
 
 			<Modal id="DeleteAllNotificationsModal">
-				<h3 className="text-lg font-bold">Delete all notifications?</h3>
+				<h3 className="text-lg font-bold">{t("notifications_delete_confirm_title")}</h3>
 				<p className="py-4 text-sm text-neutral-content/60">
-					This action cannot be undone.
+					{t("notifications_delete_confirm_desc")}
 				</p>
 				<div className="flex justify-end gap-2">
 					<button
@@ -161,18 +167,17 @@ export function Notifications() {
 						className="btn btn-neutral"
 						onClick={() => HideModal("DeleteAllNotificationsModal")}
 					>
-						Cancel
+						{t("btn_cancel")}
 					</button>
 					<button
 						type="button"
 						className="btn btn-error"
 						onClick={deleteAllNotifications}
 					>
-						Delete all
+						{t("notifications_delete_all")}
 					</button>
 				</div>
 			</Modal>
 		</Sidebar>
 	)
 }
-

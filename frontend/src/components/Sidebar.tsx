@@ -24,7 +24,7 @@ const navItems: NavItem[] = [
 	{ to: "/tournaments", icon: TbTournament, label: t("tournaments_title") },
 	{ to: "/leaderboard", icon: MdLeaderboard, label: t("leaderboard_title") },
 	{ to: "/friends", icon: FaUserFriends, label: t("friends_title") },
-	{ to: "/notifications", icon: FaBell, label: "Notifications" },
+	{ to: "/notifications", icon: FaBell, label: t("notifications_title") },
 	{ to: "/profile", icon: FaUser, label: t("profile_title") },
 	{ to: "/settings", icon: TbSettingsFilled, label: t("settings_title") },
 	{ to: "/", icon: FaDoorOpen, label: t("quit_title") }
