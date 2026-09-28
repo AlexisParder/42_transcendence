@@ -76,7 +76,7 @@ export function Play() {
 
 	return <Sidebar>
 		<SidebarRight friends={friends} presence={presence}>
-			<div className="p-6 flex flex-col h-full min-h-0 min-w-0">
+			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
 				<h1 className="text-2xl font-bold">New match</h1>
 				<p className="text-sm text-neutral-content/40">Pick a format, then open it up or invite your crew.</p>
 
@@ -161,9 +161,63 @@ export function Play() {
 					</div>
 				</div>
 
-				<div className=" my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
+				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
 					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - {timeTurn} s turns {abilites ? ", abilities" : ""}</p>
 					<button className="btn btn-info max-lg:btn-sm">Create match</button>
+				</div>
+
+				<div className="py-2 flex flex-col lg:flex-1 lg:min-h-0">
+					<div className="flex items-center justify-between pb-2">
+						<p className="uppercase text-neutral-content/50 text-xs">public matches</p>
+						<p className=" text-neutral-content/50 text-xs">Refresh 3 s ago</p>
+					</div>
+					<div className="flex flex-col gap-2 py-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
+						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
+					</div>
 				</div>
 			</div>
 
@@ -179,6 +233,41 @@ export function Play() {
 			</Modal>
 		</SidebarRight>
 	</Sidebar>
+}
+
+function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec }:
+	{
+		username: string | null | undefined,
+		image: string | null | undefined,
+		type: matchType | "BOT",
+		players: number,
+		maxPlayers: number,
+		canJoin?: boolean,
+		canSpec?: boolean
+	}
+) {
+	let typeTxt = ""
+	if (type === "ONE_V_ONE")
+		typeTxt = "1 v 1"
+	else if (type === "TWO_V_TWO")
+		typeTxt = "2 v 2"
+	else if (type === "THREE_FFA" || type === "FOUR_FFA")
+		typeTxt = "3-4 players"
+
+	return <div className="grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_6rem_4rem_6rem] gap-4 items-center bg-neutral/10 border border-neutral/50 rounded-md p-4">
+		<div className={`flex gap-2 items-center ${canSpec ? "opacity-50" : ""}`}>
+			<Avatar username={username} image={image} size={32} />
+			<p className="text-sm font-semibold max-lg:hidden">{username}'s room</p>
+			<div className="flex flex-col lg:hidden">
+				<p className="text-xs font-semibold lg:hidden">{username}'s room</p>
+				<p className="text-xs text-neutral-content/50 flex items-center gap-1">{typeTxt} <TbPointFilled className="size-1" /> {players} / {maxPlayers}</p>
+			</div>
+		</div>
+		<p className="text-xs text-neutral-content/50 max-lg:hidden">{typeTxt}</p>
+		<p className="text-xs text-neutral-content/50 max-lg:hidden">{players} / {maxPlayers}</p>
+		{canJoin && <button className="btn btn-outline btn-info btn-sm">Join</button>}
+		{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">Spectate</button>}
+	</div>
 }
 
 function SidebarRight({ children, friends, presence }: {
