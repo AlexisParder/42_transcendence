@@ -8,6 +8,7 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { TbPointFilled } from "react-icons/tb";
 import { Togglebox } from "../components/Togglebox";
+import { HideModal, Modal, ShowModal } from "../components/Modal";
 
 type visibilityType = "private" | "public"
 export function Play() {
@@ -19,6 +20,11 @@ export function Play() {
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType | "BOT">("ONE_V_ONE")
 	const [selectedMatchTypeTxt, setSelectedMatchTypeTxt] = useState<"1 v 1" | "2 v 2" | "FFA" | "Bot">("1 v 1")
+	const [abilites, setAbilities] = useState(true)
+	const [replace, setReplace] = useState(true)
+	const [spectators, setSpectators] = useState(false)
+	const [timeTurn, setTimeTurn] = useState(30)
+
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
@@ -58,6 +64,15 @@ export function Play() {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		loadFriends()
 	}, [])
+
+	function handleChangeTimeTurn(value: number) {
+		if (value < 10)
+			value = 10
+		else if (value > 60)
+			value = 60
+
+		setTimeTurn(value)
+	}
 
 	return <Sidebar>
 		<SidebarRight friends={friends} presence={presence}>
@@ -128,29 +143,40 @@ export function Play() {
 						<div className="flex flex-col gap-2 px-2">
 							<div className="flex items-center justify-between">
 								<p className="text-xs text-neutral-content/80">Time per turn</p>
-								<p className="link-primary">30 s</p>
+								<button onClick={() => ShowModal("timeTurnModal")} className="link-primary cursor-pointer outline-none">{timeTurn} s</button>
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80">Special abilities</p>
-								<Togglebox name={`spec_ab`} type="info" checked={true} />
+								<Togglebox name={`spec_ab`} type="info" checked={abilites} onClick={() => setAbilities(!abilites)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80">Replace leavers with a bot</p>
-								<Togglebox name={`spec_ab`} type="info" checked={true} />
+								<Togglebox name={`spec_ab`} type="info" checked={replace} onClick={() => setReplace(!replace)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80">Spectators</p>
-								<Togglebox name={`spec_ab`} type="info" />
+								<Togglebox name={`spec_ab`} type="info" checked={spectators} onClick={() => setSpectators(!spectators)} />
 							</div>
 						</div>
 					</div>
 				</div>
 
 				<div className=" my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
-					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - 30 s turns, abilities</p>
+					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - {timeTurn} s turns {abilites ? ", abilities" : ""}</p>
 					<button className="btn btn-info max-lg:btn-sm">Create match</button>
 				</div>
 			</div>
+
+			<Modal id="timeTurnModal">
+				<p className="text-center">Turn time: 10 to 60 seconds</p>
+				<div className="flex items-center py-4 gap-2 justify-center">
+					<input type="range" min={10} max={60} value={timeTurn} onChange={(e) => handleChangeTimeTurn(Number(e.target.value))} className="range range-xs outline-none" />
+					<p>{timeTurn}</p>
+				</div>
+				<div className="flex justify-center">
+					<button className="btn btn-outline" onClick={() => HideModal("timeTurnModal")}>Close</button>
+				</div>
+			</Modal>
 		</SidebarRight>
 	</Sidebar>
 }
