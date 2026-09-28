@@ -4,9 +4,10 @@ import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled, TbTournament } from "react-icons/tb";
 import { Link, Navigate, NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
-import { FaBell, FaUser } from "react-icons/fa6";
+import { FaBell, FaUser, FaXmark } from "react-icons/fa6";
 import { Avatar } from "./Avatar";
 import { t } from "../lib/translate";
 import { truncateText } from "../lib/truncateText";
@@ -30,34 +31,38 @@ const navItems: NavItem[] = [
 	{ to: "/", icon: FaDoorOpen, label: t("quit_title") }
 ]
 
-export function Sidebar({ children }: { children: React.ReactNode }) {
+export function Sidebar({ children, guest = false }: { children: React.ReactNode, guest?: boolean }) {
 	const { data: session, isPending } = authClient.useSession()
 	const location = useLocation()
+	const [open, setOpen] = useState(false)
 
-	if (isPending)
+	if (!guest && isPending)
 		return <p>Loading...</p>
 
-	if (!session)
+	if (!guest && !session)
 		return <Navigate to="/login" state={{ from: location }} replace />
 
 	const username = session?.user.username ? session?.user.username : ""
 	return <>
-		{!isPending && <div className="drawer md:drawer-open min-h-screen">
-			<input id="sidebarDrawer" type="checkbox" className="drawer-toggle hidden" />
-			<div className="drawer-content">
-				<Dockbar>{children}</Dockbar>
+		<div className={`drawer ${guest ? "flex-1 min-h-0" : "md:drawer-open min-h-screen"}`}>
+			<input id="sidebarDrawer" type="checkbox" className="drawer-toggle hidden" checked={open} onChange={e => setOpen(e.target.checked)} />
+			<div className={`drawer-content ${guest ? "min-h-0" : ""}`}>
+				<Dockbar className={guest ? "h-full" : undefined}>{children}</Dockbar>
 			</div>
-			<div className="drawer-side">
+			<div className="drawer-side z-50">
 				<label htmlFor="sidebarDrawer" aria-label="close sidebar" className="drawer-overlay"></label>
-				<ul className="menu bg-base-200 min-h-full w-50 max-w-50 p-4 gap-1">
-					<Link to="/" className="btn btn-ghost text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-6" />SONAR</Link>
-					<div className="flex flex-col flex-1 gap-1">
+				<ul className="menu bg-base-200 min-h-full w-screen md:w-50 md:max-w-50 p-4 gap-1" onClick={e => (e.target as HTMLElement).closest("a") && setOpen(false)}>
+					<label htmlFor="sidebarDrawer" aria-label="close sidebar" className="btn btn-ghost btn-square absolute top-4 right-4 md:hidden">
+						<FaXmark className="size-6" />
+					</label>
+					<Link to="/" className="btn btn-ghost text-2xl md:text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-7 md:size-6" />SONAR</Link>
+					<div className="flex flex-col flex-1 gap-1 mt-2 md:mt-0">
 						{navItems.map(({ to, icon: Icon, label, end }) => (
 							<li key={to}>
 								<NavLink to={to} end={end} className={({ isActive }) => (isActive ? "font-bold bg-info/15" : "")} >
 									{({ isActive }) => (
-										<div className="flex items-center gap-2">
-											<Icon className={isActive ? "text-info" : ""} /> {label}
+										<div className="flex items-center gap-3 md:gap-2 text-lg md:text-sm">
+											<Icon className={`size-5 md:size-4 ${isActive ? "text-info" : ""}`} /> {label}
 										</div>
 									)}
 								</NavLink>
@@ -65,19 +70,21 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 						))}
 					</div>
 
-					<div className="flex items-end mb-5 p-1.5 border border-neutral rounded-md">
-						<Avatar username={session?.user.username} image={session?.user.image} size={40} />
-						<div className="ml-3">
-							<p className="font-bold">{truncateText(username, 11)}</p>
+					{session && <div className="flex items-end mb-5 p-2 md:p-1.5 border border-neutral rounded-md">
+						<div className="md:hidden"><Avatar username={session.user.username} image={session.user.image} size={52} /></div>
+						<div className="hidden md:block"><Avatar username={session.user.username} image={session.user.image} size={40} /></div>
+						<div className="ml-3 text-lg md:text-sm">
+							<p className="font-bold md:hidden">{truncateText(username, 20)}</p>
+							<p className="font-bold hidden md:block">{truncateText(username, 11)}</p>
 							<p className="text-warning">{session.user.points?.toLocaleString()} {t("txt_pts")}</p>
 						</div>
-					</div>
-					<div className="flex gap-2">
-						<Link to="/privacy" className="link-primary text-xs">{t("privacy_short_title")}</Link>
-						<Link to="/terms" className="link-primary text-xs">{t("terms_short_title")}</Link>
+					</div>}
+					<div className="flex gap-3 md:gap-2">
+						<Link to="/privacy" className="link-primary text-sm md:text-xs">{t("privacy_short_title")}</Link>
+						<Link to="/terms" className="link-primary text-sm md:text-xs">{t("terms_short_title")}</Link>
 					</div>
 				</ul>
 			</div>
-		</div>}
+		</div>
 	</>
 }
