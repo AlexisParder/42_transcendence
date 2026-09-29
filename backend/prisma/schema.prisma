@@ -44,7 +44,7 @@ model User {
   ReceivedBlock UserBlocked[]  @relation("ReceivedBlock")
   matchPlayers  MatchPlayers[]
 
-  notifications Notification[]
+  notifications           Notification[]
   notificationPreferences NotificationPreferences?
 
   @@unique([username])
@@ -170,8 +170,8 @@ model Matchs {
   id        String         @id @default(cuid())
   mode      MatchMode
   isRanked  Boolean        @default(true)
-  startedAt DateTime       @default(now())
-  endedAt   DateTime?
+  startedAt DateTime
+  endedAt   DateTime
   players   MatchPlayers[]
 
   @@map("matchs")
@@ -200,22 +200,22 @@ model MatchPlayers {
 }
 
 model NotificationPreferences {
-  userId String @id
-  app_friend Boolean @default(true)
-  app_chat Boolean @default(true)
+  userId       String  @id
+  app_friend   Boolean @default(true)
+  app_chat     Boolean @default(true)
   email_friend Boolean @default(false)
-  email_chat Boolean @default(false)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email_chat   Boolean @default(false)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
 }
 
 model Notification {
-  id String @id @default(cuid())
-  userId String
-  type String
-  message String
-  read Boolean @default(false)
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  message   String
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
