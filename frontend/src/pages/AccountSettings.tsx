@@ -532,7 +532,7 @@ function SettingsCat() {
 			{hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_danger_dlt_need_pwd")}.<br />{t("settings_2fa_need_pwd_2")}.</span></p>}
 		</SectionSetting>
 
-		<Modal id="pictureModal">
+		<Modal id="pictureModal" onClose={() => setPicture('')}>
 			<p className="pb-2">{t("settings_modal_upl_pic")}</p>
 			<form onSubmit={handleChangePicture}>
 				<Input type="text" label={t("settings_modal_upl_pic_link")} name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} />
@@ -542,7 +542,7 @@ function SettingsCat() {
 				</div>
 			</form>
 		</Modal>
-		<Modal id="deleteModal">
+		<Modal id="deleteModal" onClose={() => setCode("")}>
 			<p className="pb-2">{t("settings_modal_dlt_user")}</p>
 			<form onSubmit={handleDeleteAccount}>
 				<input type="text" name="username" className="hidden" hidden={true} autoComplete="username" readOnly={true} />
@@ -656,12 +656,10 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 		setStep('password')
 		setTotpURI(null)
 		setErrors({})
+		setCode("")
 	}
 
-	const close = () => {
-		HideModal('Enable2FAModal')
-		reset()
-	}
+	const close = () => HideModal('Enable2FAModal')
 
 	const handleSubmitPwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -724,7 +722,7 @@ function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 		// ajouter notif
 	}
 
-	return <Modal id="Enable2FAModal">
+	return <Modal id="Enable2FAModal" onClose={reset}>
 		<div className="flex items-center justify-between pb-4">
 			<p className="font-bold text-lg">{t("settings_2fa_enable")}</p>
 			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
@@ -782,10 +780,7 @@ function RecoveryCodes() {
 		setErrors({})
 	}
 
-	const close = () => {
-		HideModal('ShowCodesModal')
-		reset()
-	}
+	const close = () => HideModal('ShowCodesModal')
 
 	const handleSubmitPwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -832,7 +827,7 @@ function RecoveryCodes() {
 		close()
 	}
 
-	return <Modal id="ShowCodesModal">
+	return <Modal id="ShowCodesModal" onClose={reset}>
 		<div className="flex items-center justify-between pb-4">
 			<p className="font-bold text-lg">{t("settings_modal_show_code_title")}</p>
 			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>
@@ -881,10 +876,7 @@ function ReScan2FA() {
 		setErrors({})
 	}
 
-	const close = () => {
-		HideModal('ReScan2FAModal')
-		reset()
-	}
+	const close = () => HideModal('ReScan2FAModal')
 
 	const handleSubmitPwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -911,7 +903,7 @@ function ReScan2FA() {
 		setStep("show")
 	}
 
-	return <Modal id="ReScan2FAModal">
+	return <Modal id="ReScan2FAModal" onClose={reset}>
 		<div className="flex items-center justify-between pb-4">
 			<p className="font-bold text-lg">{t("settings_modal_rescan_title")}</p>
 			<p className="text-xs text-neutral-content/60">{t("txt_step")} {step === "password" ? '1' : '2'}/2</p>

@@ -1,8 +1,15 @@
 import type React from "react";
+import { useState } from "react";
 
-export function Modal({ id, children }: { id: string, children: React.ReactNode }) {
-	return <dialog id={id} className="modal">
-		<div className="modal-box">
+export function Modal({id, children, onClose}: {id: string, children: React.ReactNode, onClose?: () => void}) {
+	const [resetKey, setResetKey] = useState(0)
+
+	const handleClose = () => {
+		setResetKey(k => k + 1)
+		onClose?.()
+	}
+	return <dialog id={id} className="modal" onClose={handleClose}>
+		<div key={resetKey} className="modal-box">
 			{children}
 		</div>
 		<form method="dialog" className="modal-backdrop">
