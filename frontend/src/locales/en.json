@@ -95,7 +95,6 @@
 	"play_s_turns": "{{time}} s turns",
 	"play_btn_create": "Create match",
 	"play_public_matches": "public matches",
-	"play_refresh_ago": "refresh {{time}} s ago",
 	"play_room_name": "{{name}}'s room",
 	"play_waiting_room": "waiting room",
 	"play_room_host_desc": "share the code or invite friends. You start the match once every seat is filled",
