@@ -279,6 +279,8 @@
 	"sign_up_already_acc": "Already aboard?",
 
 	"settings_title": "Settings",
+	"sidebar_loading": "Loading...",
+	"sidebar_close": "Close sidebar",
 	"settings_desc": "Manage your identity, security, and how you appear to other palyers",
 	"settings_acc_title": "Account",
 	"settings_notif_title": "Notifications",

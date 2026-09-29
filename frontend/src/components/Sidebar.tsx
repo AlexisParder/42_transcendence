@@ -37,7 +37,7 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 	const [open, setOpen] = useState(false)
 
 	if (!guest && isPending)
-		return <p>Loading...</p>
+		return <p>{t("sidebar_loading")}</p>
 
 	if (!guest && !session)
 		return <Navigate to="/login" state={{ from: location }} replace />
@@ -50,9 +50,9 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 				<Dockbar className={guest ? "h-full" : undefined}>{children}</Dockbar>
 			</div>
 			<div className="drawer-side z-50">
-				<label htmlFor="sidebarDrawer" aria-label="close sidebar" className="drawer-overlay"></label>
+				<label htmlFor="sidebarDrawer" aria-label={t("sidebar_close")} className="drawer-overlay"></label>
 				<ul className="menu bg-base-200 min-h-full w-screen md:w-50 md:max-w-50 p-4 gap-1" onClick={e => (e.target as HTMLElement).closest("a") && setOpen(false)}>
-					<label htmlFor="sidebarDrawer" aria-label="close sidebar" className="btn btn-ghost btn-square absolute top-4 right-4 md:hidden">
+					<label htmlFor="sidebarDrawer" aria-label={t("sidebar_close")} className="btn btn-ghost btn-square absolute top-4 right-4 md:hidden">
 						<FaXmark className="size-6" />
 					</label>
 					<Link to="/" className="btn btn-ghost text-2xl md:text-xl tracking-brand"><FaRegCircle className="text-info mr-1 size-7 md:size-6" />SONAR</Link>
