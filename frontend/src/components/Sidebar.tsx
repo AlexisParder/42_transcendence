@@ -70,7 +70,7 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 						))}
 					</div>
 
-					{session && <div className="flex items-end mb-5 p-2 md:p-1.5 border border-neutral rounded-md">
+					{session && <div className="flex items-center mb-5 p-2 md:p-1.5 border border-neutral rounded-md">
 						<div className="md:hidden"><Avatar username={session.user.username} image={session.user.image} size={52} /></div>
 						<div className="hidden md:block"><Avatar username={session.user.username} image={session.user.image} size={40} /></div>
 						<div className="ml-3 text-lg md:text-sm">
