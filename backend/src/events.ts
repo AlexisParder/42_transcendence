@@ -141,10 +141,16 @@ export interface Rules {
 
 export interface Matchs {
 	mode: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
+	settings: MatchSettings,
+	visibility: "public" | "private",
 	isRanked: boolean,
 	startedAt: string,
 	endedAt: string,
-	players: MatchPlayers[]
+	hostId: string | null,
+	hostUsername: string | null | undefined,
+	hostImage: string | null | undefined,
+	players: MatchPlayers[],
+	maxPlayers: number
 }
 
 export interface MatchPlayers {
@@ -157,4 +163,11 @@ export interface MatchPlayers {
 	status: "PLAYED" | "LEFT"
 	shotsHit: number,
 	shotsTotal: number
+}
+
+export interface MatchSettings {
+	time_turn: number,
+	abilities: boolean,
+	replace: boolean,
+	spectators: boolean
 }
