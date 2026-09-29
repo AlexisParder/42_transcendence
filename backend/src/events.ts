@@ -138,3 +138,23 @@ export interface Rules {
 	spectators: boolean,
 	ranked: boolean
 }
+
+export interface Matchs {
+	mode: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
+	isRanked: boolean,
+	startedAt: string,
+	endedAt: string,
+	players: MatchPlayers[]
+}
+
+export interface MatchPlayers {
+	userID: string | null
+	isBot: boolean,
+	team: number,
+	placement: number,
+	points: number,
+	leftAt: string | null,
+	status: "PLAYED" | "LEFT"
+	shotsHit: number,
+	shotsTotal: number
+}

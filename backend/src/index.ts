@@ -7,7 +7,7 @@ import { checkPwdHandler } from "./routes/checkPwd.route.ts"
 import { getBackupCodesHandler } from "./routes/getBackupCodes.route.ts"
 import { createServer } from "node:http"
 import { Server } from "socket.io"
-import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "./events.ts"
+import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "./events.ts"
 import { prisma } from "./db/client.ts"
 import { getConvHistoryHandler } from "./routes/getConvHistory.route.ts"
 import { getFriendsHandler } from "./routes/getFriends.route.ts"
@@ -37,6 +37,7 @@ const app = express()
 const server = createServer(app)
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
+const currentMatches = new Map<string, Matchs>()
 const allowedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
 const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
 	cors: {
@@ -48,6 +49,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData
 app.set("io", io)
 app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
+app.set("currentMatches", currentMatches)
 
 app.use(cors({
 	origin: allowedOrigins,

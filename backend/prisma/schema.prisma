@@ -178,9 +178,9 @@ model Matchs {
 }
 
 model MatchPlayers {
-  id       String  @id @default(cuid())
-  matchs   Matchs? @relation(fields: [matchsId], references: [id])
-  matchsId String?
+  id       String @id @default(cuid())
+  matchs   Matchs @relation(fields: [matchsId], references: [id], onDelete: Cascade)
+  matchsId String
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
