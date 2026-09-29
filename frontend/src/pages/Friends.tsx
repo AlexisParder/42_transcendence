@@ -39,6 +39,23 @@ export function Friends() {
 
 	const navigate = useNavigate()
 
+	useEffect(() => {
+		function syncActiveConversation() {
+			socket.emit("set_active_conversation", document.hidden ? null : peerId)
+		}
+
+		syncActiveConversation()
+		document.addEventListener("visibilitychange", syncActiveConversation)
+		socket.on("connect", syncActiveConversation)
+
+		return () => {
+			document.removeEventListener("visibilitychange", syncActiveConversation)
+			socket.off("connect", syncActiveConversation)
+			if (socket.connected)
+				socket.emit("set_active_conversation", null)
+		}
+	}, [socket, peerId])
+
 	function matchesSearch(username: string | null | undefined) {
 		return (username ?? "").toLowerCase().includes(search.trim().toLowerCase())
 	}
@@ -309,6 +326,19 @@ export function Friends() {
 	}, [socket])
 
 	useEffect(() => {
+		function onFriendRequestResolved({ requestId, accepted }: { requestId: string, accepted: boolean }) {
+			setRequests(prev => prev.filter(request => request.id !== requestId))
+			if (accepted)
+				void loadFriends()
+		}
+
+		socket.on("friend_request_resolved", onFriendRequestResolved)
+		return () => {
+			socket.off("friend_request_resolved", onFriendRequestResolved)
+		}
+	}, [socket])
+
+	useEffect(() => {
 		function onAccepted(payload: FriendRequestAccept) {
 			setFriends(prev => [...prev, {
 				id: payload.friendId,
@@ -415,7 +445,6 @@ export function Friends() {
 		HideModal("SendFriendRequestModal")
 		setErrors({})
 		formElem.reset()
-		// Ajouter une notif de success
 	}
 
 	async function handleAccept(requestId: string) {
@@ -433,16 +462,8 @@ export function Friends() {
 				return
 			}
 
-			const accepted = requests.find(r => r.id === requestId)
 			setRequests(prev => prev.filter(r => r.id !== requestId))
-
-			if (accepted)
-				setFriends(prev => [...prev, {
-					id: accepted.fromUserId,
-					username: accepted.username,
-					image: accepted.image,
-					status: "available"
-				}])
+			void loadFriends()
 		} catch (error) {
 			console.error("accept:", error)
 		}

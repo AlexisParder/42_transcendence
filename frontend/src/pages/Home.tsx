@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { RadarEchoes } from "../components/RadarEchoes"
-import { Dockbar } from "../components/Dockbar"
+import { Sidebar } from "../components/Sidebar"
 import { t } from "../lib/translate"
 
 const features = [
@@ -30,28 +30,28 @@ const stats = [
 
 export function Home() {
 	return (
-		<Dockbar className="flex-1 min-h-0">
-			<div className="flex flex-col flex-1 w-full max-w-6xl xm-auto p-4 md:p-8 gap-6">
-				<section className="flex flex-col md:flex-row items-center gap-8 flex-1">
-					<div className="flex flex-col flex-1 gap-4">
-						<p className="font-mono text-sm font-semibold tracking-wide text-primary">{t("home_project_name")}</p>
-						<h1 className="text-3xl md:text-5xl font-bold">
+		<Sidebar guest>
+			<div className="flex flex-col flex-1 w-full max-w-6xl 2xl:max-w-7xl mx-auto p-4 md:p-8 gap-6 xl:gap-10">
+				<section className="flex flex-col md:flex-row items-center gap-8 xl:gap-16 flex-1">
+					<div className="flex flex-col flex-1 gap-4 xl:gap-6">
+						<p className="font-mono text-sm xl:text-base font-semibold tracking-wide text-primary">{t("home_project_name")}</p>
+						<h1 className="text-3xl md:text-5xl xl:text-6xl 2xl:text-7xl font-bold">
 							{t("home_title_part1")}
 							<br />
 							{t("home_title_part2")}
 						</h1>
-						<p className="max-w-xl text-sm md:text-base text-base-content/60">{t("home_description")}</p>
+						<p className="max-w-xl text-sm md:text-base xl:text-lg text-base-content/60">{t("home_description")}</p>
 						<div className="flex flex-wrap gap-2">
-							<Link to="/play" className="btn btn-primary">
+							<Link to="/play" className="btn btn-primary xl:btn-lg">
 								{t("home_play_btn")}
 							</Link>
 							<div className="join">
 								<input
 									type="text"
 									placeholder={`${t("home_code_name")} - - - - -`}
-									className="input join-item w-40 bg-base-200 font-mono uppercase outline-none"
+									className="input xl:input-lg join-item w-40 xl:w-48 bg-base-200 font-mono uppercase outline-none"
 								/>
-								<button className="btn join-item bg-base-300">
+								<button className="btn xl:btn-lg join-item bg-base-300">
 									{t("home_join_btn")}
 								</button>
 							</div>
@@ -59,8 +59,8 @@ export function Home() {
 						<div className="grid grid-cols-3 gap-4 border-t border-base-content/10 pt-4">
 							{stats.map((stat) => (
 								<div key={stat.label}>
-									<p className="font-mono text-2xl font-bold">{stat.value}</p>
-									<p className="text-sm text-base-content/50">{stat.label}</p>
+									<p className="font-mono text-2xl xl:text-3xl font-bold">{stat.value}</p>
+									<p className="text-sm xl:text-base text-base-content/50">{stat.label}</p>
 								</div>
 							))}
 						</div>
@@ -72,12 +72,12 @@ export function Home() {
 				<section className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-base-content/10 pt-4">
 					{features.map((feature) => (
 						<div key={feature.title}>
-							<h2 className="font-bold">{feature.title}</h2>
-							<p className="mt-1 text-sm text-base-content/60">{feature.desc}</p>
+							<h2 className="font-bold xl:text-lg">{feature.title}</h2>
+							<p className="mt-1 text-sm xl:text-base text-base-content/60">{feature.desc}</p>
 						</div>
 					))}
 				</section>
 			</div>
-		</Dockbar>
+		</Sidebar>
 	)
 }

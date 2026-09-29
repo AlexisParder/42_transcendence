@@ -41,6 +41,7 @@ export async function acceptFriendRequestHandler(req: Request, res: Response) {
 			username: session.user.username,
 			image: session.user.image,
 		})
+		io.to(userId).emit("friend_request_resolved", { requestId, accepted: true })
 
 		res.json({ ok: true })
 	} catch (error) {

@@ -1,5 +1,6 @@
 export interface ClientToServerEvents {
 	send_message: (payload: { toUserId: string, message: string }) => void
+	set_active_conversation: (peerId: string | null) => void
 	send_friend_request: (payload: { toUserId: string }) => void
 	set_activity: (payload: { status: "available" | "away" }) => void
 }
@@ -9,6 +10,7 @@ export interface ServerToClientEvents {
 	new_message: (payload: Message) => void
 	friend_request_received: (payload: FriendRequest) => void
 	friend_request_accepted: (payload: FriendRequestAccept) => void
+	friend_request_resolved: (payload: { requestId: string, accepted: boolean }) => void
 	presence_update: (payload: PresenceUpdate) => void
 	friend_removed: (payload: { userId: string }) => void
 }
@@ -26,6 +28,7 @@ export type PresenceStatus = "available" | "offline" | "away"
 
 export interface SocketData {
 	userId: string
+	activeConversationPeerId?: string | null
 }
 
 export interface Message {

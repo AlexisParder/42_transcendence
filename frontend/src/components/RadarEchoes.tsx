@@ -6,7 +6,7 @@ const radarEchoes = [
 ]
 
 export function RadarEchoes() {
-	return <div className="relative flex items-center justify-center size-48 md:size-80 overflow-hidden rounded-full border border-primary/20 bg-base-200 bg-radar-glow">
+	return <div className="relative flex items-center justify-center size-48 md:size-80 xl:size-96 2xl:size-[28rem] overflow-hidden rounded-full border border-primary/20 bg-base-200 bg-radar-glow">
 		<div className="absolute w-3/4 h-3/4 rounded-full border border-primary/15" />
 		<div className="absolute w-1/2 h-1/2 rounded-full border border-primary/15" />
 		<div className="absolute w-1/4 h-1/4 rounded-full border border-primary/15" />
