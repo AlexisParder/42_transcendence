@@ -122,14 +122,6 @@ export interface LeaderboardInfo {
 	accuracy: number
 }
 
-export interface Player {
-	id: string,
-	username: string | null | undefined,
-	image: string | null | undefined,
-	points: number,
-	isReady: boolean
-}
-
 export interface Rules {
 	format: string,
 	timeTurn: number,
@@ -142,19 +134,21 @@ export interface Rules {
 export interface Matchs {
 	mode: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
 	settings: MatchSettings,
+	code: string,
 	visibility: "public" | "private",
 	isRanked: boolean,
 	startedAt: string,
 	endedAt: string,
 	hostId: string | null,
-	hostUsername: string | null | undefined,
-	hostImage: string | null | undefined,
 	players: MatchPlayers[],
 	maxPlayers: number
 }
 
 export interface MatchPlayers {
-	userID: string | null
+	userID: string | null,
+	username: string | null | undefined,
+	image: string | null | undefined,
+	isReady: boolean,
 	isBot: boolean,
 	team: number,
 	placement: number,

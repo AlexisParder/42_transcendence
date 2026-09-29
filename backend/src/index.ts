@@ -33,6 +33,8 @@ import { leaderboardLimit } from "./rateLimit.ts"
 import { notificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
 import { notify } from "./lib/notify.ts"
 import { getPublicMatchesHandler } from "./routes/matches/getPublicMatches.route.ts"
+import { createMatchHandler } from "./routes/matches/createMatch.route.ts"
+import { deleteMatchHandler } from "./routes/matches/deleteMatch.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -52,76 +54,6 @@ app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
 app.set("currentMatches", currentMatches)
 
-// debug
-const MatchTest: Matchs = {
-	mode: "FOUR_FFA",
-	isRanked: true,
-	startedAt: "",
-	endedAt: (Date.now() + 846445454).toString(),
-	hostId: "dadad",
-	hostUsername: "Bob",
-	hostImage: '',
-	visibility: "public",
-	maxPlayers: 4,
-	settings: {
-		time_turn: 30,
-		abilities: true,
-		replace: true,
-		spectators: true
-	},
-	players: [
-		{ userID: "1", isBot: false, team: 1, placement: 1, points: 50, leftAt: null, status: "PLAYED", shotsHit: 5, shotsTotal: 8 },
-		{ userID: "2", isBot: false, team: 2, placement: 2, points: 20, leftAt: null, status: "PLAYED", shotsHit: 3, shotsTotal: 15 }
-	]
-}
-const MatchTest2: Matchs = {
-	mode: "FOUR_FFA",
-	isRanked: true,
-	startedAt: "",
-	endedAt: (Date.now() + 846445454).toString(),
-	hostId: "wqqwq",
-	hostUsername: "alfred",
-	hostImage: '',
-	visibility: "private",
-	maxPlayers: 4,
-	settings: {
-		time_turn: 30,
-		abilities: true,
-		replace: true,
-		spectators: true
-	},
-	players: [
-		{ userID: "1", isBot: false, team: 1, placement: 1, points: 50, leftAt: null, status: "PLAYED", shotsHit: 5, shotsTotal: 8 },
-		{ userID: "2", isBot: false, team: 2, placement: 2, points: 20, leftAt: null, status: "PLAYED", shotsHit: 3, shotsTotal: 15 }
-	]
-}
-const MatchTest3: Matchs = {
-	mode: "ONE_V_ONE",
-	isRanked: true,
-	startedAt: Date.now().toString(),
-	endedAt: (Date.now() + 846445454).toString(),
-	hostId: "eqwqwdqwd",
-	hostUsername: "michel",
-	hostImage: '',
-	visibility: "public",
-	maxPlayers: 2,
-	settings: {
-		time_turn: 30,
-		abilities: true,
-		replace: true,
-		spectators: true
-	},
-	players: [
-		{ userID: "1", isBot: false, team: 1, placement: 1, points: 50, leftAt: null, status: "PLAYED", shotsHit: 5, shotsTotal: 8 },
-		{ userID: "2", isBot: false, team: 2, placement: 2, points: 20, leftAt: null, status: "PLAYED", shotsHit: 3, shotsTotal: 15 }
-	]
-}
-
-currentMatches.set("test", MatchTest)
-currentMatches.set("test2", MatchTest2)
-currentMatches.set("test3", MatchTest3)
-// fin debug
-
 app.use(cors({
 	origin: allowedOrigins,
 	credentials: true,
@@ -134,7 +66,6 @@ app.use(express.json())
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/notifications", getNotificationsHandler)
-app.get("/api/get-matches", getPublicMatchesHandler)
 app.get("/api/notification-preferences", notificationPreferencesHandler)
 app.patch("/api/notification-preferences", notificationPreferencesHandler)
 
@@ -159,6 +90,9 @@ app.post("/api/get-user-stats", getUserStatsHandler)
 app.post("/api/opt/cooldown", getSentHandler)
 app.post("/api/opt/send", setSentHandler)
 app.post("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHandler)
+app.post("/api/get-matches", getPublicMatchesHandler)
+app.post("/api/create-match", createMatchHandler)
+app.post("/api/delete-match", deleteMatchHandler)
 
 io.use(async (socket, next) => {
 	try {

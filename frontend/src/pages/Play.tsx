@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Avatar } from "../components/Avatar";
 import { Sidebar } from "../components/Sidebar";
 import { useSocket } from "../components/socketContext";
-import type { Friend, Matchs, matchType, Player, PresenceStatus, PresenceUpdate, Rules } from "../types/events";
+import type { Friend, Matchs, matchType, PresenceStatus, PresenceUpdate, Rules } from "../types/events";
 import { t } from "../lib/translate";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
@@ -31,14 +31,7 @@ export function Play() {
 	const [timeTurn, setTimeTurn] = useState(30)
 	const [view, setView] = useState<viewType>("none")
 	const [matches, setMatches] = useState<Matchs[]>([])
-
-	// var tmp
-	const hostId = "ZmtSEHvF22IycXIqipgcNHna0sURHk2t"
-	const players: Player[] = [
-		{ id: hostId, username: "alexis", image: "", points: 1284, isReady: true },
-		{ id: "tom", username: "tom", image: "", points: 1402, isReady: true },
-		{ id: "gael", username: "gael", image: "", points: 1388, isReady: false },
-	]
+	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
@@ -79,22 +72,36 @@ export function Play() {
 		loadFriends()
 	}, [])
 
+	async function loadMatches() {
+		const res = await fetch("/api/get-matches", {
+			method: "POST",
+			headers: { "Content-type": "application/json" },
+			credentials: "include"
+		})
+
+		if (!res.ok)
+			return
+
+		const data = await res.json()
+		setMatches(data.matches ?? [])
+	}
+
 	useEffect(() => {
-		async function loadMatches() {
-			const res = await fetch("/api/get-matches", {
-				method: "GET",
-				headers: { "Content-type": "application/json" },
-				credentials: "include"
-			})
+		if (view !== "none")
+			return
 
-			if (!res.ok)
-				return
+		const interval = setInterval(() => {
+			loadMatches()
+		}, 10 * 1000)
 
-			const data = await res.json()
-			setMatches(data.matches ?? [])
+		return () => {
+			clearInterval(interval)
 		}
+	}, [view])
 
+	useEffect(() => {
 		if (view === "none")
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			loadMatches()
 	}, [view])
 
@@ -105,6 +112,56 @@ export function Play() {
 			value = 60
 
 		setTimeTurn(value)
+	}
+
+	async function handleCreateMatch() {
+		if (selectedMatchType === "BOT" && visibility !== "private")
+			setVisibility("private")
+
+		try {
+			const res = await fetch("/api/create-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ selectedMatchType, visibility, code, timeTurn, abilities, replace, spectators }),
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			const data = await res.json()
+			setJoinedMatch(data.match ?? undefined)
+
+			setView("host")
+		} catch (error) {
+			console.error("create match:", error)
+		}
+	}
+
+	async function handleDeleteMatch() {
+		try {
+			const res = await fetch("/api/delete-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			setJoinedMatch(undefined)
+			setView("none")
+		} catch (error) {
+			console.error("delete match:", error)
+		}
+	}
+
+	async function handleJoinedMatch(hostId: string) {
+
 	}
 
 	return <Sidebar>
@@ -157,11 +214,11 @@ export function Play() {
 					<div className="rounded-md p-2 bg-neutral/10 border border-neutral/50">
 						<p className="uppercase px-2 text-neutral-content/50">{t("play_visibility")}</p>
 						<div className="flex gap-2 p-2">
-							<button className={`btn btn-outline ${visibility === "private" ? "border-info bg-info/15 hover:bg-info hover:text-black" : "border-neutral bg-neutral/15 hover:btn-neutral"} flex-1/2`} onClick={() => {
+							<button className={`btn btn-outline ${visibility === "private" ? "border-info bg-info/15" : "border-neutral bg-neutral/15 hover:btn-neutral hover:bg-neutral/50"} flex-1/2`} onClick={() => {
 								if (visibility !== "private")
 									setVisibility("private")
 							}}>{t("play_private")}</button>
-							<button className={`btn btn-outline ${visibility === "public" ? "border-info bg-info/15 hover:bg-info hover:text-black" : "border-neutral bg-neutral/15 hover:btn-neutral"} flex-1/2`} onClick={() => {
+							<button className={`btn btn-outline ${visibility === "public" ? "border-info bg-info/15" : "border-neutral bg-neutral/15 hover:btn-neutral hover:bg-neutral/50"} flex-1/2`} onClick={() => {
 								if (visibility !== "public" && selectedMatchType !== "BOT")
 									setVisibility("public")
 							}} disabled={selectedMatchType === "BOT"}>{t("play_public")}</button>
@@ -196,19 +253,19 @@ export function Play() {
 
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
 					<p className="text-xs font-semibold">{selectedMatchTypeTxt} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
-					<button className="btn btn-info max-lg:btn-sm">{t("play_btn_create")}</button>
+					<button className="btn btn-info max-lg:btn-sm" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
 				</div>
 
 				<div className="py-2 flex flex-col md:flex-1 md:min-h-0">
 					<div className="flex items-center justify-between pb-2">
 						<p className="uppercase text-neutral-content/50 text-xs">{t("play_public_matches")}</p>
-						<p className=" text-neutral-content/50 text-xs first-letter:uppercase">{t("play_refresh_ago", { time: 3 })}</p>
 					</div>
 					<div className="flex flex-col gap-2 py-2 md:flex-1 md:min-h-0 md:overflow-y-auto">
 						{/* ajouter un tri pour afficher les join avant les parties en cours (si elles peuvent etre spectate, sinon ne pas afficher) */}
-						{matches.map(m => (
-							<MatchItem key={m.hostId} username={m.hostUsername} image={m.hostImage} type={m.mode} players={m.players.length} maxPlayers={m.maxPlayers} canJoin={m.players.length !== m.maxPlayers} canSpec={m.settings.spectators && m.startedAt !== ""} />
+						{matches.length > 0 && matches.map(m => (
+							<MatchItem key={m.hostId} username={m.players.find(p => p.userID === m.hostId)?.username} image={m.players.find(p => p.userID === m.hostId)?.image} type={m.mode} players={m.players.length} maxPlayers={m.maxPlayers} canJoin={m.players.length !== m.maxPlayers} canSpec={m.settings.spectators && m.startedAt !== ""} handleJoinedMatch={handleJoinedMatch} hostId={m.hostId ?? ""} />
 						))}
+						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
 				</div>
 			</div>
@@ -225,59 +282,59 @@ export function Play() {
 			</Modal>
 		</SidebarRight>}
 
-		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} hostId={hostId} players={players} maxPlayers={4} code={code} visibility={visibility} friends={friends} presence={presence} rules={{
-			format: selectedMatchTypeTxt,
-			timeTurn,
-			abilities,
-			replace,
-			spectators,
-			ranked: selectedMatchType !== "BOT"
-		}} />}
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} />}
 	</Sidebar>
 }
 
-function WaitingRoom({ isHost, myId, hostId, players, maxPlayers, code, visibility, friends, presence, rules }: {
+function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch }: {
 	isHost: boolean,
 	myId: string | undefined,
-	hostId: string,
-	players: Player[],
-	maxPlayers: number,
-	code: string,
-	visibility: visibilityType,
+	joinedMatch: Matchs | undefined,
 	friends: Friend[],
 	presence: Record<string, PresenceStatus>,
-	rules: Rules
+	handleDeleteMatch: () => void
 }) {
-	const missing = maxPlayers - players.length
-	const allReady = missing === 0 && players.every(p => p.isReady)
-	const hostname = players.find(p => p.id === hostId)?.username ?? "?"
-	const me = players.find(p => p.id === myId)
+	if (!joinedMatch)
+		return
+
+	const hostname = joinedMatch.players.find(p => p.userID === joinedMatch.hostId)?.username
+	const missing = joinedMatch.maxPlayers - joinedMatch.players.length
+	const allReady = missing === 0 && joinedMatch.players.every(p => p.isReady)
+	const me = joinedMatch.players.find(p => p.userID === myId)
+	const rules: Rules = {
+		format: joinedMatch.mode,
+		timeTurn: joinedMatch.settings.time_turn,
+		abilities: joinedMatch.settings.abilities,
+		replace: joinedMatch.settings.replace,
+		spectators: joinedMatch.settings.spectators,
+		ranked: joinedMatch.isRanked
+	}
 
 	return <div className="flex flex-col h-full min-h-0">
 		<div className="flex-1 min-h-0 overflow-y-auto p-4 lg:p-6 flex flex-col gap-4">
 			<div className="flex items-start justify-between gap-4">
 				<div className="min-h-0">
-					<p className="flex items-center gap-1 uppercase text-info font-mono text-xs tracking-brand">{t("play_waiting_room")} <TbPointFilled className="size-1" /> {t(`play_${visibility}`)}</p>
+					<p className="flex items-center gap-1 uppercase text-info font-mono text-xs tracking-brand">{t("play_waiting_room")} <TbPointFilled className="size-1" /> {t(`play_${joinedMatch.visibility}`)}</p>
 					<h1 className="text-2xl font-bold truncate">{t("play_room_name", { name: hostname ?? "?" })}</h1>
 					<p className="text-xs text-neutral-content/50 max-lg:hidden first-letter:uppercase">
 						{isHost ? `${t("play_room_host_desc")}.` : `${t("play_room_guest_desc")}.`}
 					</p>
 				</div>
 				<div className="text-right shrink-0">
-					<p className={`font-mono text-2xl font-bold ${missing === 0 ? "text-info" : ""}`}>{players.length} / {maxPlayers}</p>
+					<p className={`font-mono text-2xl font-bold ${missing === 0 ? "text-info" : ""}`}>{joinedMatch.players.length} / {joinedMatch.maxPlayers}</p>
 					<p className="text-xs text-neutral-content/50 max-lg:hidden">{t("play_players")}</p>
 				</div>
 			</div>
 
 			<div className="lg:hidden">
-				<CodeBox code={code} />
+				<CodeBox code={joinedMatch.code} />
 			</div>
 
 			<div className="flex flex-col gap-2">
 				<p className="lg:hidden uppercase text-xs text-neutral-content/50 font-mono">{t("play_players")}</p>
 				<div className="flex flex-col gap-2 lg:grid lg:grid-cols-4 lg:gap-3">
-					{players.map(p => (
-						<PlayerItem key={p.id} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.id === myId} isHost={p.id === hostId} canKick={isHost && p.id !== hostId} />
+					{joinedMatch.players.map(p => (
+						<PlayerItem key={p.userID} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.userID === myId} isHost={p.userID === joinedMatch.hostId} canKick={isHost && p.userID !== joinedMatch.hostId} />
 					))}
 					{Array.from({ length: missing }).map((_, i) => <WaitingPlayerItem key={`empty_${i}`} />)}
 				</div>
@@ -286,12 +343,12 @@ function WaitingRoom({ isHost, myId, hostId, players, maxPlayers, code, visibili
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 				<RulesPanel isHost={isHost} rules={rules} />
 				<div className="max-lg:hidden">
-					<InvitePanel code={code} friends={friends} presence={presence} />
+					<InvitePanel code={joinedMatch.code} friends={friends} presence={presence} />
 				</div>
 			</div>
 		</div>
 
-		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={maxPlayers} isReady={me?.isReady ?? false} />
+		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} />
 	</div>
 }
 
@@ -442,12 +499,13 @@ function InvitePanel({ code, friends, presence }: {
 	</div>
 }
 
-function WaitingRoomFooter({ isHost, allReady, missing, total, isReady }: {
+function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDeleteMatch }: {
 	isHost: boolean,
 	allReady: boolean,
 	missing: number,
 	total: number,
-	isReady: boolean
+	isReady: boolean,
+	handleDeleteMatch: () => void
 }) {
 	let title: string
 	let detail = ""
@@ -471,7 +529,7 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady }: {
 			<div className="flex flex-col-reverse gap-2 lg:flex-row">
 				{isHost
 					? <>
-						<button className="btn btn-ghost text-error lg:btn-outline lg:btn-error">{t("play_btn_close_room")}</button>
+						<button className="btn btn-ghost text-error lg:btn-outline lg:btn-error" onClick={handleDeleteMatch}>{t("play_btn_close_room")}</button>
 						<button className="btn btn-info max-lg:btn-lg" disabled={!allReady}>{t("play_btn_start_match")}</button>
 					</>
 					: <>
@@ -483,7 +541,7 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady }: {
 	</div>
 }
 
-function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec }:
+function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec, hostId, handleJoinedMatch }:
 	{
 		username: string | null | undefined,
 		image: string | null | undefined,
@@ -491,7 +549,9 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 		players: number,
 		maxPlayers: number,
 		canJoin?: boolean,
-		canSpec?: boolean
+		canSpec?: boolean,
+		hostId: string,
+		handleJoinedMatch: (hostId: string) => void,
 	}
 ) {
 	let typeTxt = ""
@@ -513,7 +573,7 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 		</div>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{typeTxt}</p>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{players} / {maxPlayers}</p>
-		{canJoin && <button className="btn btn-outline btn-info btn-sm">{t("btn_join")}</button>}
+		{canJoin && <button className="btn btn-outline btn-info btn-sm" onClick={() => handleJoinedMatch(hostId)} >{t("btn_join")}</button>}
 		{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">{t("btn_spectate")}</button>}
 	</div>
 }
