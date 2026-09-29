@@ -32,7 +32,7 @@ export function Play() {
 	const [view, setView] = useState<viewType>("host")
 
 	// var tmp
-	const hostId = "fOXqMSNbAY7A2OT5oDoBThdxKTCjuM7Q"
+	const hostId = "ZmtSEHvF22IycXIqipgcNHna0sURHk2t"
 	const players: Player[] = [
 		{ id: hostId, username: "alexis", image: "", points: 1284, isReady: true },
 		{ id: "tom", username: "tom", image: "", points: 1402, isReady: true },
@@ -247,7 +247,7 @@ export function Play() {
 		</SidebarRight>}
 
 		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} hostId={hostId} players={players} maxPlayers={4} code={code} visibility={visibility} friends={friends} presence={presence} rules={{
-			format: selectedMatchType,
+			format: selectedMatchTypeTxt,
 			timeTurn,
 			abilities,
 			replace,
@@ -405,7 +405,7 @@ function RulesPanel({ isHost, rules }: { isHost: boolean, rules: Rules }) {
 		rules.abilities ? "abilities on" : "abilities off",
 		rules.replace ? "bot replaces leavers" : null,
 		rules.ranked ? "ranked" : "unranked",
-	].filter(Boolean).join(" @ ")
+	].filter(Boolean).join(" - ")
 
 	return <div className="rounded-lg border border-neutral/50 bg-neutral/10 p-4">
 		<div className="flex items-center justify-between pb-2">
