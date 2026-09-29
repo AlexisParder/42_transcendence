@@ -2,17 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Avatar } from "../components/Avatar";
 import { Sidebar } from "../components/Sidebar";
 import { useSocket } from "../components/socketContext";
-import type { Friend, matchType, PresenceStatus, PresenceUpdate } from "../types/events";
+import type { Friend, matchType, Player, PresenceStatus, PresenceUpdate, Rules } from "../types/events";
 import { t } from "../lib/translate";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { TbPointFilled } from "react-icons/tb";
 import { Togglebox } from "../components/Togglebox";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
+import { BiCheck } from "react-icons/bi";
+import { RxCross1 } from "react-icons/rx";
+import { authClient } from "../lib/auth-client";
 
 type visibilityType = "private" | "public"
+type viewType = "none" | "host" | "guest"
 export function Play() {
 	useDocumentTitle(t("play_title"))
+	const { data: session } = authClient.useSession()
 	const socket = useSocket()
 	const [friends, setFriends] = useState<Friend[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
@@ -20,11 +25,19 @@ export function Play() {
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType | "BOT">("ONE_V_ONE")
 	const [selectedMatchTypeTxt, setSelectedMatchTypeTxt] = useState<"1 v 1" | "2 v 2" | "FFA" | "Bot">("1 v 1")
-	const [abilites, setAbilities] = useState(true)
+	const [abilities, setAbilities] = useState(true)
 	const [replace, setReplace] = useState(true)
 	const [spectators, setSpectators] = useState(false)
 	const [timeTurn, setTimeTurn] = useState(30)
+	const [view, setView] = useState<viewType>("host")
 
+	// var tmp
+	const hostId = "fOXqMSNbAY7A2OT5oDoBThdxKTCjuM7Q"
+	const players: Player[] = [
+		{ id: hostId, username: "alexis", image: "", points: 1284, isReady: true },
+		{ id: "tom", username: "tom", image: "", points: 1402, isReady: true },
+		{ id: "gael", username: "gael", image: "", points: 1388, isReady: false },
+	]
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
@@ -75,7 +88,7 @@ export function Play() {
 	}
 
 	return <Sidebar>
-		<SidebarRight friends={friends} presence={presence}>
+		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
 				<h1 className="text-2xl font-bold">New match</h1>
 				<p className="text-sm text-neutral-content/40">Pick a format, then open it up or invite your crew.</p>
@@ -147,7 +160,7 @@ export function Play() {
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80">Special abilities</p>
-								<Togglebox name={`spec_ab`} type="info" checked={abilites} onClick={() => setAbilities(!abilites)} />
+								<Togglebox name={`spec_ab`} type="info" checked={abilities} onClick={() => setAbilities(!abilities)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80">Replace leavers with a bot</p>
@@ -162,7 +175,7 @@ export function Play() {
 				</div>
 
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
-					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - {timeTurn} s turns {abilites ? ", abilities" : ""}</p>
+					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - {timeTurn} s turns {abilities ? ", abilities" : ""}</p>
 					<button className="btn btn-info max-lg:btn-sm">Create match</button>
 				</div>
 
@@ -231,8 +244,264 @@ export function Play() {
 					<button className="btn btn-outline" onClick={() => HideModal("timeTurnModal")}>Close</button>
 				</div>
 			</Modal>
-		</SidebarRight>
+		</SidebarRight>}
+
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} hostId={hostId} players={players} maxPlayers={4} code={code} visibility={visibility} friends={friends} presence={presence} rules={{
+			format: selectedMatchType,
+			timeTurn,
+			abilities,
+			replace,
+			spectators,
+			ranked: selectedMatchType !== "BOT"
+		}} />}
 	</Sidebar>
+}
+
+function WaitingRoom({ isHost, myId, hostId, players, maxPlayers, code, visibility, friends, presence, rules }: {
+	isHost: boolean,
+	myId: string | undefined,
+	hostId: string,
+	players: Player[],
+	maxPlayers: number,
+	code: string,
+	visibility: visibilityType,
+	friends: Friend[],
+	presence: Record<string, PresenceStatus>,
+	rules: Rules
+}) {
+	const missing = maxPlayers - players.length
+	const allReady = missing === 0 && players.every(p => p.isReady)
+	const hostname = players.find(p => p.id === hostId)?.username ?? "?"
+	const me = players.find(p => p.id === myId)
+
+	return <div className="flex flex-col h-full min-h-0">
+		<div className="flex-1 min-h-0 overflow-y-auto p-4 lg:p-6 flex flex-col gap-4">
+			<div className="flex items-start justify-between gap-4">
+				<div className="min-h-0">
+					<p className="flex items-center gap-1 uppercase text-info font-mono text-xs tracking-brand">wainting room <TbPointFilled className="size-1" /> {visibility}</p>
+					<h1 className="text-2xl font-bold truncate">{hostname}'s room</h1>
+					<p className="text-xs text-neutral-content/50 max-lg:hidden">
+						{isHost ? "share the code or invite friends. You start the match once every seat is filled." : "You joined the room. The host starts the match once every seat is filled."}
+					</p>
+				</div>
+				<div className="text-right shrink-0">
+					<p className={`font-mono text-2xl font-bold ${missing === 0 ? "text-info" : ""}`}>{players.length} / {maxPlayers}</p>
+					<p className="text-xs text-neutral-content/50 max-lg:hidden">players</p>
+				</div>
+			</div>
+
+			<div className="lg:hidden">
+				<CodeBox code={code} />
+			</div>
+
+			<div className="flex flex-col gap-2">
+				<p className="lg:hidden uppercase text-xs text-neutral-content/50 font-mono">players</p>
+				<div className="flex flex-col gap-2 lg:grid lg:grid-cols-4 lg:gap-3">
+					{players.map(p => (
+						<PlayerItem key={p.id} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.id === myId} isHost={p.id === hostId} canKick={isHost && p.id !== hostId} />
+					))}
+					{Array.from({ length: missing }).map((_, i) => <WaitingPlayerItem key={`empty_${i}`} />)}
+				</div>
+			</div>
+
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+				<RulesPanel isHost={isHost} rules={rules} />
+				<div className="max-lg:hidden">
+					<InvitePanel code={code} friends={friends} presence={presence} />
+				</div>
+			</div>
+		</div>
+
+		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={maxPlayers} isReady={me?.isReady ?? false} />
+	</div>
+}
+
+function RadarWaiting({ className = "size-16" }: { className?: string }) {
+	return <div className={`relative flex items-center justify-center overflow-hidden rounded-full border border-primary/20 bg-base-200 bg-radar-glow ${className}`}>
+		<div className="absolute w-3/4 h-3/4 rounded-full border border-primary/15" />
+		<div className="absolute w-1/2 h-1/2 rounded-full border border-primary/15" />
+		<div className="absolute w-1/4 h-1/4 rounded-full border border-primary/15" />
+
+		<div className="absolute h-full w-px bg-primary/15" />
+		<div className="absolute w-full h-px bg-primary/15" />
+
+		<div className="absolute w-1/4 h-1/4 rounded-full bg-primary/5 blur-xl" />
+
+		<div className="absolute inset-0 flex justify-center rounded-full bg-radar-sweep animate-sweep motion-reduce:animate-none">
+			<div className="h-1/2 w-px bg-primary/70" />
+		</div>
+	</div>
+}
+
+function WaitingPlayerItem() {
+	return <div className="flex items-center gap-3 p-3 border border-dashed border-neutral/50 rounded-lg lg:flex-col lg:justify-center lg:gap-2 lg:h-52">
+		<RadarWaiting className="size-12 lg:size-16" />
+		<p className="uppercase text-neutral-content/50 font-mono text-xs">
+			<span className="lg:hidden">waiting...</span>
+			<span className="max-lg:hidden">waiting for player</span>
+		</p>
+	</div>
+}
+
+function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick }: {
+	username: string | null | undefined,
+	image: string | null | undefined,
+	points: number,
+	isReady: boolean,
+	isMine: boolean,
+	isHost: boolean,
+	canKick: boolean,
+}) {
+	return <div className={`flex items-center gap-3 p-3	border rounded-lg lg:flex-col lg:justify-between lg:gap-1 lg:h-52 lg:p-2.5 ${isMine ? "bg-ingo/10 border-info/50" : "bg-neutral/10 border-neutral/50"}`}>
+		<div className="max-lg:hidden flex justify-end items-center h-4 w-full">
+			{isHost && <HostBadge />}
+			{!isHost && canKick && <KickButton />}
+		</div>
+
+		<div className="flex items-center gap-3 flex-1 min-w-0 lg:flex-none lg:flex-col lg:gap-1">
+			<Avatar username={username} image={image} size={48} />
+			<div className="min-w-0 lg:text-center">
+				<p className="text-sm font-semibold flex items-center gap-2 lg:justify-center">
+					<span className="truncate">{username}</span>
+					{isMine && <span className="text-xs text-neutral-content/50 font-medium">(you)</span>}
+					{isHost && <span className="lg:hidden"><HostBadge /></span>}
+				</p>
+				<p className="text-xs text-neutral-content/50 font-mono">{points.toLocaleString()} pts</p>
+			</div>
+		</div>
+
+		<div className="flex items-center gap-2 shrink-0">
+			<ReadyBadge isReady={isReady} />
+			{!isHost && canKick && <span className="lg:hidden"><KickButton /></span>}
+		</div>
+	</div>
+}
+
+function HostBadge() {
+	return <span className="badge badge-warning badge-xs badge-outline">HOST</span>
+}
+
+function KickButton() {
+	return <button className="cursor-pointer text-neutral-content/50 hover:text-error"><RxCross1 className="size-4" /></button>
+}
+
+function ReadyBadge({ isReady }: { isReady: boolean }) {
+	return isReady
+		? <p className="flex gap-1 items-center uppercase bg-info/10 border border-info/50 rounded-xl py-0.5 px-2 text-xs text-info"><BiCheck /> ready</p>
+		: <p className="flex gap-1 items-center uppercase bg-neutral/10 border border-neutral/50 rounded-xl py-0.5 px-2 text-xs text-neutral-content/50">not ready</p>
+}
+
+function CodeBox({ code }: { code: string }) {
+	return <div className="flex items-center justify-between gap-2 bg-info/10 border border-dashed border-info/50 rounded-md px-4 py-3">
+		<p className="text-info font-mono text-xl font-semibold tracking-brand">{code}</p>
+		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code)}>Copy code</button>
+	</div>
+}
+
+function RulesPanel({ isHost, rules }: { isHost: boolean, rules: Rules }) {
+	const summary = [
+		rules.format,
+		`${rules.timeTurn} s turns`,
+		rules.abilities ? "abilities on" : "abilities off",
+		rules.replace ? "bot replaces leavers" : null,
+		rules.ranked ? "ranked" : "unranked",
+	].filter(Boolean).join(" @ ")
+
+	return <div className="rounded-lg border border-neutral/50 bg-neutral/10 p-4">
+		<div className="flex items-center justify-between pb-2">
+			<p className="uppercase text-xs text-neutral-content/50 font-mono">rules</p>
+			{isHost
+				? <button className="btn btn-xs btn-ghost text-info">Edit</button>
+				: <p className="uppercase text-xs text-neutral-content/50 font-mono">set by host</p>}
+		</div>
+
+		<p className="lg:hidden text-sm text-neutral-content/80">{summary}</p>
+
+		<div className="max-lg:hidden flex flex-col gap-2 text-xs">
+			<RuleRow label="Format" value={rules.format} />
+			<RuleRow label="Time per turn" value={`${rules.timeTurn} s`} highlight />
+			<RuleRow label="Special abilities" value={rules.abilities ? "ON" : "OFF"} highlight={rules.abilities} />
+			<RuleRow label="Replace leavers with a bot" value={rules.replace ? "ON" : "OFF"} highlight={rules.replace} />
+			<RuleRow label="Spectators" value={rules.spectators ? "ON" : "OFF"} highlight={rules.spectators} />
+			<RuleRow label="Ranked" value={rules.ranked ? "YES" : "NO"} />
+		</div>
+	</div>
+}
+
+function RuleRow({ label, value, highlight }: {
+	label: string,
+	value: string,
+	highlight?: boolean
+}) {
+	return <div className="flex items-center justify-between">
+		<p className="text-neutral-content/80">{label}</p>
+		<p className={`font-mono ${highlight ? "text-info" : ""}`}>{value}</p>
+	</div>
+}
+
+function InvitePanel({ code, friends, presence }: {
+	code: string,
+	friends: Friend[],
+	presence: Record<string, PresenceStatus>
+}) {
+	const available = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
+
+	return <div className="rounded-lg border border-neutral/50 bg-neutral/10 p-4 flex flex-col gap-3 h-full">
+		<p className="uppercase text-xs text-neutral-content/50 font-mono">invite</p>
+		<CodeBox code={code} />
+		<div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
+			{available.map(f => (
+				<div key={f.id} className="flex items-center justify-between gap-2">
+					<div className="flex items-center gap-2 min-w-0">
+						<Avatar username={f.username} image={f.image} size={24} />
+						<p className="text-xs font-semibold truncate">{f.username}</p>
+					</div>
+					<button className="btn btn-xs btn-info">{t("btn_invite")}</button>
+				</div>
+			))}
+		</div>
+	</div>
+}
+
+function WaitingRoomFooter({ isHost, allReady, missing, total, isReady }: {
+	isHost: boolean,
+	allReady: boolean,
+	missing: number,
+	total: number,
+	isReady: boolean
+}) {
+	let title: string
+	let detail = ""
+	if (allReady) {
+		title = `All ${total} players are ready.`
+		detail = isHost ? "Everyone is waiting on you." : "Waiting for the host to start."
+	} else if (missing > 0) {
+		title = `Waiting for ${missing} more player(s).`
+		detail = isHost ? "" : "Only the host can start the match."
+	} else
+		title = "Waiting for everyone to be ready."
+
+	return <div className="shrink-0 p-4 lg:px-6 lg:pb-6 max-lg:border-t max-lg:border-neutral/50">
+		<div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:bg-neutral/10 lg:border lg:border-neutral/50 lg:rounded-lg lg:p-4">
+			<p className="text-xs flex items-center gap-2">
+				<span className={`size-2 shrink-0 rounded-full ${allReady ? "bg-info" : "bg-warning"}`} />
+				<span className="font-semibold">{title}</span>
+				{detail && <span className="text-neutral-content/50 max-lg:hidden">{detail}</span>}
+			</p>
+
+			<div className="flex flex-col-reverse gap-2 lg:flex-row">
+				{isHost
+					? <>
+						<button className="btn btn-ghost text-error lg:btn-outline lg:btn-error">Close room</button>
+						<button className="btn btn-info max-lg:btn-lg" disabled={!isReady}>Start match</button>
+					</>
+					: <>
+						<button className="btn btn-ghost lg:btn-outline">Leave room</button>
+						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`} disabled={!isReady}>{isReady ? "Cancel ready" : <><BiCheck /> Ready</>}</button>
+					</>}
+			</div>
+		</div>
+	</div>
 }
 
 function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec }:

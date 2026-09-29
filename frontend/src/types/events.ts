@@ -118,3 +118,20 @@ export interface LeaderboardInfo {
 	lose: number,
 	accuracy: number
 }
+
+export interface Player {
+	id: string,
+	username: string | null | undefined,
+	image: string | null | undefined,
+	points: number,
+	isReady: boolean
+}
+
+export interface Rules {
+	format: string,
+	timeTurn: number,
+	abilities: boolean,
+	replace: boolean,
+	spectators: boolean,
+	ranked: boolean
+}
