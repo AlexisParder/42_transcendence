@@ -30,9 +30,14 @@ function LiveNotifications() {
 			}, 5000)
 			timers.add(timer)
 		}
+		function onFriendRequestResolved({ requestId }: { requestId: string, accepted: boolean }) {
+			setFriendRequests(prev => prev.filter(request => request.requestId !== requestId))
+		}
 		socket.on("notification_received", onNotification)
+		socket.on("friend_request_resolved", onFriendRequestResolved)
 		return () => {
 			socket.off("notification_received", onNotification)
+			socket.off("friend_request_resolved", onFriendRequestResolved)
 			for (const timer of timers) clearTimeout(timer)
 		}
 	}, [socket])
