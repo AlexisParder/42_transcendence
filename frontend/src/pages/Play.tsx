@@ -29,7 +29,7 @@ export function Play() {
 	const [replace, setReplace] = useState(true)
 	const [spectators, setSpectators] = useState(false)
 	const [timeTurn, setTimeTurn] = useState(30)
-	const [view, setView] = useState<viewType>("host")
+	const [view, setView] = useState<viewType>("none")
 
 	// var tmp
 	const hostId = "ZmtSEHvF22IycXIqipgcNHna0sURHk2t"
@@ -90,8 +90,8 @@ export function Play() {
 	return <Sidebar>
 		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
-				<h1 className="text-2xl font-bold">New match</h1>
-				<p className="text-sm text-neutral-content/40">Pick a format, then open it up or invite your crew.</p>
+				<h1 className="text-2xl font-bold first-letter:uppercase">{t("play_new_match")}</h1>
+				<p className="text-sm text-neutral-content/40 first-letter:uppercase">{t("play_desc")}.</p>
 
 				<div className="py-2 grid grid-cols-4 max-lg:grid-cols-2 gap-4">
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "ONE_V_ONE" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
@@ -101,7 +101,7 @@ export function Play() {
 						}
 					}}>
 						<p className="text-sm font-semibold">1 v 1</p>
-						<p className="text-xs text-neutral-content/50">ranked</p>
+						<p className="text-xs text-neutral-content/50">{t("txt_ranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "TWO_V_TWO" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "TWO_V_TWO") {
@@ -110,7 +110,7 @@ export function Play() {
 						}
 					}}>
 						<p className="text-sm font-semibold">2 v 2</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">duo <TbPointFilled className="size-1" /> ranked</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_duo")} <TbPointFilled className="size-1" /> {t("txt_ranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "FOUR_FFA" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "FOUR_FFA") {
@@ -119,7 +119,7 @@ export function Play() {
 						}
 					}}>
 						<p className="text-sm font-semibold">FFA</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 players <TbPointFilled className="size-1" /> ranked</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 {t("play_players")} <TbPointFilled className="size-1" /> {t("txt_ranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "BOT" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "BOT") {
@@ -128,46 +128,46 @@ export function Play() {
 							setVisibility("private")
 						}
 					}}>
-						<p className="text-sm font-semibold">Against the bot</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">Practice <TbPointFilled className="size-1" /> unranked</p>
+						<p className="text-sm font-semibold first-letter:uppercase">{t("play_against_bot")}</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_practice")} <TbPointFilled className="size-1" /> {t("txt_unranked")}</p>
 					</button>
 				</div>
 
 				<div className="py-2 grid grid-cols-2 max-lg:grid-cols-1 gap-4">
 					<div className="rounded-md p-2 bg-neutral/10 border border-neutral/50">
-						<p className="uppercase px-2 text-neutral-content/50">visibility</p>
+						<p className="uppercase px-2 text-neutral-content/50">{t("play_visibility")}</p>
 						<div className="flex gap-2 p-2">
 							<button className={`btn btn-outline ${visibility === "private" ? "border-info bg-info/15 hover:bg-info hover:text-black" : "border-neutral bg-neutral/15 hover:btn-neutral"} flex-1/2`} onClick={() => {
 								if (visibility !== "private")
 									setVisibility("private")
-							}}>Private</button>
+							}}>{t("play_private")}</button>
 							<button className={`btn btn-outline ${visibility === "public" ? "border-info bg-info/15 hover:bg-info hover:text-black" : "border-neutral bg-neutral/15 hover:btn-neutral"} flex-1/2`} onClick={() => {
 								if (visibility !== "public" && selectedMatchType !== "BOT")
 									setVisibility("public")
-							}} disabled={selectedMatchType === "BOT"}>Public</button>
+							}} disabled={selectedMatchType === "BOT"}>{t("play_public")}</button>
 						</div>
 						<div className="bg-info/10 border border-info/50 border-dashed rounded-md px-4 py-2 m-2 flex items-center justify-between">
 							<p className="uppercase text-info font-mono text-xl font-semibold, tracking-label">{code}</p>
-							<button className="text-neutral-content/50 btn btn-xs btn-ghost" onClick={() => navigator.clipboard.writeText(code)}>Copy code</button>
+							<button className="text-neutral-content/50 btn btn-xs btn-ghost" onClick={() => navigator.clipboard.writeText(code)}>{t("btn_copy_code")}</button>
 						</div>
 					</div>
 					<div className="rounded-md p-2 bg-neutral/10 border border-neutral/50">
-						<p className="uppercase px-2 text-neutral-content/50">rules</p>
+						<p className="uppercase px-2 text-neutral-content/50">{t("rules_title")}</p>
 						<div className="flex flex-col gap-2 px-2">
 							<div className="flex items-center justify-between">
-								<p className="text-xs text-neutral-content/80">Time per turn</p>
+								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_time_turn")}</p>
 								<button onClick={() => ShowModal("timeTurnModal")} className="link-primary cursor-pointer outline-none">{timeTurn} s</button>
 							</div>
 							<div className="flex justify-between">
-								<p className="text-xs text-neutral-content/80">Special abilities</p>
+								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_abilities")}</p>
 								<Togglebox name={`spec_ab`} type="info" checked={abilities} onClick={() => setAbilities(!abilities)} />
 							</div>
 							<div className="flex justify-between">
-								<p className="text-xs text-neutral-content/80">Replace leavers with a bot</p>
+								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_replace")}</p>
 								<Togglebox name={`spec_ab`} type="info" checked={replace} onClick={() => setReplace(!replace)} />
 							</div>
 							<div className="flex justify-between">
-								<p className="text-xs text-neutral-content/80">Spectators</p>
+								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_spectators")}</p>
 								<Togglebox name={`spec_ab`} type="info" checked={spectators} onClick={() => setSpectators(!spectators)} />
 							</div>
 						</div>
@@ -175,16 +175,17 @@ export function Play() {
 				</div>
 
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
-					<p className="text-xs font-semibold flex items-center gap-1 ">{selectedMatchTypeTxt} <TbPointFilled className="size-1" /> {visibility} - {timeTurn} s turns {abilities ? ", abilities" : ""}</p>
-					<button className="btn btn-info max-lg:btn-sm">Create match</button>
+					<p className="text-xs font-semibold">{selectedMatchTypeTxt} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
+					<button className="btn btn-info max-lg:btn-sm">{t("play_btn_create")}</button>
 				</div>
 
 				<div className="py-2 flex flex-col md:flex-1 md:min-h-0">
 					<div className="flex items-center justify-between pb-2">
-						<p className="uppercase text-neutral-content/50 text-xs">public matches</p>
-						<p className=" text-neutral-content/50 text-xs">Refresh 3 s ago</p>
+						<p className="uppercase text-neutral-content/50 text-xs">{t("play_public_matches")}</p>
+						<p className=" text-neutral-content/50 text-xs first-letter:uppercase">{t("play_refresh_ago", { time: 3 })}</p>
 					</div>
 					<div className="flex flex-col gap-2 py-2 md:flex-1 md:min-h-0 md:overflow-y-auto">
+						{/* ajouter un tri pour afficher les join avant les parties en cours (si elles peuvent etre spectate, sinon ne pas afficher) */}
 						<MatchItem username={"gael"} image={``} type={"FOUR_FFA"} players={2} maxPlayers={4} canJoin={true} />
 						<MatchItem username={"tom"} image={``} type={"TWO_V_TWO"} players={3} maxPlayers={4} canJoin={true} />
 						<MatchItem username={"alexis"} image={``} type={"ONE_V_ONE"} players={2} maxPlayers={2} canSpec={true} />
@@ -235,13 +236,13 @@ export function Play() {
 			</div>
 
 			<Modal id="timeTurnModal">
-				<p className="text-center">Turn time: 10 to 60 seconds</p>
+				<p className="text-center first-letter:uppercase">{t("play_modal_time", { min: 10, max: 60 })}</p>
 				<div className="flex items-center py-4 gap-2 justify-center">
 					<input type="range" min={10} max={60} value={timeTurn} onChange={(e) => handleChangeTimeTurn(Number(e.target.value))} className="range range-xs outline-none" />
 					<p>{timeTurn}</p>
 				</div>
 				<div className="flex justify-center">
-					<button className="btn btn-outline" onClick={() => HideModal("timeTurnModal")}>Close</button>
+					<button className="btn btn-outline" onClick={() => HideModal("timeTurnModal")}>{t("btn_close")}</button>
 				</div>
 			</Modal>
 		</SidebarRight>}
@@ -278,15 +279,15 @@ function WaitingRoom({ isHost, myId, hostId, players, maxPlayers, code, visibili
 		<div className="flex-1 min-h-0 overflow-y-auto p-4 lg:p-6 flex flex-col gap-4">
 			<div className="flex items-start justify-between gap-4">
 				<div className="min-h-0">
-					<p className="flex items-center gap-1 uppercase text-info font-mono text-xs tracking-brand">wainting room <TbPointFilled className="size-1" /> {visibility}</p>
-					<h1 className="text-2xl font-bold truncate">{hostname}'s room</h1>
-					<p className="text-xs text-neutral-content/50 max-lg:hidden">
-						{isHost ? "share the code or invite friends. You start the match once every seat is filled." : "You joined the room. The host starts the match once every seat is filled."}
+					<p className="flex items-center gap-1 uppercase text-info font-mono text-xs tracking-brand">{t("play_waiting_room")} <TbPointFilled className="size-1" /> {t(`play_${visibility}`)}</p>
+					<h1 className="text-2xl font-bold truncate">{t("play_room_name", { name: hostname ?? "?" })}</h1>
+					<p className="text-xs text-neutral-content/50 max-lg:hidden first-letter:uppercase">
+						{isHost ? `${t("play_room_host_desc")}.` : `${t("play_room_guest_desc")}.`}
 					</p>
 				</div>
 				<div className="text-right shrink-0">
 					<p className={`font-mono text-2xl font-bold ${missing === 0 ? "text-info" : ""}`}>{players.length} / {maxPlayers}</p>
-					<p className="text-xs text-neutral-content/50 max-lg:hidden">players</p>
+					<p className="text-xs text-neutral-content/50 max-lg:hidden">{t("play_players")}</p>
 				</div>
 			</div>
 
@@ -295,7 +296,7 @@ function WaitingRoom({ isHost, myId, hostId, players, maxPlayers, code, visibili
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<p className="lg:hidden uppercase text-xs text-neutral-content/50 font-mono">players</p>
+				<p className="lg:hidden uppercase text-xs text-neutral-content/50 font-mono">{t("play_players")}</p>
 				<div className="flex flex-col gap-2 lg:grid lg:grid-cols-4 lg:gap-3">
 					{players.map(p => (
 						<PlayerItem key={p.id} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.id === myId} isHost={p.id === hostId} canKick={isHost && p.id !== hostId} />
@@ -337,8 +338,8 @@ function WaitingPlayerItem() {
 	return <div className="flex items-center gap-3 p-3 border border-dashed border-neutral/50 rounded-lg lg:flex-col lg:justify-center lg:gap-2 lg:h-52">
 		<RadarWaiting className="size-12 lg:size-16" />
 		<p className="uppercase text-neutral-content/50 font-mono text-xs">
-			<span className="lg:hidden">waiting...</span>
-			<span className="max-lg:hidden">waiting for player</span>
+			<span className="lg:hidden">{t("play_waiting")}...</span>
+			<span className="max-lg:hidden">{t("play_waiting_player")}</span>
 		</p>
 	</div>
 }
@@ -363,10 +364,10 @@ function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick 
 			<div className="min-w-0 lg:text-center">
 				<p className="text-sm font-semibold flex items-center gap-2 lg:justify-center">
 					<span className="truncate">{username}</span>
-					{isMine && <span className="text-xs text-neutral-content/50 font-medium">(you)</span>}
+					{isMine && <span className="text-xs text-neutral-content/50 font-medium">({t("play_you")})</span>}
 					{isHost && <span className="lg:hidden"><HostBadge /></span>}
 				</p>
-				<p className="text-xs text-neutral-content/50 font-mono">{points.toLocaleString()} pts</p>
+				<p className="text-xs text-neutral-content/50 font-mono">{points.toLocaleString()} {t("txt_pts")}</p>
 			</div>
 		</div>
 
@@ -378,7 +379,7 @@ function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick 
 }
 
 function HostBadge() {
-	return <span className="badge badge-warning badge-xs badge-outline">HOST</span>
+	return <span className="badge badge-warning badge-xs badge-outline uppercase">{t("play_host")}</span>
 }
 
 function KickButton() {
@@ -387,43 +388,43 @@ function KickButton() {
 
 function ReadyBadge({ isReady }: { isReady: boolean }) {
 	return isReady
-		? <p className="flex gap-1 items-center uppercase bg-info/10 border border-info/50 rounded-xl py-0.5 px-2 text-xs text-info"><BiCheck /> ready</p>
-		: <p className="flex gap-1 items-center uppercase bg-neutral/10 border border-neutral/50 rounded-xl py-0.5 px-2 text-xs text-neutral-content/50">not ready</p>
+		? <p className="flex gap-1 items-center uppercase bg-info/10 border border-info/50 rounded-xl py-0.5 px-2 text-xs text-info"><BiCheck /> {t("play_ready")}</p>
+		: <p className="flex gap-1 items-center uppercase bg-neutral/10 border border-neutral/50 rounded-xl py-0.5 px-2 text-xs text-neutral-content/50">{t("play_not_ready")}</p>
 }
 
 function CodeBox({ code }: { code: string }) {
 	return <div className="flex items-center justify-between gap-2 bg-info/10 border border-dashed border-info/50 rounded-md px-4 py-3">
 		<p className="text-info font-mono text-xl font-semibold tracking-brand">{code}</p>
-		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code)}>Copy code</button>
+		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code)}>{t("btn_copy_code")}</button>
 	</div>
 }
 
 function RulesPanel({ isHost, rules }: { isHost: boolean, rules: Rules }) {
 	const summary = [
 		rules.format,
-		`${rules.timeTurn} s turns`,
-		rules.abilities ? "abilities on" : "abilities off",
-		rules.replace ? "bot replaces leavers" : null,
-		rules.ranked ? "ranked" : "unranked",
+		t("play_s_turns", { time: rules.timeTurn }),
+		rules.abilities ? t("play_abilities_on") : t("play_abilities_off"),
+		rules.replace ? t("play_bot_replace") : null,
+		rules.ranked ? t("txt_ranked") : t("txt_unranked"),
 	].filter(Boolean).join(" - ")
 
 	return <div className="rounded-lg border border-neutral/50 bg-neutral/10 p-4">
 		<div className="flex items-center justify-between pb-2">
-			<p className="uppercase text-xs text-neutral-content/50 font-mono">rules</p>
+			<p className="uppercase text-xs text-neutral-content/50 font-mono">{t("rules_title")}</p>
 			{isHost
-				? <button className="btn btn-xs btn-ghost text-info">Edit</button>
-				: <p className="uppercase text-xs text-neutral-content/50 font-mono">set by host</p>}
+				? <button className="btn btn-xs btn-ghost text-info">{t("btn_edit")}</button>
+				: <p className="uppercase text-xs text-neutral-content/50 font-mono">{t("play_set_by_host")}</p>}
 		</div>
 
 		<p className="lg:hidden text-sm text-neutral-content/80">{summary}</p>
 
 		<div className="max-lg:hidden flex flex-col gap-2 text-xs">
-			<RuleRow label="Format" value={rules.format} />
-			<RuleRow label="Time per turn" value={`${rules.timeTurn} s`} highlight />
-			<RuleRow label="Special abilities" value={rules.abilities ? "ON" : "OFF"} highlight={rules.abilities} />
-			<RuleRow label="Replace leavers with a bot" value={rules.replace ? "ON" : "OFF"} highlight={rules.replace} />
-			<RuleRow label="Spectators" value={rules.spectators ? "ON" : "OFF"} highlight={rules.spectators} />
-			<RuleRow label="Ranked" value={rules.ranked ? "YES" : "NO"} />
+			<RuleRow label={t("play_format")} value={rules.format} />
+			<RuleRow label={t("play_time_turn")} value={`${rules.timeTurn} s`} highlight />
+			<RuleRow label={t("play_abilities")} value={rules.abilities ? t("txt_on") : t("txt_off")} highlight={rules.abilities} />
+			<RuleRow label={t("play_replace")} value={rules.replace ? t("txt_on") : t("txt_off")} highlight={rules.replace} />
+			<RuleRow label={t("play_spectators")} value={rules.spectators ? t("txt_on") : t("txt_off")} highlight={rules.spectators} />
+			<RuleRow label={t("txt_ranked")} value={rules.ranked ? t("txt_yes") : t("txt_no")} />
 		</div>
 	</div>
 }
@@ -434,7 +435,7 @@ function RuleRow({ label, value, highlight }: {
 	highlight?: boolean
 }) {
 	return <div className="flex items-center justify-between">
-		<p className="text-neutral-content/80">{label}</p>
+		<p className="text-neutral-content/80 first-letter:uppercase">{label}</p>
 		<p className={`font-mono ${highlight ? "text-info" : ""}`}>{value}</p>
 	</div>
 }
@@ -447,7 +448,7 @@ function InvitePanel({ code, friends, presence }: {
 	const available = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
 
 	return <div className="rounded-lg border border-neutral/50 bg-neutral/10 p-4 flex flex-col gap-3 h-full">
-		<p className="uppercase text-xs text-neutral-content/50 font-mono">invite</p>
+		<p className="uppercase text-xs text-neutral-content/50 font-mono">{t("btn_invite")}</p>
 		<CodeBox code={code} />
 		<div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
 			{available.map(f => (
@@ -473,11 +474,11 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady }: {
 	let title: string
 	let detail = ""
 	if (allReady) {
-		title = `All ${total} players are ready.`
-		detail = isHost ? "Everyone is waiting on you." : "Waiting for the host to start."
+		title = t("play_all_players_ready", { nb: total })
+		detail = isHost ? t("play_everyone_waiting") : t("play_waiting_host")
 	} else if (missing > 0) {
-		title = `Waiting for ${missing} more player(s).`
-		detail = isHost ? "" : "Only the host can start the match."
+		title = t("play_waiting_more_players", { missing })
+		detail = isHost ? "" : t("play_only_host_start")
 	} else
 		title = "Waiting for everyone to be ready."
 
@@ -485,19 +486,19 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady }: {
 		<div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:bg-neutral/10 lg:border lg:border-neutral/50 lg:rounded-lg lg:p-4">
 			<p className="text-xs flex items-center gap-2">
 				<span className={`size-2 shrink-0 rounded-full ${allReady ? "bg-info" : "bg-warning"}`} />
-				<span className="font-semibold">{title}</span>
+				<span className="font-semibold first-letter:uppercase">{title}</span>
 				{detail && <span className="text-neutral-content/50 max-lg:hidden">{detail}</span>}
 			</p>
 
 			<div className="flex flex-col-reverse gap-2 lg:flex-row">
 				{isHost
 					? <>
-						<button className="btn btn-ghost text-error lg:btn-outline lg:btn-error">Close room</button>
-						<button className="btn btn-info max-lg:btn-lg" disabled={!isReady}>Start match</button>
+						<button className="btn btn-ghost text-error lg:btn-outline lg:btn-error">{t("play_btn_close_room")}</button>
+						<button className="btn btn-info max-lg:btn-lg" disabled={!allReady}>{t("play_btn_start_match")}</button>
 					</>
 					: <>
-						<button className="btn btn-ghost lg:btn-outline">Leave room</button>
-						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`} disabled={!isReady}>{isReady ? "Cancel ready" : <><BiCheck /> Ready</>}</button>
+						<button className="btn btn-ghost lg:btn-outline">{t("play_btn_leave_room")}</button>
+						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`} disabled={!isReady}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("txt_ready")}</>}</button>
 					</>}
 			</div>
 		</div>
@@ -521,21 +522,21 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 	else if (type === "TWO_V_TWO")
 		typeTxt = "2 v 2"
 	else if (type === "THREE_FFA" || type === "FOUR_FFA")
-		typeTxt = "3-4 players"
+		typeTxt = `3-4 ${t("play_players")}`
 
 	return <div className="grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_6rem_4rem_6rem] gap-4 items-center bg-neutral/10 border border-neutral/50 rounded-md p-4">
 		<div className={`flex gap-2 items-center ${canSpec ? "opacity-50" : ""}`}>
 			<Avatar username={username} image={image} size={32} />
-			<p className="text-sm font-semibold max-lg:hidden">{username}'s room</p>
+			<p className="text-sm font-semibold max-lg:hidden">{t("play_room_name", { name: username ?? "?" })}</p>
 			<div className="flex flex-col lg:hidden">
-				<p className="text-xs font-semibold lg:hidden">{username}'s room</p>
+				<p className="text-xs font-semibold lg:hidden">{t("play_room_name", { name: username ?? "?" })}</p>
 				<p className="text-xs text-neutral-content/50 flex items-center gap-1">{typeTxt} <TbPointFilled className="size-1" /> {players} / {maxPlayers}</p>
 			</div>
 		</div>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{typeTxt}</p>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{players} / {maxPlayers}</p>
-		{canJoin && <button className="btn btn-outline btn-info btn-sm">Join</button>}
-		{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">Spectate</button>}
+		{canJoin && <button className="btn btn-outline btn-info btn-sm">{t("btn_join")}</button>}
+		{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">{t("btn_spectate")}</button>}
 	</div>
 }
 
@@ -555,14 +556,14 @@ function SidebarRight({ children, friends, presence }: {
 				<ul className="menu flex-nowrap bg-base-200 h-full w-full p-4 gap-1">
 
 					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1">
-						<p className="uppercase text-xs text-neutral-content/50 font-mono">crew - {onlineFriends} online</p>
+						<p className="uppercase text-xs text-neutral-content/50 font-mono">{t("play_crew")} - {onlineFriends} {t("friends_online_title")}</p>
 						<FriendSection friends={friends} presence={presence} />
 					</div>
 
 					<div className="bg-base-100 rounded-md">
 						<div className="p-4 shrink-0 bg-warning/10 border border-warning/50 rounded-md flex flex-col gap-2">
-							<h2 className="text-xs font-semibold text-warning">"Mariana Trench" tournament</h2>
-							<p className="flex items-center gap-1 text-xs text-neutral-content/50">Registration open <TbPointFilled className="size-1" /> 6 / 8 seats <TbPointFilled className="size-1" /> starts in 12min</p>
+							<h2 className="text-xs font-semibold text-warning">{t("play_tournament", { name: '"Mariana Trench"' })}</h2>
+							<p className="flex items-center gap-1 text-xs text-neutral-content/50">{t("play_registration_open")} <TbPointFilled className="size-1" /> {t("play_seats", { curr: 6, max: 8 })} <TbPointFilled className="size-1" /> {t("play_starts_in", { time: "12min" })}</p>
 						</div>
 					</div>
 				</ul>
