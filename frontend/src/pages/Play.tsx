@@ -187,6 +187,30 @@ export function Play() {
 		}
 	}
 
+	async function handleLeaveMatch() {
+		if (!joinedMatch)
+			return
+
+		try {
+			const res = await fetch("/api/leave-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ hostId: joinedMatch.hostId }),
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			setJoinedMatch(undefined)
+			setView("none")
+		} catch (error) {
+			console.error("leave match:", error)
+		}
+	}
+
 	return <Sidebar>
 		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
@@ -294,17 +318,18 @@ export function Play() {
 			</Modal>
 		</SidebarRight>}
 
-		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} />}
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} />}
 	</Sidebar>
 }
 
-function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch }: {
+function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch }: {
 	isHost: boolean,
 	myId: string | undefined,
 	joinedMatch: Matchs | undefined,
 	friends: Friend[],
 	presence: Record<string, PresenceStatus>,
-	handleDeleteMatch: () => void
+	handleDeleteMatch: () => void,
+	handleLeaveMatch: () => void
 }) {
 	if (!joinedMatch)
 		return
@@ -360,7 +385,7 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 			</div>
 		</div>
 
-		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} />
+		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} />
 	</div>
 }
 
@@ -511,13 +536,14 @@ function InvitePanel({ code, friends, presence }: {
 	</div>
 }
 
-function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDeleteMatch }: {
+function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDeleteMatch, handleLeaveMatch }: {
 	isHost: boolean,
 	allReady: boolean,
 	missing: number,
 	total: number,
 	isReady: boolean,
-	handleDeleteMatch: () => void
+	handleDeleteMatch: () => void,
+	handleLeaveMatch: () => void
 }) {
 	let title: string
 	let detail = ""
@@ -545,7 +571,7 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDe
 						<button className="btn btn-info max-lg:btn-lg" disabled={!allReady}>{t("play_btn_start_match")}</button>
 					</>
 					: <>
-						<button className="btn btn-ghost lg:btn-outline">{t("play_btn_leave_room")}</button>
+						<button className="btn btn-ghost lg:btn-outline" onClick={handleLeaveMatch}>{t("play_btn_leave_room")}</button>
 						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("play_ready")}</>}</button>
 					</>}
 			</div>
