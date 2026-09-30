@@ -21,7 +21,6 @@ export function Play() {
 	const socket = useSocket()
 	const [friends, setFriends] = useState<Friend[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
-	const [code] = useState("S-K7X2Q9")
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType | "BOT">("ONE_V_ONE")
 	const [abilities, setAbilities] = useState(true)
@@ -158,7 +157,7 @@ export function Play() {
 				method: "POST",
 				headers: { "Content-type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({ selectedMatchType, visibility, code, timeTurn, abilities, replace, spectators }),
+				body: JSON.stringify({ selectedMatchType, visibility, timeTurn, abilities, replace, spectators }),
 			})
 
 			if (!res.ok) {
@@ -542,7 +541,7 @@ function HostBadge() {
 	return <span className="badge badge-warning badge-xs badge-outline uppercase">{t("play_host")}</span>
 }
 
-function KickButton({targetId, handleKick}: {
+function KickButton({ targetId, handleKick }: {
 	targetId: string,
 	handleKick: (id: string) => void
 }) {
@@ -557,8 +556,8 @@ function ReadyBadge({ isReady }: { isReady: boolean }) {
 
 function CodeBox({ code }: { code: string }) {
 	return <div className="flex items-center justify-between gap-2 bg-info/10 border border-dashed border-info/50 rounded-md px-4 py-3">
-		<p className="text-info font-mono text-xl font-semibold tracking-brand">{code}</p>
-		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code)}>{t("btn_copy_code")}</button>
+		<p className="text-info font-mono text-xl font-semibold tracking-brand uppercase">{code}</p>
+		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code.toUpperCase())}>{t("btn_copy_code")}</button>
 	</div>
 }
 
