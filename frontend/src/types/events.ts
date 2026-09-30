@@ -13,6 +13,7 @@ export interface ServerToClientEvents {
 	friend_request_resolved: (payload: { requestId: string, accepted: boolean }) => void
 	presence_update: (payload: PresenceUpdate) => void
 	friend_removed: (payload: { userId: string }) => void
+	refresh_joined_match: (payload: Matchs | undefined) => void
 }
 
 export interface NotificationEvent {

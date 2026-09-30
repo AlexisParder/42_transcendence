@@ -39,6 +39,7 @@ import { joinMatchHandler } from "./routes/matches/joinMatch.route.ts"
 import { leaveMatchHandler } from "./routes/matches/leaveMatch.route.ts"
 import { updatePlayerStatusMatchHandler } from "./routes/matches/updatePlayerStatusMatch.route.ts"
 import { getJoinedMatchHandler } from "./routes/matches/getJoinedMatch.route.ts"
+import { kickPlayerMatchHandler } from "./routes/matches/kickPlayerMatch.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -101,6 +102,7 @@ app.post("/api/leave-match", leaveMatchHandler)
 app.post("/api/create-match", createMatchHandler)
 app.post("/api/delete-match", deleteMatchHandler)
 app.post("/api/update-player-status-match", updatePlayerStatusMatchHandler)
+app.post("/api/kick-user-match", kickPlayerMatchHandler)
 
 io.use(async (socket, next) => {
 	try {
