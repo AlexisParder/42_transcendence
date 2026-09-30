@@ -24,7 +24,6 @@ export function Play() {
 	const [code] = useState("S-K7X2Q9")
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType | "BOT">("ONE_V_ONE")
-	const [selectedMatchTypeTxt, setSelectedMatchTypeTxt] = useState<"1 v 1" | "2 v 2" | "FFA" | "Bot">("1 v 1")
 	const [abilities, setAbilities] = useState(true)
 	const [replace, setReplace] = useState(true)
 	const [spectators, setSpectators] = useState(false)
@@ -196,36 +195,29 @@ export function Play() {
 
 				<div className="py-2 grid grid-cols-4 max-lg:grid-cols-2 gap-4">
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "ONE_V_ONE" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
-						if (selectedMatchType !== "ONE_V_ONE") {
+						if (selectedMatchType !== "ONE_V_ONE")
 							setSelectedMatchType("ONE_V_ONE")
-							setSelectedMatchTypeTxt("1 v 1")
-						}
 					}}>
-						<p className="text-sm font-semibold">1 v 1</p>
+						<p className="text-sm font-semibold">{t("txt_ONE_V_ONE")}</p>
 						<p className="text-xs text-neutral-content/50">{t("txt_ranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "TWO_V_TWO" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
-						if (selectedMatchType !== "TWO_V_TWO") {
+						if (selectedMatchType !== "TWO_V_TWO")
 							setSelectedMatchType("TWO_V_TWO")
-							setSelectedMatchTypeTxt("2 v 2")
-						}
 					}}>
-						<p className="text-sm font-semibold">2 v 2</p>
+						<p className="text-sm font-semibold">{t("txt_TWO_V_TWO")}</p>
 						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_duo")} <TbPointFilled className="size-1" /> {t("txt_ranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "FOUR_FFA" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
-						if (selectedMatchType !== "FOUR_FFA") {
+						if (selectedMatchType !== "FOUR_FFA")
 							setSelectedMatchType("FOUR_FFA")
-							setSelectedMatchTypeTxt("FFA")
-						}
 					}}>
-						<p className="text-sm font-semibold">FFA</p>
+						<p className="text-sm font-semibold">{t("txt_FFA")}</p>
 						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 {t("play_players")} <TbPointFilled className="size-1" /> {t("txt_ranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "BOT" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "BOT") {
 							setSelectedMatchType("BOT")
-							setSelectedMatchTypeTxt("Bot")
 							setVisibility("private")
 						}
 					}}>
@@ -276,7 +268,7 @@ export function Play() {
 				</div>
 
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
-					<p className="text-xs font-semibold">{selectedMatchTypeTxt} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
+					<p className="text-xs font-semibold">{t(`txt_${selectedMatchType}`)} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
 					<button className="btn btn-info max-lg:btn-sm" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
 				</div>
 
@@ -463,7 +455,7 @@ function CodeBox({ code }: { code: string }) {
 
 function RulesPanel({ rules }: { isHost: boolean, rules: Rules }) {
 	const summary = [
-		rules.format,
+		t(`txt_${rules.format}`),
 		t("play_s_turns", { time: rules.timeTurn }),
 		rules.abilities ? t("play_abilities_on") : t("play_abilities_off"),
 		rules.replace ? t("play_bot_replace") : null,
@@ -478,7 +470,7 @@ function RulesPanel({ rules }: { isHost: boolean, rules: Rules }) {
 		<p className="lg:hidden text-sm text-neutral-content/80">{summary}</p>
 
 		<div className="max-lg:hidden flex flex-col gap-2 text-xs">
-			<RuleRow label={t("play_format")} value={rules.format} />
+			<RuleRow label={t("play_format")} value={t(`txt_${rules.format}`)} />
 			<RuleRow label={t("play_time_turn")} value={`${rules.timeTurn} s`} highlight />
 			<RuleRow label={t("play_abilities")} value={rules.abilities ? t("txt_on") : t("txt_off")} highlight={rules.abilities} />
 			<RuleRow label={t("play_replace")} value={rules.replace ? t("txt_on") : t("txt_off")} highlight={rules.replace} />
@@ -580,9 +572,9 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 ) {
 	let typeTxt = ""
 	if (type === "ONE_V_ONE")
-		typeTxt = "1 v 1"
+		typeTxt = t("txt_ONE_V_ONE")
 	else if (type === "TWO_V_TWO")
-		typeTxt = "2 v 2"
+		typeTxt = t("txt_TWO_V_TWO")
 	else if (type === "THREE_FFA" || type === "FOUR_FFA")
 		typeTxt = `3-4 ${t("play_players")}`
 

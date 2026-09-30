@@ -251,14 +251,6 @@ function MatchesItem({ result, desc, matchType, matchTime, points }: {
 	matchTime: string,
 	points: number | "unranked"
 }) {
-	let type = "4p"
-	if (matchType === "ONE_V_ONE")
-		type = "1 v 1"
-	else if (matchType === "TWO_V_TWO")
-		type = "2 v 2"
-	else if (matchType === "THREE_FFA")
-		type = "3p"
-
 	let pointsTxt = points.toString()
 	let colorTxt = "text-neutral-content/50"
 	let colorBg = "bg-neutral/20"
@@ -281,7 +273,7 @@ function MatchesItem({ result, desc, matchType, matchTime, points }: {
 	return <div className={`grid grid-cols-[3.5rem_1fr_1fr_5rem] items-center gap-2 ${colorBg} p-2.5 rounded-md border-l-3 ${colorBd}`}>
 		<p className={`text-sm ${colorTxt} font-bold uppercase`}>{t(`txt_${result}`)}</p>
 		<p className="text-xs text-center">{desc}</p>
-		<p className="flex items-center justify-center gap-1 text-xs">{type} <TbPointFilled className="size-1" /> {formatTimeProfile(matchTime)}</p>
+		<p className="flex items-center justify-center gap-1 text-xs">{t(`txt_${matchType}`)} <TbPointFilled className="size-1" /> {formatTimeProfile(matchTime)}</p>
 		<p className={`text-xs ${colorTxt} font-bold text-right`}>{pointsTxt === "unranked" ? t("txt_unranked") : pointsTxt}</p>
 	</div>
 }

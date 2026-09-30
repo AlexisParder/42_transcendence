@@ -60,6 +60,12 @@
 	"txt_no": "no",
 	"txt_on": "on",
 	"txt_off": "off",
+	"txt_ONE_V_ONE": "1 v 1",
+	"txt_TWO_V_TWO": "2 v 2",
+	"txt_THREE_FFA": "3p",
+	"txt_FOUR_FFA": "4p",
+	"txt_BOT": "1 v 1 bot",
+	"txt_FFA": "FFA",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
