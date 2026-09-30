@@ -239,10 +239,6 @@ export function Play() {
 									setVisibility("public")
 							}} disabled={selectedMatchType === "BOT"}>{t("play_public")}</button>
 						</div>
-						<div className="bg-info/10 border border-info/50 border-dashed rounded-md px-4 py-2 m-2 flex items-center justify-between">
-							<p className="uppercase text-info font-mono text-xl font-semibold, tracking-label">{code}</p>
-							<button className="text-neutral-content/50 btn btn-xs btn-ghost" onClick={() => navigator.clipboard.writeText(code)}>{t("btn_copy_code")}</button>
-						</div>
 					</div>
 					<div className="rounded-md p-2 bg-neutral/10 border border-neutral/50">
 						<p className="uppercase px-2 text-neutral-content/50">{t("rules_title")}</p>
