@@ -461,7 +461,7 @@ function CodeBox({ code }: { code: string }) {
 	</div>
 }
 
-function RulesPanel({ isHost, rules }: { isHost: boolean, rules: Rules }) {
+function RulesPanel({ rules }: { isHost: boolean, rules: Rules }) {
 	const summary = [
 		rules.format,
 		t("play_s_turns", { time: rules.timeTurn }),
@@ -473,9 +473,6 @@ function RulesPanel({ isHost, rules }: { isHost: boolean, rules: Rules }) {
 	return <div className="rounded-lg border border-neutral/50 bg-neutral/10 p-4">
 		<div className="flex items-center justify-between pb-2">
 			<p className="uppercase text-xs text-neutral-content/50 font-mono">{t("rules_title")}</p>
-			{isHost
-				? <button className="btn btn-xs btn-ghost text-info">{t("btn_edit")}</button>
-				: <p className="uppercase text-xs text-neutral-content/50 font-mono">{t("play_set_by_host")}</p>}
 		</div>
 
 		<p className="lg:hidden text-sm text-neutral-content/80">{summary}</p>
