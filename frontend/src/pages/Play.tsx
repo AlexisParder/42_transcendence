@@ -43,6 +43,34 @@ export function Play() {
 		}
 	}, [socket])
 
+	useEffect(() => {
+		async function loadJoinedMatch() {
+			try {
+				const res = await fetch("/api/get-joined-match", {
+					method: "POST",
+					headers: { "Content-type": "application/json" },
+					credentials: "include",
+				})
+
+				if (!res.ok) {
+					// setErrors({ form: t("settings_err_updt_pwd") })
+					return
+				}
+
+				const data = await res.json()
+				const match = data.match ?? undefined
+				setJoinedMatch(match)
+
+				if (match)
+					setView(match.hostId === session?.user.id ? "host" : "guest")
+			} catch (error) {
+				console.error("load joined match:", error)
+			}
+		}
+
+		loadJoinedMatch()
+	}, [session?.user])
+
 	async function loadFriends() {
 		try {
 			const res = await fetch("/api/get-friends", {
@@ -211,6 +239,30 @@ export function Play() {
 		}
 	}
 
+	async function handleStatus() {
+		if (!joinedMatch)
+			return
+
+		try {
+			const res = await fetch("/api/update-player-status-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ hostId: joinedMatch.hostId }),
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			const data = await res.json()
+			setJoinedMatch(data.match ?? undefined)
+		} catch (error) {
+			console.error("update player status match:", error)
+		}
+	}
+
 	return <Sidebar>
 		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
@@ -318,18 +370,19 @@ export function Play() {
 			</Modal>
 		</SidebarRight>}
 
-		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} />}
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} />}
 	</Sidebar>
 }
 
-function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch }: {
+function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch, handleStatus }: {
 	isHost: boolean,
 	myId: string | undefined,
 	joinedMatch: Matchs | undefined,
 	friends: Friend[],
 	presence: Record<string, PresenceStatus>,
 	handleDeleteMatch: () => void,
-	handleLeaveMatch: () => void
+	handleLeaveMatch: () => void,
+	handleStatus: () => void
 }) {
 	if (!joinedMatch)
 		return
@@ -385,7 +438,7 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 			</div>
 		</div>
 
-		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} />
+		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} />
 	</div>
 }
 
@@ -536,14 +589,15 @@ function InvitePanel({ code, friends, presence }: {
 	</div>
 }
 
-function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDeleteMatch, handleLeaveMatch }: {
+function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDeleteMatch, handleLeaveMatch, handleStatus }: {
 	isHost: boolean,
 	allReady: boolean,
 	missing: number,
 	total: number,
 	isReady: boolean,
 	handleDeleteMatch: () => void,
-	handleLeaveMatch: () => void
+	handleLeaveMatch: () => void,
+	handleStatus: () => void
 }) {
 	let title: string
 	let detail = ""
@@ -572,7 +626,7 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDe
 					</>
 					: <>
 						<button className="btn btn-ghost lg:btn-outline" onClick={handleLeaveMatch}>{t("play_btn_leave_room")}</button>
-						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("play_ready")}</>}</button>
+						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`} onClick={handleStatus}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("play_ready")}</>}</button>
 					</>}
 			</div>
 		</div>
