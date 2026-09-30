@@ -2,6 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
+import { isInAnyMatch } from "../../lib/matchUtils.ts";
 
 export async function createMatchHandler(req: Request, res: Response) {
 	const { selectedMatchType, visibility, code, timeTurn, abilities, replace, spectators } = req.body
@@ -16,8 +17,8 @@ export async function createMatchHandler(req: Request, res: Response) {
 		const userId = session.user.id
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
 
-		if (currentMatches.get(userId))
-			return res.status(400).json({ok: false, code: "host_err_already_match"})
+		if (isInAnyMatch(currentMatches, userId))
+			return res.status(409).json({ ok: false, code: "already_in_match" })
 
 		const newMatch: Matchs = {
 			mode: selectedMatchType,
@@ -35,7 +36,20 @@ export async function createMatchHandler(req: Request, res: Response) {
 			hostId: userId,
 			maxPlayers: (selectedMatchType === "ONE_V_ONE" || selectedMatchType === "BOT") ? 2 : 4,
 			players: [
-				{ userID: userId, username: session.user.username, image: session.user.image, isReady: true, isBot: false, team: 1, placement: 1, points: 0, leftAt: null, status: "PLAYED", shotsHit: 0, shotsTotal: 0 }
+				{
+					userId,
+					username: session.user.username,
+					image: session.user.image,
+					isReady: true,
+					isBot: false,
+					team: 1,
+					placement: 1,
+					points: session.user.points ?? 0,
+					leftAt: null,
+					status: "PLAYED",
+					shotsHit: 0,
+					shotsTotal: 0
+				}
 			]
 		}
 

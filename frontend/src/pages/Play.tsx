@@ -160,8 +160,32 @@ export function Play() {
 		}
 	}
 
-	async function handleJoinedMatch(hostId: string) {
+	async function handleJoinedPublicMatch(match: Matchs) {
+		if (match.visibility !== "public") {
+			// setErrors({ form: t("settings_err_updt_pwd") })
+			return
+		}
 
+		try {
+			const res = await fetch("/api/join-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ hostId: match.hostId }),
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			const data = await res.json()
+			setJoinedMatch(data.match ?? undefined)
+
+			setView("guest")
+		} catch (error) {
+			console.error("join match:", error)
+		}
 	}
 
 	return <Sidebar>
@@ -263,7 +287,7 @@ export function Play() {
 					<div className="flex flex-col gap-2 py-2 md:flex-1 md:min-h-0 md:overflow-y-auto">
 						{/* ajouter un tri pour afficher les join avant les parties en cours (si elles peuvent etre spectate, sinon ne pas afficher) */}
 						{matches.length > 0 && matches.map(m => (
-							<MatchItem key={m.hostId} username={m.players.find(p => p.userID === m.hostId)?.username} image={m.players.find(p => p.userID === m.hostId)?.image} type={m.mode} players={m.players.length} maxPlayers={m.maxPlayers} canJoin={m.players.length !== m.maxPlayers} canSpec={m.settings.spectators && m.startedAt !== ""} handleJoinedMatch={handleJoinedMatch} hostId={m.hostId ?? ""} />
+							<MatchItem key={m.hostId} username={m.players.find(p => p.userId === m.hostId)?.username} image={m.players.find(p => p.userId === m.hostId)?.image} type={m.mode} players={m.players.length} maxPlayers={m.maxPlayers} canJoin={m.players.length !== m.maxPlayers} canSpec={m.settings.spectators && m.startedAt !== ""} handleJoinedPublicMatch={handleJoinedPublicMatch} match={m} />
 						))}
 						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
@@ -297,10 +321,10 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 	if (!joinedMatch)
 		return
 
-	const hostname = joinedMatch.players.find(p => p.userID === joinedMatch.hostId)?.username
+	const hostname = joinedMatch.players.find(p => p.userId === joinedMatch.hostId)?.username
 	const missing = joinedMatch.maxPlayers - joinedMatch.players.length
 	const allReady = missing === 0 && joinedMatch.players.every(p => p.isReady)
-	const me = joinedMatch.players.find(p => p.userID === myId)
+	const me = joinedMatch.players.find(p => p.userId === myId)
 	const rules: Rules = {
 		format: joinedMatch.mode,
 		timeTurn: joinedMatch.settings.time_turn,
@@ -334,7 +358,7 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 				<p className="lg:hidden uppercase text-xs text-neutral-content/50 font-mono">{t("play_players")}</p>
 				<div className="flex flex-col gap-2 lg:grid lg:grid-cols-4 lg:gap-3">
 					{joinedMatch.players.map(p => (
-						<PlayerItem key={p.userID} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.userID === myId} isHost={p.userID === joinedMatch.hostId} canKick={isHost && p.userID !== joinedMatch.hostId} />
+						<PlayerItem key={p.userId} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.userId === myId} isHost={p.userId === joinedMatch.hostId} canKick={isHost && p.userId !== joinedMatch.hostId} team={p.team} isDuo={joinedMatch.mode === "TWO_V_TWO"} />
 					))}
 					{Array.from({ length: missing }).map((_, i) => <WaitingPlayerItem key={`empty_${i}`} />)}
 				</div>
@@ -379,7 +403,7 @@ function WaitingPlayerItem() {
 	</div>
 }
 
-function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick }: {
+function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick, team, isDuo }: {
 	username: string | null | undefined,
 	image: string | null | undefined,
 	points: number,
@@ -387,6 +411,8 @@ function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick 
 	isMine: boolean,
 	isHost: boolean,
 	canKick: boolean,
+	team: number,
+	isDuo: boolean
 }) {
 	return <div className={`flex items-center gap-3 p-3	border rounded-lg lg:flex-col lg:justify-between lg:gap-1 lg:h-52 lg:p-2.5 ${isMine ? "bg-ingo/10 border-info/50" : "bg-neutral/10 border-neutral/50"}`}>
 		<div className="max-lg:hidden flex justify-end items-center h-4 w-full">
@@ -403,6 +429,7 @@ function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick 
 					{isHost && <span className="lg:hidden"><HostBadge /></span>}
 				</p>
 				<p className="text-xs text-neutral-content/50 font-mono">{points.toLocaleString()} {t("txt_pts")}</p>
+				{isDuo && <p className={`text-xs ${team === 1 ? "text-info/75" : "text-error/75"} font-mono`}>{team === 1 ? "Blue team" : "Red team"}</p>}
 			</div>
 		</div>
 
@@ -534,14 +561,14 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDe
 					</>
 					: <>
 						<button className="btn btn-ghost lg:btn-outline">{t("play_btn_leave_room")}</button>
-						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`} disabled={!isReady}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("txt_ready")}</>}</button>
+						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("play_ready")}</>}</button>
 					</>}
 			</div>
 		</div>
 	</div>
 }
 
-function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec, hostId, handleJoinedMatch }:
+function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec, match, handleJoinedPublicMatch }:
 	{
 		username: string | null | undefined,
 		image: string | null | undefined,
@@ -550,8 +577,8 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 		maxPlayers: number,
 		canJoin?: boolean,
 		canSpec?: boolean,
-		hostId: string,
-		handleJoinedMatch: (hostId: string) => void,
+		match: Matchs,
+		handleJoinedPublicMatch: (match: Matchs) => void,
 	}
 ) {
 	let typeTxt = ""
@@ -573,7 +600,7 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 		</div>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{typeTxt}</p>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{players} / {maxPlayers}</p>
-		{canJoin && <button className="btn btn-outline btn-info btn-sm" onClick={() => handleJoinedMatch(hostId)} >{t("btn_join")}</button>}
+		{canJoin && <button className="btn btn-outline btn-info btn-sm" onClick={() => handleJoinedPublicMatch(match)} >{t("btn_join")}</button>}
 		{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">{t("btn_spectate")}</button>}
 	</div>
 }

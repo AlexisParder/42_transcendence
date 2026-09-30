@@ -145,7 +145,7 @@ export interface Matchs {
 }
 
 export interface MatchPlayers {
-	userID: string | null,
+	userId: string | null,
 	username: string | null | undefined,
 	image: string | null | undefined,
 	isReady: boolean,
