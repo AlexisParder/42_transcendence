@@ -95,7 +95,7 @@ export function Notifications() {
 	return (
 		<Sidebar>
 			<div className="p-4">
-				<h1 className="text-xl font-bold text-info">{t("notifications_title")}</h1>
+				<h1 className="text-xl font-bold text-white">{t("notifications_title")}</h1>
 				<p className="mt-1 text-sm text-neutral-content/60">{t("notifications_history")}</p>
 				<button
 					type="button"
