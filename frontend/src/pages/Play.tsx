@@ -30,6 +30,7 @@ export function Play() {
 	const [view, setView] = useState<viewType>("none")
 	const [matches, setMatches] = useState<Matchs[]>([])
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
+	const [code, setCode] = useState("")
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
@@ -291,6 +292,29 @@ export function Play() {
 		}
 	}
 
+	async function handleJoinWithCode() {
+		try {
+			const res = await fetch("/api/join-code-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ code }),
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			const data = await res.json()
+			setJoinedMatch(data.match ?? undefined)
+			setCode("")
+			setView("guest")
+		} catch (error) {
+			console.error("join code match:", error)
+		}
+	}
+
 	return <Sidebar>
 		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
@@ -370,6 +394,19 @@ export function Play() {
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
 					<p className="text-xs font-semibold">{t(`txt_${selectedMatchType}`)} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
 					<button className="btn btn-info max-lg:btn-sm" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
+				</div>
+
+				<div className="py-2 text-center">
+					<div className="join">
+						<input
+							type="text"
+							placeholder={`${t("home_code_name")} - - - - -`}
+							className="input join-item w-40 bg-base-200 font-mono uppercase outline-none" value={code} onChange={(e) => setCode(e.target.value.trim())}
+						/>
+						<button className="btn join-item bg-base-300" onClick={handleJoinWithCode}>
+							{t("home_join_btn")}
+						</button>
+					</div>
 				</div>
 
 				<div className="py-2 flex flex-col md:flex-1 md:min-h-0">

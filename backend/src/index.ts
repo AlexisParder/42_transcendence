@@ -40,6 +40,7 @@ import { leaveMatchHandler } from "./routes/matches/leaveMatch.route.ts"
 import { updatePlayerStatusMatchHandler } from "./routes/matches/updatePlayerStatusMatch.route.ts"
 import { getJoinedMatchHandler } from "./routes/matches/getJoinedMatch.route.ts"
 import { kickPlayerMatchHandler } from "./routes/matches/kickPlayerMatch.route.ts"
+import { joinCodeMatchHandler } from "./routes/matches/joinCodeMatch.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -98,6 +99,7 @@ app.post("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHand
 app.post("/api/get-matches", getPublicMatchesHandler)
 app.post("/api/get-joined-match", getJoinedMatchHandler)
 app.post("/api/join-match", joinMatchHandler)
+app.post("/api/join-code-match", joinCodeMatchHandler)
 app.post("/api/leave-match", leaveMatchHandler)
 app.post("/api/create-match", createMatchHandler)
 app.post("/api/delete-match", deleteMatchHandler)
