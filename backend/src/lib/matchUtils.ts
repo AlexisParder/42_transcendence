@@ -27,3 +27,16 @@ export function updatePlayer(match: Matchs, userId: string, patch: Partial<Match
 	Object.assign(player, patch)
 	return player
 }
+
+const CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
+export function generateCode(existing: Map<string, Matchs>): string {
+	let code = ""
+
+	while (!code || existing.has(code)) {
+		let suffix = ""
+		for (let i = 0; i < 6; i++)
+			suffix += CHARS[Math.floor(Math.random() * CHARS.length)]
+		code = `s-${suffix}`
+	}
+	return code
+}

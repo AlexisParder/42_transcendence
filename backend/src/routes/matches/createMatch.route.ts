@@ -2,17 +2,17 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
-import { isInAnyMatch } from "../../lib/matchUtils.ts";
+import { generateCode, isInAnyMatch } from "../../lib/matchUtils.ts";
 
 export async function createMatchHandler(req: Request, res: Response) {
-	const { selectedMatchType, visibility, code, timeTurn, abilities, replace, spectators } = req.body
+	const { selectedMatchType, visibility, timeTurn, abilities, replace, spectators } = req.body
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
 		})
 
 		if (!session)
-			return res.status(401).json({ ok: false })
+			return res.status(405).json({ ok: false })
 
 		const userId = session.user.id
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
@@ -20,6 +20,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 		if (isInAnyMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "already_in_match" })
 
+		const code = generateCode(currentMatches)
 		const newMatch: Matchs = {
 			mode: selectedMatchType,
 			settings: {
@@ -30,7 +31,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 			},
 			code,
 			visibility,
-			isRanked: selectedMatchType !== "BOT",
+			isRanked: selectedMatchType !== "BOT" && !replace,
 			startedAt: "",
 			endedAt: "",
 			hostId: userId,
@@ -56,6 +57,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 		currentMatches.set(userId, newMatch)
 		res.json({ ok: true, match: newMatch })
 	} catch (err) {
-		res.status(401).json({ ok: false })
+		console.log(err)
+		res.status(500).json({ ok: false })
 	}
 }

@@ -1,7 +1,8 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { Matchs } from "../../events.ts";
+import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
+import type { Server } from "socket.io"
 
 export async function leaveMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -30,6 +31,13 @@ export async function leaveMatchHandler(req: Request, res: Response) {
 			return res.json({ ok: false, code: "host_need_close" })
 
 		match.players = match.players.filter(p => p.userId !== userId)
+
+		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
+		for (const player of match.players) {
+			if (player.userId && player.userId !== userId)
+				io.to(player.userId).emit("refresh_joined_match", match)
+		}
+
 		res.json({ ok: true, match })
 	} catch (err) {
 		res.status(500).json({ ok: false })

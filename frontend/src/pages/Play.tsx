@@ -21,7 +21,6 @@ export function Play() {
 	const socket = useSocket()
 	const [friends, setFriends] = useState<Friend[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
-	const [code] = useState("S-K7X2Q9")
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType | "BOT">("ONE_V_ONE")
 	const [abilities, setAbilities] = useState(true)
@@ -31,15 +30,24 @@ export function Play() {
 	const [view, setView] = useState<viewType>("none")
 	const [matches, setMatches] = useState<Matchs[]>([])
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
+	const [code, setCode] = useState("")
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
 			setPresence(prev => ({ ...prev, [payload.userId]: payload.status }))
 		}
+		function onRefreshMatch(payload: Matchs | undefined) {
+			setJoinedMatch(payload)
+			if (!payload)
+				setView("none")
+		}
+
 		socket.on("presence_update", onPresence)
+		socket.on("refresh_joined_match", onRefreshMatch)
 
 		return () => {
 			socket.off("presence_update", onPresence)
+			socket.off("refresh_joined_match", onRefreshMatch)
 		}
 	}, [socket])
 
@@ -119,7 +127,7 @@ export function Play() {
 
 		const interval = setInterval(() => {
 			loadMatches()
-		}, 10 * 1000)
+		}, 5 * 1000)
 
 		return () => {
 			clearInterval(interval)
@@ -150,7 +158,7 @@ export function Play() {
 				method: "POST",
 				headers: { "Content-type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({ selectedMatchType, visibility, code, timeTurn, abilities, replace, spectators }),
+				body: JSON.stringify({ selectedMatchType, visibility, timeTurn, abilities, replace, spectators }),
 			})
 
 			if (!res.ok) {
@@ -263,6 +271,50 @@ export function Play() {
 		}
 	}
 
+	async function handleKick(targetId: string) {
+		try {
+			const res = await fetch("/api/kick-user-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ targetId }),
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			const data = await res.json()
+			setJoinedMatch(data.match ?? undefined)
+		} catch (error) {
+			console.error("kick user match:", error)
+		}
+	}
+
+	async function handleJoinWithCode() {
+		try {
+			const res = await fetch("/api/join-code-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ code }),
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			const data = await res.json()
+			setJoinedMatch(data.match ?? undefined)
+			setCode("")
+			setView("guest")
+		} catch (error) {
+			console.error("join code match:", error)
+		}
+	}
+
 	return <Sidebar>
 		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
@@ -344,6 +396,19 @@ export function Play() {
 					<button className="btn btn-info max-lg:btn-sm" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
 				</div>
 
+				<div className="py-2 text-center">
+					<div className="join">
+						<input
+							type="text"
+							placeholder={`${t("home_code_name")} - - - - -`}
+							className="input join-item w-40 bg-base-200 font-mono uppercase outline-none" value={code} onChange={(e) => setCode(e.target.value.trim())}
+						/>
+						<button className="btn join-item bg-base-300" onClick={handleJoinWithCode}>
+							{t("home_join_btn")}
+						</button>
+					</div>
+				</div>
+
 				<div className="py-2 flex flex-col md:flex-1 md:min-h-0">
 					<div className="flex items-center justify-between pb-2">
 						<p className="uppercase text-neutral-content/50 text-xs">{t("play_public_matches")}</p>
@@ -370,11 +435,11 @@ export function Play() {
 			</Modal>
 		</SidebarRight>}
 
-		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} />}
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleKick={handleKick} />}
 	</Sidebar>
 }
 
-function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch, handleStatus }: {
+function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch, handleStatus, handleKick }: {
 	isHost: boolean,
 	myId: string | undefined,
 	joinedMatch: Matchs | undefined,
@@ -382,7 +447,8 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 	presence: Record<string, PresenceStatus>,
 	handleDeleteMatch: () => void,
 	handleLeaveMatch: () => void,
-	handleStatus: () => void
+	handleStatus: () => void,
+	handleKick: (id: string) => void
 }) {
 	if (!joinedMatch)
 		return
@@ -424,7 +490,7 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 				<p className="lg:hidden uppercase text-xs text-neutral-content/50 font-mono">{t("play_players")}</p>
 				<div className="flex flex-col gap-2 lg:grid lg:grid-cols-4 lg:gap-3">
 					{joinedMatch.players.map(p => (
-						<PlayerItem key={p.userId} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.userId === myId} isHost={p.userId === joinedMatch.hostId} canKick={isHost && p.userId !== joinedMatch.hostId} team={p.team} isDuo={joinedMatch.mode === "TWO_V_TWO"} />
+						<PlayerItem key={p.userId} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.userId === myId} isHost={p.userId === joinedMatch.hostId} canKick={isHost && p.userId !== joinedMatch.hostId} team={p.team} isDuo={joinedMatch.mode === "TWO_V_TWO"} handleKick={handleKick} userId={p.userId ?? ""} />
 					))}
 					{Array.from({ length: missing }).map((_, i) => <WaitingPlayerItem key={`empty_${i}`} />)}
 				</div>
@@ -469,7 +535,8 @@ function WaitingPlayerItem() {
 	</div>
 }
 
-function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick, team, isDuo }: {
+function PlayerItem({ userId, username, image, points, isReady, isMine, isHost, canKick, team, isDuo, handleKick }: {
+	userId: string,
 	username: string | null | undefined,
 	image: string | null | undefined,
 	points: number,
@@ -478,12 +545,13 @@ function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick,
 	isHost: boolean,
 	canKick: boolean,
 	team: number,
-	isDuo: boolean
+	isDuo: boolean,
+	handleKick: (id: string) => void
 }) {
 	return <div className={`flex items-center gap-3 p-3	border rounded-lg lg:flex-col lg:justify-between lg:gap-1 lg:h-52 lg:p-2.5 ${isMine ? "bg-ingo/10 border-info/50" : "bg-neutral/10 border-neutral/50"}`}>
 		<div className="max-lg:hidden flex justify-end items-center h-4 w-full">
 			{isHost && <HostBadge />}
-			{!isHost && canKick && <KickButton />}
+			{!isHost && canKick && <KickButton handleKick={handleKick} targetId={userId} />}
 		</div>
 
 		<div className="flex items-center gap-3 flex-1 min-w-0 lg:flex-none lg:flex-col lg:gap-1">
@@ -501,7 +569,7 @@ function PlayerItem({ username, image, points, isReady, isMine, isHost, canKick,
 
 		<div className="flex items-center gap-2 shrink-0">
 			<ReadyBadge isReady={isReady} />
-			{!isHost && canKick && <span className="lg:hidden"><KickButton /></span>}
+			{!isHost && canKick && <span className="lg:hidden"><KickButton handleKick={handleKick} targetId={userId} /></span>}
 		</div>
 	</div>
 }
@@ -510,8 +578,11 @@ function HostBadge() {
 	return <span className="badge badge-warning badge-xs badge-outline uppercase">{t("play_host")}</span>
 }
 
-function KickButton() {
-	return <button className="cursor-pointer text-neutral-content/50 hover:text-error"><RxCross1 className="size-4" /></button>
+function KickButton({ targetId, handleKick }: {
+	targetId: string,
+	handleKick: (id: string) => void
+}) {
+	return <button className="cursor-pointer text-neutral-content/50 hover:text-error" onClick={() => handleKick(targetId)}><RxCross1 className="size-4" /></button>
 }
 
 function ReadyBadge({ isReady }: { isReady: boolean }) {
@@ -522,8 +593,8 @@ function ReadyBadge({ isReady }: { isReady: boolean }) {
 
 function CodeBox({ code }: { code: string }) {
 	return <div className="flex items-center justify-between gap-2 bg-info/10 border border-dashed border-info/50 rounded-md px-4 py-3">
-		<p className="text-info font-mono text-xl font-semibold tracking-brand">{code}</p>
-		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code)}>{t("btn_copy_code")}</button>
+		<p className="text-info font-mono text-xl font-semibold tracking-brand uppercase">{code}</p>
+		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code.toUpperCase())}>{t("btn_copy_code")}</button>
 	</div>
 }
 
