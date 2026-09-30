@@ -31,7 +31,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 			},
 			code,
 			visibility,
-			isRanked: selectedMatchType !== "BOT",
+			isRanked: selectedMatchType !== "BOT" && !replace,
 			startedAt: "",
 			endedAt: "",
 			hostId: userId,
