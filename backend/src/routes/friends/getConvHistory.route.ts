@@ -1,8 +1,8 @@
 import { fromNodeHeaders } from "better-auth/node"
-import { auth } from "../auth.ts"
+import { auth } from "../../auth.ts"
 import type { Request, Response } from "express"
-import { prisma } from "../db/client.ts"
-import type { Message } from "../events.ts"
+import { prisma } from "../../db/client.ts"
+import type { Message } from "../../events.ts"
 
 export async function getConvHistoryHandler(req: Request, res: Response) {
 	const { peerId, before } = req.body

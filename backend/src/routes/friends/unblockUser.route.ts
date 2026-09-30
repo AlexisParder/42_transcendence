@@ -1,7 +1,7 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express";
-import { auth } from "../auth.ts";
-import { prisma } from "../db/client.ts";
+import { auth } from "../../auth.ts";
+import { prisma } from "../../db/client.ts";
 
 export async function unblockUserHandler(req: Request, res: Response) {
 	try {

@@ -1,8 +1,8 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
-import { auth } from "../auth.ts";
-import { prisma } from "../db/client.ts";
-import type { ConversationSummary } from "../events.ts";
+import { auth } from "../../auth.ts";
+import { prisma } from "../../db/client.ts";
+import type { ConversationSummary } from "../../events.ts";
 
 export async function getConverstionsHandler(req: Request, res: Response) {
 	try {

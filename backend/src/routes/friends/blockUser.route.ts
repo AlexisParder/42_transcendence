@@ -1,8 +1,8 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express";
-import { auth } from "../auth.ts";
-import { prisma } from "../db/client.ts";
-import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../events.ts";
+import { auth } from "../../auth.ts";
+import { prisma } from "../../db/client.ts";
+import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../../events.ts";
 import type { Server } from "socket.io";
 
 export async function blockUserHandler(req: Request, res: Response) {

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { auth } from "../auth.ts";
+import { auth } from "../../auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
-import { prisma } from "../db/client.ts";
+import { prisma } from "../../db/client.ts";
 
 export async function setReadHandler(req: Request, res: Response) {
 	try {

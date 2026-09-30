@@ -1,9 +1,9 @@
 import type { Request, Response } from "express"
-import { auth } from "../auth.ts"
+import { auth } from "../../auth.ts"
 import { fromNodeHeaders } from "better-auth/node"
-import { prisma } from "../db/client.ts"
+import { prisma } from "../../db/client.ts"
 import type { Server } from "socket.io"
-import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../events.ts"
+import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../../events.ts"
 
 export async function acceptFriendRequestHandler(req: Request, res: Response) {
 	try {
