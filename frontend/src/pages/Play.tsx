@@ -5,13 +5,13 @@ import { useSocket } from "../components/socketContext";
 import type { Friend, Matchs, matchType, PresenceStatus, PresenceUpdate, Rules } from "../types/events";
 import { t } from "../lib/translate";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
-import { truncateText } from "../lib/truncateText";
 import { TbPointFilled } from "react-icons/tb";
 import { Togglebox } from "../components/Togglebox";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { BiCheck } from "react-icons/bi";
 import { RxCross1 } from "react-icons/rx";
 import { authClient } from "../lib/auth-client";
+import { IoInformation, IoWarning } from "react-icons/io5";
 
 type visibilityType = "private" | "public"
 type viewType = "none" | "host" | "guest"
@@ -336,7 +336,7 @@ export function Play() {
 	}
 
 	return <Sidebar>
-		{view === "none" && <SidebarRight friends={friends} presence={presence}>
+		{view === "none" && <SidebarRight format={selectedMatchType} replace={replace}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
 				<div className="flex items-center justify-between max-sm:flex-col max-sm:gap-2 max-sm:pb-2">
 					<div>
@@ -355,7 +355,7 @@ export function Play() {
 					</div>
 				</div>
 
-				<div className="py-2 grid grid-cols-4 max-lg:grid-cols-2 gap-4">
+				<div className="py-2 grid grid-cols-4 max-xl:grid-cols-2 gap-4">
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "ONE_V_ONE" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "ONE_V_ONE")
 							setSelectedMatchType("ONE_V_ONE")
@@ -388,7 +388,7 @@ export function Play() {
 					</button>
 				</div>
 
-				<div className="py-2 grid grid-cols-2 max-lg:grid-cols-1 gap-4">
+				<div className="py-2 grid grid-cols-2 max-xl:grid-cols-1 gap-4">
 					<div className="rounded-md p-2 bg-neutral/10 border border-neutral/50">
 						<p className="uppercase px-2 text-neutral-content/50">{t("play_visibility")}</p>
 						<div className="flex gap-2 p-2">
@@ -765,12 +765,22 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 	</div>
 }
 
-function SidebarRight({ children, friends, presence }: {
+function SidebarRight({ children, format, replace }: {
 	children: React.ReactNode,
-	friends: Friend[],
-	presence: Record<string, PresenceStatus>
+	format: matchType | "BOT",
+	replace: boolean
 }) {
-	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline").length
+	let players = "3-4"
+	if (format === "ONE_V_ONE")
+		players = "2"
+	else if (format === "BOT")
+		players = "1"
+	else if (format === "TWO_V_TWO")
+		players = "4"
+
+	let ranked = "ON"
+	if (format === "BOT" || replace)
+		ranked = "OFF"
 
 	return <>
 		<div className="flex w-full h-full min-h-0">
@@ -779,16 +789,21 @@ function SidebarRight({ children, friends, presence }: {
 			</div>
 			<div className={`max-lg:hidden lg:shrink-0 min-h-0`}>
 				<ul className="menu flex-nowrap bg-base-200 h-full w-full p-4 gap-1">
+					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1 max-w-75">
+						<p className="text-xs uppercase text-neutral-content/50 font-mono">selected format</p>
+						<h2 className="font-bold text-xl">{t(`txt_${format}`)}</h2>
 
-					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1">
-						<p className="uppercase text-xs text-neutral-content/50 font-mono">{t("play_crew")} - {onlineFriends} {t("friends_online_title")}</p>
-						<FriendSection friends={friends} presence={presence} />
-					</div>
+						<SidebarRightItem label="player" value={players} />
+						<SidebarRightItem label="grid" value="14x14" />
+						<SidebarRightItem label="ships per fleet" value="4" />
+						<SidebarRightItem label="ranked" value={ranked} />
 
-					<div className="bg-base-100 rounded-md">
-						<div className="p-4 shrink-0 bg-warning/10 border border-warning/50 rounded-md flex flex-col gap-2">
-							<h2 className="text-xs font-semibold text-warning">{t("play_tournament", { name: '"Mariana Trench"' })}</h2>
-							<p className="flex items-center gap-1 text-xs text-neutral-content/50">{t("play_registration_open")} <TbPointFilled className="size-1" /> {t("play_seats", { curr: 6, max: 8 })} <TbPointFilled className="size-1" /> {t("play_starts_in", { time: "12min" })}</p>
+						{ranked !== "ON" && <div className="bg-base-100 rounded-md m-1">
+							<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoWarning className="text-warning size-7" /> Ranked is off because Replace leavers with a bot is on. Turn it off to play for points.</p>
+						</div>}
+
+						<div className="bg-base-100 rounded-md m-1">
+							<p className="border border-neutral/50 bg-neutral/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoInformation className="text-neutral size-7" /> Sink every enemy to win. Leaving a ranked match early counts as a loss.</p>
 						</div>
 					</div>
 				</ul>
@@ -797,40 +812,12 @@ function SidebarRight({ children, friends, presence }: {
 	</>
 }
 
-function FriendSection({ friends, presence }: {
-	friends: Friend[],
-	presence: Record<string, PresenceStatus>
-}) {
+function SidebarRightItem({ label, value }: { label: string, value: string }) {
 	return <>
-		<ul className={`px-1 m-0`}>
-			{friends.map(f => (
-				<FriendItem key={f.id} username={f.username} image={f.image} status={presence[f.id] ?? "available"} />
-			))}
-		</ul>
-	</>
-}
-
-function FriendItem({ username, image, status }: {
-	username: string | null | undefined,
-	image: string | null | undefined,
-	status: "available" | "in a match" | "away" | "offline"
-}) {
-	return <div className={`py-1 flex ${status === "offline" ? "opacity-50" : ""}`}>
-		<div className="flex items-center w-full gap-2">
-			<Avatar username={username} image={image} size={32} status={status} />
-			<div>
-				<p>{truncateText(username ?? "", 11)}</p>
-				<p className="text-xs opacity-60">{t(`txt_${status}`)}</p>
-			</div>
+		<div className="flex items-center justify-between p-1">
+			<p className="first-letter:uppercase text-xs text-neutral-content/60">{label}</p>
+			<p className={`font-mono text-xs font-medium ${value === "OFF" ? "text-warning" : ""}`}>{value}</p>
 		</div>
-		{status === "available" && <div>
-			<button className="btn btn-sm btn-info btn-outline">{t("btn_invite")}</button>
-		</div>}
-		{status === "away" && <div>
-			<button className="btn btn-sm btn-neutral btn-outline text-neutral-content">{t("btn_invite")}</button>
-		</div>}
-		{status === "in a match" && <div>
-			<button className="btn btn-sm btn-neutral btn-outline text-neutral-content">{t("btn_join")}</button>
-		</div>}
-	</div>
+		<div className="divider p-0 m-0"></div>
+	</>
 }
