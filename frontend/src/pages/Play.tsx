@@ -315,6 +315,26 @@ export function Play() {
 		}
 	}
 
+	async function handleInvite(targetId: string) {
+		if (!joinedMatch)
+			return
+
+		if (!joinedMatch.invitedPlayers.some(p => p === targetId)) {
+			const res = await fetch("/api/invite-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ hostId: joinedMatch.hostId, peerId: targetId })
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+			socket.emit("send_message", { toUserId: targetId, message: joinedMatch.code.toUpperCase() })
+		}
+	}
+
 	return <Sidebar>
 		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
@@ -436,11 +456,11 @@ export function Play() {
 			</Modal>
 		</SidebarRight>}
 
-		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleKick={handleKick} />}
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleKick={handleKick} handleInvite={handleInvite} />}
 	</Sidebar>
 }
 
-function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch, handleStatus, handleKick }: {
+function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch, handleStatus, handleKick, handleInvite }: {
 	isHost: boolean,
 	myId: string | undefined,
 	joinedMatch: Matchs | undefined,
@@ -449,7 +469,8 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 	handleDeleteMatch: () => void,
 	handleLeaveMatch: () => void,
 	handleStatus: () => void,
-	handleKick: (id: string) => void
+	handleKick: (id: string) => void,
+	handleInvite: (targetId: string) => void
 }) {
 	if (!joinedMatch)
 		return
@@ -500,7 +521,7 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 				<RulesPanel isHost={isHost} rules={rules} />
 				<div className="max-lg:hidden">
-					<InvitePanel code={joinedMatch.code} friends={friends} presence={presence} />
+					<InvitePanel code={joinedMatch.code} friends={friends} presence={presence} handleInvite={handleInvite} invitedPlayers={joinedMatch.invitedPlayers} />
 				</div>
 			</div>
 		</div>
@@ -637,10 +658,12 @@ function RuleRow({ label, value, highlight }: {
 	</div>
 }
 
-function InvitePanel({ code, friends, presence }: {
+function InvitePanel({ code, friends, presence, invitedPlayers, handleInvite }: {
 	code: string,
 	friends: Friend[],
-	presence: Record<string, PresenceStatus>
+	presence: Record<string, PresenceStatus>,
+	invitedPlayers: string[],
+	handleInvite: (targetId: string) => void
 }) {
 	const available = friends.filter(f => (presence[f.id] ?? f.status) !== "offline")
 
@@ -654,11 +677,11 @@ function InvitePanel({ code, friends, presence }: {
 						<Avatar username={f.username} image={f.image} size={24} />
 						<p className="text-xs font-semibold truncate">{f.username}</p>
 					</div>
-					<button className="btn btn-xs btn-info">{t("btn_invite")}</button>
+					<button disabled={invitedPlayers.some(p => p === f.id)} onClick={() => handleInvite(f.id)} className="btn btn-xs btn-info">{t("btn_invite")}</button>
 				</div>
 			))}
 		</div>
-	</div>
+	</div >
 }
 
 function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDeleteMatch, handleLeaveMatch, handleStatus }: {

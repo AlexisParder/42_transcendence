@@ -5,7 +5,7 @@ import { Sidebar } from "../components/Sidebar";
 import { FaCheck, FaPlus } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
-import type { ConversationSummary, Friend, FriendRequest, FriendRequestAccept, Message, PresenceStatus, PresenceUpdate } from "../types/events";
+import type { ConversationSummary, Friend, FriendRequest, FriendRequestAccept, Matchs, Message, PresenceStatus, PresenceUpdate } from "../types/events";
 import { authClient } from "../lib/auth-client";
 import { HideModal, Modal, ShowModal } from "../components/Modal";
 import { t } from "../lib/translate";
@@ -590,11 +590,49 @@ export function Friends() {
 		navigate('/profile', { state: { targetId: id } })
 	}
 
+	async function handleInvite() {
+		if (!peerId)
+			return
+
+		try {
+			const res = await fetch("/api/get-joined-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+			})
+
+			if (!res.ok) {
+				// setErrors({ form: t("settings_err_updt_pwd") })
+				return
+			}
+
+			const data = await res.json()
+			const match: Matchs | undefined = data.match ?? undefined
+
+			if (match && match.invitedPlayers && !match.invitedPlayers.some(p => p === peerId) || (match && !match.invitedPlayers)) {
+				const resSend = await fetch("/api/invite-match", {
+					method: "POST",
+					headers: { "Content-type": "application/json" },
+					credentials: "include",
+					body: JSON.stringify({ hostId: match.hostId, peerId })
+				})
+
+				if (!resSend.ok) {
+					// setErrors({ form: t("settings_err_updt_pwd") })
+					return
+				}
+				socket.emit("send_message", { toUserId: peerId, message: match.code.toUpperCase() })
+			}
+		} catch (error) {
+			console.error("load joined match:", error)
+		}
+	}
+
 	const areFriend = friends.find(f => f.id === peerId)
 	return <Sidebar>
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex flex-col h-full min-h-0 min-w-0">
-				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} />
+				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} handleInvite={handleInvite} />
 				{!peerId && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full items-center justify-center">
 						<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">
@@ -716,7 +754,7 @@ function DisplayMessage({ message, isMine, createdAt }: { message: string, isMin
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, blocked, peerId, onBlock, onUnblock, onProfile, closeCurrentConv, status }:
+function ConversationFriendDisplay({ friends, blocked, peerId, onBlock, onUnblock, onProfile, closeCurrentConv, status, handleInvite }:
 	{
 		friends: Friend[],
 		blocked: Friend[],
@@ -725,7 +763,8 @@ function ConversationFriendDisplay({ friends, blocked, peerId, onBlock, onUnbloc
 		onUnblock: (id: string) => void,
 		onProfile: (id: string) => void,
 		closeCurrentConv: () => void,
-		status: "available" | "in a match" | "away" | "offline"
+		status: "available" | "in a match" | "away" | "offline",
+		handleInvite: () => void
 	}) {
 	if (!peerId)
 		return
@@ -744,7 +783,7 @@ function ConversationFriendDisplay({ friends, blocked, peerId, onBlock, onUnbloc
 		</div>
 		<div className="flex items-center gap-2">
 			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={() => onProfile(peerId)}>{t("settings_profile_title")}</button>
-			{friend && !blockedData && <button className="btn btn-outline btn-neutral text-neutral-content btn-sm">{t("btn_invite")}</button>}
+			{friend && !blockedData && <button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={handleInvite}>{t("btn_invite")}</button>}
 			{friend && !blockedData && <button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>}
 			{!friend && blockedData && <button onClick={() => onUnblock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_unblock")}</button>}
 		</div>

@@ -36,6 +36,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 			endedAt: "",
 			hostId: userId,
 			maxPlayers: (selectedMatchType === "ONE_V_ONE" || selectedMatchType === "BOT") ? 2 : 4,
+			invitedPlayers: [],
 			players: [
 				{
 					userId,

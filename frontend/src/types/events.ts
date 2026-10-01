@@ -142,7 +142,8 @@ export interface Matchs {
 	endedAt: string,
 	hostId: string | null,
 	players: MatchPlayers[],
-	maxPlayers: number
+	maxPlayers: number,
+	invitedPlayers: string[]
 }
 
 export interface MatchPlayers {
