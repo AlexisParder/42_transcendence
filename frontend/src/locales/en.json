@@ -66,6 +66,7 @@
 	"txt_FOUR_FFA": "4p",
 	"txt_BOT": "1 v 1 bot",
 	"txt_FFA": "FFA",
+	"txt_grid": "grid",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
@@ -130,6 +131,10 @@
 	"play_registration_open": "Registration open",
 	"play_seats": "{{curr}} / {{max}} seats",
 	"play_starts_in": "starts in {{time}}",
+	"play_selected_format": "selected format",
+	"play_ships_per_fleet": "ships per fleet",
+	"play_ranked_off": "Ranked is off because Replace leavers with a bot is on. Turn it off to play for points",
+	"play_match_info": "Sink every enemy to win. Leaving a ranked match early counts as a loss",
 
 	"leaderboard_title": "Leaderboard",
 	"leaderboard_global_title": "Global",

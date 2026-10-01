@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { RadarEchoes } from "../components/RadarEchoes"
 import { Sidebar } from "../components/Sidebar"
 import { t } from "../lib/translate"
+import { useState } from "react"
 
 const features = [
 	{
@@ -29,6 +30,28 @@ const stats = [
 ]
 
 export function Home() {
+	const [code, setCode] = useState("")
+	const navigate = useNavigate()
+
+	async function handleJoinWithCode() {
+		try {
+			const res = await fetch("/api/join-code-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ code }),
+			})
+
+			if (!res.ok)
+				return
+
+			setCode("")
+			navigate("/play")
+		} catch (error) {
+			console.error("join code match:", error)
+		}
+	}
+
 	return (
 		<Sidebar guest>
 			<div className="flex flex-col flex-1 w-full max-w-6xl 2xl:max-w-7xl mx-auto p-4 md:p-8 gap-6 xl:gap-10">
@@ -49,9 +72,9 @@ export function Home() {
 								<input
 									type="text"
 									placeholder={`${t("home_code_name")} - - - - -`}
-									className="input xl:input-lg join-item w-40 xl:w-48 bg-base-200 font-mono uppercase outline-none"
+									className="input xl:input-lg join-item w-40 xl:w-48 bg-base-200 font-mono uppercase outline-none" value={code} onChange={(e) => setCode(e.target.value.trim())}
 								/>
-								<button className="btn xl:btn-lg join-item bg-base-300">
+								<button className="btn xl:btn-lg join-item bg-base-300" onClick={handleJoinWithCode}>
 									{t("home_join_btn")}
 								</button>
 							</div>

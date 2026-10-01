@@ -24,13 +24,15 @@ export function Play() {
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType | "BOT">("ONE_V_ONE")
 	const [abilities, setAbilities] = useState(true)
-	const [replace, setReplace] = useState(true)
+	const [replace, setReplace] = useState(false)
 	const [spectators, setSpectators] = useState(false)
 	const [timeTurn, setTimeTurn] = useState(30)
 	const [view, setView] = useState<viewType>("none")
 	const [matches, setMatches] = useState<Matchs[]>([])
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [code, setCode] = useState("")
+
+	const ranked = !replace
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
@@ -361,21 +363,21 @@ export function Play() {
 							setSelectedMatchType("ONE_V_ONE")
 					}}>
 						<p className="text-sm font-semibold">{t("txt_ONE_V_ONE")}</p>
-						<p className="text-xs text-neutral-content/50">{t("txt_ranked")}</p>
+						<p className="text-xs text-neutral-content/50">{ranked ? t("txt_ranked") : t("txt_unranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "TWO_V_TWO" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "TWO_V_TWO")
 							setSelectedMatchType("TWO_V_TWO")
 					}}>
 						<p className="text-sm font-semibold">{t("txt_TWO_V_TWO")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_duo")} <TbPointFilled className="size-1" /> {t("txt_ranked")}</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_duo")} <TbPointFilled className="size-1" /> {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "FOUR_FFA" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "FOUR_FFA")
 							setSelectedMatchType("FOUR_FFA")
 					}}>
 						<p className="text-sm font-semibold">{t("txt_FFA")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 {t("play_players")} <TbPointFilled className="size-1" /> {t("txt_ranked")}</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 {t("play_players")} <TbPointFilled className="size-1" /> {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "BOT" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "BOT") {
@@ -790,20 +792,20 @@ function SidebarRight({ children, format, replace }: {
 			<div className={`max-lg:hidden lg:shrink-0 min-h-0`}>
 				<ul className="menu flex-nowrap bg-base-200 h-full w-full p-4 gap-1">
 					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1 max-w-75">
-						<p className="text-xs uppercase text-neutral-content/50 font-mono">selected format</p>
+						<p className="text-xs uppercase text-neutral-content/50 font-mono">{t("play_selected_format")}</p>
 						<h2 className="font-bold text-xl">{t(`txt_${format}`)}</h2>
 
-						<SidebarRightItem label="player" value={players} />
-						<SidebarRightItem label="grid" value="14x14" />
-						<SidebarRightItem label="ships per fleet" value="4" />
-						<SidebarRightItem label="ranked" value={ranked} />
+						<SidebarRightItem label={t("txt_player")} value={players} />
+						<SidebarRightItem label={t("txt_grid")} value="14x14" />
+						<SidebarRightItem label={t("play_ships_per_fleet")} value="5" />
+						<SidebarRightItem label={t("txt_ranked")} value={ranked} />
 
 						{ranked !== "ON" && <div className="bg-base-100 rounded-md m-1">
-							<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoWarning className="text-warning size-7" /> Ranked is off because Replace leavers with a bot is on. Turn it off to play for points.</p>
+							<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoWarning className="text-warning size-7" /> {t("play_ranked_off")}.</p>
 						</div>}
 
 						<div className="bg-base-100 rounded-md m-1">
-							<p className="border border-neutral/50 bg-neutral/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoInformation className="text-neutral size-7" /> Sink every enemy to win. Leaving a ranked match early counts as a loss.</p>
+							<p className="border border-neutral/50 bg-neutral/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoInformation className="text-neutral size-7" /> {t("play_match_info")}.</p>
 						</div>
 					</div>
 				</ul>
