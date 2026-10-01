@@ -23,7 +23,7 @@ export function Play() {
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType | "BOT">("ONE_V_ONE")
-	const [abilities, setAbilities] = useState(true)
+	const [abilities, setAbilities] = useState(false)
 	const [replace, setReplace] = useState(false)
 	const [spectators, setSpectators] = useState(false)
 	const [timeTurn, setTimeTurn] = useState(30)
