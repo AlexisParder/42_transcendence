@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { Avatar } from "../components/Avatar";
 import { Input, InputWithText } from "../components/Input";
 import { Sidebar } from "../components/Sidebar";
-import { FaCheck, FaPlus } from "react-icons/fa6";
+import { FaCheck, FaPlus, FaRegEye } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { useSocket } from "../components/socketContext";
 import type { ConversationSummary, Friend, FriendRequest, FriendRequestAccept, Matchs, Message, PresenceStatus, PresenceUpdate } from "../types/events";
@@ -656,7 +656,7 @@ export function Friends() {
 				</div>}
 				{peerId && <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full">
-						{messages.map((msg) => <DisplayMessage key={msg.id} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
+						{messages.map((msg) => <DisplayMessage key={msg.id} isLastMessage={messages.findIndex(m => m.id === msg.id) === messages.length - 1} isRead={msg.isRead} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
 					</div>
 				</div>}
 				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
@@ -757,11 +757,14 @@ function SidebarRight({ children, search, setSearch, filteredConversations, setP
 	</>
 }
 
-function DisplayMessage({ message, isMine, createdAt }: { message: string, isMine: boolean, createdAt: string }) {
+function DisplayMessage({ message, isMine, createdAt, isLastMessage, isRead }: { message: string, isMine: boolean, createdAt: string, isLastMessage: boolean, isRead: boolean }) {
 	return <div className={`chat chat-${isMine ? 'end' : 'start'}`}>
 		<div className={`chat-bubble max-w-[70%] whitespace-pre-wrap break-all ${isMine ? 'bg-info/25' : 'bg-neutral-content/15'}`}>
 			{message}
 			<p className="text-xs text-neutral-content/60">{formatTimeMsg(createdAt)}</p>
+			{isLastMessage && isMine && isRead && <div className="flex items-end justify-end">
+				<FaRegEye className="text-neutral-content/60" />
+			</div>}
 		</div>
 	</div>
 }

@@ -36,7 +36,8 @@ export async function getConvHistoryHandler(req: Request, res: Response) {
 			fromUserId: row.userId,
 			toUserId: row.targetId,
 			message: row.message,
-			createdAt: row.sendAt.toISOString()
+			createdAt: row.sendAt.toISOString(),
+			isRead: row.isRead
 		}))
 		res.json({ messages })
 	} catch (error) {

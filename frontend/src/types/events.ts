@@ -38,6 +38,7 @@ export interface Message {
 	toUserId: string,
 	message: string,
 	createdAt: string,
+	isRead: boolean
 }
 
 export interface Friend {
