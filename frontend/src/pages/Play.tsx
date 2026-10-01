@@ -34,6 +34,15 @@ export function Play() {
 
 	const ranked = !replace
 
+	const visibleMatches = matches.map(m => {
+		const started = m.startedAt !== ""
+		const canJoin = !started && m.players.length < m.maxPlayers
+		const canSpec = started && m.settings.spectators
+		const host = m.players.find(p => p.userId === m.hostId)
+		return { m, host, canJoin, canSpec }
+	}).filter(({ canJoin, canSpec }) => canJoin || canSpec)
+		.sort((a, b) => Number(b.canJoin) - Number(a.canJoin))
+
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
 			setPresence(prev => ({ ...prev, [payload.userId]: payload.status }))
@@ -437,9 +446,18 @@ export function Play() {
 						<p className="uppercase text-neutral-content/50 text-xs">{t("play_public_matches")}</p>
 					</div>
 					<div className="flex flex-col gap-2 py-2 md:flex-1 md:min-h-0 md:overflow-y-auto">
-						{/* ajouter un tri pour afficher les join avant les parties en cours (si elles peuvent etre spectate, sinon ne pas afficher) */}
-						{matches.length > 0 && matches.map(m => (
-							<MatchItem key={m.hostId} username={m.players.find(p => p.userId === m.hostId)?.username} image={m.players.find(p => p.userId === m.hostId)?.image} type={m.mode} players={m.players.length} maxPlayers={m.maxPlayers} canJoin={m.players.length !== m.maxPlayers} canSpec={m.settings.spectators && m.startedAt !== ""} handleJoinedPublicMatch={handleJoinedPublicMatch} match={m} />
+						{visibleMatches.length > 0 && visibleMatches.map(({ m, host, canJoin, canSpec }) => (
+							<MatchItem
+								key={m.hostId}
+								username={host?.username}
+								image={host?.image}
+								type={m.mode}
+								players={m.players.length}
+								maxPlayers={m.maxPlayers}
+								canJoin={canJoin}
+								canSpec={canSpec}
+								handleJoinedPublicMatch={handleJoinedPublicMatch}
+								match={m} />
 						))}
 						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
