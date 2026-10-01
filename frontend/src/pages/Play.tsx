@@ -318,8 +318,22 @@ export function Play() {
 	return <Sidebar>
 		{view === "none" && <SidebarRight friends={friends} presence={presence}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
-				<h1 className="text-2xl font-bold first-letter:uppercase">{t("play_new_match")}</h1>
-				<p className="text-sm text-neutral-content/40 first-letter:uppercase">{t("play_desc")}.</p>
+				<div className="flex items-center justify-between max-sm:flex-col max-sm:gap-2 max-sm:pb-2">
+					<div>
+						<h1 className="text-2xl font-bold first-letter:uppercase">{t("play_new_match")}</h1>
+						<p className="text-sm text-neutral-content/40 first-letter:uppercase">{t("play_desc")}.</p>
+					</div>
+					<div className="join max-sm:w-full">
+						<input
+							type="text"
+							placeholder={`${t("home_code_name")} - - - - -`}
+							className="input join-item w-40 bg-base-200 font-mono uppercase outline-none max-sm:w-full" value={code} onChange={(e) => setCode(e.target.value.trim())}
+						/>
+						<button className="btn join-item btn-info" onClick={handleJoinWithCode}>
+							{t("home_join_btn")}
+						</button>
+					</div>
+				</div>
 
 				<div className="py-2 grid grid-cols-4 max-lg:grid-cols-2 gap-4">
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "ONE_V_ONE" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
@@ -394,19 +408,6 @@ export function Play() {
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
 					<p className="text-xs font-semibold">{t(`txt_${selectedMatchType}`)} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
 					<button className="btn btn-info max-lg:btn-sm" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
-				</div>
-
-				<div className="py-2 text-center">
-					<div className="join">
-						<input
-							type="text"
-							placeholder={`${t("home_code_name")} - - - - -`}
-							className="input join-item w-40 bg-base-200 font-mono uppercase outline-none" value={code} onChange={(e) => setCode(e.target.value.trim())}
-						/>
-						<button className="btn join-item bg-base-300" onClick={handleJoinWithCode}>
-							{t("home_join_btn")}
-						</button>
-					</div>
 				</div>
 
 				<div className="py-2 flex flex-col md:flex-1 md:min-h-0">
