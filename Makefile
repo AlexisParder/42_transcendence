@@ -1,7 +1,11 @@
 -include .env
 export
 
-export HOST_IP := $(shell ip route get 1.1.1.1 | awk '{print $$7; exit}')
+HOST_IP := $(shell ip route get 1.1.1.1 2>/dev/null | awk '{print $$7; exit}')
+ifeq ($(HOST_IP),)
+HOST_IP := $(shell ipconfig getifaddr $$(route -n get 1.1.1.1 | awk '/interface:/{print $$2}'))
+endif
+export HOST_IP
 
 all: up
 
