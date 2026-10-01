@@ -818,7 +818,7 @@ function SidebarRight({ children, format, replace }: {
 						<SidebarRightItem label={t("play_ships_per_fleet")} value="5" />
 						<SidebarRightItem label={t("txt_ranked")} value={ranked} />
 
-						{ranked !== "ON" && <div className="bg-base-100 rounded-md m-1">
+						{ranked !== "ON" && format !== "BOT" && <div className="bg-base-100 rounded-md m-1">
 							<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoWarning className="text-warning size-7" /> {t("play_ranked_off")}.</p>
 						</div>}
 
