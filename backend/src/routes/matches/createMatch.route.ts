@@ -18,7 +18,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
 
 		if (isInAnyMatch(currentMatches, userId))
-			return res.status(409).json({ ok: false, code: "already_in_match" })
+			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
 		const code = generateCode(currentMatches)
 		const newMatch: Matchs = {

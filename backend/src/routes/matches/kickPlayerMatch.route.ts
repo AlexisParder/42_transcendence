@@ -19,16 +19,19 @@ export async function kickPlayerMatchHandler(req: Request, res: Response) {
 
 		const match = currentMatches.get(userId)
 		if (!match)
-			return res.status(400).json({ ok: false, code: "match_does_not_exist" })
+			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
+
+		if (userId !== match.hostId)
+			return res.status(400).json({ ok: false, code: "match_err_host" })
 
 		if (!match.players.some(p => p.userId === targetId))
-			return res.status(409).json({ ok: false, code: "not_in_match" })
+			return res.status(409).json({ ok: false, code: "match_err_no_match" })
 
 		if (match.startedAt !== "")
-			return res.status(403).json({ ok: false, code: "match_already_started" })
+			return res.status(403).json({ ok: false, code: "match_err_already_started" })
 
 		if (userId === targetId)
-			return res.json({ ok: false, code: "not_kick_self" })
+			return res.json({ ok: false, code: "match_err_kick_self" })
 
 		match.players = match.players.filter(p => p.userId !== targetId)
 

@@ -18,7 +18,10 @@ export async function deleteMatchHandler(req: Request, res: Response) {
 
 		const match = currentMatches.get(userId)
 		if (!match)
-			return res.status(400).json({ ok: false, code: "host_err_no_match" })
+			return res.status(400).json({ ok: false, code: "match_err_no_match" })
+
+		if (match.hostId !== userId)
+			return res.status(400).json({ ok: false, code: "match_err_host" })
 
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
@@ -29,6 +32,6 @@ export async function deleteMatchHandler(req: Request, res: Response) {
 		currentMatches.delete(userId)
 		res.json({ ok: true })
 	} catch (err) {
-		res.status(401).json({ ok: false })
+		res.status(500).json({ ok: false })
 	}
 }

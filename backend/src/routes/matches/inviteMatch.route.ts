@@ -16,25 +16,25 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		if (hostId === peerId)
-			return res.status(400).json({ ok: false, code: "no_invited_host" })
+			return res.status(400).json({ ok: false, code: "match_err_invite_host" })
 
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
 		const match = currentMatches.get(hostId)
 
 		if (!match)
-			return res.status(400).json({ ok: false, code: "match_does_not_exist" })
+			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		if (isInAnyMatch(currentMatches, peerId))
-			return res.status(409).json({ ok: false, code: "already_in_match" })
+			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
 		if (match.players.length >= match.maxPlayers)
-			return res.status(400).json({ ok: false, code: "match_full" })
+			return res.status(400).json({ ok: false, code: "match_err_full" })
 
 		if (match.startedAt !== "")
-			return res.status(400).json({ ok: false, code: "match_already_started" })
+			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
 		if (match.invitedPlayers && match.invitedPlayers.some(p => p === peerId))
-			return res.status(400).json({ ok: false, code: "already_invited" })
+			return res.status(400).json({ ok: false, code: "match_err_already_invited" })
 
 		match.invitedPlayers.push(peerId)
 

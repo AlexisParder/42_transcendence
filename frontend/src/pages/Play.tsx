@@ -31,6 +31,7 @@ export function Play() {
 	const [matches, setMatches] = useState<Matchs[]>([])
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [code, setCode] = useState("")
+	const [errors, setErrors] = useState<{ matchCreation?: string, matchWaiting?: string, matchJoin?: string, matchJoinCode?: string }>({})
 
 	const ranked = !replace
 
@@ -71,10 +72,8 @@ export function Play() {
 					credentials: "include",
 				})
 
-				if (!res.ok) {
-					// setErrors({ form: t("settings_err_updt_pwd") })
+				if (!res.ok)
 					return
-				}
 
 				const data = await res.json()
 				const match = data.match ?? undefined
@@ -172,15 +171,15 @@ export function Play() {
 				body: JSON.stringify({ selectedMatchType, visibility, timeTurn, abilities, replace, spectators }),
 			})
 
+			const data = await res.json()
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchCreation: data.code ? t(data.code) : t("match_err_creation_failure") })
 				return
 			}
 
-			const data = await res.json()
 			setJoinedMatch(data.match ?? undefined)
-
 			setView("host")
+			setErrors({})
 		} catch (error) {
 			console.error("create match:", error)
 		}
@@ -194,23 +193,23 @@ export function Play() {
 				credentials: "include",
 			})
 
+			const data = await res.json()
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_delete_failure") })
 				return
 			}
 
 			setJoinedMatch(undefined)
 			setView("none")
+			setErrors({})
 		} catch (error) {
 			console.error("delete match:", error)
 		}
 	}
 
 	async function handleJoinedPublicMatch(match: Matchs) {
-		if (match.visibility !== "public") {
-			// setErrors({ form: t("settings_err_updt_pwd") })
+		if (match.visibility !== "public")
 			return
-		}
 
 		try {
 			const res = await fetch("/api/join-match", {
@@ -220,15 +219,16 @@ export function Play() {
 				body: JSON.stringify({ hostId: match.hostId }),
 			})
 
+			const data = await res.json()
+
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchJoin: data.code ? t(data.code) : t("match_err_join_failure") })
 				return
 			}
 
-			const data = await res.json()
 			setJoinedMatch(data.match ?? undefined)
-
 			setView("guest")
+			setErrors({})
 		} catch (error) {
 			console.error("join match:", error)
 		}
@@ -246,13 +246,16 @@ export function Play() {
 				body: JSON.stringify({ hostId: joinedMatch.hostId }),
 			})
 
+			const data = await res.json()
+
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_leave_failure") })
 				return
 			}
 
 			setJoinedMatch(undefined)
 			setView("none")
+			setErrors({})
 		} catch (error) {
 			console.error("leave match:", error)
 		}
@@ -270,13 +273,15 @@ export function Play() {
 				body: JSON.stringify({ hostId: joinedMatch.hostId }),
 			})
 
+			const data = await res.json()
+
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_status_update_failure") })
 				return
 			}
 
-			const data = await res.json()
 			setJoinedMatch(data.match ?? undefined)
+			setErrors({})
 		} catch (error) {
 			console.error("update player status match:", error)
 		}
@@ -291,19 +296,24 @@ export function Play() {
 				body: JSON.stringify({ targetId }),
 			})
 
+			const data = await res.json()
+
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_kick_failure") })
 				return
 			}
 
-			const data = await res.json()
 			setJoinedMatch(data.match ?? undefined)
+			setErrors({})
 		} catch (error) {
 			console.error("kick user match:", error)
 		}
 	}
 
 	async function handleJoinWithCode() {
+		if (!code)
+			return setErrors({})
+
 		try {
 			const res = await fetch("/api/join-code-match", {
 				method: "POST",
@@ -312,15 +322,17 @@ export function Play() {
 				body: JSON.stringify({ code }),
 			})
 
+			const data = await res.json()
+
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchJoinCode: data.code ? t(data.code) : t("match_err_join_failure") })
 				return
 			}
 
-			const data = await res.json()
 			setJoinedMatch(data.match ?? undefined)
 			setCode("")
 			setView("guest")
+			setErrors({})
 		} catch (error) {
 			console.error("join code match:", error)
 		}
@@ -338,11 +350,14 @@ export function Play() {
 				body: JSON.stringify({ hostId: joinedMatch.hostId, peerId: targetId })
 			})
 
+			const data = await res.json()
+
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_invite_failure") })
 				return
 			}
 			socket.emit("send_message", { toUserId: targetId, message: joinedMatch.code.toUpperCase() })
+			setErrors({})
 		}
 	}
 
@@ -354,15 +369,18 @@ export function Play() {
 						<h1 className="text-2xl font-bold first-letter:uppercase">{t("play_new_match")}</h1>
 						<p className="text-sm text-neutral-content/40 first-letter:uppercase">{t("play_desc")}.</p>
 					</div>
-					<div className="join max-sm:w-full">
-						<input
-							type="text"
-							placeholder={`${t("home_code_name")} - - - - -`}
-							className="input join-item w-40 bg-base-200 font-mono uppercase outline-none max-sm:w-full" value={code} onChange={(e) => setCode(e.target.value.trim())}
-						/>
-						<button className="btn join-item btn-info" onClick={handleJoinWithCode}>
-							{t("home_join_btn")}
-						</button>
+					<div className="flex flex-col justify-between md:items-end">
+						<div className="join max-sm:w-full">
+							<input
+								type="text"
+								placeholder={`${t("home_code_name")} - - - - -`}
+								className="input join-item w-40 bg-base-200 font-mono uppercase outline-none max-sm:w-full" value={code} onChange={(e) => setCode(e.target.value.trim())}
+							/>
+							<button className="btn join-item btn-info" onClick={handleJoinWithCode}>
+								{t("home_join_btn")}
+							</button>
+						</div>
+						{errors.matchJoinCode && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{errors.matchJoinCode}</span>}
 					</div>
 				</div>
 
@@ -379,14 +397,14 @@ export function Play() {
 							setSelectedMatchType("TWO_V_TWO")
 					}}>
 						<p className="text-sm font-semibold">{t("txt_TWO_V_TWO")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_duo")} <TbPointFilled className="size-1" /> {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_duo")}, {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "FOUR_FFA" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "FOUR_FFA")
 							setSelectedMatchType("FOUR_FFA")
 					}}>
 						<p className="text-sm font-semibold">{t("txt_FFA")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 {t("play_players")} <TbPointFilled className="size-1" /> {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 {t("play_players")}, {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
 					</button>
 					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "BOT" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
 						if (selectedMatchType !== "BOT") {
@@ -395,7 +413,7 @@ export function Play() {
 						}
 					}}>
 						<p className="text-sm font-semibold first-letter:uppercase">{t("play_against_bot")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_practice")} <TbPointFilled className="size-1" /> {t("txt_unranked")}</p>
+						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_practice")}, {t("txt_unranked")}</p>
 					</button>
 				</div>
 
@@ -422,15 +440,15 @@ export function Play() {
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_abilities")}</p>
-								<Togglebox name={`spec_ab`} type="info" checked={abilities} onClick={() => setAbilities(!abilities)} />
+								<Togglebox name={`spec_ab`} type="info" checked={abilities} onChange={() => setAbilities(!abilities)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_replace")}</p>
-								<Togglebox name={`spec_ab`} type="info" checked={replace} onClick={() => setReplace(!replace)} />
+								<Togglebox name={`spec_ab`} type="info" checked={replace} onChange={() => setReplace(!replace)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_spectators")}</p>
-								<Togglebox name={`spec_ab`} type="info" checked={spectators} onClick={() => setSpectators(!spectators)} />
+								<Togglebox name={`spec_ab`} type="info" checked={spectators} onChange={() => setSpectators(!spectators)} />
 							</div>
 						</div>
 					</div>
@@ -438,7 +456,10 @@ export function Play() {
 
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
 					<p className="text-xs font-semibold">{t(`txt_${selectedMatchType}`)} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
-					<button className="btn btn-info max-lg:btn-sm" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
+					<div className="flex flex-col justify-between items-end">
+						<button className="btn btn-info max-lg:btn-sm text-nowrap" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
+						{errors.matchCreation && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{errors.matchCreation}</span>}
+					</div>
 				</div>
 
 				<div className="py-2 flex flex-col md:flex-1 md:min-h-0">
@@ -457,7 +478,8 @@ export function Play() {
 								canJoin={canJoin}
 								canSpec={canSpec}
 								handleJoinedPublicMatch={handleJoinedPublicMatch}
-								match={m} />
+								match={m}
+								joinMatchErr={errors.matchJoin} />
 						))}
 						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
@@ -476,16 +498,17 @@ export function Play() {
 			</Modal>
 		</SidebarRight>}
 
-		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleKick={handleKick} handleInvite={handleInvite} />}
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleKick={handleKick} handleInvite={handleInvite} MatchErr={errors.matchWaiting} />}
 	</Sidebar>
 }
 
-function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDeleteMatch, handleLeaveMatch, handleStatus, handleKick, handleInvite }: {
+function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus, handleKick, handleInvite }: {
 	isHost: boolean,
 	myId: string | undefined,
 	joinedMatch: Matchs | undefined,
 	friends: Friend[],
 	presence: Record<string, PresenceStatus>,
+	MatchErr?: string,
 	handleDeleteMatch: () => void,
 	handleLeaveMatch: () => void,
 	handleStatus: () => void,
@@ -546,7 +569,7 @@ function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, handleDelet
 			</div>
 		</div>
 
-		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} />
+		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} MatchErr={MatchErr} />
 	</div>
 }
 
@@ -704,12 +727,13 @@ function InvitePanel({ code, friends, presence, invitedPlayers, handleInvite }: 
 	</div >
 }
 
-function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDeleteMatch, handleLeaveMatch, handleStatus }: {
+function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus }: {
 	isHost: boolean,
 	allReady: boolean,
 	missing: number,
 	total: number,
 	isReady: boolean,
+	MatchErr?: string,
 	handleDeleteMatch: () => void,
 	handleLeaveMatch: () => void,
 	handleStatus: () => void
@@ -733,7 +757,7 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDe
 				{detail && <span className="text-neutral-content/50 max-lg:hidden">{detail}</span>}
 			</p>
 
-			<div className="flex flex-col-reverse gap-2 lg:flex-row">
+			<div className="flex flex-col-reverse gap-2 lg:flex-row lg:items-center">
 				{isHost
 					? <>
 						<button className="btn btn-ghost text-error lg:btn-outline lg:btn-error" onClick={handleDeleteMatch}>{t("play_btn_close_room")}</button>
@@ -743,12 +767,14 @@ function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, handleDe
 						<button className="btn btn-ghost lg:btn-outline" onClick={handleLeaveMatch}>{t("play_btn_leave_room")}</button>
 						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`} onClick={handleStatus}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("play_ready")}</>}</button>
 					</>}
+				{MatchErr && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{MatchErr}</span>}
+
 			</div>
 		</div>
 	</div>
 }
 
-function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec, match, handleJoinedPublicMatch }:
+function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec, match, joinMatchErr, handleJoinedPublicMatch }:
 	{
 		username: string | null | undefined,
 		image: string | null | undefined,
@@ -758,6 +784,7 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 		canJoin?: boolean,
 		canSpec?: boolean,
 		match: Matchs,
+		joinMatchErr?: string,
 		handleJoinedPublicMatch: (match: Matchs) => void,
 	}
 ) {
@@ -780,7 +807,10 @@ function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpe
 		</div>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{typeTxt}</p>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{players} / {maxPlayers}</p>
-		{canJoin && <button className="btn btn-outline btn-info btn-sm" onClick={() => handleJoinedPublicMatch(match)} >{t("btn_join")}</button>}
+		<div className="flex flex-col items-end justify-center">
+			{canJoin && <button className="btn btn-outline btn-info btn-sm" onClick={() => handleJoinedPublicMatch(match)} >{t("btn_join")}</button>}
+			{joinMatchErr && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{joinMatchErr}</span>}
+		</div>
 		{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">{t("btn_spectate")}</button>}
 	</div>
 }

@@ -19,16 +19,16 @@ export async function leaveMatchHandler(req: Request, res: Response) {
 
 		const match = currentMatches.get(hostId)
 		if (!match)
-			return res.status(400).json({ ok: false, code: "match_does_not_exist" })
+			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		if (!match.players.some(p => p.userId === userId))
-			return res.status(409).json({ ok: false, code: "not_in_match" })
+			return res.status(409).json({ ok: false, code: "match_err_no_match" })
 
 		if (match.startedAt !== "")
-			return res.status(403).json({ ok: false, code: "match_already_started" })
+			return res.status(403).json({ ok: false, code: "match_err_already_started" })
 
 		if (userId === hostId)
-			return res.json({ ok: false, code: "host_need_close" })
+			return res.json({ ok: false, code: "match_err_must_close" })
 
 		match.players = match.players.filter(p => p.userId !== userId)
 

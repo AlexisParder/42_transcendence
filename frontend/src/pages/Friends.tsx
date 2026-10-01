@@ -24,7 +24,7 @@ export function Friends() {
 	const [messages, setMessages] = useState<Message[]>([])
 	const [friends, setFriends] = useState<Friend[]>([])
 	const scrollRef = useRef<HTMLDivElement>(null)
-	const [errors, setErrors] = useState<{ username?: string, block?: string, messages?: string }>({})
+	const [errors, setErrors] = useState<{ username?: string, block?: string, messages?: string, invite?: string }>({})
 	const [requests, setRequests] = useState<FriendRequest[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
 	const [conversations, setConversations] = useState<ConversationSummary[]>([])
@@ -495,6 +495,7 @@ export function Friends() {
 		prevScrollHeightRef.current = null
 		loadingMoreRef.current = false
 		setMessages([])
+		setErrors({})
 	}
 
 	async function handleBlock(targetId: string) {
@@ -602,27 +603,38 @@ export function Friends() {
 			})
 
 			if (!res.ok) {
-				// setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ invite: t("match_err_invite_failure") })
 				return
 			}
 
 			const data = await res.json()
 			const match: Matchs | undefined = data.match ?? undefined
 
-			if (match && match.invitedPlayers && !match.invitedPlayers.some(p => p === peerId) || (match && !match.invitedPlayers)) {
-				const resSend = await fetch("/api/invite-match", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({ hostId: match.hostId, peerId })
-				})
-
-				if (!resSend.ok) {
-					// setErrors({ form: t("settings_err_updt_pwd") })
-					return
-				}
-				socket.emit("send_message", { toUserId: peerId, message: match.code.toUpperCase() })
+			if (!match) {
+				setErrors({ invite: t("match_err_does_not_exist") })
+				return
 			}
+
+			if (match.invitedPlayers.includes(peerId)) {
+				setErrors({ invite: t("match_err_already_invited") })
+				return
+			}
+
+			const resSend = await fetch("/api/invite-match", {
+				method: "POST",
+				headers: { "Content-type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ hostId: match.hostId, peerId })
+			})
+
+			const dataSend = await resSend.json()
+			if (!resSend.ok) {
+				setErrors({ invite: dataSend.code ? t(dataSend.code) : t("match_err_invite_failure") })
+				return
+			}
+
+			socket.emit("send_message", { toUserId: peerId, message: match.code.toUpperCase() })
+			setErrors({})
 		} catch (error) {
 			console.error("load joined match:", error)
 		}
@@ -632,7 +644,7 @@ export function Friends() {
 	return <Sidebar>
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex flex-col h-full min-h-0 min-w-0">
-				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} handleInvite={handleInvite} />
+				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} handleInvite={handleInvite} inviteErr={errors.invite} />
 				{!peerId && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full items-center justify-center">
 						<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">
@@ -754,11 +766,12 @@ function DisplayMessage({ message, isMine, createdAt }: { message: string, isMin
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, blocked, peerId, onBlock, onUnblock, onProfile, closeCurrentConv, status, handleInvite }:
+function ConversationFriendDisplay({ friends, blocked, peerId, inviteErr, onBlock, onUnblock, onProfile, closeCurrentConv, status, handleInvite }:
 	{
 		friends: Friend[],
 		blocked: Friend[],
 		peerId: string | null,
+		inviteErr?: string,
 		onBlock: (id: string) => void,
 		onUnblock: (id: string) => void,
 		onProfile: (id: string) => void,
@@ -781,11 +794,14 @@ function ConversationFriendDisplay({ friends, blocked, peerId, onBlock, onUnbloc
 				{friend && <p className="text-xs text-info">{friend && t(`txt_${status}`)}</p>}
 			</div>
 		</div>
-		<div className="flex items-center gap-2">
-			<button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={() => onProfile(peerId)}>{t("settings_profile_title")}</button>
-			{friend && !blockedData && <button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={handleInvite}>{t("btn_invite")}</button>}
-			{friend && !blockedData && <button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>}
-			{!friend && blockedData && <button onClick={() => onUnblock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_unblock")}</button>}
+		<div className="flex flex-col items-end justify-between">
+			<div className="flex items-center gap-2">
+				<button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={() => onProfile(peerId)}>{t("settings_profile_title")}</button>
+				{friend && !blockedData && <button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={handleInvite}>{t("btn_invite")}</button>}
+				{friend && !blockedData && <button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>}
+				{!friend && blockedData && <button onClick={() => onUnblock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_unblock")}</button>}
+			</div>
+			{inviteErr && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{inviteErr}</span>}
 		</div>
 	</div>
 }
@@ -913,9 +929,6 @@ function OnlineItem({ username, image, status, isSelected, onSelect }: { usernam
 					<p className="text-xs opacity-60">{t(`txt_${status}`)}</p>
 				</div>
 			</div>
-			{status !== "in a match" && <div>
-				<button className="btn btn-xs btn-neutral btn-outline text-neutral-content">{t("btn_invite")}</button>
-			</div>}
 		</div>
 	</li>
 }

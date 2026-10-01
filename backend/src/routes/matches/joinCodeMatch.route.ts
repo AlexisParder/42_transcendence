@@ -27,16 +27,16 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 		}
 
 		if (!match || match === undefined)
-			return res.status(400).json({ ok: false, code: "match_does_not_exist" })
+			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		if (isInAnyMatch(currentMatches, userId))
-			return res.status(409).json({ ok: false, code: "already_in_match" })
+			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
 		if (match.players.length >= match.maxPlayers)
-			return res.status(400).json({ ok: false, code: "match_full" })
+			return res.status(400).json({ ok: false, code: "match_err_full" })
 
 		if (match.startedAt !== "")
-			return res.status(400).json({ ok: false, code: "match_already_started" })
+			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
 		const team = firstFreeTeam(match.players, match.mode === "TWO_V_TWO" ? 2 : 1)
 		const newPlayer: MatchPlayers = {
