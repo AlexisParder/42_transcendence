@@ -761,10 +761,10 @@ function DisplayMessage({ message, isMine, createdAt, isLastMessage, isRead }: {
 	return <div className={`chat chat-${isMine ? 'end' : 'start'}`}>
 		<div className={`chat-bubble max-w-[70%] whitespace-pre-wrap break-all ${isMine ? 'bg-info/25' : 'bg-neutral-content/15'}`}>
 			{message}
-			<p className="text-xs text-neutral-content/60">{formatTimeMsg(createdAt)}</p>
-			{isLastMessage && isMine && isRead && <div className="flex items-end justify-end">
-				<FaRegEye className="text-neutral-content/60" />
-			</div>}
+			<div className={`flex items-center ${isMine ? "justify-end" : ""} gap-1`}>
+				<p className="text-xs text-neutral-content/60">{formatTimeMsg(createdAt)}</p>
+				{isLastMessage && isMine && isRead && <FaRegEye className="text-neutral-content/60 size-3" />}
+			</div>
 		</div>
 	</div>
 }
