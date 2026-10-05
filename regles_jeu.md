@@ -37,3 +37,15 @@ Trois résultats possibles:
 
 # Fin de la partie
 - La partie s'arrete, quand tous les navires adverse sont coulés
+
+# Regles modes revisité
+- Un action = un tour
+  - Si on utilise une capacite, ça passe notre tour
+
+- Mode Duo,
+	- un membre a par team la suite
+		- Exemple: Team A (X, Y), Team B (I, J), X joue puis I puis Y et enfin J etc...
+
+- Capacités
+  - Chaques capacites est activables un certain nombre de fois par joueur dans la partie
+  - Si le navire associé a cette capacité est coulé, le joueur ne peut plus l'utiliser
