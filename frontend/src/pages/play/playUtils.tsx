@@ -6,6 +6,18 @@ import { Avatar } from "../../components/Avatar"
 import { t } from "../../lib/translate"
 import type { Matchs, Friend, PresenceStatus, Rules, matchType } from "../../types/events"
 
+export function MatchTypeBtn({ selected, title, subtitle, onClick }: {
+	selected: boolean,
+	title: string,
+	subtitle: string,
+	onClick: () => void
+}) {
+	return <button className={`cursor-pointer rounded-md p-4 text-left ${selected ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"}`} onClick={onClick}>
+		<p className="text-sm font-semibold first-letter:uppercase">{title}</p>
+		<p className="text-xs text-neutral-content/50">{subtitle}</p>
+	</button>
+}
+
 export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus, handleKick, handleInvite }: {
 	isHost: boolean,
 	myId: string | undefined,

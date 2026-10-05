@@ -7,10 +7,10 @@ import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Togglebox } from "../../components/Togglebox";
 import { HideModal, Modal, ShowModal } from "../../components/Modal";
 import { authClient } from "../../lib/auth-client";
-import { SidebarRight, MatchItem, WaitingRoom } from "./utilsPlay";
-
-type visibilityType = "private" | "public"
-type viewType = "none" | "host" | "guest"
+import { SidebarRight, MatchItem, WaitingRoom, MatchTypeBtn } from "./playUtils";
+import { getVisiblesMatches } from "./playLogic";
+import type { visibilityType, viewType } from "../../types/types";
+import { apiGet, apiPost } from "../../lib/api";
 
 export function Play() {
 	useDocumentTitle(t("play_title"))
@@ -32,14 +32,7 @@ export function Play() {
 
 	const ranked = !replace
 
-	const visibleMatches = matches.map(m => {
-		const started = m.startedAt !== ""
-		const canJoin = !started && m.players.length < m.maxPlayers
-		const canSpec = started && m.settings.spectators
-		const host = m.players.find(p => p.userId === m.hostId)
-		return { m, host, canJoin, canSpec }
-	}).filter(({ canJoin, canSpec }) => canJoin || canSpec)
-		.sort((a, b) => Number(b.canJoin) - Number(a.canJoin))
+	const visibleMatches = getVisiblesMatches(matches)
 
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
@@ -63,16 +56,11 @@ export function Play() {
 	useEffect(() => {
 		async function loadJoinedMatch() {
 			try {
-				const res = await fetch("/api/get-joined-match", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include",
-				})
+				const { ok, data } = await apiPost("/api/get-joined-match")
 
-				if (!res.ok)
+				if (!ok)
 					return
 
-				const data = await res.json()
 				const match = data.match ?? undefined
 				setJoinedMatch(match)
 
@@ -88,16 +76,11 @@ export function Play() {
 
 	async function loadFriends() {
 		try {
-			const res = await fetch("/api/get-friends", {
-				method: "GET",
-				headers: { "Content-type": "application/json" },
-				credentials: "include"
-			})
+			const { ok, data } = await apiGet("/api/get-friends")
 
-			if (!res.ok)
+			if (!ok)
 				return
 
-			const data = await res.json()
 			setFriends(data.friends ?? [])
 
 			const initialPresence: Record<string, PresenceStatus> = {}
@@ -115,16 +98,11 @@ export function Play() {
 	}, [])
 
 	async function loadMatches() {
-		const res = await fetch("/api/get-matches", {
-			method: "POST",
-			headers: { "Content-type": "application/json" },
-			credentials: "include"
-		})
+		const { ok, data } = await apiPost("/api/get-matches")
 
-		if (!res.ok)
+		if (!ok)
 			return
 
-		const data = await res.json()
 		setMatches(data.matches ?? [])
 	}
 
@@ -161,15 +139,16 @@ export function Play() {
 			setVisibility("private")
 
 		try {
-			const res = await fetch("/api/create-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ selectedMatchType, visibility, timeTurn, abilities, replace, spectators }),
+			const { ok, data } = await apiPost("/api/create-match", {
+				selectedMatchType,
+				visibility,
+				timeTurn,
+				abilities,
+				replace,
+				spectators
 			})
 
-			const data = await res.json()
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchCreation: data.code ? t(data.code) : t("match_err_creation_failure") })
 				return
 			}
@@ -184,14 +163,9 @@ export function Play() {
 
 	async function handleDeleteMatch() {
 		try {
-			const res = await fetch("/api/delete-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-			})
+			const { ok, data } = await apiPost("/api/delete-match")
 
-			const data = await res.json()
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_delete_failure") })
 				return
 			}
@@ -209,16 +183,9 @@ export function Play() {
 			return
 
 		try {
-			const res = await fetch("/api/join-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ hostId: match.hostId }),
-			})
+			const { ok, data } = await apiPost("/api/join-match", { hostId: match.hostId })
 
-			const data = await res.json()
-
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchJoin: data.code ? t(data.code) : t("match_err_join_failure") })
 				return
 			}
@@ -236,16 +203,9 @@ export function Play() {
 			return
 
 		try {
-			const res = await fetch("/api/leave-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ hostId: joinedMatch.hostId }),
-			})
+			const { ok, data } = await apiPost("/api/leave-match", { hostId: joinedMatch.hostId })
 
-			const data = await res.json()
-
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_leave_failure") })
 				return
 			}
@@ -263,16 +223,9 @@ export function Play() {
 			return
 
 		try {
-			const res = await fetch("/api/update-player-status-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ hostId: joinedMatch.hostId }),
-			})
+			const { ok, data } = await apiPost("/api/update-player-status-match", { hostId: joinedMatch.hostId })
 
-			const data = await res.json()
-
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_status_update_failure") })
 				return
 			}
@@ -286,16 +239,9 @@ export function Play() {
 
 	async function handleKick(targetId: string) {
 		try {
-			const res = await fetch("/api/kick-user-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ targetId }),
-			})
+			const { ok, data } = await apiPost("/api/kick-user-match", { targetId })
 
-			const data = await res.json()
-
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_kick_failure") })
 				return
 			}
@@ -312,16 +258,9 @@ export function Play() {
 			return setErrors({})
 
 		try {
-			const res = await fetch("/api/join-code-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ code }),
-			})
+			const { ok, data } = await apiPost("/api/join-code-match", { code })
 
-			const data = await res.json()
-
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchJoinCode: data.code ? t(data.code) : t("match_err_join_failure") })
 				return
 			}
@@ -340,16 +279,12 @@ export function Play() {
 			return
 
 		if (!joinedMatch.invitedPlayers.some(p => p === targetId)) {
-			const res = await fetch("/api/invite-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ hostId: joinedMatch.hostId, peerId: targetId })
+			const { ok, data } = await apiPost("/api/invite-match", {
+				hostId: joinedMatch.hostId,
+				peerId: targetId
 			})
 
-			const data = await res.json()
-
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_invite_failure") })
 				return
 			}
@@ -382,36 +317,39 @@ export function Play() {
 				</div>
 
 				<div className="py-2 grid grid-cols-4 max-xl:grid-cols-2 gap-4">
-					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "ONE_V_ONE" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
-						if (selectedMatchType !== "ONE_V_ONE")
+					<MatchTypeBtn
+						selected={selectedMatchType === "ONE_V_ONE"}
+						title={t("txt_ONE_V_ONE")}
+						subtitle={ranked ? t("txt_ranked") : t("txt_unranked")}
+						onClick={() => {
 							setSelectedMatchType("ONE_V_ONE")
-					}}>
-						<p className="text-sm font-semibold">{t("txt_ONE_V_ONE")}</p>
-						<p className="text-xs text-neutral-content/50">{ranked ? t("txt_ranked") : t("txt_unranked")}</p>
-					</button>
-					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "TWO_V_TWO" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
-						if (selectedMatchType !== "TWO_V_TWO")
+						}}
+					/>
+					<MatchTypeBtn
+						selected={selectedMatchType === "TWO_V_TWO"}
+						title={t("txt_TWO_V_TWO")}
+						subtitle={`${t("play_duo")}, ${ranked ? t("txt_ranked") : t("txt_unranked")}`}
+						onClick={() => {
 							setSelectedMatchType("TWO_V_TWO")
-					}}>
-						<p className="text-sm font-semibold">{t("txt_TWO_V_TWO")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_duo")}, {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
-					</button>
-					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "FOUR_FFA" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
-						if (selectedMatchType !== "FOUR_FFA")
+						}}
+					/>
+					<MatchTypeBtn
+						selected={selectedMatchType === "FOUR_FFA"}
+						title={t("txt_FFA")}
+						subtitle={`3-4 ${t("play_players")}, ${ranked ? t("txt_ranked") : t("txt_unranked")}`}
+						onClick={() => {
 							setSelectedMatchType("FOUR_FFA")
-					}}>
-						<p className="text-sm font-semibold">{t("txt_FFA")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">3-4 {t("play_players")}, {ranked ? t("txt_ranked") : t("txt_unranked")}</p>
-					</button>
-					<button className={`cursor-pointer rounded-md p-4 ${selectedMatchType === "BOT" ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} text-left`} onClick={() => {
-						if (selectedMatchType !== "BOT") {
+						}}
+					/>
+					<MatchTypeBtn
+						selected={selectedMatchType === "BOT"}
+						title={t("play_against_bot")}
+						subtitle={`${t("play_practice")}, ${t("txt_unranked")}`}
+						onClick={() => {
 							setSelectedMatchType("BOT")
 							setVisibility("private")
-						}
-					}}>
-						<p className="text-sm font-semibold first-letter:uppercase">{t("play_against_bot")}</p>
-						<p className="text-xs text-neutral-content/50 flex items-center gap-1">{t("play_practice")}, {t("txt_unranked")}</p>
-					</button>
+						}}
+					/>
 				</div>
 
 				<div className="py-2 grid grid-cols-2 max-xl:grid-cols-1 gap-4">
