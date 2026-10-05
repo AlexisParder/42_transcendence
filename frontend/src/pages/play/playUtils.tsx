@@ -78,7 +78,7 @@ export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, Matc
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-				<RulesPanel isHost={isHost} rules={rules} />
+				<RulesPanel rules={rules} />
 				<div className="max-lg:hidden">
 					<InvitePanel code={joinedMatch.code} friends={friends} presence={presence} handleInvite={handleInvite} invitedPlayers={joinedMatch.invitedPlayers} />
 				</div>
@@ -144,7 +144,7 @@ export function PlayerItem({ userId, username, image, points, isReady, isMine, i
 					{isHost && <span className="lg:hidden"><HostBadge /></span>}
 				</p>
 				<p className="text-xs text-neutral-content/50 font-mono">{points.toLocaleString()} {t("txt_pts")}</p>
-				{isDuo && <p className={`text-xs ${team === 1 ? "text-info/75" : "text-error/75"} font-mono`}>{team === 1 ? "Blue team" : "Red team"}</p>}
+				{isDuo && <p className={`text-xs ${team === 1 ? "text-info/75" : "text-error/75"} font-mono`}>{team === 1 ? t("txt_team_blue") : t("txt_team_red")}</p>}
 			</div>
 		</div>
 
@@ -179,7 +179,7 @@ export function CodeBox({ code }: { code: string }) {
 	</div>
 }
 
-export function RulesPanel({ rules }: { isHost: boolean, rules: Rules }) {
+export function RulesPanel({ rules }: { rules: Rules }) {
 	const summary = [
 		t(`txt_${rules.format}`),
 		t("play_s_turns", { time: rules.timeTurn }),
@@ -263,7 +263,7 @@ export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, M
 		title = t("play_waiting_more_players", { missing })
 		detail = isHost ? "" : t("play_only_host_start")
 	} else
-		title = "Waiting for everyone to be ready."
+		title = t("play_waiting_everyone")
 
 	return <div className="shrink-0 p-4 lg:px-6 lg:pb-6 max-lg:border-t max-lg:border-neutral/50">
 		<div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:bg-neutral/10 lg:border lg:border-neutral/50 lg:rounded-lg lg:p-4">
@@ -350,7 +350,7 @@ export function SidebarRight({ children, format, replace }: {
 
 	return <>
 		<div className="flex w-full h-full min-h-0">
-			<div className={`flex-1 min-w-0 min-h-0}`}>
+			<div className={`flex-1 min-w-0 min-h-0`}>
 				{children}
 			</div>
 			<div className={`max-lg:hidden lg:shrink-0 min-h-0`}>

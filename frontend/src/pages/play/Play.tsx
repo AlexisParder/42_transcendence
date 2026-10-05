@@ -98,12 +98,16 @@ export function Play() {
 	}, [])
 
 	async function loadMatches() {
-		const { ok, data } = await apiPost("/api/get-matches")
+		try {
+			const { ok, data } = await apiPost("/api/get-matches")
 
-		if (!ok)
-			return
+			if (!ok)
+				return
 
-		setMatches(data.matches ?? [])
+			setMatches(data.matches ?? [])
+		} catch (error) {
+			console.error("load matches:", error)
+		}
 	}
 
 	useEffect(() => {
@@ -278,18 +282,22 @@ export function Play() {
 		if (!joinedMatch)
 			return
 
-		if (!joinedMatch.invitedPlayers.some(p => p === targetId)) {
-			const { ok, data } = await apiPost("/api/invite-match", {
-				hostId: joinedMatch.hostId,
-				peerId: targetId
-			})
+		try {
+			if (!joinedMatch.invitedPlayers.some(p => p === targetId)) {
+				const { ok, data } = await apiPost("/api/invite-match", {
+					hostId: joinedMatch.hostId,
+					peerId: targetId
+				})
 
-			if (!ok) {
-				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_invite_failure") })
-				return
+				if (!ok) {
+					setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_invite_failure") })
+					return
+				}
+				socket.emit("send_message", { toUserId: targetId, message: joinedMatch.code.toUpperCase() })
+				setErrors({})
 			}
-			socket.emit("send_message", { toUserId: targetId, message: joinedMatch.code.toUpperCase() })
-			setErrors({})
+		} catch (error) {
+			console.error("invite:", error)
 		}
 	}
 
@@ -375,15 +383,15 @@ export function Play() {
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_abilities")}</p>
-								<Togglebox name={`spec_ab`} type="info" checked={abilities} onChange={() => setAbilities(!abilities)} />
+								<Togglebox name={`tb_ab`} type="info" checked={abilities} onChange={() => setAbilities(!abilities)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_replace")}</p>
-								<Togglebox name={`spec_ab`} type="info" checked={replace} onChange={() => setReplace(!replace)} />
+								<Togglebox name={`tb_re`} type="info" checked={replace} onChange={() => setReplace(!replace)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_spectators")}</p>
-								<Togglebox name={`spec_ab`} type="info" checked={spectators} onChange={() => setSpectators(!spectators)} />
+								<Togglebox name={`tb_sp`} type="info" checked={spectators} onChange={() => setSpectators(!spectators)} />
 							</div>
 						</div>
 					</div>

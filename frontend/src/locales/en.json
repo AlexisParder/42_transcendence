@@ -68,6 +68,8 @@
 	"txt_FFA": "FFA",
 	"txt_grid": "grid",
 	"txt_typing": "{{name}} is typing",
+	"txt_team_blue": "Blue team",
+	"txt_team_red": "Red team",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
@@ -140,6 +142,7 @@
 	"play_everyone_waiting": "everyone is waiting on you.",
 	"play_waiting_host": "waiting for the host to start.",
 	"play_waiting_more_players": "waiting for {{missing}} more player(s).",
+	"play_waiting_everyone": "Waiting for everyone to be ready.",
 	"play_only_host_start": "only the host can start the match.",
 	"play_btn_close_room": "Close room",
 	"play_btn_start_match": "Start match",
