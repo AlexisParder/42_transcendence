@@ -225,6 +225,29 @@ io.on("connection", async (socket) => {
 			await notifyFriendsOfPresence(userId, "offline")
 		} else
 			onlineUsers.set(userId, count - 1)
+
+		const matches = Array.from(currentMatches.values())
+		let joinedMath = null
+		for (const match of matches) {
+			if (match.players.some(p => p.userId === userId)) {
+				joinedMath = match
+				break
+			}
+		}
+
+		if (joinedMath && joinedMath.hostId === userId && joinedMath.startedAt === "") {
+			for (const player of joinedMath.players) {
+				if (player.userId && player.userId !== userId)
+					io.to(player.userId).emit("refresh_joined_match", undefined)
+			}
+			currentMatches.delete(userId)
+		} else if (joinedMath) {
+			joinedMath.players = joinedMath.players.filter(p => p.userId !== userId)
+			for (const player of joinedMath.players) {
+				if (player.userId && player.userId !== userId)
+					io.to(player.userId).emit("refresh_joined_match", joinedMath)
+			}
+		}
 	})
 })
 
