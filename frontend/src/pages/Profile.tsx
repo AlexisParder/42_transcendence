@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Match, Rank, Stat, UserInfo } from "../types/events";
 import { useLocation } from "react-router-dom";
 import { formatTimeProfile } from "../lib/formatTime";
+import { apiPost } from "../lib/api";
 
 type categoryType = "matches" | "achievements"
 export function Profile() {
@@ -34,17 +35,11 @@ export function Profile() {
 
 		async function loadUserInfo() {
 			try {
-				const res = await fetch("/api/get-user-info", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({ targetId }),
-				})
+				const { ok, data } = await apiPost("/api/get-user-info", { targetId })
 
-				if (!res.ok)
+				if (!ok)
 					return
 
-				const data = await res.json()
 				setRank(data.rank)
 				setTargetInfo(data.userInfo)
 			} catch (error) {
@@ -54,15 +49,9 @@ export function Profile() {
 
 		async function loadFirstUserStats() {
 			try {
-				const res = await fetch("/api/get-user-stats", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({ targetId, offset: 0 }),
-				})
+				const { ok, data } = await apiPost("/api/get-user-stats", { targetId, offset: 0 })
 
-				const data = await res.json()
-				if (!res.ok || cancelled)
+				if (!ok || cancelled)
 					return
 
 				const first: Match[] = data.matchs ?? []
@@ -92,15 +81,9 @@ export function Profile() {
 		loadingMoreRef.current = true
 
 		try {
-			const res = await fetch("/api/get-user-stats", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ targetId, offset: loadedRef.current }),
-			})
+			const { ok, data } = await apiPost("/api/get-user-stats", { targetId, offset: loadedRef.current })
 
-			const data = await res.json()
-			if (!res.ok)
+			if (!ok)
 				return
 
 			const next: Match[] = data.matchs ?? []

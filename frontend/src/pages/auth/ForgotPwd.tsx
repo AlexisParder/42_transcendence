@@ -8,6 +8,7 @@ import { Input } from "../../components/Input";
 import { PasswordBar } from "../../components/PasswordBar";
 import { isValidEmail } from "../../lib/isValideEmail";
 import { formatMS } from "../../lib/formatTime";
+import { apiPost } from "../../lib/api";
 
 const COOLDOWN = 60
 
@@ -32,12 +33,8 @@ export function ForgotPwd() {
 	useEffect(() => {
 		if (!email) return
 		(async () => {
-			const res = await fetch(`/api/opt/cooldown`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email })
-			})
-			const data = await res.json()
+			const { data } = await apiPost(`/api/opt/cooldown`, { email })
+
 			if (data.ok)
 				setSentAt(data.left > 0 ? Date.now() - (COOLDOWN - data.left) * 1000 : 0)
 		})()
@@ -56,12 +53,8 @@ export function ForgotPwd() {
 		setCode("")
 
 		try {
-			const res = await fetch(`/api/opt/send`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email })
-			})
-			const data = await res.json()
+			const { data } = await apiPost(`/api/opt/send`, { email })
+
 			if (!data.ok) {
 				if (data.error == "cooldown")
 					setErrors({ code: t("verified_err_resend_cooldown") })

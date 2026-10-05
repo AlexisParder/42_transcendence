@@ -7,6 +7,7 @@ import { truncateText } from "../lib/truncateText";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LeaderboardInfo } from "../types/events";
 import { useNavigate } from "react-router-dom";
+import { apiPost } from "../lib/api";
 
 type LdbFilterType = "global" | "friends"
 export function Leaderboard() {
@@ -27,16 +28,11 @@ export function Leaderboard() {
 
 		async function loadFirst() {
 			try {
-				const res = await fetch("/api/get-leaderboard-infos", {
-					method: "POST",
-					headers: { "Content-type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify({ offset: 0, filter: ldbFilter })
-				})
-				const data = await res.json()
+				const { ok, data } = await apiPost("/api/get-leaderboard-infos", { offset: 0, filter: ldbFilter })
+
 				if (cancelled)
 					return
-				if (!res.ok)
+				if (!ok)
 					return setReqError(data.error)
 
 				setReqError("")
@@ -65,15 +61,9 @@ export function Leaderboard() {
 		loadingMoreRef.current = true
 
 		try {
-			const res = await fetch("/api/get-leaderboard-infos", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ offset: loadedRef.current, filter: ldbFilter })
-			})
+			const { ok, data } = await apiPost("/api/get-leaderboard-infos", { offset: loadedRef.current, filter: ldbFilter })
 
-			const data = await res.json()
-			if (!res.ok)
+			if (!ok)
 				return setReqError(data.error)
 			setReqError("")
 
