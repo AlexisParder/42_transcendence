@@ -39,7 +39,7 @@ export async function deliverNotification(input: NotificationInput, delivery: De
 		if (preferences[`email_${category}`] && recipient.emailVerified) {
 			jobs.push(delivery.sendEmail({
 				to: recipient.email,
-				subject: input.type === "MESSAGE" ? "SONAR — New message" : "SONAR — Friend request",
+				subject: input.type === "MESSAGE" ? "SONAR - New message" : "SONAR - Friend request",
 				html: input.type === "MESSAGE"
 					? "<p>You have a new message. Open SONAR to read it.</p>"
 					: "<p>You have a new friend request. Open SONAR to respond.</p>",
