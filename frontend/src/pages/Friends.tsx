@@ -14,6 +14,7 @@ import { formatTime, formatTimeMsg } from "../lib/formatTime";
 import { truncateText } from "../lib/truncateText";
 import { useNavigate } from "react-router-dom";
 import { BiArrowBack, BiConversation } from "react-icons/bi";
+import { apiGet, apiPost } from "../lib/api";
 
 export function Friends() {
 	useDocumentTitle(t("friends_title"))
@@ -130,16 +131,11 @@ export function Friends() {
 
 	async function loadFriends() {
 		try {
-			const res = await fetch("/api/get-friends", {
-				method: "GET",
-				headers: { "Content-type": "application/json" },
-				credentials: "include"
-			})
+			const { ok, data } = await apiGet("/api/get-friends")
 
-			if (!res.ok)
+			if (!ok)
 				return
 
-			const data = await res.json()
 			setFriends(data.friends ?? [])
 
 			const initialPresence: Record<string, PresenceStatus> = {}
@@ -158,16 +154,11 @@ export function Friends() {
 
 	async function loadFriendsPending() {
 		try {
-			const res = await fetch("/api/get-friends-pending", {
-				method: "GET",
-				headers: { "Content-type": "application/json" },
-				credentials: "include"
-			})
+			const { ok, data } = await apiPost("/api/get-friends-pending")
 
-			if (!res.ok)
+			if (!ok)
 				return
 
-			const data = await res.json()
 			setRequests(data.requests ?? [])
 		} catch (error) {
 			console.error("load friends pending:", error)
@@ -180,16 +171,11 @@ export function Friends() {
 
 	async function loadBlocked() {
 		try {
-			const res = await fetch("/api/get-blocked", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include"
-			})
+			const { ok, data } = await apiPost("/api/get-blocked")
 
-			if (!res.ok)
+			if (!ok)
 				return
 
-			const data = await res.json()
 			setBlocked(data.blocked ?? [])
 		} catch (error) {
 			console.error("load blocked:", error)
@@ -206,16 +192,11 @@ export function Friends() {
 
 	async function reloadConversations() {
 		try {
-			const res = await fetch("/api/get-conversations", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-			})
+			const { ok, data } = await apiPost("/api/get-conversations")
 
-			if (!res.ok)
+			if (!ok)
 				return
 
-			const data = await res.json()
 			setConversations(data.conversations ?? [])
 		} catch (error) {
 			console.error("load conversations:", error)
@@ -232,14 +213,9 @@ export function Friends() {
 			return
 
 		try {
-			const res = await fetch("/api/set-read", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ peer }),
-			})
+			const { ok } = await apiPost("/api/set-read", { peer })
 
-			if (!res.ok)
+			if (!ok)
 				return
 
 			setConversations(prev => prev.map(c => c.peerId === peer ? { ...c, unreadCount: 0 } : c))
@@ -250,17 +226,10 @@ export function Friends() {
 
 	const loadHistory = useCallback(async (cancelled: boolean) => {
 		try {
-			const res = await fetch("/api/get-conv-history", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ peerId }),
-			})
+			const { ok, data } = await apiPost("/api/get-conv-history", { peerId })
 
-			if (!res.ok)
+			if (!ok)
 				return
-
-			const data = await res.json()
 
 			if (cancelled)
 				return
@@ -300,16 +269,11 @@ export function Friends() {
 		loadingMoreRef.current = true
 		try {
 			const oldest = messages[0]
-			const res = await fetch("/api/get-conv-history", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ peerId, before: oldest.createdAt })
-			})
-			if (!res.ok)
+			const { ok, data } = await apiPost("/api/get-conv-history", { peerId, before: oldest.createdAt })
+
+			if (!ok)
 				return
 
-			const data = await res.json()
 			const older: Message[] = data.messages ?? []
 
 			if (older.length < 50)
@@ -491,16 +455,10 @@ export function Friends() {
 			return
 		}
 
-		const res = await fetch("/api/send-friend-request", {
-			method: "POST",
-			headers: { "Content-type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ username }),
-		})
+		const { ok, data } = await apiPost("/api/send-friend-request", { username })
 
-		const body = await res.json()
-		if (!res.ok) {
-			setErrors({ username: t(body.error) })
+		if (!ok) {
+			setErrors({ username: t(data.error) })
 			return
 		}
 
@@ -511,16 +469,10 @@ export function Friends() {
 
 	async function handleAccept(requestId: string) {
 		try {
-			const res = await fetch("/api/accept-friend-request", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ requestId })
-			})
+			const { ok, data } = await apiPost("/api/accept-friend-request", { requestId })
 
-			const body = await res.json()
-			if (!res.ok) {
-				setErrors({ username: t(body.error) })
+			if (!ok) {
+				setErrors({ username: t(data.error) })
 				return
 			}
 
@@ -533,16 +485,10 @@ export function Friends() {
 
 	async function handleDecline(requestId: string) {
 		try {
-			const res = await fetch("/api/decline-friend-request", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ requestId })
-			})
+			const { ok, data } = await apiPost("/api/decline-friend-request", { requestId })
 
-			const body = await res.json()
-			if (!res.ok) {
-				setErrors({ username: t(body.error) })
+			if (!ok) {
+				setErrors({ username: t(data.error) })
 				return
 			}
 			setRequests(prev => prev.filter(r => r.id !== requestId))
@@ -568,16 +514,10 @@ export function Friends() {
 
 	async function handleBlock(targetId: string) {
 		try {
-			const res = await fetch("/api/block-user", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ targetId })
-			})
+			const { ok, data } = await apiPost("/api/block-user", { targetId })
 
-			const body = await res.json()
-			if (!res.ok) {
-				setErrors({ block: t(body.error) })
+			if (!ok) {
+				setErrors({ block: t(data.error) })
 				return
 			}
 
@@ -596,16 +536,10 @@ export function Friends() {
 
 	async function handleUnblock(targetId: string) {
 		try {
-			const res = await fetch("/api/unblock-user", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ targetId })
-			})
+			const { ok, data } = await apiPost("/api/unblock-user", { targetId })
 
-			const body = await res.json()
-			if (!res.ok) {
-				setErrors({ block: t(body.error) })
+			if (!ok) {
+				setErrors({ block: t(data.error) })
 				return
 			}
 			setBlocked(prev => prev.filter(b => b.id !== targetId))
@@ -664,18 +598,13 @@ export function Friends() {
 			return
 
 		try {
-			const res = await fetch("/api/get-joined-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-			})
+			const { ok, data } = await apiPost("/api/get-joined-match")
 
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ invite: t("match_err_invite_failure") })
 				return
 			}
 
-			const data = await res.json()
 			const match: Matchs | undefined = data.match ?? undefined
 
 			if (!match) {
@@ -688,16 +617,10 @@ export function Friends() {
 				return
 			}
 
-			const resSend = await fetch("/api/invite-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ hostId: match.hostId, peerId })
-			})
+			const { ok: rOk, data: rData } = await apiPost("/api/invite-match", { hostId: match.hostId, peerId })
 
-			const dataSend = await resSend.json()
-			if (!resSend.ok) {
-				setErrors({ invite: dataSend.code ? t(dataSend.code) : t("match_err_invite_failure") })
+			if (!rOk) {
+				setErrors({ invite: rData.code ? t(rData.code) : t("match_err_invite_failure") })
 				return
 			}
 
