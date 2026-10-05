@@ -12,6 +12,7 @@ import { Avatar } from "../../components/Avatar"
 import { IoWarning } from "react-icons/io5"
 import { setTranslationLanguage, t } from "../../lib/translate"
 import { Enable2FA, RecoveryCodes, ReScan2FA } from "./Security"
+import { apiPost } from "../../lib/api"
 
 type Errors = {
 	username?: string
@@ -103,14 +104,9 @@ export function SettingsCat() {
 			// ajouter une notif de success
 
 		} else {
-			const res = await fetch("/api/set-pwd", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ newPassword: password }),
-			})
+			const { ok } = await apiPost("/api/set-pwd", { newPassword: password })
 
-			if (!res.ok) {
+			if (!ok) {
 				setErrors({ form: t("settings_err_updt_pwd") })
 				return
 			}
@@ -281,14 +277,9 @@ export function SettingsCat() {
 			return
 		}
 
-		const res = await fetch("/api/check-pwd", {
-			method: "POST",
-			headers: { "Content-type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ password }),
-		})
+		const { ok } = await apiPost("/api/check-pwd", { password })
 
-		if (!res.ok) {
+		if (!ok) {
 			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
 			return
 		}

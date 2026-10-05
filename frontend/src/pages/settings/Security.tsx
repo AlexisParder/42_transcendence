@@ -6,6 +6,7 @@ import { HideModal, Modal } from "../../components/Modal"
 import { IoWarning } from "react-icons/io5"
 import { QRCodeSVG } from "qrcode.react"
 import { t } from "../../lib/translate"
+import { apiPost } from "../../lib/api"
 
 type Enable2FAStep = 'password' | 'verify'
 export function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
@@ -155,21 +156,15 @@ export function RecoveryCodes() {
 			return
 		}
 
-		const res = await fetch("/api/view-codes", {
-			method: "POST",
-			headers: { "Content-type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ password }),
-		})
+		const { ok, data } = await apiPost("/api/view-codes", { password })
 
-		const body = await res.json()
 
-		if (!res.ok || !body.ok) {
+		if (!ok || !data.ok) {
 			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
 			return
 		}
 
-		if (body.backupCodes.length <= 0) {
+		if (data.backupCodes.length <= 0) {
 			const { data: newData } = await authClient.twoFactor.generateBackupCodes({
 				password
 			})
@@ -177,7 +172,7 @@ export function RecoveryCodes() {
 			if (newData)
 				setBackupCodes(newData.backupCodes)
 		} else
-			setBackupCodes(body.backupCodes)
+			setBackupCodes(data.backupCodes)
 
 		setErrors({})
 		formElem.reset()
