@@ -1,13 +1,13 @@
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { SonarTitle } from "../components/SonarTitle";
-import { useDocumentTitle } from "../hooks/useDocumentTitle"
+import { SonarTitle } from "../../components/SonarTitle";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle"
 import { useEffect, useState } from "react";
-import { authClient } from "../lib/auth-client";
-import { t } from "../lib/translate";
-import { Input } from "../components/Input";
-import { PasswordBar } from "../components/PasswordBar";
-import { isValidEmail } from "../lib/isValideEmail";
-import { formatMS } from "../lib/formatTime";
+import { authClient } from "../../lib/auth-client";
+import { t } from "../../lib/translate";
+import { Input } from "../../components/Input";
+import { PasswordBar } from "../../components/PasswordBar";
+import { isValidEmail } from "../../lib/isValideEmail";
+import { formatMS } from "../../lib/formatTime";
 
 const COOLDOWN = 60
 

@@ -1,11 +1,11 @@
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { SonarTitle } from "../components/SonarTitle";
-import { useDocumentTitle } from "../hooks/useDocumentTitle"
+import { SonarTitle } from "../../components/SonarTitle";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle"
 import { IoMailUnreadOutline } from "react-icons/io5";
 import { useCallback, useEffect, useState } from "react";
-import { authClient } from "../lib/auth-client";
-import { t } from "../lib/translate";
-import { formatMS } from "../lib/formatTime";
+import { authClient } from "../../lib/auth-client";
+import { t } from "../../lib/translate";
+import { formatMS } from "../../lib/formatTime";
 
 const COOLDOWN = 60
 

@@ -1,15 +1,15 @@
 import type React from "react";
-import { SonarTitle } from "../components/SonarTitle";
+import { SonarTitle } from "../../components/SonarTitle";
 import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
-import { Input } from "../components/Input";
-import { authClient } from "../lib/auth-client";
+import { Input } from "../../components/Input";
+import { authClient } from "../../lib/auth-client";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { isValidEmail } from "../lib/isValideEmail";
-import { SignGoogle } from "../lib/SignGoogle";
-import { SignDiscord } from "../lib/SignDiscord";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
-import { t } from "../lib/translate";
+import { isValidEmail } from "../../lib/isValideEmail";
+import { SignGoogle } from "../../lib/SignGoogle";
+import { SignDiscord } from "../../lib/SignDiscord";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { t } from "../../lib/translate";
 
 type Errors = {
 	email?: string

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { SonarTitle } from "../components/SonarTitle";
+import { SonarTitle } from "../../components/SonarTitle";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { t } from "../lib/translate";
-import { authClient } from "../lib/auth-client";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
-import { Input } from "../components/Input";
+import { t } from "../../lib/translate";
+import { authClient } from "../../lib/auth-client";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { Input } from "../../components/Input";
 
 type Errors = {
 	code?: string
