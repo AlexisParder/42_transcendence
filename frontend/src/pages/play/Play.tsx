@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { Sidebar } from "../components/Sidebar";
-import { useSocket } from "../components/socketContext";
-import type { Friend, Matchs, matchType, PresenceStatus, PresenceUpdate } from "../types/events";
-import { t } from "../lib/translate";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
-import { Togglebox } from "../components/Togglebox";
-import { HideModal, Modal, ShowModal } from "../components/Modal";
-import { authClient } from "../lib/auth-client";
-import { SidebarRight, MatchItem, WaitingRoom } from "./utils/utilsPlay";
+import { Sidebar } from "../../components/Sidebar";
+import { useSocket } from "../../components/socketContext";
+import type { Friend, Matchs, matchType, PresenceStatus, PresenceUpdate } from "../../types/events";
+import { t } from "../../lib/translate";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { Togglebox } from "../../components/Togglebox";
+import { HideModal, Modal, ShowModal } from "../../components/Modal";
+import { authClient } from "../../lib/auth-client";
+import { SidebarRight, MatchItem, WaitingRoom } from "./utilsPlay";
 
 type visibilityType = "private" | "public"
 type viewType = "none" | "host" | "guest"
