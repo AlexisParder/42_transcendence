@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { authClient } from "../../lib/auth-client";
 import { t } from "../../lib/translate";
 import { formatMS } from "../../lib/formatTime";
+import { apiPost } from "../../lib/api";
 
 const COOLDOWN = 60
 
@@ -47,13 +48,9 @@ export function Verified() {
 	useEffect(() => {
 		if (!email) return
 		(async () => {
-			const res = await fetch(`/api/opt/cooldown`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email })
-			})
-			const data = await res.json()
-			if (data.ok)
+			const {ok, data} = await apiPost("/api/opt/cooldown", { email })
+
+			if (ok)
 				setSentAt(data.left > 0 ? Date.now() - (COOLDOWN - data.left) * 1000 : 0)
 		})()
 	}, [email])
@@ -78,13 +75,9 @@ export function Verified() {
 		setCode("")
 
 		try {
-			const res = await fetch(`/api/opt/send`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email })
-			})
-			const data = await res.json()
-			if (!data.ok) {
+			const {ok, data} = await apiPost("/api/opt/send", { email })
+
+			if (!ok && data.error) {
 				if (data.error == "cooldown")
 					setErrors({ code: t("verified_err_resend_cooldown") })
 				else

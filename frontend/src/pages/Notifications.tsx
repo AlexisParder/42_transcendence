@@ -6,6 +6,7 @@ import { Modal, ShowModal, HideModal } from "../components/Modal"
 import { authClient } from "../lib/auth-client"
 import { t } from "../lib/translate"
 import { notificationMessage } from "../lib/notificationMessage"
+import { apiPost, apiGet } from "../lib/api"
 
 type NotificationItem = {
 	id: string
@@ -25,14 +26,10 @@ export function Notifications() {
 	useEffect(() => {
 		async function loadNotifications() {
 			try {
-				const response = await fetch("/api/notifications", {
-					credentials: "include"
-				})
-
-				if (!response.ok)
+				const {ok, data} = await apiGet("/api/notifications")
+				if (!ok)
 					return
 
-				const data = await response.json()
 				setNotifications(data.notifications ?? [])
 			} catch (error) {
 				console.error("load notifications:", error)
@@ -43,14 +40,9 @@ export function Notifications() {
 	}, [])
 
 	async function markAsRead(notificationId: string) {
-		const response = await fetch("/api/notifications/read", {
-			method: "POST",
-			headers: { "Content-type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ notificationId })
-		})
+		const { ok } = await apiPost("/api/notifications/read", { notificationId })
 
-		if (response.ok)
+		if (ok)
 			setNotifications(prev => prev.map(notification =>
 				notification.id === notificationId
 					? { ...notification, read: true }
@@ -59,34 +51,23 @@ export function Notifications() {
 	}
 
 	async function markAllAsRead() {
-		const response = await fetch("/api/notifications/read-all", {
-			method: "POST",
-			credentials: "include"
-		})
+		const { ok } = await apiPost("/api/notifications/read-all")
 
-		if (response.ok)
+		if (ok)
 			setNotifications(prev => prev.map(notification => ({ ...notification, read: true })))
 	}
 
 	async function deleteNotification(notificationId: string) {
-		const response = await fetch("/api/notifications/delete", {
-			method: "POST",
-			headers: { "Content-type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ notificationId })
-		})
+		const { ok } = await apiPost("/api/notifications/delete", { notificationId })
 
-		if (response.ok)
+		if (ok)
 			setNotifications(prev => prev.filter(notification => notification.id !== notificationId))
 	}
 
 	async function deleteAllNotifications() {
-		const response = await fetch("/api/notifications/delete-all", {
-			method: "POST",
-			credentials: "include"
-		})
+		const { ok } = await apiPost("/api/notifications/delete-all")
 
-		if (response.ok)
+		if (ok)
 			setNotifications([])
 
 		HideModal("DeleteAllNotificationsModal")

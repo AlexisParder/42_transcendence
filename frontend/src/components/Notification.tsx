@@ -5,6 +5,7 @@ import { authClient } from "../lib/auth-client"
 import type { NotificationEvent } from "../types/events"
 import { t } from "../lib/translate"
 import { notificationMessage } from "../lib/notificationMessage"
+import { apiPost } from "../lib/api"
 
 export function Notification() {
 	const { data: session } = authClient.useSession()
@@ -46,15 +47,9 @@ function LiveNotifications() {
 		const endpoint = action === "accept"
 			? "/api/accept-friend-request"
 			: "/api/decline-friend-request"
+		const {ok} = await apiPost(endpoint, { requestId })
 
-		const response = await fetch(endpoint, {
-			method: "POST",
-			headers: { "Content-type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ requestId })
-		})
-
-		if (response.ok)
+		if (ok)
 			setFriendRequests(prev => prev.filter(request => request.requestId !== requestId))
 	}
 	const visibleFriendRequests = friendRequests.slice(-3)

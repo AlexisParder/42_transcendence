@@ -3,6 +3,7 @@ import { RadarEchoes } from "../components/RadarEchoes"
 import { Sidebar } from "../components/Sidebar"
 import { t } from "../lib/translate"
 import { useState } from "react"
+import { apiPost } from "../lib/api"
 
 const features = [
 	{
@@ -35,14 +36,8 @@ export function Home() {
 
 	async function handleJoinWithCode() {
 		try {
-			const res = await fetch("/api/join-code-match", {
-				method: "POST",
-				headers: { "Content-type": "application/json" },
-				credentials: "include",
-				body: JSON.stringify({ code }),
-			})
-
-			if (!res.ok)
+			const { ok } = await apiPost("/api/join-code-match", { code })
+			if (!ok)
 				return
 
 			setCode("")
