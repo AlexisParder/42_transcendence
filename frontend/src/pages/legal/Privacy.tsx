@@ -1,6 +1,6 @@
 import type React from "react"
-import { useDocumentTitle } from "../hooks/useDocumentTitle"
-import { t } from "../lib/translate"
+import { useDocumentTitle } from "../../hooks/useDocumentTitle"
+import { t } from "../../lib/translate"
 import { Link } from "react-router-dom"
 
 export function Privacy() {

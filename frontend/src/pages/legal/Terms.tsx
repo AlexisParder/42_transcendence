@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
-import { useDocumentTitle } from "../hooks/useDocumentTitle"
-import { t } from "../lib/translate"
+import { useDocumentTitle } from "../../hooks/useDocumentTitle"
+import { t } from "../../lib/translate"
 import type React from "react"
 import { RxCross1 } from "react-icons/rx"
 
