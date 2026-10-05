@@ -177,6 +177,7 @@ io.on("connection", async (socket) => {
 				toUserId: row.targetId,
 				message: row.message,
 				createdAt: row.sendAt.toISOString(),
+				isRead: false
 			}
 
 			io.to(toUserId).emit("new_message", wire)

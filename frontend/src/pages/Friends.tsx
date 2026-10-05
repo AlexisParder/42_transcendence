@@ -86,6 +86,27 @@ export function Friends() {
 		}
 	}, [socket])
 
+	useEffect(() => {
+		function onMessagesRead(payload: { by: string }) {
+			const myId = session?.user.id
+
+			if (payload.by !== peerId)
+				return
+
+			setMessages(prev => prev.map(m =>
+				m.fromUserId === myId && m.toUserId === payload.by
+					? { ...m, isRead: true }
+					: m
+			))
+		}
+
+		socket.on("messages_read", onMessagesRead)
+
+		return () => {
+			socket.off("messages_read", onMessagesRead)
+		}
+	}, [socket, peerId, session])
+
 	async function loadFriends() {
 		try {
 			const res = await fetch("/api/get-friends", {

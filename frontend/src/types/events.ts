@@ -8,6 +8,7 @@ export interface ClientToServerEvents {
 export interface ServerToClientEvents {
 	notification_received: (payload: NotificationEvent) => void
 	new_message: (payload: Message) => void
+	messages_read: (payload: { by: string }) => void
 	friend_request_received: (payload: FriendRequest) => void
 	friend_request_accepted: (payload: FriendRequestAccept) => void
 	friend_request_resolved: (payload: { requestId: string, accepted: boolean }) => void
