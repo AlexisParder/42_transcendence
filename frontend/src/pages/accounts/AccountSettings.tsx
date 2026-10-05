@@ -1,22 +1,20 @@
 import type React from "react"
-import type { SessionRow } from "../hooks/useSessions"
-import { Input, InputWithText } from "../components/Input"
-import { Sidebar } from "../components/Sidebar"
-import { PasswordBar } from "../components/PasswordBar"
+import type { SessionRow } from "../../hooks/useSessions"
+import { Input, InputWithText } from "../../components/Input"
+import { Sidebar } from "../../components/Sidebar"
+import { PasswordBar } from "../../components/PasswordBar"
 import { useEffect, useState } from "react"
-import { authClient } from "../lib/auth-client"
-import { prettyUA } from "../lib/prettyUA"
-import { useSessions } from "../hooks/useSessions"
-import { HideModal, Modal, ShowModal } from "../components/Modal"
+import { authClient } from "../../lib/auth-client"
+import { prettyUA } from "../../lib/prettyUA"
+import { useSessions } from "../../hooks/useSessions"
+import { HideModal, Modal, ShowModal } from "../../components/Modal"
 import { useNavigate } from "react-router-dom"
-import { Avatar } from "../components/Avatar"
+import { Avatar } from "../../components/Avatar"
 import { IoWarning } from "react-icons/io5"
 import { QRCodeSVG } from "qrcode.react"
-import { setTranslationLanguage, t } from "../lib/translate"
-import { useDocumentTitle } from "../hooks/useDocumentTitle"
-import { Togglebox } from "../components/Togglebox"
-import { useNotificationPreferences } from "../hooks/useNotificationPreferences"
-import type { NotificationPreferences } from "../hooks/useNotificationPreferences"
+import { setTranslationLanguage, t } from "../../lib/translate"
+import { useDocumentTitle } from "../../hooks/useDocumentTitle"
+import { SettingsNotif } from "./Notifications"
 
 type Errors = {
 	username?: string
@@ -56,74 +54,6 @@ export function AccountSettings() {
 			{category === "notifications" && <SettingsNotif />}
 		</div>
 	</Sidebar>
-}
-
-function SettingsNotif() {
-	const { data: session } = authClient.useSession()
-	return <NotificationSettingsTable key={session?.user.id ?? "anonymous"} userId={session?.user.id} />
-}
-
-function NotificationSettingsTable({ userId }: { userId?: string }) {
-	const { preferences, saving, saved, error, update } = useNotificationPreferences(userId)
-	const controls = { preferences, disabled: saving || !preferences, onChange: update }
-	return <div className="max-w-200">
-		<p className="mb-3 text-sm text-base-content/60">{t("settings_notif_help")}</p>
-		<p role="status" className="mb-3 text-sm">{error || (saving ? t("settings_notif_saving") : saved ? t("settings_notif_saved") : !preferences ? t("settings_notif_loading") : "")}</p>
-		<div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-		<table className="table">
-			<thead>
-				<tr>
-					<th>{t("settings_notif_lbl_event").toUpperCase()}</th>
-					<th>{t("settings_notif_lbl_app").toUpperCase()}</th>
-					{/* <th>{t("settings_notif_lbl_push").toUpperCase()}</th> */}
-					<th>{t("txt_email").toUpperCase()}</th>
-				</tr>
-			</thead>
-			<tbody>
-				<NotifLine title={t("settings_notif_title_1")} desc={t("settings_notif_desc_1")} inputName="turn" />
-				<NotifLine title={t("settings_notif_title_2")} desc={t("settings_notif_desc_2")} inputName="match" />
-				<NotifLine title={t("settings_notif_title_3")} desc={t("settings_notif_desc_3")} inputName="friend" controls={controls} />
-				<NotifLine title={t("settings_notif_title_4")} desc={t("settings_notif_desc_4")} inputName="chat" controls={controls} />
-				<NotifLine title={t("settings_notif_title_5")} desc={t("settings_notif_desc_5")} inputName="tournament" />
-				<NotifLine title={t("settings_notif_title_6")} desc={t("settings_notif_desc_6")} inputName="rank" />
-				<NotifLine title={t("settings_notif_title_7")} desc={t("settings_notif_desc_7")} inputName="achievements" />
-				<NotifLine title={t("settings_notif_title_8")} desc={t("settings_notif_desc_8")} inputName="security" />
-			</tbody>
-		</table>
-		</div>
-	</div>
-}
-
-function NotifLine({ title, desc, inputName, controls }: {
-	title: string, desc: string, inputName: string,
-	controls?: {
-		preferences: NotificationPreferences | null
-		disabled: boolean
-		onChange: (key: keyof NotificationPreferences, value: boolean) => Promise<void>
-	}
-}) {
-	return <tr>
-		<th>
-			<p>{title}</p>
-			<p className="text-xs text-neutral-content/40">{desc}</p>
-			{!controls && <span className="badge badge-ghost badge-sm mt-1">{t("settings_notif_unavailable")}</span>}
-		</th>
-		<td>
-			<Togglebox name={`app_${inputName}`} type="info" aria-label={`${title} - ${t("settings_notif_lbl_app")}`}
-				checked={controls?.preferences?.[`app_${inputName}` as keyof NotificationPreferences] ?? false}
-				disabled={!controls || controls.disabled}
-				onChange={event => controls?.onChange(`app_${inputName}` as keyof NotificationPreferences, event.target.checked)} />
-		</td>
-		{/* <td>
-			<Togglebox name={`push_${inputName}`} type="info" />
-		</td> */}
-		<td>
-			<Togglebox name={`email_${inputName}`} type="info" aria-label={`${title} - ${t("txt_email")}`}
-				checked={controls?.preferences?.[`email_${inputName}` as keyof NotificationPreferences] ?? false}
-				disabled={!controls || controls.disabled}
-				onChange={event => controls?.onChange(`email_${inputName}` as keyof NotificationPreferences, event.target.checked)} />
-		</td>
-	</tr>
 }
 
 function SettingsCat() {
