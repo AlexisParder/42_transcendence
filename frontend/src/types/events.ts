@@ -3,6 +3,7 @@ export interface ClientToServerEvents {
 	set_active_conversation: (peerId: string | null) => void
 	send_friend_request: (payload: { toUserId: string }) => void
 	set_activity: (payload: { status: "available" | "away" }) => void
+	set_typing: (payload: { toUserId: string, typing: boolean }) => void
 }
 
 export interface ServerToClientEvents {
@@ -15,6 +16,7 @@ export interface ServerToClientEvents {
 	presence_update: (payload: PresenceUpdate) => void
 	friend_removed: (payload: { userId: string }) => void
 	refresh_joined_match: (payload: Matchs | undefined) => void
+	typing: (payload: { fromUserId: string, typing: boolean }) => void
 }
 
 export interface NotificationEvent {

@@ -36,7 +36,10 @@ export function Friends() {
 	const loadingMoreRef = useRef(false)
 	const [search, setSearch] = useState("")
 	const [, setTick] = useState(0)
-
+	const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const typingDisplayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const isTypingRef = useRef(false)
+	const [peerTyping, setPeerTyping] = useState(false)
 	const navigate = useNavigate()
 
 	useEffect(() => {
@@ -44,15 +47,33 @@ export function Friends() {
 			socket.emit("set_active_conversation", document.hidden ? null : peerId)
 		}
 
+
+		function onTyping(payload: { fromUserId: string, typing: boolean }) {
+			if (payload.fromUserId !== peerId)
+				return
+
+			setPeerTyping(payload.typing)
+
+			if (typingDisplayTimerRef.current)
+				clearTimeout(typingDisplayTimerRef.current)
+			if (payload.typing)
+				typingDisplayTimerRef.current = setTimeout(() => setPeerTyping(false), 5000)
+		}
+
 		syncActiveConversation()
 		document.addEventListener("visibilitychange", syncActiveConversation)
 		socket.on("connect", syncActiveConversation)
 
+		socket.on("typing", onTyping)
 		return () => {
 			document.removeEventListener("visibilitychange", syncActiveConversation)
 			socket.off("connect", syncActiveConversation)
 			if (socket.connected)
 				socket.emit("set_active_conversation", null)
+
+			socket.off("typing", onTyping)
+			if (typingDisplayTimerRef.current)
+				clearTimeout(typingDisplayTimerRef.current)
 		}
 	}, [socket, peerId])
 
@@ -433,8 +454,28 @@ export function Friends() {
 			return setErrors({ messages: t("friend_err_msg_to_long") })
 
 		socket.emit("send_message", { toUserId: peerId, message })
+		isTypingRef.current = false
+		socket.emit("set_typing", { toUserId: peerId, typing: false })
 		setSendInput("")
 		setErrors({})
+	}
+
+	function handleTyping() {
+		if (!peerId)
+			return
+
+		if (!isTypingRef.current) {
+			isTypingRef.current = true
+			socket.emit("set_typing", { toUserId: peerId, typing: true })
+		}
+
+		if (typingTimerRef.current)
+			clearTimeout(typingTimerRef.current)
+
+		typingTimerRef.current = setTimeout(() => {
+			isTypingRef.current = false
+			socket.emit("set_typing", { toUserId: peerId, typing: false })
+		}, 2000)
 	}
 
 	const handleSendRequestFriend: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -510,8 +551,14 @@ export function Friends() {
 		}
 	}
 
+	function selectPeer(id: string) {
+		setPeerTyping(false)
+		setPeerId(id)
+	}
+
 	function closeCurrentConv() {
 		setPeerId(null)
+		setPeerTyping(false)
 		setHasMore(true)
 		prevScrollHeightRef.current = null
 		loadingMoreRef.current = false
@@ -663,7 +710,7 @@ export function Friends() {
 
 	const areFriend = friends.find(f => f.id === peerId)
 	return <Sidebar>
-		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={setPeerId} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
+		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={selectPeer} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex flex-col h-full min-h-0 min-w-0">
 				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} handleInvite={handleInvite} inviteErr={errors.invite} />
 				{!peerId && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
@@ -680,16 +727,26 @@ export function Friends() {
 						{messages.map((msg) => <DisplayMessage key={msg.id} isLastMessage={messages.findIndex(m => m.id === msg.id) === messages.length - 1} isRead={msg.isRead} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
 					</div>
 				</div>}
-				{peerId && <div className="flex items-center justify-between p-2 bg-base-200 gap-4">
-					<div className="w-full pl-2">
-						{areFriend && <Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
-							if (e.key === "Enter")
-								handleSend()
-						}} />}
-						{!areFriend && <p className="py-2 text-sm text-neutral-content/60">{t("friend_txt_not_msg")}</p>}
+				{peerId && <>
+					<div className="h-5 px-4 pt-1.5 text-xs text-neutral-content/60 bg-base-200">
+						{peerTyping && (
+							<p className="inline-flex items-center gap-1"><span className="loading loading-dots loading-xs"></span> {t("txt_typing", { name: friends.find(f => f.id === peerId)?.username ?? "?" })}</p>
+						)}
 					</div>
-					{areFriend && <button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>}
-				</div>}
+					<div className="flex items-center justify-between p-2 bg-base-200 gap-4">
+						<div className="w-full pl-2">
+							{areFriend && <Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={errors.messages} onChange={(e) => {
+								setSendInput(e.target.value)
+								handleTyping()
+							}} onKeyDown={(e) => {
+								if (e.key === "Enter")
+									handleSend()
+							}} />}
+							{!areFriend && <p className="py-2 text-sm text-neutral-content/60">{t("friend_txt_not_msg")}</p>}
+						</div>
+						{areFriend && <button className="btn btn-outline btn-info" onClick={handleSend}>{t("btn_send")}</button>}
+					</div>
+				</>}
 			</div>
 
 			<Modal id="SendFriendRequestModal">

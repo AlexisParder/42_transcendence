@@ -67,6 +67,7 @@
 	"txt_BOT": "1 v 1 bot",
 	"txt_FFA": "FFA",
 	"txt_grid": "grid",
+	"txt_typing": "{{name}} is typing",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",

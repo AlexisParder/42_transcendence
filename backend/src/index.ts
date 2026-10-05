@@ -190,6 +190,15 @@ io.on("connection", async (socket) => {
 		}
 	})
 
+	socket.on("set_typing", (payload) => {
+		const fromUserId = socket.data.userId
+
+		io.to(payload.toUserId).emit("typing", {
+			fromUserId,
+			typing: payload.typing
+		})
+	})
+
 	socket.join(userId)
 
 	const before = onlineUsers.get(userId) ?? 0
