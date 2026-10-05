@@ -43,7 +43,7 @@ Trois résultats possibles:
   - Si on utilise une capacite, ça passe notre tour
 
 - Mode Duo,
-	- un membre a par team la suite
+	- un membre par team à la suite
 		- Exemple: Team A (X, Y), Team B (I, J), X joue puis I puis Y et enfin J etc...
 
 - Capacités
