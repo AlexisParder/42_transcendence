@@ -84,7 +84,8 @@ export type matchType = "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA"
 export interface Match {
 	id: string,
 	result: 'win' | 'loss',
-	desc: string,
+	otherPlayer: string | null,
+	placement: number | null,
 	matchType: matchType,
 	matchTime: string,
 	ranked: boolean,
@@ -110,7 +111,7 @@ export interface UserInfo {
 	username: string | null | undefined,
 	image: string | null | undefined,
 	createdAt: string,
-	leaderboardPos: string,
+	leaderboardPos: number,
 	isMine: boolean
 }
 

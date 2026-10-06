@@ -4,7 +4,7 @@ export function formatTime(iso: string): string {
 	const diff = Date.now() - new Date(iso).getTime()
 	const min = Math.floor(diff / 60000)
 	if (min < 1)
-		return "now"
+		return t("txt_now")
 	if (min < 60)
 		return `${min} min`
 
@@ -17,7 +17,7 @@ export function formatTime(iso: string): string {
 export function formatTimeProfile(min: string): string {
 	const minNb = Number(min)
 	if (minNb < 1)
-		return "now"
+		return t("txt_now")
 	if (minNb < 60)
 		return `${minNb} min`
 
