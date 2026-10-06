@@ -1,4 +1,6 @@
 import { Avatar } from "../../components/Avatar"
+import { Grid } from "../../components/Grid"
+import type { Log } from "../../types/events"
 
 export function MatchHeader() {
 	return <div className="flex items-center justify-between bg-base-200 py-4 px-6">
@@ -91,7 +93,7 @@ function OrderItem({ username, image, points, isTurn, isMine, colorTeam, currFle
 					<p className={`text-xs font-mono font-semibold ${fleetColor}`}>{currFleet}/{maxFleet}</p>
 				</div>
 				{isTurn && <p className="text-info uppercase font-mono text-xs">taking aim</p>}
-				{!isTurn && <p className="text-neutral-content/50 font-mono text-xs">{points.toLocaleString()} pts - waiting</p>}
+				{!isTurn && <p className="text-neutral-content/50 font-mono text-xs">{points.toLocaleString()} pts, waiting</p>}
 			</div>
 		</div>
 	</div>
@@ -105,7 +107,47 @@ export function CenterSide() {
 
 // Right Side
 export function RightSide() {
-	return <div className="bg-base-200">
+	return <div className="bg-base-200 p-4">
+		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">your water</p>
+		<Grid />
+		<div className="flex items-center gap-4 pb-4">
+			<FleetColorIndicator title="intact" badge="badge-neutral" />
+			<FleetColorIndicator title="hit" badge="badge-warning" />
+			<FleetColorIndicator title="sunk" badge="badge-error" />
+		</div>
+
+		<p className="text-info first-letter:uppercase text-xs font-semibold">log</p>
+		<div className="divider m-0"></div>
+
+		<div className="flex flex-col gap-2">
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
+			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
+			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+		</div>
 	</div>
 }
 
@@ -118,5 +160,22 @@ function FleetColorIndicator({ title, badge }: {
 			className={`indicator-item indicator-middle indicator-start badge ${badge} badge-xs`}
 		></span>
 		<div className="uppercase text-xs text-neutral-content/50 font-medium">{title}</div>
+	</div>
+}
+
+function LogItem({ log }: { log: Log }) {
+	let textColor = "text-info"
+	let bgColor = "bg-info/10"
+
+	if (log.type === "warning") {
+		textColor = "text-warning"
+		bgColor = "bg-warning/10"
+	} else if (log.type === "neutral") {
+		textColor = "text-neutral-content/50"
+		bgColor = "bg-neutral/10"
+	}
+
+	return <div className={`p-2 ${bgColor} rounded-md`}>
+		<p className={`text-xs font-mono first-letter:uppercase ${textColor}`}>{log.text}</p>
 	</div>
 }

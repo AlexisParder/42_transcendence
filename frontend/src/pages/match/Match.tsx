@@ -6,7 +6,7 @@ export function Match() {
 
 	return <div>
 		<MatchHeader />
-		<div className="flex h-screen">
+		<div className="flex">
 			<LeftSide />
 			<CenterSide />
 			<RightSide />

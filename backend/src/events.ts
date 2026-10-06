@@ -171,3 +171,8 @@ export interface MatchSettings {
 	replace: boolean,
 	spectators: boolean
 }
+
+export interface Log {
+	text: string,
+	type: "info" | "warning" | "neutral"
+}
