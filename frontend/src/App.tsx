@@ -18,6 +18,7 @@ import { Notifications } from './pages/Notifications'
 import { SocketProvider } from './provider/SocketProvider'
 import { Notification } from './components/Notification'
 import { ForgotPwd } from './pages/auth/ForgotPwd'
+import { Match } from './pages/match/Match'
 
 const router = createBrowserRouter([
 	{
@@ -92,6 +93,11 @@ const router = createBrowserRouter([
 	{
 		path: '/notifications',
 		element: <Notifications />,
+		errorElement: <PageError />
+	},
+	{
+		path: '/match',
+		element: <Match />,
 		errorElement: <PageError />
 	}
 ])
