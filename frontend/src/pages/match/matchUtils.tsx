@@ -2,15 +2,19 @@ import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import type { Log } from "../../types/events"
 
-export function MatchHeader() {
+export function MatchHeader({mode, title, description}: {
+	mode?: string
+	title: string
+	description: string
+}) {
 	return <div className="flex items-center justify-between bg-base-200 py-4 px-6">
 		<div className="flex items-center gap-4">
 			<h2 className="uppercase text-sm font-bold tracking-brand">sonar</h2>
-			<p className="bg-info rounded-md text-info-content font-semibold text-xs px-2 py-0.5">1 v 1</p>
-			<p className="text-xs uppercase tracking-brand font-medium text-neutral-content/50">ranked</p>
+			{mode && <p className="bg-info rounded-md text-info-content font-semibold text-xs px-2 py-0.5">{mode}</p>}
+			<p className="text-xs uppercase tracking-brand font-medium text-neutral-content/50">{title}</p>
 		</div>
 		<div className="flex items-center gap-4">
-			<p className="first-letter:uppercase text-info text-xs font-semibold">your turn</p>
+			<p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>
 			<p className="font-mono text-sm text-info font-semibold border brder-info rounded-full px-2 py-1 text-center">0:03</p>
 			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer">forfeit</button>
 		</div>

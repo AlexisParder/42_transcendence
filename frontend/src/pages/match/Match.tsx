@@ -10,16 +10,16 @@ export function Match() {
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && <>
-			{/* <MatchHeader />
+			<MatchHeader title="DEPLOYMENT" description="Place your fleet" />
 			<div className="flex flex-1 min-h-0">
 				<LeftSide />
 				<CenterSide />
 				<RightSide />
-			</div> */}
+			</div>
 		</>}
 
 		{category === "match" && <>
-			<MatchHeader />
+			<MatchHeader mode="1 v 1" title="Ranked Match" description="Your turn" />
 			<div className="flex flex-1 min-h-0">
 				<LeftSide />
 				<CenterSide />
