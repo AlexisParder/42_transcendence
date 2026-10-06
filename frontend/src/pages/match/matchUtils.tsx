@@ -101,7 +101,19 @@ function OrderItem({ username, image, points, isTurn, isMine, colorTeam, currFle
 
 // Center Side
 export function CenterSide() {
-	return <div className="flex-1">
+	return <div className="flex-1 py-4 px-6">
+		<div className="flex items-center justify-between">
+			<p className="text-xs uppercase text-info font-medium tracking-brand">tom's waters, fire</p>
+			<p className="text-xs uppercase text-neutral-content/50">wrecks revealed when a ship sinks</p>
+		</div>
+
+		<div className="px-6 py-2">
+			<Grid />
+		</div>
+
+		<div className="flex items-center justify-between">
+
+		</div>
 	</div>
 }
 
