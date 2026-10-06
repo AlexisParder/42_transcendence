@@ -738,7 +738,7 @@ function SidebarRight({ children, search, setSearch, filteredConversations, setP
 			<div className={`${peerId ? "max-md:hidden" : "max-md:w-full"} md:w-65 md:shrink-0 min-h-0`}>
 				<ul className="menu flex-nowrap bg-base-200 h-full w-full p-2 gap-1">
 					<div className="shrink-0">
-						<Input type="text" name="search" label="Search friends..." value={search} onChange={(e) => setSearch(e.target.value)} />
+						<Input type="text" name="search" label={t("friends_search")} value={search} onChange={(e) => setSearch(e.target.value)} />
 					</div>
 
 					<div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-1">

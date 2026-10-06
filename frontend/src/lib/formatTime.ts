@@ -1,4 +1,4 @@
-import { t } from "./translate"
+import { getTranslationLanguage, t } from "./translate"
 
 export function formatTime(iso: string): string {
 	const diff = Date.now() - new Date(iso).getTime()
@@ -28,7 +28,7 @@ export function formatTimeProfile(min: string): string {
 }
 
 export function formatTimeMsg(iso: string): string {
-	const date = new Date(iso).toLocaleString()
+	const date = new Date(iso).toLocaleString(getTranslationLanguage())
 
 	return date
 }
