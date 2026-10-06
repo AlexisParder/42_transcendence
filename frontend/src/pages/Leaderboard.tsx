@@ -165,7 +165,7 @@ function LeaderboardItem({ id, pos, username, image, matches, win, lose, accurac
 			<Avatar username={username} image={image} size={28} />
 			<div>
 				<p className="text-xs">{truncateText(username, 11)}</p>
-				<p className="md:hidden text-xs text-neutral-content/50 flex gap-1 items-center">{matches} matches <TbPointFilled className="size-1" /> {accuracy}%</p>
+				<p className="md:hidden text-xs text-neutral-content/50 flex gap-1 items-center">{matches} {t("profiles_txt_matches").toLowerCase()} <TbPointFilled className="size-1" /> {accuracy}%</p>
 			</div>
 		</td>
 		<td className="hidden md:table-cell">

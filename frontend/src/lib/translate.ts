@@ -13,6 +13,10 @@ export function setTranslationLanguage(l: string) {
 	language = l
 }
 
+export function getTranslationLanguage() {
+	return language
+}
+
 export function t(key: string, vars?: Record<string, string | number>) {
 	const raw = key.split(".").reduce<unknown>(
 		(o, k) => (o as Translations | undefined)?.[k],

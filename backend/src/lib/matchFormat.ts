@@ -1,11 +1,5 @@
 type Mode = "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA"
 
-export function ordinal(n: number): string {
-	const s = ['th', 'st', 'nd', 'rd']
-	const v = n % 100
-	return n + (s[(v - 20) % 10] || s[v] || s[0])
-}
-
 export function formatMatch(row: any, userId: string) {
 	const { matchs: match, ...me } = row
 
@@ -13,20 +7,16 @@ export function formatMatch(row: any, userId: string) {
 
 	const min = match.endedAt ? Math.round((+new Date(match.endedAt) - +new Date(match.startedAt)) / 60000) : 0
 
-	let desc = ""
+	let otherPlayer: string | null = null
 	switch (match.mode) {
 		case "ONE_V_ONE": {
 			const opp = others[0]
-			desc = opp?.isBot ? 'vs Bot' : `vs ${opp?.user?.username ?? "?"}`
+			otherPlayer = opp?.isBot ? null : (opp?.user?.username ?? "?")
 			break;
 		}
 		case "TWO_V_TWO": {
 			const mate = others.find((p: any) => p.team === me.team)
-			desc = mate?.isBot ? 'Duo with Bot' : `Duo with ${mate?.user?.username ?? "?"}`
-			break;
-		}
-		default: {
-			desc = me.placement ? `FFA - ${ordinal(me.placement)} place` : 'FFA'
+			otherPlayer = mate?.isBot ? null : (mate?.user?.username ?? "?")
 			break;
 		}
 	}
@@ -36,7 +26,8 @@ export function formatMatch(row: any, userId: string) {
 	return {
 		id: match.id,
 		result,
-		desc,
+		otherPlayer,
+		placement: (me.placement ?? null) as number | null,
 		matchType: match.mode as Mode,
 		matchTime: min,
 		ranked: match.isRanked,

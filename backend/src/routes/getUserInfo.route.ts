@@ -3,7 +3,6 @@ import type { Request, Response } from "express";
 import { auth } from "../auth.ts";
 import { prisma } from "../db/client.ts";
 import type { Rank, UserInfo } from "../events.ts";
-import { ordinal } from "../lib/matchFormat.ts";
 
 const FALLBACK_RANK: Rank = {
 	id: "custom",
@@ -73,8 +72,8 @@ export async function getUserInfoHandler(req: Request, res: Response) {
 			points,
 			username,
 			image,
-			createdAt: createdAt.toDateString(),
-			leaderboardPos: ordinal(ldbPos),
+			createdAt: createdAt.toISOString(),
+			leaderboardPos: ldbPos,
 			isMine
 		}
 
