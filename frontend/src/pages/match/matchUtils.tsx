@@ -107,7 +107,7 @@ export function CenterSide() {
 
 // Right Side
 export function RightSide() {
-	return <div className="bg-base-200 p-4">
+	return <div className="bg-base-200 p-4 flex flex-col min-h-0">
 		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">your water</p>
 		<Grid />
 		<div className="flex items-center gap-4 pb-4">
@@ -119,7 +119,7 @@ export function RightSide() {
 		<p className="text-info first-letter:uppercase text-xs font-semibold">log</p>
 		<div className="divider m-0"></div>
 
-		<div className="flex flex-col gap-2">
+		<div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
 			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
 			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
 			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
