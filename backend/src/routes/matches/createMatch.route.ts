@@ -22,7 +22,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 
 		const code = generateCode(currentMatches)
 		const newMatch: Matchs = {
-			mode: selectedMatchType,
+			type: selectedMatchType,
 			settings: {
 				time_turn: timeTurn,
 				abilities,

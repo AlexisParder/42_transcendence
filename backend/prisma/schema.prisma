@@ -168,7 +168,7 @@ model Ranks {
 
 model Matchs {
   id        String         @id @default(cuid())
-  mode      MatchMode
+  type      MatchType
   isRanked  Boolean        @default(true)
   startedAt DateTime
   endedAt   DateTime
@@ -224,7 +224,7 @@ model Notification {
   @@map("notifications")
 }
 
-enum MatchMode {
+enum MatchType {
   ONE_V_ONE
   TWO_V_TWO
   THREE_FFA

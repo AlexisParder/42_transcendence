@@ -31,7 +31,7 @@ export async function joinMatchHandler(req: Request, res: Response) {
 		if (match.startedAt !== "")
 			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
-		const team = firstFreeTeam(match.players, match.mode === "TWO_V_TWO" ? 2 : 1)
+		const team = firstFreeTeam(match.players, match.type === "TWO_V_TWO" ? 2 : 1)
 		const newPlayer: MatchPlayers = {
 			userId,
 			username: session.user.username,

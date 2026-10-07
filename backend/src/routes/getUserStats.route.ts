@@ -44,7 +44,7 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 					matchs: {
 						select: {
 							id: true,
-							mode: true,
+							type: true,
 							isRanked: true,
 							startedAt: true,
 							endedAt: true,

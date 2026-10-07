@@ -415,7 +415,7 @@ export function Play() {
 								key={m.hostId}
 								username={host?.username}
 								image={host?.image}
-								type={m.mode}
+								type={m.type}
 								players={m.players.length}
 								maxPlayers={m.maxPlayers}
 								canJoin={canJoin}

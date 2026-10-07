@@ -138,7 +138,7 @@ export interface Rules {
 }
 
 export interface Matchs {
-	mode: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
+	type: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
 	settings: MatchSettings,
 	code: string,
 	visibility: "public" | "private",
