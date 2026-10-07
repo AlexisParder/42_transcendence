@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
-import type { Matchs } from "../../types/events";
+import { Dock } from "./selectUtils";
+import type { Matchs, shipName } from "../../types/events";
+import { SHIPS } from "./ships";
 import { useSocket } from "../../components/socketContext";
 import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
@@ -13,10 +15,13 @@ export function Match() {
 
 	const { data: session } = authClient.useSession()
 	const socket = useSocket()
-	const [category, setCategory] = useState<categoryType>("match")
+	const [category, setCategory] = useState<categoryType>("select")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState("")
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
+	const [placedShips, setPlacedShips] = useState<shipName[]>([])
+	const [draggingShip, setDraggingShip] = useState<shipName | null>(null)
+	const [orientation, setOrientation] = useState<"horizontal" | "vertical">("horizontal")
 
 	useEffect(() => {
 		function onRefreshMatch(payload: Matchs | undefined) {
@@ -58,7 +63,7 @@ export function Match() {
 			<div className="flex flex-1 min-h-0">
 				{/* <LeftSide /> */}
 				{/* <CenterSide /> */}
-				{/* <RightSide /> */}
+				<Dock match={joinedMatch} myId={session?.user.id} placedShips={placedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} onRotate={() => setOrientation(orientation === "horizontal" ? "vertical" : "horizontal")} onRandom={() => setPlacedShips(SHIPS.map(s => s.name))} onClear={() => setPlacedShips([])} />
 			</div>
 		</>}
 

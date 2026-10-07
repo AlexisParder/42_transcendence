@@ -177,3 +177,11 @@ export interface Log {
 	text: string,
 	type: "info" | "warning" | "neutral"
 }
+
+export type shipName = "carrier" | "cruiser" | "destroyer" | "frigate" | "submarine"
+
+export interface Ship {
+	name: shipName,
+	size: number,
+	image: string
+}
