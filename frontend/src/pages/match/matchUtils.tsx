@@ -122,7 +122,7 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 	return <div className={`${isTurn ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50"} ${currFleet < 1 ? "opacity-50" : ""} rounded-lg p-2 flex min-w-0 max-sm:flex-1`}>
 		<div className="flex flex-1 items-center gap-1 min-w-0">
 			<div className={`divider divider-horizontal ${dividerColor[teamNumber - 1]} m-0`}></div>
-			<div className="max-sm:hidden">
+			<div className="max-sm:hidden flex items-center">
 				<Avatar username={username} image={image} size={32} />
 			</div>
 			<div className="pl-1 flex-1 min-w-0">
