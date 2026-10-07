@@ -193,7 +193,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		<div className="pt-1.5 pb-2 text-center">
 			<Grid />
 		</div>
-		<div className="flex items-center gap-2">
+		{match.settings.abilities && <div className="flex items-center gap-2">
 			<button className="bg-info/10 border border-info/50 p-2 rounded-md text-left w-full">
 				<p className="text-xs font-semibold">3x3 Scan</p>
 				<p className="text-info uppercase text-xs">ready</p>
@@ -213,7 +213,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				<p className="text-xs font-semibold">Repair</p>
 				<p className="text-neutral-content/50 uppercase text-xs">1 use</p>
 			</button>
-		</div>
+		</div>}
 
 		<div className="flex flex-col pt-2 gap-2 flex-1 min-h-0 overflow-y-auto lg:hidden">
 			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
