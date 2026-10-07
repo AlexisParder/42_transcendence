@@ -18,8 +18,8 @@ export function MatchHeader({ type, title, description }: {
 		<div className="flex items-center max-sm:gap-2 gap-4">
 			<p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>
 			<p className="font-mono text-sm text-info font-semibold border border-info rounded-full px-2 py-1 text-center">0:03</p>
-			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden">forfeit</button>
-			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden"><IoFlagOutline /></button>
+			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">forfeit</button>
+			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
 		</div>
 	</div>
 }
@@ -182,8 +182,8 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>}
 
 		<div className="flex items-center gap-2 py-1.5 lg:hidden">
-			<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer`} onClick={() => setWaterView("attack")}>Attack</button>
-			<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer`} onClick={() => setWaterView("my waters")}>My waters</button>
+			<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => setWaterView("attack")}>Attack</button>
+			<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => setWaterView("my waters")}>My waters</button>
 		</div>
 
 		{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? "enemy team waters" : `${target?.username}'s waters`}</p>}
@@ -215,7 +215,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			</button>
 		</div>}
 
-		<div className="flex flex-col pt-2 gap-2 flex-1 min-h-0 overflow-y-auto lg:hidden">
+		<div className="flex flex-col pt-2 gap-2 flex-1 min-h-0 overflow-y-auto lg:hidden outline-none">
 			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
 			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
 			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
@@ -266,12 +266,12 @@ export function GameInfos({ match }: {
 
 
 		<div className="flex">
-			<button className="btn text-info text-xs font-semibold border-b-info rounded-none">Log</button>
-			{match.type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold">Team chat <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
+			<button className="btn text-info text-xs font-semibold border-b-info rounded-none outline-none">Log</button>
+			{match.type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold outline-none">Team chat <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
 		</div>
 		<div className="divider m-0"></div>
 
-		<div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
+		<div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none">
 			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
 			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
 			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
