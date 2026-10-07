@@ -170,7 +170,7 @@ export function Game({ type }: {
 
 		<div className="flex items-center gap-2 py-1.5 lg:hidden">
 			<button className="w-full bg-info/10 border border-info/50 rounded-lg py-2 text-xs font-semibold">Attack</button>
-			<button className="w-full bg-neutral/10 border border-neutral/50 rounded-lg py-2 text-xs font-medium">My waters</button>
+			<button className="w-full bg-neutral/10 border border-neutral/50 rounded-lg py-2 text-xs font-medium hover:bg-neutral/50 cursor-pointer">My waters</button>
 		</div>
 
 		<p className="text-xs uppercase text-info font-medium tracking-brand text-center">{type === "TWO_V_TWO" ? "enemy team waters" : "tom's waters"}</p>
