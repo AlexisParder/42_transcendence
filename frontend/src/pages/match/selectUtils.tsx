@@ -52,7 +52,7 @@ export function Dock({ match, myId, placedShips, draggingShip, setDraggingShip, 
 		</div>
 
 		<div className="mt-auto pt-4 flex flex-col gap-2">
-			<button className="btn btn-info w-full" disabled={shipsLeft > 0}>{shipsLeft > 0 ? `Ready — ${shipsLeft} ship${shipsLeft > 1 ? "s" : ""} left` : "Ready"}</button>
+			<button className="btn btn-info w-full" disabled={shipsLeft > 0}>{shipsLeft > 0 ? `Ready - ${shipsLeft} ship${shipsLeft > 1 ? "s" : ""} left` : "Ready"}</button>
 			<p className="text-neutral-content/50 text-xs text-center">When the timer runs out, remaining ships are placed at random.</p>
 		</div>
 	</div>
