@@ -1,40 +1,29 @@
 import { IoDiceOutline, IoRefreshOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
+import { Grid } from "../../components/Grid"
+import { t } from "../../lib/translate"
 import type { Matchs, Ship, shipName } from "../../types/events"
 import { SHIPS } from "./ships"
 
-export function Dock({ match, myId, placedShips, draggingShip, setDraggingShip, onRotate, onRandom, onClear }: {
+const ABILITIES = [
+	{ key: "S", title: "3x3 Scan", description: "Reveals contacts in a 3x3 area." },
+	{ key: "L", title: "Line salvo", description: "Fires on a full row of 4 cells." },
+	{ key: "J", title: "Jamming", description: "Hides your hits from the enemy for 1 turn." },
+	{ key: "R", title: "Repair", description: "Restores one damaged cell, once." },
+]
+
+export function DeploymentInfos({ match, myId }: {
 	match: Matchs,
-	myId: string | null | undefined,
-	placedShips: shipName[],
-	draggingShip: shipName | null,
-	setDraggingShip: (ship: shipName | null) => void,
-	onRotate: () => void,
-	onRandom: () => void,
-	onClear: () => void
+	myId: string | null | undefined
 }) {
-	const shipsLeft = SHIPS.length - placedShips.length
-
-	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 ml-auto max-lg:hidden">
-		<div className="flex items-center justify-between">
-			<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">dock</p>
-			<p className="font-mono text-xs text-neutral-content/50 font-semibold">{placedShips.length} / {SHIPS.length} placed</p>
+	return <div className="bg-base-200 p-4 flex flex-col gap-4 min-h-0 w-72 xl:w-80 shrink-0 overflow-y-auto max-lg:hidden">
+		<div className="flex flex-col gap-1">
+			<h1 className="text-2xl font-bold">Deploy your fleet</h1>
+			<p className="text-sm text-neutral-content/60">Drag each ship onto the grid. Ships can sit side by side. The match starts once both captains are ready.</p>
 		</div>
 
-		<div className="flex flex-col gap-2 py-4 min-h-0 overflow-y-auto">
-			{SHIPS.map(ship => (
-				<DockItem key={ship.name} ship={ship} isPlaced={placedShips.includes(ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} />
-			))}
-		</div>
-
-		<div className="flex items-center gap-2">
-			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={onRotate}><IoRefreshOutline /> Rotate</button>
-			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={onRandom}><IoDiceOutline /> Random</button>
-			<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={onClear} disabled={placedShips.length < 1}>Clear</button>
-		</div>
-
-		<div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md mt-4">
-			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-2">{match.players.length > 2 ? "opponents" : "opponent"}</p>
+		<div className="bg-neutral/10 border border-neutral/50 p-3 rounded-lg">
+			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono tracking-brand pb-2">{match.players.length > 2 ? "opponents" : "opponent"}</p>
 			<div className="flex flex-col gap-2">
 				{match.players.filter(p => p.userId !== myId).map(p => (
 					<div key={p.userId} className="flex items-center gap-2 min-w-0">
@@ -49,6 +38,91 @@ export function Dock({ match, myId, placedShips, draggingShip, setDraggingShip, 
 					</div>
 				))}
 			</div>
+		</div>
+
+		<div className="bg-neutral/10 border border-neutral/50 p-3 rounded-lg flex flex-col gap-2">
+			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono tracking-brand">match</p>
+			<MatchInfoItem title="mode" value={t(`txt_${match.type}`)} />
+			<MatchInfoItem title="ranked" value={match.isRanked ? t("txt_yes") : t("txt_no")} valueColor={match.isRanked ? "text-info" : ""} />
+			<MatchInfoItem title="turn timer" value={`${match.settings.time_turn} s`} />
+		</div>
+
+		{match.settings.abilities && <div className="bg-neutral/10 border border-neutral/50 p-3 rounded-lg flex flex-col gap-3">
+			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono tracking-brand">abilities this match</p>
+			{ABILITIES.map(a => (
+				<div key={a.key} className="flex gap-3">
+					<p className="w-8 h-8 shrink-0 rounded-md border border-info/50 bg-info/10 text-info font-mono text-xs font-semibold flex items-center justify-center">{a.key}</p>
+					<div>
+						<p className="text-sm font-semibold">{a.title}</p>
+						<p className="text-xs text-neutral-content/60">{a.description}</p>
+					</div>
+				</div>
+			))}
+		</div>}
+	</div>
+}
+
+function MatchInfoItem({ title, value, valueColor = "" }: {
+	title: string,
+	value: string,
+	valueColor?: string
+}) {
+	return <div className="flex items-center justify-between">
+		<p className="text-sm text-neutral-content/60 first-letter:uppercase">{title}</p>
+		<p className={`font-mono text-sm font-semibold uppercase ${valueColor}`}>{value}</p>
+	</div>
+}
+
+export function Deployment() {
+	return <div className="flex-1 p-6 max-sm:p-4 flex flex-col gap-4 min-h-0 min-w-0">
+		<div className="flex-1 min-h-0" style={{ containerType: "size" }}>
+			<div className="w-[min(100cqw,calc(100cqh-2rem))] max-w-3xl mx-auto flex flex-col gap-2">
+				<div className="flex items-center justify-between">
+					<p className="font-mono text-xs uppercase text-info font-semibold tracking-brand">your waters — 14×14</p>
+					<div className="flex items-center gap-2">
+						<span className="w-3 h-3 rounded-sm border border-dashed border-info/50 bg-info/10"></span>
+						<p className="font-mono text-xs uppercase text-neutral-content/50 font-medium tracking-brand">drop zone</p>
+					</div>
+				</div>
+				<Grid className="w-full" />
+			</div>
+		</div>
+
+		<div className="flex items-center justify-center flex-wrap gap-2 text-sm text-neutral-content/60">
+			<kbd className="kbd kbd-sm">R</kbd>
+			<p>rotate while dragging</p>
+			<kbd className="kbd kbd-sm">Click</kbd>
+			<p>a placed ship to pick it up again</p>
+		</div>
+	</div>
+}
+
+export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, orientation, setOrientation }: {
+	placedShips: shipName[],
+	setPlacedShips: (ships: shipName[]) => void,
+	draggingShip: shipName | null,
+	setDraggingShip: (ship: shipName | null) => void,
+	orientation: "horizontal" | "vertical",
+	setOrientation: (orientation: "horizontal" | "vertical") => void
+}) {
+	const shipsLeft = SHIPS.length - placedShips.length
+
+	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
+		<div className="flex items-center justify-between">
+			<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">dock</p>
+			<p className="font-mono text-xs text-neutral-content/50 font-semibold">{placedShips.length} / {SHIPS.length} placed</p>
+		</div>
+
+		<div className="flex flex-col gap-2 py-4 min-h-0 overflow-y-auto">
+			{SHIPS.map(ship => (
+				<DockItem key={ship.name} ship={ship} isPlaced={placedShips.includes(ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} />
+			))}
+		</div>
+
+		<div className="flex items-center gap-2">
+			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={() => setOrientation(orientation === "horizontal" ? "vertical" : "horizontal")}><IoRefreshOutline /> Rotate</button>
+			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={() => setPlacedShips(SHIPS.map(s => s.name))}><IoDiceOutline /> Random</button>
+			<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips([])} disabled={placedShips.length < 1}>Clear</button>
 		</div>
 
 		<div className="mt-auto pt-4 flex flex-col gap-2">

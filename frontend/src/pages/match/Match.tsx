@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
-import { Dock } from "./selectUtils";
+import { Deployment, DeploymentInfos, Dock } from "./selectUtils";
 import type { Matchs, shipName } from "../../types/events";
-import { SHIPS } from "./ships";
 import { useSocket } from "../../components/socketContext";
 import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
@@ -59,11 +58,11 @@ export function Match() {
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && <>
-			<MatchHeader title="DEPLOYMENT" description="Place your fleet" />
+			<MatchHeader title="deployment" description="Place your fleet" />
 			<div className="flex flex-1 min-h-0">
-				{/* <LeftSide /> */}
-				{/* <CenterSide /> */}
-				<Dock match={joinedMatch} myId={session?.user.id} placedShips={placedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} onRotate={() => setOrientation(orientation === "horizontal" ? "vertical" : "horizontal")} onRandom={() => setPlacedShips(SHIPS.map(s => s.name))} onClear={() => setPlacedShips([])} />
+				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
+				<Deployment />
+				<Dock placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} orientation={orientation} setOrientation={setOrientation} />
 			</div>
 		</>}
 
