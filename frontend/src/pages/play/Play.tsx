@@ -66,6 +66,8 @@ export function Play() {
 
 				if (match)
 					setView(match.hostId === session?.user.id ? "host" : "guest")
+				else
+					setView("none")
 			} catch (error) {
 				console.error("load joined match:", error)
 			}

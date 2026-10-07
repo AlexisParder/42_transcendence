@@ -2,7 +2,7 @@ import { IoFlagOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
-import type { Log, matchType } from "../../types/events"
+import type { Log, Matchs, matchType } from "../../types/events"
 
 export function MatchHeader({ type, title, description }: {
 	type?: matchType
@@ -24,42 +24,46 @@ export function MatchHeader({ type, title, description }: {
 	</div>
 }
 
-export function GameStats({ type }: {
-	type: matchType
+export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
+	match: Matchs,
+	myId: string | null | undefined,
+	selectedTarget: string,
+	setSelectedTarget: (user: string) => void
 }) {
 	return <div className="bg-base-200 p-4 flex flex-col justify-between max-w-60 max-sm:hidden">
 		<div className="flex flex-col gap-10">
 			<div className="flex flex-col gap-2">
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">turn order</p>
-				{type !== "TWO_V_TWO" && <div className="flex flex-col gap-2">
-					<OrderItem username={"alexis"} image={``} points={1284} isTurn={true} isMine={true} colorTeam="primary" currFleet={4} />
-					<OrderItem username={"tom"} image={``} points={1402} isTurn={false} isMine={false} colorTeam="secondary" currFleet={2} />
-					<OrderItem username={"qweqeqeqweqeqeqeqqeqeqweqe"} image={``} points={1054} isTurn={false} isMine={false} colorTeam="accent" currFleet={3} />
-					<OrderItem username={"bob"} image={``} points={-78} isTurn={false} isMine={false} colorTeam="warning" currFleet={1} isBot={true} />
-				</div>}
-				{type === "TWO_V_TWO" && <div className="flex flex-col gap-2">
-					<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">your team</p>
-					<OrderItem username={"alexis"} image={``} points={1284} isTurn={true} isMine={true} colorTeam="primary" currFleet={4} />
-					<OrderItem username={"gael"} image={``} points={1054} isTurn={false} isMine={false} colorTeam="primary" currFleet={4} />
 
-					<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">enemy team</p>
-					<OrderItem username={"qweqeqeqweqeqeqeqqeqeqweqe"} image={``} points={1402} isTurn={false} isMine={false} colorTeam="error" currFleet={2} />
-					<OrderItem username={"bob"} image={``} points={-78} isTurn={false} isMine={false} colorTeam="error" currFleet={2} isBot={true} />
-				</div>}
+				<div className="flex flex-col gap-2">
+					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">your team</p>}
+					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 1).map(p => (
+						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+					))}
+
+					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">enemy team</p>}
+					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 2).map(p => (
+						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+					))}
+
+					{match.type !== "TWO_V_TWO" && match.players.map(p => (
+						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+					))}
+				</div>
 			</div>
 
-			{type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
+			{match.type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-2">target</p>
 				<div className="flex flex-col gap-2">
-					<button className="bg-warning/10 border border-warning/50 rounded-md  p-1 text-xs font-semibold cursor-pointer truncate">tom</button>
-					<button className="bg-neutral/10 border border-neutral/50 rounded-md  p-1 text-xs font-medium hover:bg-neutral/50 cursor-pointer truncate">gael</button>
-					<button className="bg-neutral/10 border border-neutral/50 rounded-md  p-1 text-xs font-medium hover:bg-neutral/50 cursor-pointer truncate">bob</button>
+					{match.players.filter(p => p.userId !== myId).map(p => (
+						<button key={p.userId} className={`${selectedTarget === p.userId ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate`} onClick={() => setSelectedTarget(p.userId ?? "")}>{p.username}</button>
+					))}
 				</div>
 				<p className="text-neutral-content/50 text-xs pt-1">pick an opponent, then a cell on their grid.</p>
 			</div>}
 		</div>
 		<div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
-			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{type === "TWO_V_TWO" ? "team fleet" : "your fleet"}</p>
+			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{match.type === "TWO_V_TWO" ? "team fleet" : "your fleet"}</p>
 			<FleetStatItem title="carrier" leftBox={5} totalBox={5} />
 			<FleetStatItem title="cruiser" leftBox={2} totalBox={4} />
 			<FleetStatItem title="destroyer" leftBox={3} totalBox={3} />
@@ -88,13 +92,14 @@ function FleetStatItem({ title, leftBox, totalBox }: {
 	</div>
 }
 
-function OrderItem({ username, image, points, isTurn, isMine, colorTeam, currFleet, maxFleet = 5, isBot = false }: {
+function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchType, currFleet, maxFleet = 5, isBot = false }: {
 	username: string | null | undefined,
 	image: string | null | undefined,
 	points: number,
 	isTurn: boolean,
 	isMine: boolean,
-	colorTeam: "primary" | "secondary" | "accent" | "warning" | "error",
+	teamNumber: number,
+	matchType: matchType,
 	currFleet: number
 	maxFleet?: number,
 	isBot?: boolean
@@ -106,26 +111,23 @@ function OrderItem({ username, image, points, isTurn, isMine, colorTeam, currFle
 	else if (fleetPercent < 0.75)
 		fleetColor = "text-warning"
 
-	let dividerColor = "divider-primary"
-	if (colorTeam == "secondary") {
-		dividerColor = "divider-secondary"
-	} else if (colorTeam == "accent") {
-		dividerColor = "divider-accent"
-	} else if (colorTeam == "warning") {
-		dividerColor = "divider-warning"
-	} else if (colorTeam == "error") {
-		dividerColor = "divider-error"
-	}
+	const dividerColor = [
+		"divider-primary",
+		`${matchType === "TWO_V_TWO" ? "divider-error" : "divider-secondary"}`,
+		"divider-accent",
+		"divider-warning",
+		"divider-error",
+	] as const
 
 	return <div className={`${isTurn ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50"} ${currFleet < 1 ? "opacity-50" : ""} rounded-lg p-2 flex min-w-0 max-sm:flex-1`}>
 		<div className="flex flex-1 items-center gap-1 min-w-0">
-			<div className={`divider divider-horizontal ${dividerColor} m-0`}></div>
+			<div className={`divider divider-horizontal ${dividerColor[teamNumber - 1]} m-0`}></div>
 			<div className="max-sm:hidden">
 				<Avatar username={username} image={image} size={32} />
 			</div>
 			<div className="pl-1 flex-1 min-w-0">
-				<div className="flex items-center justify-between">
-					{!isBot && <p className="text-xs font-semibold truncate">{username} {isMine && <span className="max-sm:hidden">(you)</span>}</p>}
+				<div className="flex items-center justify-between gap-2">
+					{!isBot && <p className={`text-xs font-semibold truncate ${isMine ? "text-info" : ""}`}>{username} {isMine && <span className="max-sm:hidden">(you)</span>}</p>}
 					{isBot && <p className="text-xs font-semibold truncate text-warning uppercase">bot</p>}
 					{currFleet > 0 && <p className={`text-xs font-mono font-semibold max-sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
 				</div>
@@ -139,41 +141,54 @@ function OrderItem({ username, image, points, isTurn, isMine, colorTeam, currFle
 	</div>
 }
 
-export function Game({ type }: {
-	type: matchType
+export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView }: {
+	match: Matchs,
+	myId: string | null | undefined,
+	selectedTarget: string,
+	setSelectedTarget: (id: string) => void,
+	waterView: "attack" | "my waters",
+	setWaterView: (view: "attack" | "my waters") => void
+
 }) {
+	const target = match.players.find(p => p.userId === selectedTarget)
+
 	return <div className="flex-1 p-4 flex flex-col min-h-0 min-w-0">
+
 		<div className="flex items-center gap-2 sm:hidden">
-			{type !== "TWO_V_TWO" && <div className="flex w-full min-w-0 gap-2 items-center justify-center">
-				<OrderItem username={"alexis"} image={``} points={1284} isTurn={true} isMine={true} colorTeam="primary" currFleet={4} />
-				<OrderItem username={"tom"} image={``} points={1402} isTurn={false} isMine={false} colorTeam="secondary" currFleet={2} />
-				<OrderItem username={"qweqeqeqweqeqeqeqqeqeqweqe"} image={``} points={1054} isTurn={false} isMine={false} colorTeam="accent" currFleet={3} />
-				<OrderItem username={"bob"} image={``} points={-78} isTurn={false} isMine={false} colorTeam="warning" currFleet={1} isBot={true} />
-			</div>}
-			{type === "TWO_V_TWO" && <div className="flex w-full min-w-0 gap-2 items-center justify-center">
-				<OrderItem username={"alexis"} image={``} points={1284} isTurn={true} isMine={true} colorTeam="primary" currFleet={4} />
-				<OrderItem username={"gael"} image={``} points={1054} isTurn={false} isMine={false} colorTeam="primary" currFleet={4} />
-				<p className="text-neutral-content/50 font-mono uppercase text-xs font-semibold">VS</p>
-				<OrderItem username={"qweqeqeqweqeqeqeqqeqeqweqe"} image={``} points={1402} isTurn={false} isMine={false} colorTeam="error" currFleet={2} />
-				<OrderItem username={"bob"} image={``} points={-78} isTurn={false} isMine={false} colorTeam="error" currFleet={2} isBot={true} />
-			</div>}
+			<div className="flex w-full min-w-0 gap-2 items-center justify-center">
+				{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 1).map(p => (
+					<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+				))}
+
+				{match.type === "TWO_V_TWO" && <p className="text-neutral-content/50 font-mono uppercase text-xs font-semibold">VS</p>}
+
+				{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 2).map(p => (
+					<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+				))}
+
+				{match.type !== "TWO_V_TWO" && match.players.map(p => (
+					<OrderItem key={p.userId} username={p.username} image={``} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+				))}
+			</div>
 		</div>
 
-		{type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 mt-1.5 rounded-md sm:hidden">
+		{match.type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 mt-1.5 rounded-md sm:hidden">
 			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-1 text-center">target</p>
 			<div className="flex gap-1 items-center">
-				<button className="bg-warning/10 border border-warning/50 rounded-md p-1 text-xs font-semibold cursor-pointer truncate w-full">tom</button>
-				<button className="bg-neutral/10 border border-neutral/50 rounded-md p-1 text-xs font-medium hover:bg-neutral/50 cursor-pointer truncate w-full">gael</button>
-				<button className="bg-neutral/10 border border-neutral/50 rounded-md p-1 text-xs font-medium hover:bg-neutral/50 cursor-pointer truncate w-full">bob</button>
+				{match.players.filter(p => p.userId !== myId).map(p => (
+					<button key={p.userId} className={`${selectedTarget === p.userId ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate w-full`} onClick={() => setSelectedTarget(p.userId ?? "")}>{p.username}</button>
+				))}
 			</div>
 		</div>}
 
 		<div className="flex items-center gap-2 py-1.5 lg:hidden">
-			<button className="w-full bg-info/10 border border-info/50 rounded-lg py-2 text-xs font-semibold">Attack</button>
-			<button className="w-full bg-neutral/10 border border-neutral/50 rounded-lg py-2 text-xs font-medium hover:bg-neutral/50 cursor-pointer">My waters</button>
+			<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer`} onClick={() => setWaterView("attack")}>Attack</button>
+			<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer`} onClick={() => setWaterView("my waters")}>My waters</button>
 		</div>
 
-		<p className="text-xs uppercase text-info font-medium tracking-brand text-center">{type === "TWO_V_TWO" ? "enemy team waters" : "tom's waters"}</p>
+		{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? "enemy team waters" : `${target?.username}'s waters`}</p>}
+
+		{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>}
 
 		<div className="pt-1.5 pb-2 text-center">
 			<Grid />
@@ -231,17 +246,17 @@ export function Game({ type }: {
 		</div>
 
 		<div className="bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
-			<p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">target locked <span className="text-info">H9</span> {type === "FOUR_FFA" && <span className="font-bold">(tom)</span>}</p>
+			<p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">target locked <span className="text-info">H9</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>
 			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm">Fire</button>
 		</div>
-	</div>
+	</div >
 }
 
-export function GameInfos({ type }: {
-	type: matchType
+export function GameInfos({ match }: {
+	match: Matchs
 }) {
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 max-lg:hidden">
-		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>
+		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>
 		<Grid />
 		<div className="flex items-center gap-4 pb-4">
 			<FleetColorIndicator title="intact" badge="badge-neutral" />
@@ -252,7 +267,7 @@ export function GameInfos({ type }: {
 
 		<div className="flex">
 			<button className="btn text-info text-xs font-semibold border-b-info rounded-none">Log</button>
-			{type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold">Team chat <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
+			{match.type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold">Team chat <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
 		</div>
 		<div className="divider m-0"></div>
 

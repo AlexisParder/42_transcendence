@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
-import type { Matchs, matchType } from "../../types/events";
+import type { Matchs } from "../../types/events";
 import { useSocket } from "../../components/socketContext";
 import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
+import { t } from "../../lib/translate";
 
 type categoryType = "select" | "match"
 export function Match() {
@@ -14,6 +15,8 @@ export function Match() {
 	const socket = useSocket()
 	const [category, setCategory] = useState<categoryType>("match")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
+	const [selectedTarget, setSelectedTarget] = useState("")
+	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
 
 	useEffect(() => {
 		function onRefreshMatch(payload: Matchs | undefined) {
@@ -35,8 +38,9 @@ export function Match() {
 				if (!ok)
 					return
 
-				const match = data.match ?? undefined
+				const match: Matchs | undefined = data.match ?? undefined
 				setJoinedMatch(match)
+				setSelectedTarget(match?.players.find(p => p.userId !== session?.user.id)?.userId ?? "")
 			} catch (error) {
 				console.error("load joined match:", error)
 			}
@@ -45,7 +49,7 @@ export function Match() {
 		loadJoinedMatch()
 	}, [session?.user])
 
-	if (!joinedMatch) // a changer plus tard
+	if (!joinedMatch)
 		return
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
@@ -59,11 +63,11 @@ export function Match() {
 		</>}
 
 		{category === "match" && <>
-			<MatchHeader type={joinedMatch.type} title="Ranked" description="Your turn" />
+			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description="Your turn" />
 			<div className="flex flex-1 min-h-0 min-w-0">
-				<GameStats type={joinedMatch.type} />
-				<Game type={joinedMatch.type} />
-				<GameInfos type={joinedMatch.type} />
+				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
+				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} />
+				<GameInfos match={joinedMatch} />
 			</div>
 		</>}
 	</div>
