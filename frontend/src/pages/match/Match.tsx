@@ -22,8 +22,8 @@ export function Match() {
 		</>}
 
 		{category === "match" && <>
-			<MatchHeader type={type} title="Ranked Match" description="Your turn" />
-			<div className="flex flex-1 min-h-0">
+			<MatchHeader type={type} title="Ranked" description="Your turn" />
+			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats type={type} />
 				<Game type={type} />
 				<GameInfos type={type} />
