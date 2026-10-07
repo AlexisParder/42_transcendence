@@ -190,9 +190,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 
 		{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>}
 
-		<div className="pt-1.5 pb-2 text-center">
-			<Grid />
-		</div>
+		<Grid className="w-full max-w-xl mx-auto" />
 		{match.settings.abilities && <div className="flex items-center gap-2">
 			<button className="bg-info/10 border border-info/50 p-2 rounded-md text-left w-full">
 				<p className="text-xs font-semibold">3x3 Scan</p>
@@ -255,9 +253,9 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 export function GameInfos({ match }: {
 	match: Matchs
 }) {
-	return <div className="bg-base-200 p-4 flex flex-col min-h-0 max-lg:hidden">
+	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
 		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>
-		<Grid />
+		<Grid className="w-full bg-abyss-900 my-2" />
 		<div className="flex items-center gap-4 pb-4">
 			<FleetColorIndicator title="intact" badge="badge-neutral" />
 			<FleetColorIndicator title="hit" badge="badge-warning" />
