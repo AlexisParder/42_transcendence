@@ -5,7 +5,7 @@ import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, generateCode, isInAnyMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
 
 export async function createMatchHandler(req: Request, res: Response) {
-	const { selectedMatchType, visibility, timeTurn, abilities, replace, spectators } = req.body
+	const { selectedMatchType, visibility, timeTurn, replace, spectators } = req.body
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
@@ -28,7 +28,6 @@ export async function createMatchHandler(req: Request, res: Response) {
 			type: selectedMatchType,
 			settings: {
 				time_turn: timeTurn,
-				abilities,
 				replace,
 				spectators
 			},

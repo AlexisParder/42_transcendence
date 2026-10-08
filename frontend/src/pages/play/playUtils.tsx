@@ -41,7 +41,6 @@ export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, Matc
 	const rules: Rules = {
 		format: joinedMatch.type,
 		timeTurn: joinedMatch.settings.time_turn,
-		abilities: joinedMatch.settings.abilities,
 		replace: joinedMatch.settings.replace,
 		spectators: joinedMatch.settings.spectators,
 		ranked: joinedMatch.isRanked
@@ -183,7 +182,6 @@ export function RulesPanel({ rules }: { rules: Rules }) {
 	const summary = [
 		t(`txt_${rules.format}`),
 		t("play_s_turns", { time: rules.timeTurn }),
-		rules.abilities ? t("play_abilities_on") : t("play_abilities_off"),
 		rules.replace ? t("play_bot_replace") : null,
 		rules.ranked ? t("txt_ranked") : t("txt_unranked"),
 	].filter(Boolean).join(" - ")
@@ -198,7 +196,6 @@ export function RulesPanel({ rules }: { rules: Rules }) {
 		<div className="max-lg:hidden flex flex-col gap-2 text-xs">
 			<RuleRow label={t("play_format")} value={t(`txt_${rules.format}`)} />
 			<RuleRow label={t("play_time_turn")} value={`${rules.timeTurn} s`} highlight />
-			<RuleRow label={t("play_abilities")} value={rules.abilities ? t("txt_on") : t("txt_off")} highlight={rules.abilities} />
 			<RuleRow label={t("play_replace")} value={rules.replace ? t("txt_on") : t("txt_off")} highlight={rules.replace} />
 			<RuleRow label={t("play_spectators")} value={rules.spectators ? t("txt_on") : t("txt_off")} highlight={rules.spectators} />
 			<RuleRow label={t("txt_ranked")} value={rules.ranked ? t("txt_yes") : t("txt_no")} />

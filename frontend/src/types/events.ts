@@ -131,7 +131,6 @@ export interface LeaderboardInfo {
 export interface Rules {
 	format: string,
 	timeTurn: number,
-	abilities: boolean,
 	replace: boolean,
 	spectators: boolean,
 	ranked: boolean
@@ -194,7 +193,6 @@ export interface MatchPlayers {
 
 export interface MatchSettings {
 	time_turn: number,
-	abilities: boolean,
 	replace: boolean,
 	spectators: boolean
 }

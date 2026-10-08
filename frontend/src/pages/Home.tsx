@@ -11,10 +11,6 @@ const features = [
 		desc: t("home_desc_feature1"),
 	},
 	{
-		title: t("home_title_feature2"),
-		desc: t("home_desc_feature2"),
-	},
-	{
 		title: t("home_title_feature3"),
 		desc: t("home_desc_feature3"),
 	},

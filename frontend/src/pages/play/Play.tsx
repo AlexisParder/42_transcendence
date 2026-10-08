@@ -20,7 +20,6 @@ export function Play() {
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
 	const [visibility, setVisibility] = useState<visibilityType>("private")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType>("ONE_V_ONE")
-	const [abilities, setAbilities] = useState(false)
 	const [replace, setReplace] = useState(false)
 	const [spectators, setSpectators] = useState(false)
 	const [timeTurn, setTimeTurn] = useState(30)
@@ -149,7 +148,6 @@ export function Play() {
 				selectedMatchType,
 				visibility,
 				timeTurn,
-				abilities,
 				replace,
 				spectators
 			})
@@ -384,10 +382,6 @@ export function Play() {
 								<button onClick={() => ShowModal("timeTurnModal")} className="link-primary cursor-pointer outline-none">{timeTurn} s</button>
 							</div>
 							<div className="flex justify-between">
-								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_abilities")}</p>
-								<Togglebox name={`tb_ab`} type="info" checked={abilities} onChange={() => setAbilities(!abilities)} />
-							</div>
-							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_replace")}</p>
 								<Togglebox name={`tb_re`} type="info" checked={replace} onChange={() => setReplace(!replace)} />
 							</div>
@@ -400,7 +394,7 @@ export function Play() {
 				</div>
 
 				<div className="my-2 flex items-center justify-between bg-info/10 border border-info/50 rounded-md p-4">
-					<p className="text-xs font-semibold">{t(`txt_${selectedMatchType}`)} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })} {abilities ? `- ${t("play_abilities")}` : ""}</p>
+					<p className="text-xs font-semibold">{t(`txt_${selectedMatchType}`)} - {t(`play_${visibility}`)} - {t("play_s_turns", { time: timeTurn })}</p>
 					<div className="flex flex-col justify-between items-end">
 						<button className="btn btn-info max-lg:btn-sm text-nowrap" onClick={handleCreateMatch}>{t("play_btn_create")}</button>
 						{errors.matchCreation && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{errors.matchCreation}</span>}
