@@ -2,7 +2,7 @@ import { IoDiceOutline, IoRefreshOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
-import type { Matchs, Ship, shipName } from "../../types/events"
+import type { Matchs, Ship, ShipName } from "../../types/events"
 import { SHIPS } from "./ships"
 
 const ABILITIES = [
@@ -98,10 +98,10 @@ export function Deployment() {
 }
 
 export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, orientation, setOrientation }: {
-	placedShips: shipName[],
-	setPlacedShips: (ships: shipName[]) => void,
-	draggingShip: shipName | null,
-	setDraggingShip: (ship: shipName | null) => void,
+	placedShips: ShipName[],
+	setPlacedShips: (ships: ShipName[]) => void,
+	draggingShip: ShipName | null,
+	setDraggingShip: (ship: ShipName | null) => void,
 	orientation: "horizontal" | "vertical",
 	setOrientation: (orientation: "horizontal" | "vertical") => void
 }) {
@@ -136,7 +136,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip }: {
 	ship: Ship,
 	isPlaced: boolean,
 	isDragging: boolean,
-	setDraggingShip: (ship: shipName | null) => void
+	setDraggingShip: (ship: ShipName | null) => void
 }) {
 	let status = "in dock"
 	let statusColor = "text-neutral-content/50"

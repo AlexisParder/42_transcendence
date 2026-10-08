@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express";
 import { auth } from "../auth.ts";
 import { prisma } from "../db/client.ts";
-import { formatMatch } from "../lib/matchFormat.ts";
+import { formatMatch } from "../lib/matchs/matchFormat.ts";
 import type { Stat } from "../events.ts";
 
 export async function getUserStatsHandler(req: Request, res: Response) {

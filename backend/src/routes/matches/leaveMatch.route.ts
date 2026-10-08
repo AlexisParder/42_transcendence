@@ -3,6 +3,7 @@ import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
 import type { Server } from "socket.io"
+import { filterMatchForUser } from "../../lib/matchs/matchUtils.ts";
 
 export async function leaveMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -35,10 +36,10 @@ export async function leaveMatchHandler(req: Request, res: Response) {
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
 			if (player.userId && player.userId !== userId)
-				io.to(player.userId).emit("refresh_joined_match", match)
+				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 
-		res.json({ ok: true, match })
+		res.json({ ok: true, match: filterMatchForUser(match, userId) })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

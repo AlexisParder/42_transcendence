@@ -2,6 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
+import { filterMatchForUser } from "../../lib/matchs/matchUtils.ts";
 
 export async function getPublicMatchesHandler(req: Request, res: Response) {
 	try {
@@ -17,7 +18,7 @@ export async function getPublicMatchesHandler(req: Request, res: Response) {
 
 		const publicMatches = matches.filter(m => m.visibility === "public").reverse()
 
-		res.json({ ok: true, matches: publicMatches })
+		res.json({ ok: true, matches: publicMatches.map(m => filterMatchForUser(m, session.user.id)) })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

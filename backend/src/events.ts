@@ -79,7 +79,7 @@ export interface ConversationSummary {
 	unreadCount: number
 }
 
-export type matchType = "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA"
+export type matchType = "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA" | "BOT"
 
 export interface Match {
 	id: string,
@@ -138,7 +138,7 @@ export interface Rules {
 }
 
 export interface Matchs {
-	type: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
+	type: matchType,
 	settings: MatchSettings,
 	code: string,
 	visibility: "public" | "private",
@@ -153,18 +153,20 @@ export interface Matchs {
 }
 
 export interface Teams {
-	nbTeam: number,
+	idTeam: number,
 	ships: Ship[],
 	shots: Shot[],
 }
 
-export type ShipType = "carrier" | "cruiser" | "destroyer" | "frigate" | "submarine"
+export type ShipName = "carrier" | "cruiser" | "destroyer" | "frigate" | "submarine"
 export type vect2 = {x: number, y: number}
 
 export interface Ship {
-	type: ShipType,
+	name: ShipName,
 	start: vect2,
 	end: vect2,
+	size: number,
+	image: string
 }
 
 export interface Shot {

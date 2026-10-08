@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
 import { Deployment, DeploymentInfos, Dock } from "./selectUtils";
-import type { Matchs, shipName } from "../../types/events";
+import type { Matchs, ShipName } from "../../types/events";
 import { useSocket } from "../../components/socketContext";
 import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
@@ -18,8 +18,8 @@ export function Match() {
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState("")
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
-	const [placedShips, setPlacedShips] = useState<shipName[]>([])
-	const [draggingShip, setDraggingShip] = useState<shipName | null>(null)
+	const [placedShips, setPlacedShips] = useState<ShipName[]>([])
+	const [draggingShip, setDraggingShip] = useState<ShipName | null>(null)
 	const [orientation, setOrientation] = useState<"horizontal" | "vertical">("horizontal")
 
 	useEffect(() => {

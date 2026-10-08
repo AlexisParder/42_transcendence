@@ -294,7 +294,7 @@ export function MatchItem({ username, image, type, players, maxPlayers, canJoin,
 	{
 		username: string | null | undefined,
 		image: string | null | undefined,
-		type: matchType | "BOT",
+		type: matchType,
 		players: number,
 		maxPlayers: number,
 		canJoin?: boolean,
@@ -333,7 +333,7 @@ export function MatchItem({ username, image, type, players, maxPlayers, canJoin,
 
 export function SidebarRight({ children, format, replace }: {
 	children: React.ReactNode,
-	format: matchType | "BOT",
+	format: matchType,
 	replace: boolean
 }) {
 	let players = "3-4"

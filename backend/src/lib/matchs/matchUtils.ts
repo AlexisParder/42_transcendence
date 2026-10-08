@@ -1,4 +1,4 @@
-import type { MatchPlayers, Matchs } from "../events.ts";
+import type { MatchPlayers, Matchs, matchType } from "../../events.ts";
 
 export function isInAnyMatch(currentMatches: Map<string, Matchs>, userId: string): boolean {
 	for (const match of currentMatches.values()) {
@@ -39,4 +39,27 @@ export function generateCode(existing: Map<string, Matchs>): string {
 		code = `s-${suffix}`
 	}
 	return code
+}
+
+export function filterMatchForUser(match: Matchs, userId: string): Matchs {
+	const team = match.players.find(p => p.userId === userId)?.team
+
+	return {
+		...match,
+		teams: match.teams.map(t =>
+			t.idTeam === team ? t : { ...t, ships: [] }
+		)
+	}
+}
+
+export const MATCH_CONFIG: Record<matchType, { teams: number, maxPlayers: number }> = {
+	ONE_V_ONE: { teams: 2, maxPlayers: 2 },
+	BOT: { teams: 2, maxPlayers: 2 },
+	TWO_V_TWO: { teams: 2, maxPlayers: 4 },
+	THREE_FFA: { teams: 3, maxPlayers: 3 },
+	FOUR_FFA: { teams: 4, maxPlayers: 4 },
+}
+
+export function isMatchType(value: unknown): value is matchType {
+	return typeof value === "string" && Object.hasOwn(MATCH_CONFIG, value)
 }
