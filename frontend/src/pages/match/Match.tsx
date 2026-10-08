@@ -14,7 +14,7 @@ export function Match() {
 
 	const { data: session } = authClient.useSession()
 	const socket = useSocket()
-	const [category, setCategory] = useState<categoryType>("select")
+	const [category, setCategory] = useState<categoryType>("match")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState("")
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
