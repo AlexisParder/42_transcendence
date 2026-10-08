@@ -75,7 +75,7 @@ function MatchInfoItem({ title, value, valueColor = "" }: {
 
 export function Deployment() {
 	return <div className="flex-1 p-6 max-sm:p-4 flex flex-col gap-4 min-h-0 min-w-0">
-		<div className="flex-1 min-h-0" style={{ containerType: "size" }}>
+		<div className="flex-1 min-h-0 @container-size">
 			<div className="w-[min(100cqw,calc(100cqh-2rem))] max-w-3xl mx-auto flex flex-col gap-2">
 				<div className="flex items-center justify-between">
 					<p className="font-mono text-xs uppercase text-info font-semibold tracking-brand">your waters — 14×14</p>
@@ -132,6 +132,14 @@ export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShi
 	</div>
 }
 
+// image width in the dock, proportional to the ship size
+const IMG_WIDTH: Record<number, string> = {
+	2: "w-2/5",
+	3: "w-3/5",
+	4: "w-4/5",
+	5: "w-full",
+}
+
 function DockItem({ ship, isPlaced, isDragging, setDraggingShip }: {
 	ship: Ship,
 	isPlaced: boolean,
@@ -163,7 +171,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip }: {
 
 	return <div className={`${cardColor} border rounded-lg p-3 flex items-center gap-3 select-none`} draggable={!isPlaced} onDragStart={onDragStart} onDragEnd={() => setDraggingShip(null)}>
 		<div className="w-24 shrink-0 flex items-center">
-			<img src={ship.image} alt={ship.name} draggable={false} className="h-6 object-contain object-left" style={{ width: `${ship.size / 5 * 100}%` }} />
+			<img src={ship.image} alt={ship.name} draggable={false} className={`h-6 object-contain object-left ${IMG_WIDTH[ship.size]}`} />
 		</div>
 		<div className="flex-1 min-w-0">
 			<p className="text-sm font-semibold first-letter:uppercase truncate">{ship.name}</p>
