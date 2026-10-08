@@ -2,7 +2,7 @@ import { IoFlagOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
-import type { Log, Matchs, matchType } from "../../types/events"
+import type { Log, Matchs, matchType, vect2 } from "../../types/events"
 
 export function MatchHeader({ type, title, description }: {
 	type?: matchType
@@ -141,16 +141,21 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 	</div>
 }
 
-export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView }: {
+export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked }: {
 	match: Matchs,
 	myId: string | null | undefined,
 	selectedTarget: string,
 	setSelectedTarget: (id: string) => void,
 	waterView: "attack" | "my waters",
-	setWaterView: (view: "attack" | "my waters") => void
+	setWaterView: (view: "attack" | "my waters") => void,
+	targetLocked: vect2,
+	setTargetLocked: (coords: vect2) => void
 
 }) {
 	const target = match.players.find(p => p.userId === selectedTarget)
+	const myTeam = match.players.find(p => p.userId === myId)?.team
+	const rowName = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 
 	return <div className="flex-1 p-4 flex flex-col min-h-0 min-w-0">
 
@@ -190,7 +195,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 
 		{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>}
 
-		<Grid className="w-full max-w-xl mx-auto" />
+		<Grid className="w-full max-w-xl mx-auto" ships={match.teams.find(t => t.idTeam === myTeam)?.ships} targetLocked={targetLocked} setTargetLocked={setTargetLocked} />
 		{match.settings.abilities && <div className="flex items-center gap-2">
 			<button className="bg-info/10 border border-info/50 p-2 rounded-md text-left w-full">
 				<p className="text-xs font-semibold">3x3 Scan</p>
@@ -243,10 +248,10 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
 		</div>
 
-		<div className="bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
-			<p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">target locked <span className="text-info">H9</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>
+		{targetLocked.x >= 0 && targetLocked.y >= 0 && <div className="bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
+			<p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">target locked <span className="text-info">{rowName[targetLocked.y]}{targetLocked.x + 1}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>
 			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm">Fire</button>
-		</div>
+		</div>}
 	</div >
 }
 
