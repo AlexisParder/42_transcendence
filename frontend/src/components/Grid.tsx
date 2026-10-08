@@ -5,7 +5,7 @@ import destroyer from "../assets/boats/intact/destroyer.png"
 import frigate from "../assets/boats/intact/frigate.png"
 import submarine from "../assets/boats/intact/submarine.png"
 
-const SIZE = 14
+export const SIZE = 14
 
 const IMG_SHIP: Record<ShipName, string> = {
 	carrier,
@@ -32,14 +32,29 @@ function shipPlacement(ship: Ship) {
 	}
 }
 
-export function Grid({ ships = [], className = "", targetLocked, setTargetLocked }: {
+export function Grid({ ships = [], className = "", hoverable = true, targetLocked, setTargetLocked, previewShip, dropZone = [], dropValid = true, setHoverCell, onDropCell, onPickCell }: {
 	ships?: Ship[],
 	className?: string,
+	hoverable?: boolean,
 	targetLocked?: vect2,
-	setTargetLocked?: (coords: vect2) => void
+	setTargetLocked?: (coords: vect2) => void,
+	previewShip?: Ship,
+	dropZone?: vect2[],
+	dropValid?: boolean,
+	setHoverCell?: (coords: vect2 | null) => void,
+	onDropCell?: (coords: vect2) => void,
+	onPickCell?: (coords: vect2) => void
 }) {
+	function cellColor(x: number, y: number) {
+		if (dropZone.some(c => c.x === x && c.y === y))
+			return dropValid ? "border-dashed border-info/50 bg-info/10" : "border-dashed border-error/50 bg-error/10"
+		if (targetLocked?.x === x && targetLocked?.y === y)
+			return "border-info/50 bg-info/10"
+		return `bg-base-200 border-neutral/30 ${hoverable ? "hover:border-info/50 hover:bg-info/10" : ""}`
+	}
+
 	return <>
-		<div className={`grid grid-cols-14 grid-rows-14 gap-1 p-1 aspect-square rounded-md ${className}`}>
+		<div className={`grid grid-cols-14 grid-rows-14 gap-1 p-1 aspect-square rounded-md ${className}`} onPointerLeave={() => setHoverCell?.(null)}>
 			{Array.from({ length: SIZE * SIZE }, (_, i) => {
 				const x = Math.floor(i / SIZE)
 				const y = i % SIZE
@@ -47,22 +62,23 @@ export function Grid({ ships = [], className = "", targetLocked, setTargetLocked
 					<button key={`${x}-${y}`} onClick={() => {
 						if (setTargetLocked)
 							setTargetLocked({ x, y })
-					}} style={{ gridRow: y + 1, gridColumn: x + 1 }} className={`${targetLocked?.x === x && targetLocked?.y === y ? "border-info/50 bg-info/10" : "bg-base-200 border-neutral/30 hover:border-info/50 hover:bg-info/10"} border rounded-sm outline-none`} />
+					}} onPointerEnter={() => setHoverCell?.({ x, y })} onPointerDown={e => { if (onPickCell) { e.preventDefault(); onPickCell({ x, y }) } }} onPointerUp={() => onDropCell?.({ x, y })} style={{ gridRow: y + 1, gridColumn: x + 1 }} className={`${cellColor(x, y)} border rounded-sm outline-none`} />
 				)
 			})}
 
-			{ships.map(ship => {
+			{[...ships, ...(previewShip ? [previewShip] : [])].map(ship => {
 				const { vertical, angle, style } = shipPlacement(ship)
+				const isPreview = ship === previewShip
 
-				return <>
-					<div key={ship.name} className="relative z-10 pointer-events-none overflow-hidden" style={{ ...style, containerType: "size" }}>
+				return (
+					<div key={isPreview ? "preview" : ship.name} className={`relative z-10 pointer-events-none overflow-hidden @container-size ${isPreview ? "opacity-60" : ""}`} style={style}>
 						<img src={IMG_SHIP[ship.name]} alt={ship.name} draggable={false} className="absolute top-1/2 left-1/2 max-w-none object-fill" style={{
 							width: vertical ? "100cqh" : "100cqw",
 							height: vertical ? "100cqw" : "100cqh",
 							transform: `translate(-50%, -50%) rotate(${angle}deg)`
 						}} />
 					</div>
-				</>
+				)
 			})}
 		</div >
 	</>

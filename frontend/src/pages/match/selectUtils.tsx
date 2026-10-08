@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react"
 import { IoDiceOutline, IoRefreshOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
-import type { Matchs, Ship, ShipName } from "../../types/events"
-import { SHIPS } from "./ships"
+import type { Matchs, Ship, ShipName, shipRotation, vect2 } from "../../types/events"
+import { canPlaceShip, getShipCells, getShipRotation, placeShip, randomShips, SHIPS } from "./ships"
 
 export function DeploymentInfos({ match, myId }: {
 	match: Matchs,
@@ -53,7 +54,61 @@ function MatchInfoItem({ title, value, valueColor = "" }: {
 	</div>
 }
 
-export function Deployment() {
+export function Deployment({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation }: {
+	placedShips: Ship[],
+	setPlacedShips: (ships: Ship[]) => void,
+	draggingShip: ShipName | null,
+	setDraggingShip: (ship: ShipName | null) => void,
+	rotation: shipRotation,
+	setRotation: (rotation: shipRotation) => void
+}) {
+	const [hoverCell, setHoverCell] = useState<vect2 | null>(null)
+	const [grabIndex, setGrabIndex] = useState(0)
+	const ship = SHIPS.find(s => s.name === draggingShip)
+	const previewShip = ship && hoverCell ? placeShip(ship, hoverCell, rotation, grabIndex) : undefined
+	const isValid = previewShip ? canPlaceShip(placedShips, previewShip) : false
+
+	// while dragging: R rotates, releasing anywhere outside the grid cancels the drag
+	useEffect(() => {
+		if (!draggingShip)
+			return
+
+		function onKeyDown(e: KeyboardEvent) {
+			if (e.key === "r" || e.key === "R")
+				setRotation((rotation + 90) % 360 as shipRotation)
+		}
+
+		function onPointerUp() {
+			setDraggingShip(null)
+			setGrabIndex(0)
+		}
+
+		window.addEventListener("keydown", onKeyDown)
+		window.addEventListener("pointerup", onPointerUp)
+		return () => {
+			window.removeEventListener("keydown", onKeyDown)
+			window.removeEventListener("pointerup", onPointerUp)
+		}
+	}, [draggingShip, rotation, setRotation, setDraggingShip])
+
+	function onDropCell(coords: vect2) {
+		if (!ship)
+			return
+		const placed = placeShip(ship, coords, rotation, grabIndex)
+		if (canPlaceShip(placedShips, placed))
+			setPlacedShips([...placedShips.filter(s => s.name !== placed.name), placed])
+	}
+
+	function onPickCell(coords: vect2) {
+		const picked = placedShips.find(s => getShipCells(s).some(c => c.x === coords.x && c.y === coords.y))
+		if (!picked)
+			return
+		setRotation(getShipRotation(picked))
+		setGrabIndex(getShipCells(picked).findIndex(c => c.x === coords.x && c.y === coords.y))
+		setHoverCell(coords)
+		setDraggingShip(picked.name)
+	}
+
 	return <div className="flex-1 p-6 max-sm:p-4 flex flex-col gap-4 min-h-0 min-w-0">
 		<div className="flex-1 min-h-0 @container-size">
 			<div className="w-[min(100cqw,calc(100cqh-2rem))] mx-auto flex flex-col gap-2">
@@ -64,7 +119,7 @@ export function Deployment() {
 						<p className="font-mono text-xs uppercase text-neutral-content/50 font-medium tracking-brand">drop zone</p>
 					</div>
 				</div>
-				<Grid className="w-full" />
+				<Grid className="w-full" hoverable={false} ships={placedShips.filter(s => s.name !== draggingShip)} previewShip={isValid ? previewShip : undefined} dropZone={previewShip ? getShipCells(previewShip) : []} dropValid={isValid} setHoverCell={draggingShip ? setHoverCell : undefined} onDropCell={onDropCell} onPickCell={onPickCell} />
 			</div>
 		</div>
 
@@ -77,13 +132,13 @@ export function Deployment() {
 	</div>
 }
 
-export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, orientation, setOrientation }: {
-	placedShips: ShipName[],
-	setPlacedShips: (ships: ShipName[]) => void,
+export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation }: {
+	placedShips: Ship[],
+	setPlacedShips: (ships: Ship[]) => void,
 	draggingShip: ShipName | null,
 	setDraggingShip: (ship: ShipName | null) => void,
-	orientation: "horizontal" | "vertical",
-	setOrientation: (orientation: "horizontal" | "vertical") => void
+	rotation: shipRotation,
+	setRotation: (rotation: shipRotation) => void
 }) {
 	const shipsLeft = SHIPS.length - placedShips.length
 
@@ -95,13 +150,13 @@ export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShi
 
 		<div className="flex flex-col gap-2 py-4 min-h-0 overflow-y-auto">
 			{SHIPS.map(ship => (
-				<DockItem key={ship.name} ship={ship} isPlaced={placedShips.includes(ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} />
+				<DockItem key={ship.name} ship={ship} isPlaced={placedShips.some(s => s.name === ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} />
 			))}
 		</div>
 
 		<div className="flex items-center gap-2">
-			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={() => setOrientation(orientation === "horizontal" ? "vertical" : "horizontal")}><IoRefreshOutline /> Rotate</button>
-			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={() => setPlacedShips(SHIPS.map(s => s.name))}><IoDiceOutline /> Random</button>
+			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={() => setRotation((rotation + 90) % 360 as shipRotation)}><IoRefreshOutline /> Rotate</button>
+			<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none" onClick={() => setPlacedShips(randomShips())}><IoDiceOutline /> Random</button>
 			<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips([])} disabled={placedShips.length < 1}>Clear</button>
 		</div>
 
@@ -132,16 +187,14 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip }: {
 		cardColor = "bg-neutral/10 border-neutral/50 opacity-50"
 	}
 
-	function onDragStart(e: React.DragEvent<HTMLDivElement>) {
-		e.dataTransfer.setData("text/plain", ship.name)
-		e.dataTransfer.effectAllowed = "move"
-		const img = e.currentTarget.querySelector("img")
-		if (img)
-			e.dataTransfer.setDragImage(img, img.width / 2, img.height / 2)
+	function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+		if (isPlaced)
+			return
+		e.preventDefault()
 		setDraggingShip(ship.name)
 	}
 
-	return <div className={`${cardColor} border rounded-lg p-3 flex items-center gap-3 select-none`} draggable={!isPlaced} onDragStart={onDragStart} onDragEnd={() => setDraggingShip(null)}>
+	return <div className={`${cardColor} border rounded-lg p-3 flex items-center gap-3 select-none`} onPointerDown={onPointerDown}>
 		<div className="w-24 shrink-0 flex items-center">
 			<img src={ship.image} alt={ship.name} draggable={false} className="h-6 object-contain object-left w-full" />
 		</div>

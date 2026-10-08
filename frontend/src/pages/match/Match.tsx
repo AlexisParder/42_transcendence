@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
 import { Deployment, DeploymentInfos, Dock } from "./selectUtils";
-import type { Matchs, ShipName, vect2 } from "../../types/events";
+import type { Matchs, Ship, ShipName, shipRotation, vect2 } from "../../types/events";
 import { useSocket } from "../../components/socketContext";
 import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
@@ -18,9 +18,9 @@ export function Match() {
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState("")
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
-	const [placedShips, setPlacedShips] = useState<ShipName[]>([])
+	const [placedShips, setPlacedShips] = useState<Ship[]>([])
 	const [draggingShip, setDraggingShip] = useState<ShipName | null>(null)
-	const [orientation, setOrientation] = useState<"horizontal" | "vertical">("horizontal")
+	const [rotation, setRotation] = useState<shipRotation>(0)
 	const [targetLocked, setTargetLocked] = useState<vect2>({ x: -1, y: -1 })
 
 	useEffect(() => {
@@ -62,8 +62,8 @@ export function Match() {
 			<MatchHeader title="deployment" description="Place your fleet" />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
-				<Deployment />
-				<Dock placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} orientation={orientation} setOrientation={setOrientation} />
+				<Deployment placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
+				<Dock placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
 			</div>
 		</>}
 

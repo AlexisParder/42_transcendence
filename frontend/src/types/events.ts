@@ -159,6 +159,7 @@ export interface Teams {
 
 export type ShipName = "carrier" | "cruiser" | "destroyer" | "frigate" | "submarine"
 export type vect2 = {x: number, y: number}
+export type shipRotation = 0 | 90 | 180 | 270
 
 export interface Ship {
 	name: ShipName,
