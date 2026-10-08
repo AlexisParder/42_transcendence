@@ -112,14 +112,6 @@ export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShi
 	</div>
 }
 
-// image width in the dock, proportional to the ship size
-const IMG_WIDTH: Record<number, string> = {
-	2: "w-2/5",
-	3: "w-3/5",
-	4: "w-4/5",
-	5: "w-full",
-}
-
 function DockItem({ ship, isPlaced, isDragging, setDraggingShip }: {
 	ship: Ship,
 	isPlaced: boolean,
@@ -151,7 +143,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip }: {
 
 	return <div className={`${cardColor} border rounded-lg p-3 flex items-center gap-3 select-none`} draggable={!isPlaced} onDragStart={onDragStart} onDragEnd={() => setDraggingShip(null)}>
 		<div className="w-24 shrink-0 flex items-center">
-			<img src={ship.image} alt={ship.name} draggable={false} className={`h-6 object-contain object-left ${IMG_WIDTH[ship.size]}`} />
+			<img src={ship.image} alt={ship.name} draggable={false} className="h-6 object-contain object-left w-full" />
 		</div>
 		<div className="flex-1 min-w-0">
 			<p className="text-sm font-semibold first-letter:uppercase truncate">{ship.name}</p>
