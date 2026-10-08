@@ -72,7 +72,7 @@ export function Match() {
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} />
-				<GameInfos match={joinedMatch} />
+				<GameInfos match={joinedMatch} myId={session?.user.id} />
 			</div>
 		</>}
 	</div>

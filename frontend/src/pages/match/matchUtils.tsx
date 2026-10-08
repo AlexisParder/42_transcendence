@@ -191,12 +191,12 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => setWaterView("my waters")}>My waters</button>
 		</div>
 
-		{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? "enemy team waters" : `${target?.username}'s waters`}</p>}
+		{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? "enemy team waters" : `${target?.username}'s waters`}</p>}
 
-		{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>}
+		{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>}
 
-		<Grid className="w-full max-w-xl mx-auto" ships={match.teams.find(t => t.idTeam === myTeam)?.ships} targetLocked={targetLocked} setTargetLocked={setTargetLocked} />
-		{match.settings.abilities && <div className="flex items-center gap-2">
+		<Grid className="w-full max-w-xl lg:max-w-2xl mx-auto" ships={waterView === "my waters" ? match.teams.find(t => t.idTeam === myTeam)?.ships : []} targetLocked={targetLocked} setTargetLocked={setTargetLocked} />
+		{match.settings.abilities && <div className="flex items-center gap-2 pt-2">
 			<button className="bg-info/10 border border-info/50 p-2 rounded-md text-left w-full">
 				<p className="text-xs font-semibold">3x3 Scan</p>
 				<p className="text-info uppercase text-xs">ready</p>
@@ -255,12 +255,15 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	</div >
 }
 
-export function GameInfos({ match }: {
-	match: Matchs
+export function GameInfos({ match, myId }: {
+	match: Matchs,
+	myId: string | null | undefined,
 }) {
+	const myTeam = match.players.find(p => p.userId === myId)?.team
+
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
 		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>
-		<Grid className="w-full bg-abyss-900 my-2" />
+		<Grid className="w-full bg-abyss-900 my-2" ships={match.teams.find(t => t.idTeam === myTeam)?.ships} />
 		<div className="flex items-center gap-4 pb-4">
 			<FleetColorIndicator title="intact" badge="badge-neutral" />
 			<FleetColorIndicator title="hit" badge="badge-warning" />
