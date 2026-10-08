@@ -34,7 +34,7 @@ export function DeploymentInfos({ match, myId }: {
 							<p className="text-neutral-content/50 font-mono text-xs">{p.points.toLocaleString()} pts</p>
 						</div>
 						{p.isReady && <p className="text-info font-mono font-semibold text-xs uppercase">ready</p>}
-						{!p.isReady && <p className="text-warning font-mono font-semibold text-xs uppercase flex items-center gap-1"><span className="badge badge-warning badge-xs"></span>placing…</p>}
+						{!p.isReady && <p className="text-warning font-mono font-semibold text-xs uppercase flex items-center gap-1"><span className="loading loading-ring loading-xs"></span>placing…</p>}
 					</div>
 				))}
 			</div>
