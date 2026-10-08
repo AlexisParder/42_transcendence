@@ -180,14 +180,23 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-1 text-center">target</p>
 				<div className="flex gap-1 items-center">
 					{match.players.filter(p => p.userId !== myId).map(p => (
-						<button key={p.userId} className={`${selectedTarget === p.userId ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate w-full`} onClick={() => setSelectedTarget(p.userId ?? "")}>{p.username}</button>
+						<button key={p.userId} className={`${selectedTarget === p.userId ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate w-full`} onClick={() => {
+							setSelectedTarget(p.userId ?? "")
+							setTargetLocked({ x: -1, y: -1 })
+						}}>{p.username}</button>
 					))}
 				</div>
 			</div>}
 
 			<div className="flex items-center gap-2 py-2 lg:hidden">
-				<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => setWaterView("attack")}>Attack</button>
-				<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => setWaterView("my waters")}>My waters</button>
+				<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => {
+					setWaterView("attack")
+					setTargetLocked({ x: -1, y: -1 })
+				}}>Attack</button>
+				<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => {
+					setWaterView("my waters")
+					setTargetLocked({ x: -1, y: -1 })
+				}}>My waters</button>
 			</div>
 
 			{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? "enemy team waters" : `${target?.username}'s waters`}</p>}
