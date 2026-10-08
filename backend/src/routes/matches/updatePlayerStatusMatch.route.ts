@@ -39,6 +39,6 @@ export async function updatePlayerStatusMatchHandler(req: Request, res: Response
 
 		res.json({ ok: true, match })
 	} catch (err) {
-		res.status(401).json({ ok: false })
+		res.status(500).json({ ok: false })
 	}
 }

@@ -148,7 +148,31 @@ export interface Matchs {
 	hostId: string | null,
 	players: MatchPlayers[],
 	maxPlayers: number,
-	invitedPlayers: string[]
+	invitedPlayers: string[],
+	teams: Teams[]
+}
+
+export interface Teams {
+	nbTeam: number,
+	ships: Ship[],
+	shots: Shot[],
+}
+
+export type ShipType = "carrier" | "cruiser" | "destroyer" | "frigate" | "submarine"
+export type vect2 = {x: number, y: number}
+
+export interface Ship {
+	type: ShipType,
+	start: vect2,
+	end: vect2,
+}
+
+export interface Shot {
+	coords: vect2,
+	status: "miss" | "hit" | "sunk"
+	ship: null | Ship,
+	authorId: string | null,
+	authorTeam: number
 }
 
 export interface MatchPlayers {
