@@ -58,7 +58,7 @@ export function Deployment() {
 		<div className="flex-1 min-h-0 @container-size">
 			<div className="w-[min(100cqw,calc(100cqh-2rem))] mx-auto flex flex-col gap-2">
 				<div className="flex items-center justify-between">
-					<p className="font-mono text-xs uppercase text-info font-semibold tracking-brand">your waters - 14x14</p>
+					<p className="font-mono text-xs uppercase text-info font-semibold tracking-brand">your waters</p>
 					<div className="flex items-center gap-2">
 						<span className="w-3 h-3 rounded-sm border border-dashed border-info/50 bg-info/10"></span>
 						<p className="font-mono text-xs uppercase text-neutral-content/50 font-medium tracking-brand">drop zone</p>
