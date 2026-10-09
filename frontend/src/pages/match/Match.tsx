@@ -88,8 +88,7 @@ export function Match() {
 		}
 	}
 
-	// if (!joinedMatch || joinedMatch.startedAt === "")
-	if (!joinedMatch)
+	if (!joinedMatch || joinedMatch.startedAt === "")
 		return
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
