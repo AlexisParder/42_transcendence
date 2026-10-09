@@ -273,11 +273,11 @@ export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, M
 			<div className="flex flex-col-reverse gap-2 lg:flex-row lg:items-center">
 				{isHost
 					? <>
-						<button className="btn btn-ghost text-error lg:btn-outline lg:btn-error" onClick={handleDeleteMatch}>{t("play_btn_close_room")}</button>
+						<button className="btn btn-ghost max-lg:text-error lg:btn-outline lg:btn-error" onClick={handleDeleteMatch}>{t("play_btn_close_room")}</button>
 						<button className="btn btn-info max-lg:btn-lg" disabled={!allReady}>{t("play_btn_start_match")}</button>
 					</>
 					: <>
-						<button className="btn btn-ghost lg:btn-outline" onClick={handleLeaveMatch}>{t("play_btn_leave_room")}</button>
+						<button className="btn btn-ghost max-lg:text-error lg:btn-outline lg:btn-error" onClick={handleLeaveMatch}>{t("play_btn_leave_room")}</button>
 						<button className={`btn max-lg:btn-lg ${isReady ? "btn-outline" : "btn-info btn-outline"}`} onClick={handleStatus}>{isReady ? t("play_cancel_ready") : <><BiCheck /> {t("play_ready")}</>}</button>
 					</>}
 				{MatchErr && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{MatchErr}</span>}
