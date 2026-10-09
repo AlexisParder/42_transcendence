@@ -35,7 +35,7 @@ export async function leaveMatchHandler(req: Request, res: Response) {
 
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
-			if (player.userId && player.userId !== userId)
+			if (player.userId)
 				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 

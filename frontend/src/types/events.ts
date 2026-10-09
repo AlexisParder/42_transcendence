@@ -152,7 +152,7 @@ export interface Matchs {
 }
 
 export interface Teams {
-	idTeam: number,
+	id: number,
 	ships: Ship[],
 	shots: Shot[],
 }

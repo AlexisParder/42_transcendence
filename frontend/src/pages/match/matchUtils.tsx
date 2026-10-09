@@ -28,8 +28,8 @@ export function MatchHeader({ type, title, description }: {
 export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 	match: Matchs,
 	myId: string | null | undefined,
-	selectedTarget: string,
-	setSelectedTarget: (user: string) => void
+	selectedTarget: number,
+	setSelectedTarget: (team: number) => void
 }) {
 	return <div className="bg-base-200 p-4 flex flex-col justify-between max-w-60 max-sm:hidden">
 		<div className="flex flex-col gap-10">
@@ -57,7 +57,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-2">target</p>
 				<div className="flex flex-col gap-2">
 					{match.players.filter(p => p.userId !== myId).map(p => (
-						<button key={p.userId} className={`${selectedTarget === p.userId ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate`} onClick={() => setSelectedTarget(p.userId ?? "")}>{p.username}</button>
+						<button key={p.userId} className={`${selectedTarget === p.team ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate`} onClick={() => setSelectedTarget(p.team ?? 0)}>{p.username}</button>
 					))}
 				</div>
 				<p className="text-neutral-content/50 text-xs pt-1">pick an opponent, then a cell on their grid.</p>
@@ -142,22 +142,36 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 	</div>
 }
 
-export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked }: {
+export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire }: {
 	match: Matchs,
 	myId: string | null | undefined,
-	selectedTarget: string,
-	setSelectedTarget: (id: string) => void,
+	selectedTarget: number,
+	setSelectedTarget: (team: number) => void,
 	waterView: "attack" | "my waters",
 	setWaterView: (view: "attack" | "my waters") => void,
 	targetLocked: vect2,
-	setTargetLocked: (coords: vect2) => void
+	setTargetLocked: (coords: vect2) => void,
+	handleFire: () => void
 
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
 	const view = isDesktop ? "attack" : waterView
-	const target = match.players.find(p => p.userId === selectedTarget)
+	const target = match.players.find(p => p.team === selectedTarget)
+	const targetTeamData = match.teams.find(t => t.id === selectedTarget)
 	const myTeam = match.players.find(p => p.userId === myId)?.team
+	const myTeamData = match.teams.find(t => t.id === myTeam)
 	const rowName = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	const sunkShip = [
+		...new Map(
+			(targetTeamData?.shots ?? [])
+				.filter(s => s.ship !== null)
+				.map(s => [s.ship!.name, s.ship!])
+		).values()
+	]
+
+	const ships = view === "my waters" ? myTeamData?.ships : sunkShip
+	const shots = view === "my waters" ? myTeamData?.shots : targetTeamData?.shots
 
 	return <div className="flex-1 p-4 flex flex-col min-h-0 min-w-0 w-full">
 		<div className="shrink-0">
@@ -183,8 +197,8 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-1 text-center">target</p>
 				<div className="flex gap-1 items-center">
 					{match.players.filter(p => p.userId !== myId).map(p => (
-						<button key={p.userId} className={`${selectedTarget === p.userId ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate w-full`} onClick={() => {
-							setSelectedTarget(p.userId ?? "")
+						<button key={p.userId} className={`${selectedTarget === p.team ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate w-full`} onClick={() => {
+							setSelectedTarget(p.team ?? 0)
 							setTargetLocked({ x: -1, y: -1 })
 						}}>{p.username}</button>
 					))}
@@ -208,7 +222,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>
 
 		<div className="flex-1 min-h-0 flex items-center justify-center @container-size py-2">
-			<Grid className="aspect-square w-[min(100cqw,100cqh)]" hoverable={view !== "my waters"} ships={view === "my waters" ? match.teams.find(t => t.idTeam === myTeam)?.ships : []} targetLocked={view === "my waters" ? { x: -1, y: -1 } : targetLocked} setTargetLocked={view === "my waters" ? undefined : setTargetLocked} />
+			<Grid className="aspect-square w-[min(100cqw,100cqh)]" hoverable={view !== "my waters"} ships={ships} shots={shots} targetLocked={view === "my waters" ? { x: -1, y: -1 } : targetLocked} setTargetLocked={view === "my waters" ? undefined : setTargetLocked} />
 		</div>
 
 		<div className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none">
@@ -241,15 +255,13 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
 		</div>
 
-		{targetLocked.x >= 0 && targetLocked.y >= 0 && <div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
-			<p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">target locked <span className="text-info">{rowName[targetLocked.y]}{targetLocked.x + 1}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>
-			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm">Fire</button>
-		</div>}
+		<div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
+			{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">target locked <span className="text-info">{rowName[targetLocked.y]}{targetLocked.x + 1}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
 
-		{targetLocked.x < 0 && targetLocked.y < 0 && <div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
-			<p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">No Target locked</p>
-			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled>Fire</button>
-		</div>}
+			{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">No Target locked</p>}
+
+			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={targetLocked.x < 0 && targetLocked.y < 0} onClick={handleFire}>Fire</button>
+		</div>
 	</div>
 }
 
@@ -258,10 +270,11 @@ export function GameInfos({ match, myId }: {
 	myId: string | null | undefined,
 }) {
 	const myTeam = match.players.find(p => p.userId === myId)?.team
+	const myTeamData = match.teams.find(t => t.id === myTeam)
 
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
 		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>
-		<Grid className="w-full bg-abyss-900 my-2" hoverable={false} ships={match.teams.find(t => t.idTeam === myTeam)?.ships} />
+		<Grid className="w-full bg-abyss-900 my-2" hoverable={false} ships={myTeamData?.ships} shots={myTeamData?.shots} />
 		<div className="flex items-center gap-4 pb-4">
 			<FleetColorIndicator title="intact" badge="badge-neutral" />
 			<FleetColorIndicator title="hit" badge="badge-warning" />

@@ -42,6 +42,7 @@ import { getJoinedMatchHandler } from "./routes/matches/getJoinedMatch.route.ts"
 import { kickPlayerMatchHandler } from "./routes/matches/kickPlayerMatch.route.ts"
 import { joinCodeMatchHandler } from "./routes/matches/joinCodeMatch.route.ts"
 import { inviteMatchHandler } from "./routes/matches/inviteMatch.route.ts"
+import { playerFireHandler } from "./routes/matches/playerFire.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -107,6 +108,7 @@ app.post("/api/delete-match", deleteMatchHandler)
 app.post("/api/update-player-status-match", updatePlayerStatusMatchHandler)
 app.post("/api/kick-user-match", kickPlayerMatchHandler)
 app.post("/api/invite-match", inviteMatchHandler)
+app.post("/api/player-fire", playerFireHandler)
 
 io.use(async (socket, next) => {
 	try {
@@ -237,14 +239,14 @@ io.on("connection", async (socket) => {
 
 		// if (joinedMath && joinedMath.hostId === userId && joinedMath.startedAt === "") {
 		// 	for (const player of joinedMath.players) {
-		// 		if (player.userId && player.userId !== userId)
+		// 		if (player.userId)
 		// 			io.to(player.userId).emit("refresh_joined_match", undefined)
 		// 	}
 		// 	currentMatches.delete(userId)
 		// } else if (joinedMath) {
 		// 	joinedMath.players = joinedMath.players.filter(p => p.userId !== userId)
 		// 	for (const player of joinedMath.players) {
-		// 		if (player.userId && player.userId !== userId)
+		// 		if (player.userId)
 		// 			io.to(player.userId).emit("refresh_joined_match", joinedMath)
 		// 	}
 		// }
