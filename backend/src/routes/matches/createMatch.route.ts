@@ -40,7 +40,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 			maxPlayers: MATCH_CONFIG[selectedMatchType].maxPlayers,
 			invitedPlayers: [],
 			teams: Array.from({ length: MATCH_CONFIG[selectedMatchType].teams }, (_, i) => ({
-				idTeam: i + 1,
+				id: i + 1,
 				ships: [],
 				shots: []
 			})),
