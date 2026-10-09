@@ -178,13 +178,13 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			<div className="flex items-center gap-2 sm:hidden">
 				<div className="flex w-full min-w-0 gap-2 items-center justify-center">
 					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 1).map(p => (
-						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
 					))}
 
 					{match.type === "TWO_V_TWO" && <p className="text-neutral-content/50 font-mono uppercase text-xs font-semibold">VS</p>}
 
 					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 2).map(p => (
-						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
+						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} currFleet={5} />
 					))}
 
 					{match.type !== "TWO_V_TWO" && match.players.map(p => (
