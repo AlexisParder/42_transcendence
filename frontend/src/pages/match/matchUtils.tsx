@@ -66,10 +66,10 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 		<div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
 			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{match.type === "TWO_V_TWO" ? "team fleet" : "your fleet"}</p>
 			<FleetStatItem title="carrier" leftBox={5} totalBox={5} />
-			<FleetStatItem title="cruiser" leftBox={2} totalBox={4} />
-			<FleetStatItem title="destroyer" leftBox={3} totalBox={3} />
-			<FleetStatItem title="frigate" leftBox={3} totalBox={3} />
-			<FleetStatItem title="submarine" leftBox={0} totalBox={2} />
+			<FleetStatItem title="frigate" leftBox={3} totalBox={4} />
+			<FleetStatItem title="cruiser" leftBox={2} totalBox={3} />
+			<FleetStatItem title="submarine" leftBox={0} totalBox={3} />
+			<FleetStatItem title="destroyer" leftBox={2} totalBox={2} />
 		</div>
 	</div>
 }
