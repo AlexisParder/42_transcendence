@@ -16,6 +16,7 @@ export interface ServerToClientEvents {
 	presence_update: (payload: PresenceUpdate) => void
 	friend_removed: (payload: { userId: string }) => void
 	refresh_joined_match: (payload: Matchs | undefined) => void
+	start_match: () => void
 	typing: (payload: { fromUserId: string, typing: boolean }) => void
 }
 

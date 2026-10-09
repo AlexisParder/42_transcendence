@@ -12,7 +12,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 		})
 
 		if (!session)
-			return res.status(405).json({ ok: false })
+			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>

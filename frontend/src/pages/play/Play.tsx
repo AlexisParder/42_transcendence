@@ -11,6 +11,7 @@ import { SidebarRight, MatchItem, WaitingRoom, MatchTypeBtn } from "./playUtils"
 import { getVisiblesMatches } from "./playLogic";
 import type { visibilityType, viewType } from "../../types/types";
 import { apiGet, apiPost } from "../../lib/api";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export function Play() {
 	useDocumentTitle(t("play_title"))
@@ -33,6 +34,8 @@ export function Play() {
 
 	const visibleMatches = getVisiblesMatches(matches)
 
+	const navigate = useNavigate()
+
 	useEffect(() => {
 		function onPresence(payload: PresenceUpdate) {
 			setPresence(prev => ({ ...prev, [payload.userId]: payload.status }))
@@ -42,15 +45,20 @@ export function Play() {
 			if (!payload)
 				setView("none")
 		}
+		function onStartMatch() {
+			return navigate("/match")
+		}
 
 		socket.on("presence_update", onPresence)
 		socket.on("refresh_joined_match", onRefreshMatch)
+		socket.on("start_match", onStartMatch)
 
 		return () => {
 			socket.off("presence_update", onPresence)
 			socket.off("refresh_joined_match", onRefreshMatch)
+			socket.off("start_match", onStartMatch)
 		}
-	}, [socket])
+	}, [socket, navigate])
 
 	useEffect(() => {
 		async function loadJoinedMatch() {
@@ -63,8 +71,10 @@ export function Play() {
 				const match = data.match ?? undefined
 				setJoinedMatch(match)
 
-				if (match)
+				if (match && match.startedAt === "")
 					setView(match.hostId === session?.user.id ? "host" : "guest")
+				else if (match && match.startedAt !== "")
+					return navigate("/match")
 				else
 					setView("none")
 			} catch (error) {
@@ -73,7 +83,7 @@ export function Play() {
 		}
 
 		loadJoinedMatch()
-	}, [session?.user])
+	}, [session?.user, navigate])
 
 	async function loadFriends() {
 		try {
@@ -106,6 +116,7 @@ export function Play() {
 				return
 
 			setMatches(data.matches ?? [])
+			setErrors({})
 		} catch (error) {
 			console.error("load matches:", error)
 		}
@@ -238,6 +249,22 @@ export function Play() {
 			setErrors({})
 		} catch (error) {
 			console.error("update player status match:", error)
+		}
+	}
+
+	async function handleStart() {
+		if (!joinedMatch)
+			return
+
+		try {
+			const { ok, data } = await apiPost("/api/start-match", { hostId: joinedMatch.hostId })
+
+			if (!ok) {
+				setErrors({ matchWaiting: data.code ? t(data.code) : t("match_err_start_failure") })
+				return
+			}
+		} catch (error) {
+			console.error("start match:", error)
 		}
 	}
 
@@ -437,6 +464,6 @@ export function Play() {
 			</Modal>
 		</SidebarRight>}
 
-		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleKick={handleKick} handleInvite={handleInvite} MatchErr={errors.matchWaiting} />}
+		{(view === "host" || view === "guest") && <WaitingRoom isHost={view === "host"} myId={session?.user.id} joinedMatch={joinedMatch} friends={friends} presence={presence} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleStart={handleStart} handleKick={handleKick} handleInvite={handleInvite} MatchErr={errors.matchWaiting} />}
 	</Sidebar>
 }

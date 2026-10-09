@@ -36,7 +36,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
 
 		if (!isValidCell(coords) || !Number.isInteger(targetTeamId))
-			return res.status(400).json({ ok: false, code: "match_err_invald_input" })
+			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 		const match = currentMatches.get(hostId)
 		if (!match)
@@ -49,8 +49,8 @@ export async function playerFireHandler(req: Request, res: Response) {
 		if (player.team === targetTeamId)
 			return res.status(400).json({ ok: false, code: "match_err_own_team" })
 
-		// if (match.startedAt === "")
-		// 	return res.status(403).json({ ok: false, code: "match_err_not_started" })
+		if (match.startedAt === "")
+			return res.status(403).json({ ok: false, code: "match_err_not_started" })
 
 		// TODO: check timer
 		// TODO: check tour du joueur

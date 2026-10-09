@@ -88,6 +88,7 @@ export function Match() {
 		}
 	}
 
+	// if (!joinedMatch || joinedMatch.startedAt === "")
 	if (!joinedMatch)
 		return
 

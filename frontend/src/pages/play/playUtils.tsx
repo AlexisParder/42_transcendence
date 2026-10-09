@@ -18,7 +18,7 @@ export function MatchTypeBtn({ selected, title, subtitle, onClick }: {
 	</button>
 }
 
-export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus, handleKick, handleInvite }: {
+export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus, handleStart, handleKick, handleInvite }: {
 	isHost: boolean,
 	myId: string | undefined,
 	joinedMatch: Matchs | undefined,
@@ -28,6 +28,7 @@ export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, Matc
 	handleDeleteMatch: () => void,
 	handleLeaveMatch: () => void,
 	handleStatus: () => void,
+	handleStart: () => void,
 	handleKick: (id: string) => void,
 	handleInvite: (targetId: string) => void
 }) {
@@ -84,7 +85,7 @@ export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, Matc
 			</div>
 		</div>
 
-		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} MatchErr={MatchErr} />
+		<WaitingRoomFooter isHost={isHost} allReady={allReady} missing={missing} total={joinedMatch.maxPlayers} isReady={me?.isReady ?? false} handleDeleteMatch={handleDeleteMatch} handleLeaveMatch={handleLeaveMatch} handleStatus={handleStatus} handleStart={handleStart} MatchErr={MatchErr} />
 	</div>
 }
 
@@ -240,7 +241,7 @@ export function InvitePanel({ code, friends, presence, invitedPlayers, handleInv
 	</div >
 }
 
-export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus }: {
+export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus, handleStart }: {
 	isHost: boolean,
 	allReady: boolean,
 	missing: number,
@@ -249,7 +250,8 @@ export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, M
 	MatchErr?: string,
 	handleDeleteMatch: () => void,
 	handleLeaveMatch: () => void,
-	handleStatus: () => void
+	handleStatus: () => void,
+	handleStart: () => void
 }) {
 	let title: string
 	let detail = ""
@@ -274,7 +276,7 @@ export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, M
 				{isHost
 					? <>
 						<button className="btn btn-ghost max-lg:text-error lg:btn-outline lg:btn-error" onClick={handleDeleteMatch}>{t("play_btn_close_room")}</button>
-						<button className="btn btn-info max-lg:btn-lg" disabled={!allReady}>{t("play_btn_start_match")}</button>
+						<button className="btn btn-info max-lg:btn-lg" disabled={!allReady} onClick={handleStart}>{t("play_btn_start_match")}</button>
 					</>
 					: <>
 						<button className="btn btn-ghost max-lg:text-error lg:btn-outline lg:btn-error" onClick={handleLeaveMatch}>{t("play_btn_leave_room")}</button>
@@ -322,9 +324,9 @@ export function MatchItem({ username, image, type, players, maxPlayers, canJoin,
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{players} / {maxPlayers}</p>
 		<div className="flex flex-col items-end justify-center">
 			{canJoin && <button className="btn btn-outline btn-info btn-sm" onClick={() => handleJoinedPublicMatch(match)} >{t("btn_join")}</button>}
+			{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">{t("btn_spectate")}</button>}
 			{joinMatchErr && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{joinMatchErr}</span>}
 		</div>
-		{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm">{t("btn_spectate")}</button>}
 	</div>
 }
 
