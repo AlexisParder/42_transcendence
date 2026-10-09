@@ -3,6 +3,7 @@ import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
 import type { Log, Matchs, matchType, vect2 } from "../../types/events"
+import { useMediaQuery } from "../../hooks/useMediaQuery"
 
 export function MatchHeader({ type, title, description }: {
 	type?: matchType
@@ -152,6 +153,8 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	setTargetLocked: (coords: vect2) => void
 
 }) {
+	const isDesktop = useMediaQuery("(min-width: 64rem)")
+	const view = isDesktop ? "attack" : waterView
 	const target = match.players.find(p => p.userId === selectedTarget)
 	const myTeam = match.players.find(p => p.userId === myId)?.team
 	const rowName = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -205,7 +208,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>
 
 		<div className="flex-1 min-h-0 flex items-center justify-center @container-size py-2">
-			<Grid className="aspect-square w-[min(100cqw,100cqh)]" ships={waterView === "my waters" ? match.teams.find(t => t.idTeam === myTeam)?.ships : []} targetLocked={targetLocked} setTargetLocked={setTargetLocked} />
+			<Grid className="aspect-square w-[min(100cqw,100cqh)]" hoverable={view !== "my waters"} ships={view === "my waters" ? match.teams.find(t => t.idTeam === myTeam)?.ships : []} targetLocked={view === "my waters" ? { x: -1, y: -1 } : targetLocked} setTargetLocked={view === "my waters" ? undefined : setTargetLocked} />
 		</div>
 
 		<div className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none">
@@ -258,7 +261,7 @@ export function GameInfos({ match, myId }: {
 
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
 		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>
-		<Grid className="w-full bg-abyss-900 my-2" ships={match.teams.find(t => t.idTeam === myTeam)?.ships} />
+		<Grid className="w-full bg-abyss-900 my-2" hoverable={false} ships={match.teams.find(t => t.idTeam === myTeam)?.ships} />
 		<div className="flex items-center gap-4 pb-4">
 			<FleetColorIndicator title="intact" badge="badge-neutral" />
 			<FleetColorIndicator title="hit" badge="badge-warning" />
