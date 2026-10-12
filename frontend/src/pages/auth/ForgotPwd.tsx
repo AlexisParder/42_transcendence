@@ -33,7 +33,7 @@ export function ForgotPwd() {
 	useEffect(() => {
 		if (!email) return
 		(async () => {
-			const { ok, data } = await apiPost("/api/opt/cooldown", { email })
+			const { ok, data } = await apiPost("/api/otp/cooldown", { email })
 
 			if (ok)
 				setSentAt(data.left > 0 ? Date.now() - (COOLDOWN - data.left) * 1000 : 0)
@@ -53,7 +53,7 @@ export function ForgotPwd() {
 		setCode("")
 
 		try {
-			const { ok, data } = await apiPost(`/api/opt/send`, { email })
+			const { ok, data } = await apiPost(`/api/otp/send`, { email })
 
 			if (!ok) {
 				if (data.error == "cooldown")
