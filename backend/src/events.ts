@@ -149,7 +149,15 @@ export interface Matchs {
 	players: MatchPlayers[],
 	maxPlayers: number,
 	invitedPlayers: string[],
-	teams: Teams[]
+	teams: Teams[],
+	turns: Turns,
+}
+
+export interface Turns {
+	timerStart: string,
+	userTurn: string | null,
+	isBotTurn: boolean,
+	turnOrder: string[]
 }
 
 export interface Teams {

@@ -39,6 +39,12 @@ export async function createMatchHandler(req: Request, res: Response) {
 			hostId: userId,
 			maxPlayers: MATCH_CONFIG[selectedMatchType].maxPlayers,
 			invitedPlayers: [],
+			turns: {
+				timerStart: "",
+				userTurn: null,
+				isBotTurn: false,
+				turnOrder: []
+			},
 			teams: Array.from({ length: MATCH_CONFIG[selectedMatchType].teams }, (_, i) => ({
 				id: i + 1,
 				// ships: [],

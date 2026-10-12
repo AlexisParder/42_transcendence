@@ -38,18 +38,28 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 
 				<div className="flex flex-col gap-2">
 					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">your team</p>}
-					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 1).map(p => (
-						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} match={match} />
-					))}
+					{match.type === "TWO_V_TWO" && match.turns.turnOrder
+						.map(id => match.players.find(p => p.userId === id && p.team === 1))
+						.filter(Boolean)
+						.map(p => (
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} />
+						))}
 
 					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">enemy team</p>}
-					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 2).map(p => (
-						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={true} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} match={match} />
-					))}
 
-					{match.type !== "TWO_V_TWO" && match.players.map(p => (
-						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} match={match} />
-					))}
+					{match.type === "TWO_V_TWO" && match.turns.turnOrder
+						.map(id => match.players.find(p => p.userId === id && p.team === 2))
+						.filter(Boolean)
+						.map(p => (
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} />
+						))}
+
+					{match.type !== "TWO_V_TWO" && match.turns.turnOrder
+						.map(id => match.players.find(p => p.userId === id))
+						.filter(Boolean)
+						.map(p => (
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} />
+						))}
 				</div>
 			</div>
 
@@ -188,19 +198,28 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		<div className="shrink-0">
 			<div className="flex items-center gap-2 sm:hidden">
 				<div className="flex w-full min-w-0 gap-2 items-center justify-center">
-					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 1).map(p => (
-						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} match={match} />
-					))}
+					{match.type === "TWO_V_TWO" && match.turns.turnOrder
+						.map(id => match.players.find(p => p.userId === id && p.team === 1))
+						.filter(Boolean)
+						.map(p => (
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} />
+						))}
 
 					{match.type === "TWO_V_TWO" && <p className="text-neutral-content/50 font-mono uppercase text-xs font-semibold">VS</p>}
 
-					{match.type === "TWO_V_TWO" && match.players.filter(p => p.team == 2).map(p => (
-						<OrderItem key={p.userId} username={p.username} image={p.image} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} match={match} />
-					))}
+					{match.type === "TWO_V_TWO" && match.turns.turnOrder
+						.map(id => match.players.find(p => p.userId === id && p.team === 2))
+						.filter(Boolean)
+						.map(p => (
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} />
+						))}
 
-					{match.type !== "TWO_V_TWO" && match.players.map(p => (
-						<OrderItem key={p.userId} username={p.username} image={``} points={p.points} isTurn={false} isMine={p.userId === myId} teamNumber={p.team} isBot={p.isBot} matchType={match.type} match={match} />
-					))}
+					{match.type !== "TWO_V_TWO" && match.turns.turnOrder
+						.map(id => match.players.find(p => p.userId === id))
+						.filter(Boolean)
+						.map(p => (
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} />
+						))}
 				</div>
 			</div>
 

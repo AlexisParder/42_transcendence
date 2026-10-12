@@ -4,6 +4,7 @@ import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
 import type { Server } from "socket.io"
 import { updatePlayer } from "../../lib/matchs/matchUtils.ts";
+import { buildTurnOrder } from "../../lib/matchs/playerOrder.ts";
 
 export async function startMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -33,6 +34,11 @@ export async function startMatchHandler(req: Request, res: Response) {
 		if (match.hostId !== userId)
 			return res.status(400).json({ ok: false, code: "match_err_host" })
 
+		const turnOrder: string[] = buildTurnOrder(match.players, match.type === "TWO_V_TWO")
+
+		match.turns.turnOrder = turnOrder
+		match.turns.userTurn = turnOrder[0] ?? null
+
 		if (match.players.some(p => !p.isReady))
 			return res.status(400).json({ ok: false, code: "match_err_all_players_not_ready" })
 
@@ -42,6 +48,7 @@ export async function startMatchHandler(req: Request, res: Response) {
 		})
 
 		match.startedAt = Date.now().toString()
+		match.turns.timerStart = match.startedAt
 
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
