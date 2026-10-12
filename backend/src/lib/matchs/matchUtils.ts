@@ -63,3 +63,12 @@ export const MATCH_CONFIG: Record<matchType, { teams: number, maxPlayers: number
 export function isMatchType(value: unknown): value is matchType {
 	return typeof value === "string" && Object.hasOwn(MATCH_CONFIG, value)
 }
+
+export function isExpired(startStr: string | null | undefined, durationMs: number): boolean {
+	const start = Number(startStr)
+
+	if (!startStr || Number.isNaN(start))
+		return true
+
+	return Date.now() - start >= durationMs
+}

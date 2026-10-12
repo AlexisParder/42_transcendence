@@ -4,7 +4,8 @@ import destroyer from "../../assets/boats/intact/destroyer.png"
 import frigate from "../../assets/boats/intact/frigate.png"
 import submarine from "../../assets/boats/intact/submarine.png"
 import { SIZE } from "../../components/Grid"
-import type { Ship, shipRotation, vect2 } from "../../types/events"
+import type { Ship, vect2 } from "../../types/events"
+import type { shipRotation } from "../../types/types"
 
 export const SHIPS: Ship[] = [
 	{ name: "carrier", size: 5, image: carrier, start: { x: -1, y: -1 }, end: { x: -1, y: -1 } },

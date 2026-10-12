@@ -290,7 +290,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 
 			{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">No Target locked</p>}
 
-			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={targetLocked.x < 0 && targetLocked.y < 0} onClick={handleFire}>Fire</button>
+			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={(targetLocked.x < 0 && targetLocked.y < 0) || match.turns.userTurn !== myId} onClick={handleFire}>Fire</button>
 		</div>
 	</div>
 }

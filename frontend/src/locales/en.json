@@ -104,6 +104,8 @@
 	"match_err_cell_already_shot": "This cell has already been shot",
 	"match_err_all_players_not_ready": "All players are not ready",
 	"match_err_not_started": "This match has not started yet",
+	"match_err_not_your_turn": "It's not your turn",
+	"match_err_time_expired": "Time expired",
 	"match_err_creation_failure": "An error occurred while creating the match",
 	"match_err_delete_failure": "An error occurred while deleting the match",
 	"match_err_join_failure": "An error occurred while joining the match",

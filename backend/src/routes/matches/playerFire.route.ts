@@ -3,7 +3,7 @@ import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, Ship, Shot, SocketData, vect2 } from "../../events.ts";
 import type { Server } from "socket.io"
-import { filterMatchForUser } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, isExpired } from "../../lib/matchs/matchUtils.ts";
 
 const sameCoords = (a: vect2, b: vect2) => a.x === b.x && a.y === b.y
 const isValidCell = (c: any): c is vect2 => c && Number.isInteger(c.x) && Number.isInteger(c.y) && c.x >= 0 && c.x < 14 && c.y >= 0 && c.y < 14
@@ -52,8 +52,11 @@ export async function playerFireHandler(req: Request, res: Response) {
 		if (match.startedAt === "")
 			return res.status(403).json({ ok: false, code: "match_err_not_started" })
 
-		// TODO: check timer
-		// TODO: check tour du joueur
+		if (match.turns.userTurn !== userId)
+			return res.status(400).json({ ok: false, code: "match_err_not_your_turn" })
+
+		if (isExpired(match.turns.timerStart, match.settings.time_turn * 1000))
+			return res.status(400).json({ ok: false, code: "match_err_time_expired" })
 
 		const team = match.teams.find(t => t.id === targetTeamId)
 		if (!team)

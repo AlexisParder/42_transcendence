@@ -3,8 +3,9 @@ import { IoDiceOutline, IoRefreshOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
-import type { Matchs, Ship, ShipName, shipRotation, vect2 } from "../../types/events"
+import type { Matchs, Ship, ShipName, vect2 } from "../../types/events"
 import { canPlaceShip, getShipCells, getShipRotation, placeShip, randomShips, SHIPS } from "./ships"
+import type { shipRotation } from "../../types/types"
 
 export function DeploymentInfos({ match, myId }: {
 	match: Matchs,

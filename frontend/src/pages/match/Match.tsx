@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
 import { Deployment, DeploymentInfos, Dock } from "./selectUtils";
-import type { Matchs, Ship, ShipName, shipRotation, vect2 } from "../../types/events";
+import type { Matchs, Ship, ShipName, vect2 } from "../../types/events";
 import { useSocket } from "../../components/socketContext";
 import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
 import { t } from "../../lib/translate";
+import type { shipRotation } from "../../types/types";
 
 type categoryType = "select" | "match"
 export function Match() {
