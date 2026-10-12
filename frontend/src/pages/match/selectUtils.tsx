@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { IoDiceOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
@@ -65,9 +65,26 @@ export function Deployment({ placedShips, setPlacedShips, draggingShip, setDragg
 }) {
 	const [hoverCell, setHoverCell] = useState<vect2 | null>(null)
 	const [grabIndex, setGrabIndex] = useState(0)
+	const dockRef = useRef<HTMLDivElement>(null)
 	const ship = SHIPS.find(s => s.name === draggingShip)
 	const previewShip = ship && hoverCell ? placeShip(ship, hoverCell, rotation, grabIndex) : undefined
 	const isValid = previewShip ? canPlaceShip(placedShips, previewShip) : false
+
+	useEffect(() => {
+		const dock = dockRef.current
+		if (!dock)
+			return
+
+		function onWheel(e: WheelEvent) {
+			if (!dock || Math.abs(e.deltaY) <= Math.abs(e.deltaX) || dock.scrollWidth <= dock.clientWidth)
+				return
+			e.preventDefault()
+			dock.scrollBy({ left: e.deltaY })
+		}
+
+		dock.addEventListener("wheel", onWheel, { passive: false })
+		return () => dock.removeEventListener("wheel", onWheel)
+	}, [])
 
 	useEffect(() => {
 		if (!ship)
@@ -152,7 +169,7 @@ export function Deployment({ placedShips, setPlacedShips, draggingShip, setDragg
 				<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">dock</p>
 				<p className="font-mono text-xs text-neutral-content/50">swipe →</p>
 			</div>
-			<div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-none">
+			<div ref={dockRef} className="flex gap-2 overflow-x-auto scrollbar-none">
 				{SHIPS.map(ship => (
 					<DockItem key={ship.name} ship={ship} isPlaced={placedShips.some(s => s.name === ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} compact={true} />
 				))}
@@ -263,7 +280,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip, compact = false
 	}
 
 	if (compact)
-		return <div className={`${cardColor} border rounded-lg p-3 flex flex-col items-center gap-2 shrink-0 w-[calc((100%-1rem)/3)] snap-start select-none touch-pan-x`} onPointerDown={onPointerDown}>
+		return <div className={`${cardColor} border rounded-lg p-3 flex flex-col items-center gap-2 shrink-0 w-[calc((100%-1rem)/3)] select-none touch-pan-x`} onPointerDown={onPointerDown}>
 			<div className="h-8 w-full flex items-center justify-center">
 				<img src={ship.image} alt={ship.name} draggable={false} className="h-4 max-w-full object-contain" />
 			</div>
