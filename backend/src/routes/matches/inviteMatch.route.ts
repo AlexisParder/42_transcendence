@@ -30,7 +30,7 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 		if (match.players.length >= match.maxPlayers)
 			return res.status(400).json({ ok: false, code: "match_err_full" })
 
-		if (match.startedAt !== "")
+		if (match.startedAt !== 0)
 			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
 		if (match.invitedPlayers && match.invitedPlayers.some(p => p === peerId))

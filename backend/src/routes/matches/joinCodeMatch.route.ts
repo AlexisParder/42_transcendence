@@ -35,7 +35,7 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 		if (match.players.length >= match.maxPlayers)
 			return res.status(400).json({ ok: false, code: "match_err_full" })
 
-		if (match.startedAt !== "")
+		if (match.startedAt !== 0)
 			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
 		const team = firstFreeTeam(match.players, match.type === "TWO_V_TWO" ? 2 : 1)

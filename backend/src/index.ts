@@ -239,13 +239,13 @@ io.on("connection", async (socket) => {
 			}
 		}
 
-		if (joinedMath && joinedMath.hostId === userId && joinedMath.startedAt === "") {
+		if (joinedMath && joinedMath.hostId === userId && joinedMath.startedAt === 0) {
 			for (const player of joinedMath.players) {
 				if (player.userId)
 					io.to(player.userId).emit("refresh_joined_match", undefined)
 			}
 			currentMatches.delete(userId)
-		} else if (joinedMath && joinedMath.startedAt === "") {
+		} else if (joinedMath && joinedMath.startedAt === 0) {
 			joinedMath.players = joinedMath.players.filter(p => p.userId !== userId)
 			for (const player of joinedMath.players) {
 				if (player.userId)

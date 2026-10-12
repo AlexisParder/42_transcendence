@@ -34,13 +34,13 @@ export async function createMatchHandler(req: Request, res: Response) {
 			code,
 			visibility,
 			isRanked: selectedMatchType !== "BOT" && !replace,
-			startedAt: "",
-			endedAt: "",
+			startedAt: 0,
+			endedAt: 0,
 			hostId: userId,
 			maxPlayers: MATCH_CONFIG[selectedMatchType].maxPlayers,
 			invitedPlayers: [],
 			turns: {
-				timerStart: "",
+				timerStart: 0,
 				userTurn: null,
 				isBotTurn: false,
 				turnOrder: []

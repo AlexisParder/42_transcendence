@@ -26,7 +26,7 @@ export async function updatePlayerStatusMatchHandler(req: Request, res: Response
 		if (!player)
 			return res.status(409).json({ ok: false, code: "match_err_no_match" })
 
-		if (match.startedAt !== "")
+		if (match.startedAt !== 0)
 			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
 		updatePlayer(match, userId, { isReady: !player.isReady })

@@ -71,9 +71,9 @@ export function Play() {
 				const match = data.match ?? undefined
 				setJoinedMatch(match)
 
-				if (match && match.startedAt === "")
+				if (match && match.startedAt === 0)
 					setView(match.hostId === session?.user.id ? "host" : "guest")
-				else if (match && match.startedAt !== "")
+				else if (match && match.startedAt !== 0)
 					return navigate("/match")
 				else
 					setView("none")

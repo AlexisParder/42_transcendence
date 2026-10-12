@@ -24,8 +24,7 @@ export async function getJoinedMatchHandler(req: Request, res: Response) {
 			}
 		}
 
-
-		res.json({ ok: true, match: joinedMath ? filterMatchForUser(joinedMath, session.user.id) : null })
+		res.json({ ok: true, match: joinedMath ? filterMatchForUser(joinedMath, session.user.id) : null  })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

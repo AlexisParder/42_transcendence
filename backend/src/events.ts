@@ -143,8 +143,8 @@ export interface Matchs {
 	code: string,
 	visibility: "public" | "private",
 	isRanked: boolean,
-	startedAt: string,
-	endedAt: string,
+	startedAt: number,
+	endedAt: number,
 	hostId: string | null,
 	players: MatchPlayers[],
 	maxPlayers: number,
@@ -154,7 +154,7 @@ export interface Matchs {
 }
 
 export interface Turns {
-	timerStart: string,
+	timerStart: number,
 	userTurn: string | null,
 	isBotTurn: boolean,
 	turnOrder: string[]

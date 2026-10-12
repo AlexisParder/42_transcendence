@@ -2,7 +2,7 @@ import type { Matchs } from "../../types/events"
 
 export function getVisiblesMatches(matches: Matchs[]) {
 	return matches.map(m => {
-		const started = m.startedAt !== ""
+		const started = m.startedAt !== 0
 		const canJoin = !started && m.players.length < m.maxPlayers
 		const canSpec = started && m.settings.spectators
 		const host = m.players.find(p => p.userId === m.hostId)

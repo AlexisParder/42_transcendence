@@ -15,7 +15,7 @@ export function Match() {
 
 	const { data: session } = authClient.useSession()
 	const socket = useSocket()
-	const [category, setCategory] = useState<categoryType>("select")
+	const [category, setCategory] = useState<categoryType>("match")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState(0)
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
@@ -89,7 +89,7 @@ export function Match() {
 		}
 	}
 
-	if (!joinedMatch || joinedMatch.startedAt === "")
+	if (!joinedMatch || joinedMatch.startedAt === 0)
 		return
 
 	return <div className="h-dvh flex flex-col overflow-hidden">

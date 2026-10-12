@@ -64,11 +64,6 @@ export function isMatchType(value: unknown): value is matchType {
 	return typeof value === "string" && Object.hasOwn(MATCH_CONFIG, value)
 }
 
-export function isExpired(startStr: string | null | undefined, durationMs: number): boolean {
-	const start = Number(startStr)
-
-	if (!startStr || Number.isNaN(start))
-		return true
-
+export function isExpired(start: number, durationMs: number): boolean {
 	return Date.now() - start >= durationMs
 }

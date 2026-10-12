@@ -28,7 +28,7 @@ export async function startMatchHandler(req: Request, res: Response) {
 		if (!player)
 			return res.status(403).json({ ok: false, code: "match_err_no_match" })
 
-		if (match.startedAt !== "")
+		if (match.startedAt !== 0)
 			return res.status(403).json({ ok: false, code: "match_err_already_started" })
 
 		if (match.hostId !== userId)
@@ -47,7 +47,7 @@ export async function startMatchHandler(req: Request, res: Response) {
 				updatePlayer(match, p.userId, { isReady: false })
 		})
 
-		match.startedAt = Date.now().toString()
+		match.startedAt = Date.now()
 		match.turns.timerStart = match.startedAt
 
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
