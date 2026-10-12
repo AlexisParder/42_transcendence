@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
-import { Deployment, DeploymentInfos, Dock } from "./selectUtils";
+import { Deployment, DeploymentFooter, DeploymentInfos, Dock } from "./selectUtils";
 import type { Matchs, Ship, ShipName, vect2 } from "../../types/events";
 import { useSocket } from "../../components/socketContext";
 import { authClient } from "../../lib/auth-client";
@@ -15,7 +15,7 @@ export function Match() {
 
 	const { data: session } = authClient.useSession()
 	const socket = useSocket()
-	const [category, setCategory] = useState<categoryType>("match")
+	const [category, setCategory] = useState<categoryType>("select")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState(0)
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
@@ -100,6 +100,7 @@ export function Match() {
 				<Deployment placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
 				<Dock placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
 			</div>
+			<DeploymentFooter placedShips={placedShips} />
 		</>}
 
 		{category === "match" && <>

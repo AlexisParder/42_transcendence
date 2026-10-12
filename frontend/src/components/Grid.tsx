@@ -74,7 +74,7 @@ function shipPlacement(ship: Ship) {
 	}
 }
 
-export function Grid({ ships = [], shots = [], className = "", hoverable = true, targetLocked, setTargetLocked, previewShip, dropZone = [], dropValid = true, setHoverCell, onDropCell, onPickCell }: {
+export function Grid({ ships = [], shots = [], className = "", hoverable = true, targetLocked, setTargetLocked, previewShip, dropZone = [], dropValid = true, onPickCell }: {
 	ships?: Ship[],
 	shots?: Shot[],
 	className?: string,
@@ -84,8 +84,6 @@ export function Grid({ ships = [], shots = [], className = "", hoverable = true,
 	previewShip?: Ship,
 	dropZone?: vect2[],
 	dropValid?: boolean,
-	setHoverCell?: (coords: vect2 | null) => void,
-	onDropCell?: (coords: vect2) => void,
 	onPickCell?: (coords: vect2) => void
 }) {
 	const shipStatus = new Map(ships.map(s => [s.name, getShipStatus(s, shots)]))
@@ -107,7 +105,7 @@ export function Grid({ ships = [], shots = [], className = "", hoverable = true,
 	}
 
 	return <>
-		<div className={`grid grid-cols-14 grid-rows-14 gap-1 p-1 aspect-square rounded-md ${className}`} onPointerLeave={() => setHoverCell?.(null)}>
+		<div data-grid="" className={`grid grid-cols-14 grid-rows-14 gap-1 p-1 aspect-square rounded-md ${onPickCell ? "touch-none" : ""} ${className}`}>
 			{Array.from({ length: SIZE * SIZE }, (_, i) => {
 				const x = Math.floor(i / SIZE)
 				const y = i % SIZE
@@ -118,14 +116,12 @@ export function Grid({ ships = [], shots = [], className = "", hoverable = true,
 							if (setTargetLocked)
 								setTargetLocked({ x, y })
 						}}
-						onPointerEnter={() => setHoverCell?.({ x, y })}
 						onPointerDown={e => {
 							if (onPickCell) {
 								e.preventDefault()
 								onPickCell({ x, y })
 							}
 						}}
-						onPointerUp={() => onDropCell?.({ x, y })}
 						style={{ gridRow: y + 1, gridColumn: x + 1 }}
 						className={`${cellColor(x, y)} border rounded-sm outline-none`} />
 				)
