@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { IoDiceOutline } from "react-icons/io5"
-import { IoMdRefresh } from "react-icons/io"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
@@ -189,8 +188,22 @@ function DockActions({ placedShips, setPlacedShips, rotation, setRotation, class
 	setRotation: (rotation: shipRotation) => void,
 	className?: string
 }) {
+	const [prevRotation, setPrevRotation] = useState(rotation)
+	const [arrowAngle, setArrowAngle] = useState<number>(rotation)
+	if (rotation !== prevRotation) {
+		setPrevRotation(rotation)
+		setArrowAngle(arrowAngle + ((rotation - prevRotation + 540) % 360) - 180)
+	}
+
 	return <div className={`flex items-center gap-2 ${className}`}>
-		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none" onClick={() => setRotation((rotation + 90) % 360 as shipRotation)}><IoMdRefresh/>Rotate</button>
+		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none" onClick={() => setRotation((rotation + 90) % 360 as shipRotation)}>
+			<span className="flex items-center gap-px mr-1 transition-transform duration-200" style={{ transform: `rotate(${arrowAngle}deg)` }} title="Current orientation">
+				<span className="w-1.5 h-1.5 rounded-[1px] bg-info/30"></span>
+				<span className="w-1.5 h-1.5 rounded-[1px] bg-info/30"></span>
+				<span className="w-1.5 h-1.5 rounded-[1px] rounded-r-full bg-info"></span>
+			</span>
+			Rotate
+		</button>
 		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none" onClick={() => setPlacedShips(randomShips())}><IoDiceOutline /> Random</button>
 		<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips([])} disabled={placedShips.length < 1}>Clear</button>
 	</div>
