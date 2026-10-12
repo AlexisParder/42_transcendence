@@ -67,8 +67,6 @@ export function randomShips() {
 	return ships
 }
 
-// Returns the grid cell under a screen point (works for mouse and touch, unlike pointerenter).
-// Computed from the grid bounds so a point in the gap between two cells snaps to the closest one.
 export function cellFromPoint(clientX: number, clientY: number): vect2 | null {
 	const grid = document.elementFromPoint(clientX, clientY)?.closest<HTMLElement>("[data-grid]")
 	if (!grid)
