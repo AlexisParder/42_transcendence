@@ -116,7 +116,7 @@ export function Match() {
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && <>
-			<MatchHeader title="deployment" description="Place your fleet" remaining={remaining} />
+			<MatchHeader title="deployment" description="Place your fleet" remaining={remaining} isMyTurn={true} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
@@ -126,7 +126,7 @@ export function Match() {
 		</>}
 
 		{category === "match" && <>
-			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description="Your turn" remaining={remaining} />
+			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description="Your turn" remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} />

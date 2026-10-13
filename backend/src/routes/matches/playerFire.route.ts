@@ -3,7 +3,7 @@ import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, Ship, Shot, SocketData, vect2 } from "../../events.ts";
 import type { Server } from "socket.io"
-import { filterMatchForUser, isExpired } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, isExpired, isTeamEliminated } from "../../lib/matchs/matchUtils.ts";
 import { nextTurn } from "../../lib/matchs/turnTimer.ts";
 
 const sameCoords = (a: vect2, b: vect2) => a.x === b.x && a.y === b.y
@@ -56,6 +56,9 @@ export async function playerFireHandler(req: Request, res: Response) {
 		if (match.turns.userTurn !== userId)
 			return res.status(400).json({ ok: false, code: "match_err_not_your_turn" })
 
+		if (isTeamEliminated(match, player.team))
+			return res.status(400).json({ ok: false, code: "match_err_you_eliminated" })
+
 		if (isExpired(match.turns.timerStart, match.settings.time_turn * 1000))
 			return res.status(400).json({ ok: false, code: "match_err_time_expired" })
 
@@ -63,9 +66,11 @@ export async function playerFireHandler(req: Request, res: Response) {
 		if (!team)
 			return res.status(400).json({ ok: false, code: "match_err_team_does_not_exist" })
 
+		if (isTeamEliminated(match, targetTeamId))
+			return res.status(400).json({ ok: false, code: "match_err_team_eliminated" })
+
 		if (team.shots.some(s => sameCoords(s.coords, coords)))
 			return res.status(400).json({ ok: false, code: "match_err_cell_already_shot" })
-
 
 		const ship = team.ships.find(s => isOnShip(s, coords))
 		let shot: Shot

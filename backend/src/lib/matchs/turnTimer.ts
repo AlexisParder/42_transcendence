@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
+import { isTeamEliminated } from "./matchUtils.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -28,9 +29,30 @@ export function startTurnTimer(match: Matchs, io: IO) {
 }
 
 export function nextTurn(match: Matchs, io: IO) {
+	if (match.endedAt !== 0)
+		return
+
+	const aliveTeams = match.teams.filter(t => !isTeamEliminated(match, t.id))
+	if (aliveTeams.length <= 1)
+	{
+		stopTurns(match)
+		// TODO: ajouter la logique de fin
+		return
+	}
+
 	const order = match.turns.turnOrder
 	const current = order.indexOf(match.turns.userTurn ?? "")
-	const next = order[(current + 1) % order.length] ?? null
+	
+	let next: string | null = null
+	for (let i = 1; i <= order.length; i++) {
+		const candidate = order[(current + i) % order.length]
+		const teamId = match.players.find(p => p.userId === candidate)?.team
+
+		if (candidate && teamId !== undefined && !isTeamEliminated(match, teamId)) {
+			next = candidate
+			break
+		}
+	}
 
 	match.turns.userTurn = next
 	match.turns.isBotTurn = match.players.find(p => p.userId === next)?.isBot ?? false

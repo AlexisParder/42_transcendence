@@ -66,7 +66,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 					isReady: true,
 					isBot: false,
 					team: 1,
-					placement: 1,
+					placement: 0,
 					points: session.user.points ?? 0,
 					leftAt: null,
 					status: "PLAYED",

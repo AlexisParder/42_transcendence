@@ -35,10 +35,10 @@ export async function startMatchHandler(req: Request, res: Response) {
 		if (match.hostId !== userId)
 			return res.status(400).json({ ok: false, code: "match_err_host" })
 
-
-
 		if (match.players.some(p => !p.isReady))
 			return res.status(400).json({ ok: false, code: "match_err_all_players_not_ready" })
+
+		match.code = ""
 
 		match.players.map(p => {
 			if (p.userId)

@@ -39,7 +39,7 @@ export async function joinMatchHandler(req: Request, res: Response) {
 			isReady: false,
 			isBot: false,
 			team,
-			placement: team,
+			placement: 0,
 			points: session.user.points ?? 0,
 			leftAt: null,
 			status: "PLAYED",

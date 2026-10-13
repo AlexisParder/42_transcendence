@@ -7,7 +7,7 @@ import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Match, Rank, Stat, UserInfo } from "../types/events";
+import type { Match, matchType, Rank, Stat, UserInfo } from "../types/events";
 import { useLocation } from "react-router-dom";
 import { formatTimeProfile } from "../lib/formatTime";
 import { apiPost } from "../lib/api";
@@ -176,7 +176,7 @@ export function Profile() {
 					<p className="shrink-0 text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_matches_title")}</p>
 					<div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pr-1">
 						{matches.length > 0 && matches.map(m => (
-							<MatchesItem key={m.id} {...m} />
+							<MatchesItem key={m.id} type={m.matchType} {...m} />
 						))}
 
 						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
@@ -227,19 +227,19 @@ export function Profile() {
 	</Sidebar>
 }
 
-function matchDesc(matchType: Match["matchType"], otherPlayer: string | null, placement: number | null) {
-	if (matchType === "ONE_V_ONE")
+function matchDesc(type: Match["matchType"], otherPlayer: string | null, placement: number | null) {
+	if (type === "ONE_V_ONE")
 		return t("profile_match_vs", { name: otherPlayer ?? "Bot" })
-	if (matchType === "TWO_V_TWO")
+	if (type === "TWO_V_TWO")
 		return t("profile_match_duo_with", { name: otherPlayer ?? "Bot" })
 	return placement ? t(`profile_match_place_${placement}`) : t("txt_FFA")
 }
 
-function MatchesItem({ result, otherPlayer, placement, matchType, matchTime, points }: {
+function MatchesItem({ result, otherPlayer, placement, type, matchTime, points }: {
 	result: "win" | "loss",
 	otherPlayer: string | null,
 	placement: number | null,
-	matchType: "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA",
+	type: matchType,
 	matchTime: string,
 	points: number | "unranked"
 }) {
@@ -264,8 +264,8 @@ function MatchesItem({ result, otherPlayer, placement, matchType, matchTime, poi
 
 	return <div className={`grid grid-cols-[4rem_1fr_1fr_5rem] items-center gap-2 ${colorBg} p-2.5 rounded-md border-l-3 ${colorBd}`}>
 		<p className={`text-sm ${colorTxt} font-bold uppercase`}>{t(`txt_${result}`)}</p>
-		<p className="text-xs text-center">{matchDesc(matchType, otherPlayer, placement)}</p>
-		<p className="flex items-center justify-center gap-1 text-xs">{t(`txt_${matchType}`)} <TbPointFilled className="size-1" /> {formatTimeProfile(matchTime)}</p>
+		<p className="text-xs text-center">{matchDesc(type, otherPlayer, placement)}</p>
+		<p className="flex items-center justify-center gap-1 text-xs">{t(`txt_${type}`)} <TbPointFilled className="size-1" /> {formatTimeProfile(matchTime)}</p>
 		<p className={`text-xs ${colorTxt} font-bold text-right`}>{pointsTxt === "unranked" ? t("txt_unranked") : pointsTxt}</p>
 	</div>
 }

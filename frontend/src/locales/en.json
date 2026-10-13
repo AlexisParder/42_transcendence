@@ -106,6 +106,8 @@
 	"match_err_not_started": "This match has not started yet",
 	"match_err_not_your_turn": "It's not your turn",
 	"match_err_time_expired": "Time expired",
+	"match_err_you_eliminated": "You have been eliminated.",
+	"match_err_team_eliminated": "This team has been eliminated",
 	"match_err_creation_failure": "An error occurred while creating the match",
 	"match_err_delete_failure": "An error occurred while deleting the match",
 	"match_err_join_failure": "An error occurred while joining the match",

@@ -67,3 +67,17 @@ export function isMatchType(value: unknown): value is matchType {
 export function isExpired(start: number, durationMs: number): boolean {
 	return Date.now() - start >= durationMs
 }
+
+export function isTeamEliminated(match: Matchs, teamId: number) {
+	const teamData = match.teams.find(t => t.id === teamId)
+	if (!teamData)
+		return true
+
+	const sunkCount = new Set(
+		(teamData?.shots ?? [])
+			.filter(s => s.ship !== null)
+			.map(s => s.ship!.name)
+	).size
+
+	return teamData.ships.length > 0 && sunkCount >= teamData.ships.length
+}
