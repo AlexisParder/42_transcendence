@@ -23,18 +23,37 @@ export function Match() {
 	const [draggingShip, setDraggingShip] = useState<ShipName | null>(null)
 	const [rotation, setRotation] = useState<shipRotation>(0)
 	const [targetLocked, setTargetLocked] = useState<vect2>({ x: -1, y: -1 })
+	const [turnEndsAt, setTurnEndsAt] = useState(0)
+	const [remaining, setRemaining] = useState(0)
 
 	useEffect(() => {
 		function onRefreshMatch(payload: Matchs | undefined) {
 			setJoinedMatch(payload)
 		}
+		function onTurnUpdate(payload: { remaining: number }) {
+			setTurnEndsAt(Date.now() + payload.remaining * 1000)
+			setRemaining(payload.remaining)
+		}
 
 		socket.on("refresh_joined_match", onRefreshMatch)
+		socket.on("turn_update", onTurnUpdate)
 
 		return () => {
 			socket.off("refresh_joined_match", onRefreshMatch)
+			socket.off("turn_update", onTurnUpdate)
 		}
 	}, [socket])
+
+	useEffect(() => {
+		if (!turnEndsAt)
+			return
+
+		const id = setInterval(() => {
+			setRemaining(Math.max(0, Math.ceil((turnEndsAt - Date.now()) / 1000)))
+		}, 1000)
+
+		return () => clearInterval(id)
+	}, [turnEndsAt])
 
 	useEffect(() => {
 		const userId = session?.user.id
@@ -56,6 +75,9 @@ export function Match() {
 				const myTeam = match?.players.find(p => p.userId === userId)?.team
 
 				setSelectedTarget(match?.players.find(p => p.team !== myTeam)?.team ?? 0)
+
+				if (data.remaining > 0)
+					setTurnEndsAt(Date.now() + data.remaining * 1000)
 			} catch (error) {
 				console.error("load joined match:", error)
 			}
@@ -94,7 +116,7 @@ export function Match() {
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && <>
-			<MatchHeader title="deployment" description="Place your fleet" />
+			<MatchHeader title="deployment" description="Place your fleet" remaining={remaining} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
@@ -104,7 +126,7 @@ export function Match() {
 		</>}
 
 		{category === "match" && <>
-			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description="Your turn" />
+			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description="Your turn" remaining={remaining} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} />

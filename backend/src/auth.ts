@@ -71,7 +71,7 @@ export const auth = betterAuth({
 			otpLength: 6,
 			expiresIn: 600,
 			sendVerificationOTP: async ({ email, otp }) => {
-				await sendMail({
+				void sendMail({
 					to: email,
 					subject: "Your Sonar code",
 					html: `<p>Your code: <strong>${otp}</strong></p>`,

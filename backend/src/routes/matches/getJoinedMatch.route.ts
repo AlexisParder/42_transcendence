@@ -3,6 +3,7 @@ import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
 import { filterMatchForUser } from "../../lib/matchs/matchUtils.ts";
+import { getRemaining } from "../../lib/matchs/turnTimer.ts";
 
 export async function getJoinedMatchHandler(req: Request, res: Response) {
 	try {
@@ -24,7 +25,11 @@ export async function getJoinedMatchHandler(req: Request, res: Response) {
 			}
 		}
 
-		res.json({ ok: true, match: joinedMath ? filterMatchForUser(joinedMath, session.user.id) : null  })
+		res.json({
+			ok: true,
+			match: joinedMath ? filterMatchForUser(joinedMath, session.user.id) : null,
+			remaining: joinedMath && joinedMath.startedAt !== 0 ? getRemaining(joinedMath) : 0
+		})
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

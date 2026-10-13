@@ -5,6 +5,7 @@ import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } f
 import type { Server } from "socket.io"
 import { updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { buildTurnOrder } from "../../lib/matchs/playerOrder.ts";
+import { startTurnTimer } from "../../lib/matchs/turnTimer.ts";
 
 export async function startMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -34,10 +35,7 @@ export async function startMatchHandler(req: Request, res: Response) {
 		if (match.hostId !== userId)
 			return res.status(400).json({ ok: false, code: "match_err_host" })
 
-		const turnOrder: string[] = buildTurnOrder(match.players, match.type === "TWO_V_TWO")
 
-		match.turns.turnOrder = turnOrder
-		match.turns.userTurn = turnOrder[0] ?? null
 
 		if (match.players.some(p => !p.isReady))
 			return res.status(400).json({ ok: false, code: "match_err_all_players_not_ready" })
@@ -47,6 +45,10 @@ export async function startMatchHandler(req: Request, res: Response) {
 				updatePlayer(match, p.userId, { isReady: false })
 		})
 
+		const turnOrder: string[] = buildTurnOrder(match.players, match.type === "TWO_V_TWO")
+		match.turns.turnOrder = turnOrder
+		match.turns.userTurn = turnOrder[0] ?? null
+
 		match.startedAt = Date.now()
 		match.turns.timerStart = match.startedAt
 
@@ -55,6 +57,7 @@ export async function startMatchHandler(req: Request, res: Response) {
 			if (player.userId)
 				io.to(player.userId).emit("start_match")
 		}
+		startTurnTimer(match, io)
 
 		res.json({ ok: true })
 	} catch (err) {

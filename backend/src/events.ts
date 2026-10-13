@@ -18,6 +18,7 @@ export interface ServerToClientEvents {
 	refresh_joined_match: (payload: Matchs | undefined) => void
 	start_match: () => void
 	typing: (payload: { fromUserId: string, typing: boolean }) => void
+	turn_update: (payload: {remaining: number}) => void
 }
 
 export interface NotificationEvent {
@@ -145,7 +146,7 @@ export interface Matchs {
 	isRanked: boolean,
 	startedAt: number,
 	endedAt: number,
-	hostId: string | null,
+	hostId: string,
 	players: MatchPlayers[],
 	maxPlayers: number,
 	invitedPlayers: string[],

@@ -4,11 +4,13 @@ import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
 import type { Log, Matchs, matchType, vect2 } from "../../types/events"
 import { useMediaQuery } from "../../hooks/useMediaQuery"
+import { formatMS } from "../../lib/formatTime"
 
-export function MatchHeader({ type, title, description }: {
+export function MatchHeader({ type, title, description, remaining }: {
 	type?: matchType
 	title: string
-	description: string
+	description: string,
+	remaining: number
 }) {
 	return <div className="flex items-center justify-between bg-base-200 py-4 px-6">
 		<div className="flex items-center max-sm:gap-2 gap-4">
@@ -18,7 +20,7 @@ export function MatchHeader({ type, title, description }: {
 		</div>
 		<div className="flex items-center max-sm:gap-2 gap-4">
 			<p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>
-			<p className="font-mono text-sm text-info font-semibold border border-info rounded-full px-2 py-1 text-center">0:03</p>
+			<p className="font-mono text-sm text-info font-semibold border border-info rounded-full px-2 py-1 text-center">{formatMS(remaining)}</p>
 			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">forfeit</button>
 			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
 		</div>
@@ -125,6 +127,9 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 	]
 
 	const currFleet = maxFleet - sunkShip.length
+
+	if (isTurn && currFleet < 1)
+		isTurn = false
 
 	let fleetColor = "text-neutral-content"
 	const fleetPercent = currFleet / maxFleet

@@ -4,6 +4,7 @@ import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, Ship, Shot, SocketData, vect2 } from "../../events.ts";
 import type { Server } from "socket.io"
 import { filterMatchForUser, isExpired } from "../../lib/matchs/matchUtils.ts";
+import { nextTurn } from "../../lib/matchs/turnTimer.ts";
 
 const sameCoords = (a: vect2, b: vect2) => a.x === b.x && a.y === b.y
 const isValidCell = (c: any): c is vect2 => c && Number.isInteger(c.x) && Number.isInteger(c.y) && c.x >= 0 && c.x < 14 && c.y >= 0 && c.y < 14
@@ -99,13 +100,13 @@ export async function playerFireHandler(req: Request, res: Response) {
 
 		team.shots.push(shot)
 
-		// TODO: Passer au tour du joueur suivant
-
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
 			if (player.userId)
 				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
+
+		nextTurn(match, io)
 
 		res.json({ ok: true, match: filterMatchForUser(match, userId) })
 	} catch (err) {
