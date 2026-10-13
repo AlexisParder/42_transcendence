@@ -117,7 +117,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 
-		nextTurn(match, io)
+		nextTurn(match, io, true)
 
 		res.json({ ok: true, match: filterMatchForUser(match, userId) })
 	} catch (err) {
