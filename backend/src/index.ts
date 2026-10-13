@@ -44,6 +44,7 @@ import { joinCodeMatchHandler } from "./routes/matches/joinCodeMatch.route.ts"
 import { inviteMatchHandler } from "./routes/matches/inviteMatch.route.ts"
 import { playerFireHandler } from "./routes/matches/playerFire.route.ts"
 import { startMatchHandler } from "./routes/matches/startMatch.route.ts"
+import { setPlayerShipsHandler } from "./routes/matches/setShips.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -111,6 +112,7 @@ app.post("/api/kick-user-match", kickPlayerMatchHandler)
 app.post("/api/invite-match", inviteMatchHandler)
 app.post("/api/start-match", startMatchHandler)
 app.post("/api/player-fire", playerFireHandler)
+app.post("/api/set-player-ships", setPlayerShipsHandler)
 
 io.use(async (socket, next) => {
 	try {

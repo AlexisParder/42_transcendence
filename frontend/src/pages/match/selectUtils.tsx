@@ -6,6 +6,7 @@ import { t } from "../../lib/translate"
 import type { Matchs, Ship, ShipName, vect2 } from "../../types/events"
 import { canPlaceShip, cellFromPoint, getShipCells, getShipRotation, placeShip, randomShips, SHIPS } from "./ships"
 import type { shipRotation } from "../../types/types"
+import { apiPost } from "../../lib/api"
 
 export function DeploymentInfos({ match, myId }: {
 	match: Matchs,
@@ -192,8 +193,28 @@ function ReadyButton({ placedShips, className = "" }: {
 }) {
 	const shipsLeft = SHIPS.length - placedShips.length
 
+	async function setPlayerShips() {
+		try {
+			const { ok, data } = await apiPost("/api/set-player-ships")
+
+			if (!ok)
+			{
+				console.log("code:", data.code)
+				return
+			}
+			console.log("setPlayerShips:", data)
+		} catch (error) {
+			console.error("setPlayerShips:", error)
+		}
+	}
+
 	return <div className={`flex flex-col gap-2 ${className}`}>
-		<button className="btn btn-info w-full disabled:bg-info/10 disabled:border-info/30 disabled:text-info/60" disabled={shipsLeft > 0}>{shipsLeft > 0 ? `Ready - ${shipsLeft} ship${shipsLeft > 1 ? "s" : ""} left` : "Ready"}</button>
+		<button
+			className="btn btn-info w-full disabled:bg-info/10 disabled:border-info/30 disabled:text-info/60"
+			disabled={shipsLeft > 0}
+			onClick={setPlayerShips}
+			>{shipsLeft > 0 ? `Ready - ${shipsLeft} ship${shipsLeft > 1 ? "s" : ""} left` : "Ready"}
+			</button>
 		<p className="text-neutral-content/50 text-xs text-center">Unplaced ships are set at random when time runs out.</p>
 	</div>
 }

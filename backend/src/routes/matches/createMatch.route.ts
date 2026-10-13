@@ -48,15 +48,15 @@ export async function createMatchHandler(req: Request, res: Response) {
 			},
 			teams: Array.from({ length: MATCH_CONFIG[selectedMatchType].teams }, (_, i) => ({
 				id: i + 1,
-				// ships: [],
-				ships: [
-					// TESTS
-					{ name: "carrier", start: { x: 0, y: i }, end: { x: 4, y: i }, size: 5, image: "" },
-					{ name: "frigate", start: { x: 0, y: i + 2 }, end: { x: 3, y: i + 2 }, size: 4, image: "" },
-					{ name: "cruiser", start: { x: 6, y: i }, end: { x: 6, y: i + 2 }, size: 3, image: "" },
-					{ name: "submarine", start: { x: 8, y: i + 4 }, end: { x: 8, y: i + 6 }, size: 3, image: "" },
-					{ name: "destroyer", start: { x: i, y: 8 }, end: { x: i + 1, y: 8 }, size: 2, image: "" },
-				],
+				ships: [],
+				// ships: [
+				// 	// TESTS
+				// 	{ name: "carrier", start: { x: 0, y: i }, end: { x: 4, y: i }, size: 5, image: "" },
+				// 	{ name: "frigate", start: { x: 0, y: i + 2 }, end: { x: 3, y: i + 2 }, size: 4, image: "" },
+				// 	{ name: "cruiser", start: { x: 6, y: i }, end: { x: 6, y: i + 2 }, size: 3, image: "" },
+				// 	{ name: "submarine", start: { x: 8, y: i + 4 }, end: { x: 8, y: i + 6 }, size: 3, image: "" },
+				// 	{ name: "destroyer", start: { x: i, y: 8 }, end: { x: i + 1, y: 8 }, size: 2, image: "" },
+				// ],
 				shots: []
 			})),
 			players: [
