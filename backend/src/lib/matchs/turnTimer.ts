@@ -8,7 +8,7 @@ const timers = new Map<string, NodeJS.Timeout>()
 export function getRemaining(match: Matchs): number {
 	const elapsed = Date.now() - match.turns.timerStart
 
-	return Math.max(0, Math.ceil(((match.settings.time_turn * 1000) - elapsed) / 1000))
+	return Math.max(0, Math.ceil((((match.step === "deploy" ? 30 : match.settings.time_turn) * 1000) - elapsed) / 1000))
 }
 
 function emitTurn(match: Matchs, io: IO) {
@@ -24,17 +24,23 @@ function emitTurn(match: Matchs, io: IO) {
 
 export function startTurnTimer(match: Matchs, io: IO) {
 	clearTimeout(timers.get(match.hostId))
-	timers.set(match.hostId, setTimeout(() => nextTurn(match, io), (match.settings.time_turn * 1000)))
+	timers.set(match.hostId, setTimeout(() => {
+		if (match.step === "deploy") {
+			match.step = "game"
+			nextTurn(match, io, false)
+		} else {
+			nextTurn(match, io, true)
+		}
+	}, ((match.step === "deploy" ? 30 : match.settings.time_turn) * 1000)))
 	emitTurn(match, io)
 }
 
-export function nextTurn(match: Matchs, io: IO) {
+export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 	if (match.endedAt !== 0)
 		return
 
 	const aliveTeams = match.teams.filter(t => !isTeamEliminated(match, t.id))
-	if (aliveTeams.length <= 1)
-	{
+	if (aliveTeams.length <= 1) {
 		stopTurns(match)
 		// TODO: ajouter la logique de fin
 		return
@@ -42,20 +48,22 @@ export function nextTurn(match: Matchs, io: IO) {
 
 	const order = match.turns.turnOrder
 	const current = order.indexOf(match.turns.userTurn ?? "")
-	
-	let next: string | null = null
-	for (let i = 1; i <= order.length; i++) {
-		const candidate = order[(current + i) % order.length]
-		const teamId = match.players.find(p => p.userId === candidate)?.team
 
-		if (candidate && teamId !== undefined && !isTeamEliminated(match, teamId)) {
-			next = candidate
-			break
+	if (changePlayer) {
+		let next: string | null = null
+		for (let i = 1; i <= order.length; i++) {
+			const candidate = order[(current + i) % order.length]
+			const teamId = match.players.find(p => p.userId === candidate)?.team
+
+			if (candidate && teamId !== undefined && !isTeamEliminated(match, teamId)) {
+				next = candidate
+				break
+			}
 		}
-	}
 
-	match.turns.userTurn = next
-	match.turns.isBotTurn = match.players.find(p => p.userId === next)?.isBot ?? false
+		match.turns.userTurn = next
+		match.turns.isBotTurn = match.players.find(p => p.userId === next)?.isBot ?? false
+	}
 	match.turns.timerStart = Date.now()
 
 	startTurnTimer(match, io)

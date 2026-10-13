@@ -3,7 +3,7 @@ import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, Ship, Shot, SocketData, vect2 } from "../../events.ts";
 import type { Server } from "socket.io"
-import { filterMatchForUser, isExpired, isTeamEliminated } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, isExpired, isTeamEliminated, setFinalPlacement } from "../../lib/matchs/matchUtils.ts";
 import { nextTurn } from "../../lib/matchs/turnTimer.ts";
 
 const sameCoords = (a: vect2, b: vect2) => a.x === b.x && a.y === b.y
@@ -100,6 +100,12 @@ export async function playerFireHandler(req: Request, res: Response) {
 					s.status = "sunk"
 					s.ship = ship
 				})
+
+				if (isTeamEliminated(match, targetTeamId)) {
+					const players = match.players.filter(p => p.team === targetTeamId)
+					for (const player of players)
+						setFinalPlacement(match, player.userId ?? "", player.status === "LEFT" ? "LEFT" : "PLAYED")
+				}
 			}
 		}
 

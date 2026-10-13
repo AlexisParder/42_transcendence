@@ -29,6 +29,7 @@ export function Match() {
 	useEffect(() => {
 		function onRefreshMatch(payload: Matchs | undefined) {
 			setJoinedMatch(payload)
+			setCategory(payload?.step === "game" ? "match" : "select")
 		}
 		function onTurnUpdate(payload: { remaining: number }) {
 			setTurnEndsAt(Date.now() + payload.remaining * 1000)
@@ -75,6 +76,8 @@ export function Match() {
 				const myTeam = match?.players.find(p => p.userId === userId)?.team
 
 				setSelectedTarget(match?.players.find(p => p.team !== myTeam)?.team ?? 0)
+
+				setCategory(match?.step === "game" ? "match" : "select")				
 
 				if (data.remaining > 0)
 					setTurnEndsAt(Date.now() + data.remaining * 1000)

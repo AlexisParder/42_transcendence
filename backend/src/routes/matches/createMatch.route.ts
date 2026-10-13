@@ -32,6 +32,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 				spectators
 			},
 			code,
+			step: "deploy",
 			visibility,
 			isRanked: selectedMatchType !== "BOT" && !replace,
 			startedAt: 0,

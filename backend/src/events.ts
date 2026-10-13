@@ -142,6 +142,7 @@ export interface Matchs {
 	type: matchType,
 	settings: MatchSettings,
 	code: string,
+	step: "deploy" | "game",
 	visibility: "public" | "private",
 	isRanked: boolean,
 	startedAt: number,
