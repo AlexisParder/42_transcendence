@@ -33,13 +33,13 @@ export function EndDisplay({ match }: {
 			<h2 className="font-bold text-5xl max-md:text-4xl first-letter:uppercase">{isWin ? "enemy fleet sunk" : "fleet lost"}</h2>
 			<p className="first-letter:uppercase text-neutral-content/50 text-sm font-medium font-mono tracking-[0.06em]">match time - {formatMS((match.endedAt - match.startedAt) / 1000)}</p>
 
-			<div className={`flex items-center gap-2 py-2 px-4 border rounded-lg ${isWin ? "bg-info/10 border-info/50" : "bg-error/10 border-error/50"}`}>
+			{match.isRanked && <div className={`flex items-center gap-2 py-2 px-4 border rounded-lg ${isWin ? "bg-info/10 border-info/50" : "bg-error/10 border-error/50"}`}>
 				<p className={`font-mono font-bold text-2xl ${isWin ? "text-info" : "text-error"}`}>{isWin ? "+" : "-"}{player?.matchPoints ?? 0}</p>
 				<div className="flex flex-col">
 					<p className="text-xs text-neutral-content/50">points</p>
 					<p className="inline-flex items-center gap-1 text-xs text-neutral-content/50">{player?.points ?? 0} <MdArrowRightAlt />{session?.user.points}</p>
 				</div>
-			</div>
+			</div>}
 
 			<div className="shrink-0 grid grid-cols-1 text-center md:text-left md:grid-cols-3 border-t border-base-300 w-full">
 				<div className="flex-1/3 p-4">
