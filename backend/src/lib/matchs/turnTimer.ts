@@ -27,13 +27,17 @@ export function startTurnTimer(match: Matchs, io: IO) {
 	clearTimeout(timers.get(match.hostId))
 	timers.set(match.hostId, setTimeout(() => {
 		if (match.step === "deploy") {
-			match.step = "game"
-			nextTurn(match, io, false)
+			endDeploy(match, io)
 		} else {
 			nextTurn(match, io, true)
 		}
 	}, ((match.step === "deploy" ? 30 : match.settings.time_turn) * 1000)))
 	emitTurn(match, io)
+}
+
+export function endDeploy(match: Matchs, io: IO) {
+	match.step = "game"
+	nextTurn(match, io, false)
 }
 
 export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {

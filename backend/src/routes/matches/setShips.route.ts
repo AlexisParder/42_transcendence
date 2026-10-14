@@ -4,6 +4,7 @@ import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, Ship, SocketData } from "../../events.ts";
 import type { Server } from "socket.io"
 import { filterMatchForUser, updatePlayer } from "../../lib/matchs/matchUtils.ts";
+import { endDeploy } from "../../lib/matchs/turnTimer.ts";
 
 export async function setPlayerShipsHandler(req: Request, res: Response) {
 	const { ships }: { ships: Ship[] } = req.body
@@ -49,6 +50,9 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 			if (p.userId)
 				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))
 		}
+
+		if (match.players.every(p => p.isReady || p.isBot))
+			endDeploy(match, io)
 
 		res.json({ ok: true, match: filterMatchForUser(match, session.user.id) })
 	} catch (err) {
