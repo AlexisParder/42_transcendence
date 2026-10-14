@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
 import { isTeamEliminated, setFinalPlacement } from "./matchUtils.ts";
 import { currentMatches } from "../../mapMatches.ts";
+import { fillRandomShips } from "./shipValidation.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -36,6 +37,9 @@ export function startTurnTimer(match: Matchs, io: IO) {
 }
 
 export function endDeploy(match: Matchs, io: IO) {
+	for (const team of match.teams)
+		team.ships = fillRandomShips(team.ships)
+
 	match.step = "game"
 	nextTurn(match, io, false)
 }

@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto"
 import type { Ship, ShipName, vect2 } from "../../events.ts"
 
 const GRID_SIZE = 14
@@ -54,6 +55,40 @@ export function validateShips(ships: any): Ship[] | null {
 		}
 
 		result.push({ name: s.name, start: { x: s.start.x, y: s.start.y }, end: { x: s.end.x, y: s.end.y }, size })
+	}
+
+	return result
+}
+
+const DIRECTIONS: vect2[] = [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }]
+
+function randomShip(name: ShipName): Ship {
+	const size = SHIP_SIZES[name]
+	const dir = DIRECTIONS[randomInt(DIRECTIONS.length)]
+	const start = { x: randomInt(GRID_SIZE), y: randomInt(GRID_SIZE) }
+	const end = { x: start.x + dir.x * (size - 1), y: start.y + dir.y * (size - 1) }
+
+	return { name, start, end, size }
+}
+
+function isFree(ship: Ship, taken: Set<string>): boolean {
+	return isValidCell(ship.end) && getCells(ship.start, ship.end).every(c => !taken.has(`${c.x},${c.y}`))
+}
+
+export function fillRandomShips(ships: Ship[]): Ship[] {
+	const result: Ship[] = [...ships]
+	const taken = new Set(ships.flatMap(s => getCells(s.start, s.end)).map(c => `${c.x},${c.y}`))
+
+	for (const name of Object.keys(SHIP_SIZES) as ShipName[]) {
+		if (result.some(s => s.name === name))
+			continue
+
+		let ship = randomShip(name)
+		while (!isFree(ship, taken))
+			ship = randomShip(name)
+
+		getCells(ship.start, ship.end).forEach(c => taken.add(`${c.x},${c.y}`))
+		result.push(ship)
 	}
 
 	return result
