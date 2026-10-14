@@ -196,6 +196,7 @@ export interface MatchPlayers {
 	team: number,
 	placement: number,
 	points: number,
+	matchPoints: number,
 	leftAt: string | null,
 	status: "PLAYED" | "LEFT"
 	shotsHit: number,

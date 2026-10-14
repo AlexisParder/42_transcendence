@@ -48,6 +48,7 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 			team,
 			placement: 0,
 			points: session.user.points ?? 0,
+			matchPoints: 0,
 			leftAt: null,
 			status: "PLAYED",
 			shotsHit: 0,

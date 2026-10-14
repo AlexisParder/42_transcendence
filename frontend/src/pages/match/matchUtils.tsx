@@ -131,7 +131,7 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 
 	const currFleet = maxFleet - sunkShip.length
 
-	if (isTurn && currFleet < 1)
+	if ((isTurn && currFleet < 1) || (isTurn && match.endedAt !== 0))
 		isTurn = false
 
 	let fleetColor = "text-neutral-content"
@@ -162,10 +162,11 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 					{currFleet > 0 && <p className={`text-xs font-mono font-semibold max-sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
 				</div>
 				{currFleet > 0 && <p className={`text-xs font-mono font-semibold sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
-				{isTurn && <p className="text-info uppercase font-mono text-xs max-sm:hidden">taking aim</p>}
-				{!isTurn && !isBot && currFleet > 0 && <p className="text-neutral-content/50 font-mono text-xs max-sm:hidden">{points.toLocaleString()} pts, waiting</p>}
+				{isTurn && match.endedAt === 0 && <p className="text-info uppercase font-mono text-xs max-sm:hidden">taking aim</p>}
+				{!isTurn && !isBot && match.endedAt === 0 && currFleet > 0 && <p className="text-neutral-content/50 font-mono text-xs max-sm:hidden">{points.toLocaleString()} pts, waiting</p>}
 				{!isTurn && isBot && currFleet > 0 && <p className="text-warning font-mono text-xs first-letter:uppercase max-sm:hidden">player left</p>}
 				{currFleet < 1 && <p className="text-neutral-content/50 font-mono text-xs truncate">flunk, {ordinal(placement)} place</p>}
+				{currFleet > 0 && match.endedAt !== 0 && <p className="text-neutral-content/50 font-mono text-xs truncate">end, {ordinal(placement)} place</p>}
 			</div>
 		</div>
 	</div>
@@ -298,7 +299,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 
 			{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">No Target locked</p>}
 
-			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={(targetLocked.x < 0 && targetLocked.y < 0) || match.turns.userTurn !== myId} onClick={handleFire}>Fire</button>
+			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={(targetLocked.x < 0 && targetLocked.y < 0) || match.turns.userTurn !== myId || match.endedAt !== 0} onClick={handleFire}>Fire</button>
 		</div>
 	</div>
 }

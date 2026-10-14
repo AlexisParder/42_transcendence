@@ -50,7 +50,7 @@ const app = express()
 const server = createServer(app)
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
-const currentMatches = new Map<string, Matchs>()
+export const currentMatches = new Map<string, Matchs>()
 const allowedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
 const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
 	cors: {

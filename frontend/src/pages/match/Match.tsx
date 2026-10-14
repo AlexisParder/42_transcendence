@@ -8,6 +8,7 @@ import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
 import { t } from "../../lib/translate";
 import type { shipRotation } from "../../types/types";
+import { EndDisplay } from "./endUtils";
 
 type categoryType = "select" | "match"
 export function Match() {
@@ -118,7 +119,7 @@ export function Match() {
 		return
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
-		{category === "select" && <>
+		{category === "select" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader title="deployment" description="Place your fleet" remaining={remaining} isMyTurn={true} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
@@ -128,13 +129,17 @@ export function Match() {
 			<DeploymentFooter placedShips={placedShips} />
 		</>}
 
-		{category === "match" && <>
+		{category === "match" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description="Your turn" remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} />
 				<GameInfos match={joinedMatch} myId={session?.user.id} />
 			</div>
+		</>}
+
+		{joinedMatch.endedAt !== 0 && <>
+			<EndDisplay match={joinedMatch} myId={session?.user.id} />
 		</>}
 	</div>
 }

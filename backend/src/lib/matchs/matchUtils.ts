@@ -82,11 +82,16 @@ export function isTeamEliminated(match: Matchs, teamId: number) {
 	return teamData.ships.length > 0 && sunkCount >= teamData.ships.length
 }
 
-export function setFinalPlacement(match: Matchs, playerId: string, playerStatus: "PLAYED" | "LEFT") {
+export function setFinalPlacement(match: Matchs, playerId: string, playerStatus?: "PLAYED" | "LEFT") {
 	const playersPlaced = match.players.filter(p => p.placement > 0).length
 
-	updatePlayer(match, playerId, {
-		placement: match.players.length - playersPlaced, 
-		status: playerStatus
-	})
+	if (playerStatus)
+		updatePlayer(match, playerId, {
+			placement: match.players.length - playersPlaced,
+			status: playerStatus
+		})
+	else
+		updatePlayer(match, playerId, {
+			placement: match.players.length - playersPlaced
+		})
 }
