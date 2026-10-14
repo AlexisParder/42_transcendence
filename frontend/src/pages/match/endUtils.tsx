@@ -3,14 +3,29 @@ import { formatMS } from "../../lib/formatTime";
 import type { Matchs } from "../../types/events";
 import { authClient } from "../../lib/auth-client";
 import { Link } from "react-router-dom";
+import { t } from "../../lib/translate";
 
-export function EndDisplay({ match, myId }: {
+export function EndDisplay({ match }: {
 	match: Matchs,
-	myId: string | null | undefined,
 }) {
 	const { data: session } = authClient.useSession()
-	const player = match.players.find(p => p.userId === myId)
+	const player = match.players.find(p => p.userId === session?.user.id)
+	const playerTeamData = match.teams.find(t => t.id === player?.team)
 	const isWin = (player?.matchPoints ?? 0) >= 0
+	let shotsCount = 0
+	let hitsCount = 0
+	for (const team of match.teams.filter(t => t.id !== player?.team)) {
+		shotsCount += team.shots.filter(s => s.authorId === session?.user.id).length
+		hitsCount += team.shots.filter(s => s.authorId === session?.user.id && s.status !== "miss").length
+	}
+
+	const sunkShip = [
+		...new Map(
+			(playerTeamData?.shots ?? [])
+				.filter(s => s.ship !== null)
+				.map(s => [s.ship!.name, s.ship!])
+		).values()
+	]
 
 	return <div className="flex items-center justify-center flex-1">
 		<div className="flex flex-col items-center gap-3 bg-base-200 p-4 rounded-lg border border-neutral max-md:min-w-75 min-w-150">
@@ -28,18 +43,18 @@ export function EndDisplay({ match, myId }: {
 
 			<div className="shrink-0 grid grid-cols-1 text-center md:text-left md:grid-cols-3 border-t border-base-300 w-full">
 				<div className="flex-1/3 p-4">
-					<p className="text-xs text-neutral-content/50">accuracy</p>
-					<p className="font-bold text-2xl font-mono">52 %</p>
-					<p className="text-xs text-neutral-content/50">21 shots - 11 hits</p>
+					<p className="text-xs text-neutral-content/50 first-letter:uppercase">accuracy</p>
+					<p className="font-bold text-2xl font-mono">{Math.floor(hitsCount / (shotsCount) * 100)} %</p>
+					<p className="text-xs text-neutral-content/50">{shotsCount} shots - {hitsCount} hits</p>
 				</div>
 				<div className="flex-1/3 p-4 md:border-l max-md:border-t border-base-300">
-					<p className="text-xs text-neutral-content/50">ships lost</p>
-					<p className="font-bold text-2xl font-mono">1 / 4</p>
+					<p className="text-xs text-neutral-content/50 first-letter:uppercase">ships lost</p>
+					<p className="font-bold text-2xl font-mono">{sunkShip.length} / 5</p>
 				</div>
 				<div className="flex-1/3 p-4 md:border-l max-md:border-t border-base-300">
-					<p className="text-xs text-neutral-content/50">best streak</p>
-					<p className="font-bold text-2xl font-mono">4</p>
-					<p className="text-xs text-neutral-content/50">hits in a row</p>
+					<p className="text-xs text-neutral-content/50 first-letter:uppercase">Mode</p>
+					<p className="font-bold text-2xl font-mono">{t(`txt_${match.type}`)}</p>
+					<p className="text-xs text-neutral-content/50">{t(match.isRanked ? "txt_ranked" : "txt_unranked") } - {t(`play_${match.visibility}`)}</p>
 				</div>
 			</div>
 

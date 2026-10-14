@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
 import { isTeamEliminated, setFinalPlacement } from "./matchUtils.ts";
-import { currentMatches } from "../../index.ts";
+import { currentMatches } from "../../mapMatches.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -49,7 +49,7 @@ export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 
 		// TODO: ajouter la logique de fin
 		emitTurn(match, io)
-		currentMatches.delete(match.hostId)
+		// currentMatches.delete(match.hostId)
 		return
 	}
 

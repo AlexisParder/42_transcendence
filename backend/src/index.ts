@@ -45,12 +45,12 @@ import { inviteMatchHandler } from "./routes/matches/inviteMatch.route.ts"
 import { playerFireHandler } from "./routes/matches/playerFire.route.ts"
 import { startMatchHandler } from "./routes/matches/startMatch.route.ts"
 import { setPlayerShipsHandler } from "./routes/matches/setShips.route.ts"
+import { currentMatches } from "./mapMatches.ts"
 
 const app = express()
 const server = createServer(app)
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
-export const currentMatches = new Map<string, Matchs>()
 const allowedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
 const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
 	cors: {

@@ -139,7 +139,7 @@ export function Match() {
 		</>}
 
 		{joinedMatch.endedAt !== 0 && <>
-			<EndDisplay match={joinedMatch} myId={session?.user.id} />
+			<EndDisplay match={joinedMatch} />
 		</>}
 	</div>
 }
