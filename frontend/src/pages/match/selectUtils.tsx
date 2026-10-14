@@ -56,13 +56,14 @@ function MatchInfoItem({ title, value, valueColor = "" }: {
 	</div>
 }
 
-export function Deployment({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation }: {
+export function Deployment({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation, isLocked }: {
 	placedShips: Ship[],
 	setPlacedShips: (ships: Ship[]) => void,
 	draggingShip: ShipName | null,
 	setDraggingShip: (ship: ShipName | null) => void,
 	rotation: shipRotation,
-	setRotation: (rotation: shipRotation) => void
+	setRotation: (rotation: shipRotation) => void,
+	isLocked: boolean
 }) {
 	const [hoverCell, setHoverCell] = useState<vect2 | null>(null)
 	const [grabIndex, setGrabIndex] = useState(0)
@@ -154,7 +155,7 @@ export function Deployment({ placedShips, setPlacedShips, draggingShip, setDragg
 					</div>
 					<p className="font-mono text-xs text-neutral-content/50 font-semibold lg:hidden">{placedShips.length} / {SHIPS.length} placed</p>
 				</div>
-				<Grid className="w-full" hoverable={false} ships={placedShips.filter(s => s.name !== draggingShip)} previewShip={isValid ? previewShip : undefined} dropZone={previewShip ? getShipCells(previewShip) : []} dropValid={isValid} onPickCell={onPickCell} />
+				<Grid className="w-full" hoverable={false} ships={placedShips.filter(s => s.name !== draggingShip)} previewShip={isValid ? previewShip : undefined} dropZone={previewShip ? getShipCells(previewShip) : []} dropValid={isValid} onPickCell={isLocked ? undefined : onPickCell} />
 			</div>
 		</div>
 
@@ -172,30 +173,31 @@ export function Deployment({ placedShips, setPlacedShips, draggingShip, setDragg
 			</div>
 			<div ref={dockRef} className="flex gap-2 overflow-x-auto scrollbar-none">
 				{SHIPS.map(ship => (
-					<DockItem key={ship.name} ship={ship} isPlaced={placedShips.some(s => s.name === ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} compact={true} />
+					<DockItem key={ship.name} ship={ship} isPlaced={placedShips.some(s => s.name === ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} isLocked={isLocked} compact={true} />
 				))}
 			</div>
 		</div>
 
-		<DockActions placedShips={placedShips} setPlacedShips={setPlacedShips} rotation={rotation} setRotation={setRotation} className="lg:hidden" />
+		<DockActions placedShips={placedShips} setPlacedShips={setPlacedShips} rotation={rotation} setRotation={setRotation} isLocked={isLocked} className="lg:hidden" />
 	</div>
 }
 
-export function DeploymentFooter({ placedShips }: { placedShips: Ship[] }) {
+export function DeploymentFooter({ placedShips, isLocked }: { placedShips: Ship[], isLocked: boolean }) {
 	return <div className="bg-base-200 border-t border-neutral/50 p-4 lg:hidden">
-		<ReadyButton placedShips={placedShips} />
+		<ReadyButton placedShips={placedShips} isLocked={isLocked} />
 	</div>
 }
 
-function ReadyButton({ placedShips, className = "" }: {
+function ReadyButton({ placedShips, isLocked, className = "" }: {
 	placedShips: Ship[],
+	isLocked: boolean,
 	className?: string
 }) {
 	const shipsLeft = SHIPS.length - placedShips.length
 
 	async function setPlayerShips() {
 		try {
-			const { ok, data } = await apiPost("/api/set-player-ships")
+			const { ok, data } = await apiPost("/api/set-player-ships", { ships: placedShips.map(s => ({ name: s.name, size: s.size, start: s.start, end: s.end })) })
 
 			if (!ok)
 			{
@@ -211,19 +213,20 @@ function ReadyButton({ placedShips, className = "" }: {
 	return <div className={`flex flex-col gap-2 ${className}`}>
 		<button
 			className="btn btn-info w-full disabled:bg-info/10 disabled:border-info/30 disabled:text-info/60"
-			disabled={shipsLeft > 0}
+			disabled={shipsLeft > 0 || isLocked}
 			onClick={setPlayerShips}
-			>{shipsLeft > 0 ? `Ready - ${shipsLeft} ship${shipsLeft > 1 ? "s" : ""} left` : "Ready"}
+			>{isLocked ? "Waiting for opponents…" : shipsLeft > 0 ? `Ready - ${shipsLeft} ship${shipsLeft > 1 ? "s" : ""} left` : "Ready"}
 			</button>
 		<p className="text-neutral-content/50 text-xs text-center">Unplaced ships are set at random when time runs out.</p>
 	</div>
 }
 
-function DockActions({ placedShips, setPlacedShips, rotation, setRotation, className = "" }: {
+function DockActions({ placedShips, setPlacedShips, rotation, setRotation, isLocked, className = "" }: {
 	placedShips: Ship[],
 	setPlacedShips: (ships: Ship[]) => void,
 	rotation: shipRotation,
 	setRotation: (rotation: shipRotation) => void,
+	isLocked: boolean,
 	className?: string
 }) {
 	const [prevRotation, setPrevRotation] = useState(rotation)
@@ -234,7 +237,7 @@ function DockActions({ placedShips, setPlacedShips, rotation, setRotation, class
 	}
 
 	return <div className={`flex items-center gap-2 ${className}`}>
-		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none" onClick={() => setRotation((rotation + 90) % 360 as shipRotation)}>
+		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setRotation((rotation + 90) % 360 as shipRotation)} disabled={isLocked}>
 			<span className="flex items-center gap-px mr-1 transition-transform duration-200" style={{ transform: `rotate(${arrowAngle}deg)` }} title="Current orientation">
 				<span className="w-1.5 h-1.5 rounded-[1px] bg-info/30"></span>
 				<span className="w-1.5 h-1.5 rounded-[1px] bg-info/30"></span>
@@ -242,18 +245,19 @@ function DockActions({ placedShips, setPlacedShips, rotation, setRotation, class
 			</span>
 			Rotate
 		</button>
-		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none" onClick={() => setPlacedShips(randomShips())}><IoDiceOutline /> Random</button>
-		<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips([])} disabled={placedShips.length < 1}>Clear</button>
+		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips(randomShips())} disabled={isLocked}><IoDiceOutline /> Random</button>
+		<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips([])} disabled={placedShips.length < 1 || isLocked}>Clear</button>
 	</div>
 }
 
-export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation }: {
+export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation, isLocked }: {
 	placedShips: Ship[],
 	setPlacedShips: (ships: Ship[]) => void,
 	draggingShip: ShipName | null,
 	setDraggingShip: (ship: ShipName | null) => void,
 	rotation: shipRotation,
-	setRotation: (rotation: shipRotation) => void
+	setRotation: (rotation: shipRotation) => void,
+	isLocked: boolean
 }) {
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
 		<div className="flex items-center justify-between">
@@ -263,20 +267,21 @@ export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShi
 
 		<div className="flex flex-col gap-2 py-4 min-h-0 overflow-y-auto">
 			{SHIPS.map(ship => (
-				<DockItem key={ship.name} ship={ship} isPlaced={placedShips.some(s => s.name === ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} />
+				<DockItem key={ship.name} ship={ship} isPlaced={placedShips.some(s => s.name === ship.name)} isDragging={draggingShip === ship.name} setDraggingShip={setDraggingShip} isLocked={isLocked} />
 			))}
 		</div>
 
-		<DockActions placedShips={placedShips} setPlacedShips={setPlacedShips} rotation={rotation} setRotation={setRotation} />
-		<ReadyButton placedShips={placedShips} className="mt-auto pt-4" />
+		<DockActions placedShips={placedShips} setPlacedShips={setPlacedShips} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
+		<ReadyButton placedShips={placedShips} isLocked={isLocked} className="mt-auto pt-4" />
 	</div>
 }
 
-function DockItem({ ship, isPlaced, isDragging, setDraggingShip, compact = false }: {
+function DockItem({ ship, isPlaced, isDragging, setDraggingShip, isLocked, compact = false }: {
 	ship: Ship,
 	isPlaced: boolean,
 	isDragging: boolean,
 	setDraggingShip: (ship: ShipName | null) => void,
+	isLocked: boolean,
 	compact?: boolean
 }) {
 	let status = "in dock"
@@ -294,7 +299,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip, compact = false
 	}
 
 	function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-		if (isPlaced)
+		if (isPlaced || isLocked)
 			return
 		e.preventDefault()
 		setDraggingShip(ship.name)

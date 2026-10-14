@@ -118,15 +118,17 @@ export function Match() {
 	if (!joinedMatch || joinedMatch.startedAt === 0)
 		return
 
+	const isLocked = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
+
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader title="deployment" description="Place your fleet" remaining={remaining} isMyTurn={true} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
-				<Deployment placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
-				<Dock placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} />
+				<Deployment placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
+				<Dock placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
 			</div>
-			<DeploymentFooter placedShips={placedShips} />
+			<DeploymentFooter placedShips={placedShips} isLocked={isLocked} />
 		</>}
 
 		{category === "match" && joinedMatch.endedAt === 0 && <>

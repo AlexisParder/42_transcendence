@@ -1,10 +1,13 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
+import type { ClientToServerEvents, Matchs, ServerToClientEvents, Ship, SocketData } from "../../events.ts";
 import type { Server } from "socket.io"
+import { filterMatchForUser, updatePlayer } from "../../lib/matchs/matchUtils.ts";
 
 export async function setPlayerShipsHandler(req: Request, res: Response) {
+	const { ships }: { ships: Ship[] } = req.body
+
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
@@ -35,19 +38,19 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 		if (match.startedAt == 0)
 			return res.status(403).json({ ok: false, code: "match_err_already_started" })
 
-		if (match.players.some(p => p.isReady))
-			return res.status(400).json({ ok: false, code: "match_err_all_players_not_ready" })
+		if (player.isReady)
+			return res.status(400).json({ ok: false, code: "match_err_already_ready" })
 
-		console.log("Team Id: ", player.team)
-		match.teams[player.team - 1].ships = [
-			{ name: "carrier", start: { x: 0, y: 1 }, end: { x: 4, y: 1 }, size: 5, image: "" },
-			{ name: "frigate", start: { x: 0, y: 3 }, end: { x: 3, y: 3 }, size: 4, image: "" },
-			{ name: "cruiser", start: { x: 6, y: 1 }, end: { x: 6, y: 3 }, size: 3, image: "" },
-			{ name: "submarine", start: { x: 8, y: 5 }, end: { x: 8, y: 7 }, size: 3, image: "" },
-			{ name: "destroyer", start: { x: 1, y: 8 }, end: { x: 2, y: 8 }, size: 2, image: "" },
-		]
+		match.teams[player.team - 1].ships = ships
+		updatePlayer(match, session.user.id, { isReady: true })
 
-		res.json({ ok: true })
+		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
+		for (const p of match.players) {
+			if (p.userId)
+				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))
+		}
+
+		res.json({ ok: true, match: filterMatchForUser(match, session.user.id) })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}
