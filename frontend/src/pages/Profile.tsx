@@ -11,6 +11,7 @@ import type { Match, matchType, Rank, Stat, UserInfo } from "../types/events";
 import { useLocation } from "react-router-dom";
 import { formatTimeProfile } from "../lib/formatTime";
 import { apiPost } from "../lib/api";
+import { ordinal } from "../lib/ordinal";
 
 type categoryType = "matches" | "achievements"
 export function Profile() {
@@ -138,7 +139,7 @@ export function Profile() {
 
 				<div>
 					<p className={`text-4xl ${(targetInfo?.points ?? 0) >= 0 ? "text-info" : "text-error"} font-bold font-mono text-center md:text-right`}>{targetInfo?.points.toLocaleString()}</p>
-					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> {t("txt_worldwide", { pos: targetInfo?.leaderboardPos ?? "-" })}</p>
+					<p className="flex items-center text-xs gap-1 text-neutral-content/50">{t("txt_points")} <TbPointFilled className="size-1" /> {t("txt_worldwide", { pos: targetInfo?.leaderboardPos ? ordinal(targetInfo?.leaderboardPos) : "-" })}</p>
 				</div>
 			</div>
 

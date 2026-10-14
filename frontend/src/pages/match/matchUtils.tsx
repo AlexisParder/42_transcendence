@@ -5,6 +5,7 @@ import { t } from "../../lib/translate"
 import type { Log, Matchs, matchType, vect2 } from "../../types/events"
 import { useMediaQuery } from "../../hooks/useMediaQuery"
 import { formatMS } from "../../lib/formatTime"
+import { ordinal } from "../../lib/ordinal"
 
 export function MatchHeader({ type, title, description, remaining, isMyTurn }: {
 	type?: matchType
@@ -164,7 +165,7 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 				{isTurn && <p className="text-info uppercase font-mono text-xs max-sm:hidden">taking aim</p>}
 				{!isTurn && !isBot && currFleet > 0 && <p className="text-neutral-content/50 font-mono text-xs max-sm:hidden">{points.toLocaleString()} pts, waiting</p>}
 				{!isTurn && isBot && currFleet > 0 && <p className="text-warning font-mono text-xs first-letter:uppercase max-sm:hidden">player left</p>}
-				{currFleet < 1 && <p className="text-neutral-content/50 font-mono text-xs truncate">flunk, {placement}th place</p>}
+				{currFleet < 1 && <p className="text-neutral-content/50 font-mono text-xs truncate">flunk, {ordinal(placement)} place</p>}
 			</div>
 		</div>
 	</div>
