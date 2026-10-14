@@ -71,5 +71,6 @@ export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 
 export function stopTurns(match: Matchs) {
 	clearTimeout(timers.get(match.hostId))
+	match.endedAt = Date.now()
 	timers.delete(match.hostId)
 }
