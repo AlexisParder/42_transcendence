@@ -1,13 +1,14 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, Ship, SocketData } from "../../events.ts";
+import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
 import type { Server } from "socket.io"
 import { filterMatchForUser, updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { endDeploy } from "../../lib/matchs/turnTimer.ts";
+import { validateShips } from "../../lib/matchs/shipValidation.ts";
 
 export async function setPlayerShipsHandler(req: Request, res: Response) {
-	const { ships }: { ships: Ship[] } = req.body
+	const { ships } = req.body
 
 	try {
 		const session = await auth.api.getSession({
@@ -42,7 +43,11 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 		if (player.isReady)
 			return res.status(400).json({ ok: false, code: "match_err_already_ready" })
 
-		match.teams[player.team - 1].ships = ships
+		const validShips = validateShips(ships)
+		if (!validShips)
+			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
+		match.teams[player.team - 1].ships = validShips
 		updatePlayer(match, session.user.id, { isReady: true })
 
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
