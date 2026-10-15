@@ -47,7 +47,7 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 		<div className={`drawer ${guest ? "flex-1 min-h-0" : "md:drawer-open min-h-screen"}`}>
 			<input id="sidebarDrawer" type="checkbox" className="drawer-toggle hidden" checked={open} onChange={e => setOpen(e.target.checked)} />
 			<div className={`drawer-content ${guest ? "min-h-0" : ""}`}>
-				<Dockbar className={guest ? "h-full" : undefined}>{children}</Dockbar>
+				<Dockbar className={guest ? "h-full" : undefined} fixed={guest}>{children}</Dockbar>
 			</div>
 			<div className="drawer-side z-50">
 				<label htmlFor="sidebarDrawer" aria-label={t("sidebar_close")} className="drawer-overlay"></label>
