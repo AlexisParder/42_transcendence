@@ -13,33 +13,33 @@ export function DeploymentInfos({ match, myId }: {
 }) {
 	return <div className="bg-base-200 p-4 flex flex-col gap-4 min-h-0 w-72 xl:w-80 shrink-0 overflow-y-auto max-lg:hidden">
 		<div className="flex flex-col gap-1">
-			<h1 className="text-2xl font-bold">Deploy your fleet</h1>
-			<p className="text-sm text-neutral-content/60">Drag each ship onto the grid. Ships can sit side by side. The match starts once both captains are ready.</p>
+			<h1 className="text-2xl font-bold">{t("select_title")}</h1>
+			<p className="text-sm text-neutral-content/60">{t("select_desc")}</p>
 		</div>
 
 		<div className="bg-neutral/10 border border-neutral/50 p-3 rounded-lg">
-			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono tracking-brand pb-2">{match.players.length > 2 ? "opponents" : "opponent"}</p>
+			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono tracking-brand pb-2">{match.players.length > 2 ? t("select_opponents") : t("select_opponent")}</p>
 			<div className="flex flex-col gap-2">
 				{match.players.filter(p => p.userId !== myId).map(p => (
 					<div key={p.userId} className="flex items-center gap-2 min-w-0">
 						<Avatar username={p.username} image={p.image} size={32} />
 						<div className="flex-1 min-w-0">
 							{!p.isBot && <p className="text-xs font-semibold truncate">{p.username}</p>}
-							{p.isBot && <p className="text-xs font-semibold truncate text-warning uppercase">bot</p>}
-							<p className="text-neutral-content/50 font-mono text-xs">{p.points.toLocaleString()} pts</p>
+							{p.isBot && <p className="text-xs font-semibold truncate text-warning uppercase">{t("match_bot")}</p>}
+							<p className="text-neutral-content/50 font-mono text-xs">{p.points.toLocaleString()} {t("txt_pts")}</p>
 						</div>
-						{p.isReady && <p className="text-info font-mono font-semibold text-xs uppercase">ready</p>}
-						{!p.isReady && <p className="text-warning font-mono font-semibold text-xs uppercase flex items-center gap-1"><span className="loading loading-ring loading-xs"></span>placing…</p>}
+						{p.isReady && <p className="text-info font-mono font-semibold text-xs uppercase">{t("select_ready")}</p>}
+						{!p.isReady && <p className="text-warning font-mono font-semibold text-xs uppercase flex items-center gap-1"><span className="loading loading-ring loading-xs"></span>{t("select_placing")}</p>}
 					</div>
 				))}
 			</div>
 		</div>
 
 		<div className="bg-neutral/10 border border-neutral/50 p-3 rounded-lg flex flex-col gap-2">
-			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono tracking-brand">match</p>
-			<MatchInfoItem title="mode" value={t(`txt_${match.type}`)} />
-			<MatchInfoItem title="ranked" value={match.isRanked ? t("txt_yes") : t("txt_no")} valueColor={match.isRanked ? "text-info" : ""} />
-			<MatchInfoItem title="turn timer" value={`${match.settings.time_turn} s`} />
+			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono tracking-brand">{t("select_match")}</p>
+			<MatchInfoItem title={t("select_mode")} value={t(`txt_${match.type}`)} />
+			<MatchInfoItem title={t("txt_ranked")} value={match.isRanked ? t("txt_yes") : t("txt_no")} valueColor={match.isRanked ? "text-info" : ""} />
+			<MatchInfoItem title={t("select_turn_timer")} value={t("select_turn_timer_value", { time: match.settings.time_turn })} />
 		</div>
 	</div>
 }
@@ -140,19 +140,19 @@ export function Deployment({ placedShips, setPlacedShips, draggingShip, setDragg
 
 	return <div className="flex-1 p-6 max-sm:p-4 flex flex-col gap-4 max-lg:gap-3 min-h-0 min-w-0">
 		<div className="flex flex-col gap-1 lg:hidden">
-			<h1 className="text-xl font-bold">Deploy your fleet</h1>
-			<p className="text-sm text-neutral-content/60">Drag ships onto the grid. Ships can sit side by side.</p>
+			<h1 className="text-xl font-bold">{t("select_title")}</h1>
+			<p className="text-sm text-neutral-content/60">{t("select_desc_short")}</p>
 		</div>
 
 		<div className="flex-1 min-h-0 @container-size">
 			<div className="w-[min(100cqw,calc(100cqh-2rem))] mx-auto flex flex-col gap-2">
 				<div className="flex items-center justify-between">
-					<p className="font-mono text-xs uppercase text-info font-semibold tracking-brand">your waters</p>
+					<p className="font-mono text-xs uppercase text-info font-semibold tracking-brand">{t("match_your_waters")}</p>
 					<div className="flex items-center gap-2 max-lg:hidden">
 						<span className="w-3 h-3 rounded-sm border border-dashed border-info/50 bg-info/10"></span>
-						<p className="font-mono text-xs uppercase text-neutral-content/50 font-medium tracking-brand">drop zone</p>
+						<p className="font-mono text-xs uppercase text-neutral-content/50 font-medium tracking-brand">{t("select_drop_zone")}</p>
 					</div>
-					<p className="font-mono text-xs text-neutral-content/50 font-semibold lg:hidden">{placedShips.length} / {SHIPS.length} placed</p>
+					<p className="font-mono text-xs text-neutral-content/50 font-semibold lg:hidden">{t("select_placed_count", { curr: placedShips.length, max: SHIPS.length })}</p>
 				</div>
 				<Grid className="w-full" hoverable={false} ships={placedShips.filter(s => s.name !== draggingShip)} previewShip={isValid ? previewShip : undefined} dropZone={previewShip ? getShipCells(previewShip) : []} dropValid={isValid} onPickCell={isLocked ? undefined : onPickCell} />
 			</div>
@@ -160,15 +160,15 @@ export function Deployment({ placedShips, setPlacedShips, draggingShip, setDragg
 
 		<div className="flex items-center justify-center flex-wrap gap-2 text-sm text-neutral-content/60 max-lg:hidden">
 			<kbd className="kbd kbd-sm">R</kbd>
-			<p>rotate while dragging</p>
-			<kbd className="kbd kbd-sm">Click</kbd>
-			<p>a placed ship to pick it up again</p>
+			<p>{t("select_rotate_hint")}</p>
+			<kbd className="kbd kbd-sm">{t("select_kbd_click")}</kbd>
+			<p>{t("select_pick_hint")}</p>
 		</div>
 
 		<div className="flex flex-col gap-2 lg:hidden">
 			<div className="flex items-center justify-between">
-				<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">dock</p>
-				<p className="font-mono text-xs text-neutral-content/50">swipe →</p>
+				<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{t("select_dock")}</p>
+				<p className="font-mono text-xs text-neutral-content/50">{t("select_swipe")}</p>
 			</div>
 			<div ref={dockRef} className="flex gap-2 overflow-x-auto scrollbar-none">
 				{SHIPS.map(ship => (
@@ -200,9 +200,9 @@ function ReadyButton({ placedShips, isLocked, onReady, className = "" }: {
 			className="btn btn-info w-full disabled:bg-info/10 disabled:border-info/30 disabled:text-info/60"
 			disabled={shipsLeft > 0 || isLocked}
 			onClick={onReady}
-		>{isLocked ? "Waiting for opponents…" : shipsLeft > 0 ? `Ready - ${shipsLeft} ship${shipsLeft > 1 ? "s" : ""} left` : "Ready"}
+		>{isLocked ? t("select_waiting_opponents") : shipsLeft > 0 ? t(shipsLeft > 1 ? "select_ready_ships_left" : "select_ready_ship_left", { nb: shipsLeft }) : t("select_btn_ready")}
 		</button>
-		<p className="text-neutral-content/50 text-xs text-center">Unplaced ships are set at random when time runs out.</p>
+		<p className="text-neutral-content/50 text-xs text-center">{t("select_random_info")}</p>
 	</div>
 }
 
@@ -223,15 +223,15 @@ function DockActions({ placedShips, setPlacedShips, rotation, setRotation, isLoc
 
 	return <div className={`flex items-center gap-2 ${className}`}>
 		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setRotation((rotation + 90) % 360 as shipRotation)} disabled={isLocked}>
-			<span className="flex items-center gap-px mr-1 transition-transform duration-200" style={{ transform: `rotate(${arrowAngle}deg)` }} title="Current orientation">
+			<span className="flex items-center gap-px mr-1 transition-transform duration-200" style={{ transform: `rotate(${arrowAngle}deg)` }} title={t("select_current_orientation")}>
 				<span className="w-1.5 h-1.5 rounded-[1px] bg-info/30"></span>
 				<span className="w-1.5 h-1.5 rounded-[1px] bg-info/30"></span>
 				<span className="w-1.5 h-1.5 rounded-[1px] rounded-r-full bg-info"></span>
 			</span>
-			Rotate
+			{t("select_btn_rotate")}
 		</button>
-		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips(randomShips())} disabled={isLocked}><IoDiceOutline /> Random</button>
-		<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips([])} disabled={placedShips.length < 1 || isLocked}>Clear</button>
+		<button className="w-full flex items-center justify-center gap-1 border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips(randomShips())} disabled={isLocked}><IoDiceOutline /> {t("select_btn_random")}</button>
+		<button className="w-full border bg-neutral/10 border-neutral/50 hover:bg-neutral/50 rounded-lg py-2 max-lg:py-3 text-xs font-semibold cursor-pointer outline-none disabled:opacity-50 disabled:cursor-default disabled:hover:bg-neutral/10" onClick={() => setPlacedShips([])} disabled={placedShips.length < 1 || isLocked}>{t("select_btn_clear")}</button>
 	</div>
 }
 
@@ -247,8 +247,8 @@ export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShi
 }) {
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
 		<div className="flex items-center justify-between">
-			<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">dock</p>
-			<p className="font-mono text-xs text-neutral-content/50 font-semibold">{placedShips.length} / {SHIPS.length} placed</p>
+			<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{t("select_dock")}</p>
+			<p className="font-mono text-xs text-neutral-content/50 font-semibold">{t("select_placed_count", { curr: placedShips.length, max: SHIPS.length })}</p>
 		</div>
 
 		<div className="flex flex-col gap-2 py-4 min-h-0 overflow-y-auto">
@@ -270,16 +270,16 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip, isLocked, compa
 	isLocked: boolean,
 	compact?: boolean
 }) {
-	let status = "in dock"
+	let status = t("select_in_dock")
 	let statusColor = "text-neutral-content/50"
 	let cardColor = "bg-neutral/10 border-neutral/50 hover:bg-neutral/30 cursor-grab"
 
 	if (isDragging) {
-		status = "dragging"
+		status = t("select_dragging")
 		statusColor = "text-info"
 		cardColor = "bg-info/10 border-info/50 cursor-grabbing"
 	} else if (isPlaced) {
-		status = "✓ placed"
+		status = `✓ ${t("select_placed")}`
 		statusColor = "text-info/60"
 		cardColor = "bg-neutral/10 border-neutral/50 opacity-50"
 	}
@@ -298,7 +298,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip, isLocked, compa
 			</div>
 			<div className="flex flex-col items-center min-w-0 w-full">
 				<p className="text-sm font-semibold first-letter:uppercase truncate">{ship.name}</p>
-				<p className={`${isDragging || isPlaced ? statusColor : "text-neutral-content/50"} font-mono text-xs uppercase truncate`}>{isDragging || isPlaced ? status : `${ship.size} cells`}</p>
+				<p className={`${isDragging || isPlaced ? statusColor : "text-neutral-content/50"} font-mono text-xs uppercase truncate`}>{isDragging || isPlaced ? status : t("select_cells", { nb: ship.size })}</p>
 			</div>
 		</div>
 
@@ -308,7 +308,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip, isLocked, compa
 		</div>
 		<div className="flex-1 min-w-0">
 			<p className="text-sm font-semibold first-letter:uppercase truncate">{ship.name}</p>
-			<p className="text-neutral-content/50 font-mono text-xs">{ship.size} cells</p>
+			<p className="text-neutral-content/50 font-mono text-xs">{t("select_cells", { nb: ship.size })}</p>
 		</div>
 		<p className={`${statusColor} font-mono font-semibold text-xs uppercase shrink-0`}>{status}</p>
 	</div>

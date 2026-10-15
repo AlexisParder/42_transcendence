@@ -12,7 +12,7 @@ import { EndDisplay } from "./endUtils";
 
 type categoryType = "select" | "match"
 export function Match() {
-	useDocumentTitle("Match")
+	useDocumentTitle(t("match_title"))
 
 	const { data: session } = authClient.useSession()
 	const socket = useSocket()
@@ -151,7 +151,7 @@ export function Match() {
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && joinedMatch.endedAt === 0 && <>
-			<MatchHeader title="deployment" description="Place your fleet" remaining={remaining} isMyTurn={true} />
+			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
@@ -161,7 +161,7 @@ export function Match() {
 		</>}
 
 		{category === "match" && joinedMatch.endedAt === 0 && <>
-			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description="Your turn" remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} />
+			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} />

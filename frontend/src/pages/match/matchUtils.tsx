@@ -23,7 +23,7 @@ export function MatchHeader({ type, title, description, remaining, isMyTurn }: {
 		<div className="flex items-center max-sm:gap-2 gap-4">
 			{isMyTurn && <p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>}
 			<p className="font-mono text-sm text-info font-semibold border border-info rounded-full px-2 py-1 text-center">{formatMS(remaining)}</p>
-			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">forfeit</button>
+			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("match_forfeit")}</button>
 			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
 		</div>
 	</div>
@@ -38,10 +38,10 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 	return <div className="bg-base-200 p-4 flex flex-col justify-between max-w-60 max-sm:hidden">
 		<div className="flex flex-col gap-10">
 			<div className="flex flex-col gap-2">
-				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">turn order</p>
+				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{t("match_turn_order")}</p>
 
 				<div className="flex flex-col gap-2">
-					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">your team</p>}
+					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{t("match_your_team")}</p>}
 					{match.type === "TWO_V_TWO" && match.turns.turnOrder
 						.map(id => match.players.find(p => p.userId === id && p.team === 1))
 						.filter(Boolean)
@@ -49,7 +49,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
 						))}
 
-					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">enemy team</p>}
+					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">{t("match_enemy_team")}</p>}
 
 					{match.type === "TWO_V_TWO" && match.turns.turnOrder
 						.map(id => match.players.find(p => p.userId === id && p.team === 2))
@@ -68,17 +68,17 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 			</div>
 
 			{match.type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
-				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-2">target</p>
+				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-2">{t("match_target")}</p>
 				<div className="flex flex-col gap-2">
 					{match.players.filter(p => p.userId !== myId).map(p => (
 						<button key={p.userId} className={`${selectedTarget === p.team ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate`} onClick={() => setSelectedTarget(p.team ?? 0)}>{p.username}</button>
 					))}
 				</div>
-				<p className="text-neutral-content/50 text-xs pt-1">pick an opponent, then a cell on their grid.</p>
+				<p className="text-neutral-content/50 text-xs pt-1">{t("match_target_desc")}</p>
 			</div>}
 		</div>
 		<div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
-			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{match.type === "TWO_V_TWO" ? "team fleet" : "your fleet"}</p>
+			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{match.type === "TWO_V_TWO" ? t("match_team_fleet") : t("match_your_fleet")}</p>
 			<FleetStatItem title="carrier" leftBox={5} totalBox={5} />
 			<FleetStatItem title="frigate" leftBox={3} totalBox={4} />
 			<FleetStatItem title="cruiser" leftBox={2} totalBox={3} />
@@ -103,7 +103,7 @@ function FleetStatItem({ title, leftBox, totalBox }: {
 	return <div className={`flex justify-between items-center p-0.5 ${leftBox < 1 ? "opacity-50" : ""}`}>
 		<p className="text-xs font-medium first-letter:uppercase">{title}</p>
 		{leftBox > 0 && <p className={`text-xs font-mono font-medium ${fleetColor}`}>{leftBox}/{totalBox}</p>}
-		{leftBox < 1 && <p className="text-xs font-mono font-medium text-error uppercase">sunk</p>}
+		{leftBox < 1 && <p className="text-xs font-mono font-medium text-error uppercase">{t("match_sunk")}</p>}
 	</div>
 }
 
@@ -157,16 +157,16 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 			</div>
 			<div className="pl-1 flex-1 min-w-0">
 				<div className="flex items-center justify-between gap-2">
-					{!isBot && <p className={`text-xs font-semibold truncate ${isMine ? "text-info" : ""}`}>{username} {isMine && <span className="max-sm:hidden">(you)</span>}</p>}
-					{isBot && <p className="text-xs font-semibold truncate text-warning uppercase">bot</p>}
+					{!isBot && <p className={`text-xs font-semibold truncate ${isMine ? "text-info" : ""}`}>{username} {isMine && <span className="max-sm:hidden">({t("match_you")})</span>}</p>}
+					{isBot && <p className="text-xs font-semibold truncate text-warning uppercase">{t("match_bot")}</p>}
 					{currFleet > 0 && <p className={`text-xs font-mono font-semibold max-sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
 				</div>
 				{currFleet > 0 && <p className={`text-xs font-mono font-semibold sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
-				{isTurn && match.endedAt === 0 && <p className="text-info uppercase font-mono text-xs max-sm:hidden">taking aim</p>}
-				{!isTurn && !isBot && match.endedAt === 0 && currFleet > 0 && <p className="text-neutral-content/50 font-mono text-xs max-sm:hidden">{points.toLocaleString()} pts, waiting</p>}
-				{!isTurn && isBot && currFleet > 0 && <p className="text-warning font-mono text-xs first-letter:uppercase max-sm:hidden">player left</p>}
-				{currFleet < 1 && <p className="text-neutral-content/50 font-mono text-xs truncate">flunk, {ordinal(placement)} place</p>}
-				{currFleet > 0 && match.endedAt !== 0 && <p className="text-neutral-content/50 font-mono text-xs truncate">end, {ordinal(placement)} place</p>}
+				{isTurn && match.endedAt === 0 && <p className="text-info uppercase font-mono text-xs max-sm:hidden">{t("match_taking_aim")}</p>}
+				{!isTurn && !isBot && match.endedAt === 0 && currFleet > 0 && <p className="text-neutral-content/50 font-mono text-xs max-sm:hidden">{t("match_pts_waiting", { pts: points.toLocaleString() })}</p>}
+				{!isTurn && isBot && currFleet > 0 && <p className="text-warning font-mono text-xs first-letter:uppercase max-sm:hidden">{t("match_player_left")}</p>}
+				{currFleet < 1 && <p className="text-neutral-content/50 font-mono text-xs truncate">{t("match_flunk_place", { place: ordinal(placement) })}</p>}
+				{currFleet > 0 && match.endedAt !== 0 && <p className="text-neutral-content/50 font-mono text-xs truncate">{t("match_end_place", { place: ordinal(placement) })}</p>}
 			</div>
 		</div>
 	</div>
@@ -214,7 +214,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
 						))}
 
-					{match.type === "TWO_V_TWO" && <p className="text-neutral-content/50 font-mono uppercase text-xs font-semibold">VS</p>}
+					{match.type === "TWO_V_TWO" && <p className="text-neutral-content/50 font-mono uppercase text-xs font-semibold">{t("match_vs")}</p>}
 
 					{match.type === "TWO_V_TWO" && match.turns.turnOrder
 						.map(id => match.players.find(p => p.userId === id && p.team === 2))
@@ -233,7 +233,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			</div>
 
 			{match.type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 mt-1.5 rounded-md sm:hidden">
-				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-1 text-center">target</p>
+				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-1 text-center">{t("match_target")}</p>
 				<div className="flex gap-1 items-center">
 					{match.players.filter(p => p.userId !== myId).map(p => (
 						<button key={p.userId} className={`${selectedTarget === p.team ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate w-full`} onClick={() => {
@@ -248,16 +248,16 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => {
 					setWaterView("attack")
 					setTargetLocked({ x: -1, y: -1 })
-				}}>Attack</button>
+				}}>{t("match_btn_attack")}</button>
 				<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => {
 					setWaterView("my waters")
 					setTargetLocked({ x: -1, y: -1 })
-				}}>My waters</button>
+				}}>{t("match_btn_my_waters")}</button>
 			</div>
 
-			{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? "enemy team waters" : `${target?.username}'s waters`}</p>}
+			{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? t("match_enemy_team_waters") : t("match_player_waters", { name: target?.username ?? "?" })}</p>}
 
-			{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>}
+			{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? t("match_your_team_waters") : t("match_your_waters")}</p>}
 		</div>
 
 		<div className="flex-1 min-h-0 flex items-center justify-center @container-size py-2">
@@ -295,11 +295,11 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>
 
 		<div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
-			{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">target locked <span className="text-info">{rowName[targetLocked.y]}{targetLocked.x + 1}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
+			{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{rowName[targetLocked.y]}{targetLocked.x + 1}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
 
-			{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">No Target locked</p>}
+			{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_no_target")}</p>}
 
-			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={(targetLocked.x < 0 && targetLocked.y < 0) || match.turns.userTurn !== myId || match.endedAt !== 0} onClick={handleFire}>Fire</button>
+			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={(targetLocked.x < 0 && targetLocked.y < 0) || match.turns.userTurn !== myId || match.endedAt !== 0} onClick={handleFire}>{t("match_btn_fire")}</button>
 		</div>
 	</div>
 }
@@ -312,18 +312,18 @@ export function GameInfos({ match, myId }: {
 	const myTeamData = match.teams.find(t => t.id === myTeam)
 
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
-		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? "your team waters" : "your waters"}</p>
+		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? t("match_your_team_waters") : t("match_your_waters")}</p>
 		<Grid className="w-full bg-abyss-900 my-2" hoverable={false} ships={myTeamData?.ships} shots={myTeamData?.shots} />
 		<div className="flex items-center gap-4 pb-4">
-			<FleetColorIndicator title="intact" badge="badge-neutral" />
-			<FleetColorIndicator title="hit" badge="badge-warning" />
-			<FleetColorIndicator title="sunk" badge="badge-error" />
+			<FleetColorIndicator title={t("match_intact")} badge="badge-neutral" />
+			<FleetColorIndicator title={t("match_hit")} badge="badge-warning" />
+			<FleetColorIndicator title={t("match_sunk")} badge="badge-error" />
 		</div>
 
 
 		<div className="flex">
-			<button className="btn text-info text-xs font-semibold border-b-info rounded-none outline-none">Log</button>
-			{match.type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold outline-none">Team chat <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
+			<button className="btn text-info text-xs font-semibold border-b-info rounded-none outline-none">{t("match_log")}</button>
+			{match.type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold outline-none">{t("match_team_chat")} <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
 		</div>
 		<div className="divider m-0"></div>
 
