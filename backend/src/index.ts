@@ -44,7 +44,7 @@ import { joinCodeMatchHandler } from "./routes/matches/joinCodeMatch.route.ts"
 import { inviteMatchHandler } from "./routes/matches/inviteMatch.route.ts"
 import { playerFireHandler } from "./routes/matches/playerFire.route.ts"
 import { startMatchHandler } from "./routes/matches/startMatch.route.ts"
-import { setPlayerShipsHandler } from "./routes/matches/setShips.route.ts"
+import { setPlayerReadyOnSelectHandler, setPlayerShipsHandler } from "./routes/matches/setShips.route.ts"
 import { currentMatches } from "./mapMatches.ts"
 
 const app = express()
@@ -113,6 +113,7 @@ app.post("/api/invite-match", inviteMatchHandler)
 app.post("/api/start-match", startMatchHandler)
 app.post("/api/player-fire", playerFireHandler)
 app.post("/api/set-player-ships", setPlayerShipsHandler)
+app.post("/api/set-player-ready-on-select", setPlayerReadyOnSelectHandler)
 
 io.use(async (socket, next) => {
 	try {

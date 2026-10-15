@@ -11,6 +11,8 @@ const SHIP_SIZES: Record<ShipName, number> = {
 	destroyer: 2,
 }
 
+export const SHIP_COUNT = Object.keys(SHIP_SIZES).length
+
 function isValidCell(c: any): c is vect2 {
 	return c && Number.isInteger(c.x) && Number.isInteger(c.y) && c.x >= 0 && c.x < GRID_SIZE && c.y >= 0 && c.y < GRID_SIZE
 }
@@ -26,7 +28,7 @@ function getCells(start: vect2, end: vect2): vect2[] {
 export function validateShips(ships: any): Ship[] | null {
 	const names = Object.keys(SHIP_SIZES) as ShipName[]
 
-	if (!Array.isArray(ships) || ships.length !== names.length)
+	if (!Array.isArray(ships) || ships.length > names.length)
 		return null
 
 	const result: Ship[] = []

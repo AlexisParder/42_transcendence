@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Game, GameStats, MatchHeader, GameInfos } from "./matchUtils";
 import { Deployment, DeploymentFooter, DeploymentInfos, Dock } from "./selectUtils";
@@ -26,6 +26,32 @@ export function Match() {
 	const [targetLocked, setTargetLocked] = useState<vect2>({ x: -1, y: -1 })
 	const [turnEndsAt, setTurnEndsAt] = useState(0)
 	const [remaining, setRemaining] = useState(0)
+	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
+
+	function updatePlacedShips(ships: Ship[]) {
+		setPlacedShips(ships)
+
+		shipsRequest.current = shipsRequest.current.then(async () => {
+			try {
+				const { ok, data } = await apiPost("/api/set-player-ships", { ships: ships.map(s => ({ name: s.name, size: s.size, start: s.start, end: s.end })) })
+				if (!ok)
+					console.log("set player ships:", data.code)
+			} catch (error) {
+				console.error("set player ships:", error)
+			}
+		})
+	}
+
+	async function setReady() {
+		await shipsRequest.current
+		try {
+			const { ok, data } = await apiPost("/api/set-player-ready-on-select")
+			if (!ok)
+				console.log("set player ready:", data.code)
+		} catch (error) {
+			console.error("set player ready:", error)
+		}
+	}
 
 	useEffect(() => {
 		function onRefreshMatch(payload: Matchs | undefined) {
@@ -78,7 +104,10 @@ export function Match() {
 
 				setSelectedTarget(match?.players.find(p => p.team !== myTeam)?.team ?? 0)
 
-				setCategory(match?.step === "game" ? "match" : "select")				
+				setCategory(match?.step === "game" ? "match" : "select")
+
+				if (match?.step === "deploy")
+					setPlacedShips(match.teams.find(t => t.id === myTeam)?.ships ?? [])
 
 				if (data.remaining > 0)
 					setTurnEndsAt(Date.now() + data.remaining * 1000)
@@ -125,10 +154,10 @@ export function Match() {
 			<MatchHeader title="deployment" description="Place your fleet" remaining={remaining} isMyTurn={true} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
-				<Deployment placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
-				<Dock placedShips={placedShips} setPlacedShips={setPlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
+				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
+				<Dock placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} onReady={setReady} />
 			</div>
-			<DeploymentFooter placedShips={placedShips} isLocked={isLocked} />
+			<DeploymentFooter placedShips={placedShips} isLocked={isLocked} onReady={setReady} />
 		</>}
 
 		{category === "match" && joinedMatch.endedAt === 0 && <>
