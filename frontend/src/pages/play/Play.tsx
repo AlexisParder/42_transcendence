@@ -11,7 +11,7 @@ import { SidebarRight, MatchItem, WaitingRoom, MatchTypeBtn } from "./playUtils"
 import { getVisiblesMatches } from "./playLogic";
 import type { visibilityType, viewType } from "../../types/types";
 import { apiGet, apiPost } from "../../lib/api";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export function Play() {
 	useDocumentTitle(t("play_title"))
@@ -30,7 +30,7 @@ export function Play() {
 	const [code, setCode] = useState("")
 	const [errors, setErrors] = useState<{ matchCreation?: string, matchWaiting?: string, matchJoin?: string, matchJoinCode?: string }>({})
 
-	const ranked = !replace
+	const ranked = !replace && visibility === "public"
 
 	const visibleMatches = getVisiblesMatches(matches)
 
