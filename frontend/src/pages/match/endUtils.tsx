@@ -28,10 +28,10 @@ export function EndDisplay({ match }: {
 			<p className="first-letter:uppercase text-neutral-content/50 text-sm font-medium font-mono tracking-[0.06em]">match time - {formatMS((match.endedAt - match.startedAt) / 1000)}</p>
 
 			{match.isRanked && <div className={`flex items-center gap-2 py-2 px-4 border rounded-lg ${isWin ? "bg-info/10 border-info/50" : "bg-error/10 border-error/50"}`}>
-				<p className={`font-mono font-bold text-2xl ${isWin ? "text-info" : "text-error"}`}>{isWin ? "+" : "-"}{player?.matchPoints ?? 0}</p>
+				<p className={`font-mono font-bold text-2xl ${isWin ? "text-info" : "text-error"}`}>{isWin ? "+" : ""}{player?.matchPoints ?? 0}</p>
 				<div className="flex flex-col">
 					<p className="text-xs text-neutral-content/50">points</p>
-					<p className="inline-flex items-center gap-1 text-xs text-neutral-content/50">{player?.points ?? 0} <MdArrowRightAlt />{session?.user.points}</p>
+					<p className="inline-flex items-center gap-1 text-xs text-neutral-content/50">{player?.points ?? 0} <MdArrowRightAlt />{(player?.points ?? 0) + (player?.matchPoints ?? 0)}</p>
 				</div>
 			</div>}
 

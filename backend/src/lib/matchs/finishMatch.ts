@@ -1,9 +1,11 @@
 import type { Server } from "socket.io";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
+import type { ClientToServerEvents, Matchs, matchType, ServerToClientEvents, SocketData } from "../../events.ts";
 import { currentMatches } from "../../mapMatches.ts";
 import { emitTurn } from "./turnTimer.ts";
 import { prisma } from "../../db/client.ts";
 import type { PairMatchIndex } from "./eloLib.ts";
+import { filterMatchForUser } from "./matchUtils.ts";
+import { applyEloToMatch, computeMatchElo, isRankedmatch } from "./eloMatchAdapater.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
@@ -50,14 +52,69 @@ async function loadPairMatchIndex(userIds: string[]): Promise<PairMatchIndex> {
 	return (a, b) => (pairCounts.get(pairKey(a, b)) ?? 0) + 1
 }
 
-export async function finishMatch(match: Matchs, io: IO) {
-	if (match.isRanked) {
-		for (const player of match.players) {
-			if (player.isBot || !player.userId)
-				continue
+async function saveMatch(match: Matchs, ranked: boolean, deltas: Map<string, number>) {
+	const createMatch = prisma.matchs.create({
+		data: {
+			type: match.type as matchType,
+			isRanked: ranked,
+			startedAt: new Date(match.startedAt),
+			endedAt: new Date(match.endedAt),
+			players: {
+				create: match.players.map(p => ({
+					userId: p.userId,
+					isBot: p.isBot,
+					team: p.team,
+					placement: p.placement,
+					points: p.matchPoints,
+					leftAt: p.leftAt !== 0 ? new Date(p.leftAt) : null,
+					status: p.status,
+					shotsHit: p.shotsHit,
+					shotsTotal: p.shotsTotal
+				}))
+			}
 		}
-	}
+	})
 
-	emitTurn(match, io)
-	currentMatches.delete(match.hostId)
+	const updateUsers = [...deltas].map(([userId, delta]) =>
+		prisma.user.update({
+			where: { id: userId },
+			data: { points: { increment: delta } }
+		})
+	)
+
+	await prisma.$transaction([createMatch, ...updateUsers])
+}
+
+function emitFinalState(match: Matchs, io: IO) {
+	for (const player of match.players) {
+		if (player.userId && !player.isBot)
+			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
+	}
+}
+
+export async function finishMatch(match: Matchs, io: IO) {
+	try {
+		const ranked = isRankedmatch(match)
+		const deltas = new Map<string, number>()
+
+		if (ranked) {
+			const userIds = match.players.map(p => p.userId).filter((id): id is string => id !== null)
+
+			const [rankedGames, pairMatchIndex] = await Promise.all([
+				loadRankedGames(userIds),
+				loadPairMatchIndex(userIds)
+			])
+
+			const results = computeMatchElo(match, rankedGames, pairMatchIndex)
+			applyEloToMatch(match, results)
+
+			for (const r of results)
+				deltas.set(r.id, r.delta)
+		}
+
+		await saveMatch(match, ranked, deltas)
+	} finally {
+		emitFinalState(match, io)
+		currentMatches.delete(match.hostId)
+	}
 }
