@@ -3,6 +3,7 @@ import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, generateCode, isInAnyMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
+import { prisma } from "../../db/client.ts";
 
 export async function createMatchHandler(req: Request, res: Response) {
 	const { selectedMatchType, visibility, timeTurn, replace, spectators } = req.body
@@ -16,6 +17,13 @@ export async function createMatchHandler(req: Request, res: Response) {
 
 		const userId = session.user.id
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const data = await prisma.user.findUnique({
+			where: { id: session.user.id },
+			select: { points: true }
+		})
+
+		if (!data)
+			return res.status(400).json({ ok: false })
 
 		if (isInAnyMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
@@ -23,7 +31,11 @@ export async function createMatchHandler(req: Request, res: Response) {
 		if (!isMatchType(selectedMatchType))
 			return res.status(400).json({ ok: false })
 
+		if (visibility !== "public" && visibility !== "private")
+			return res.status(400).json({ ok: false })
+
 		const code = generateCode(currentMatches)
+
 		const newMatch: Matchs = {
 			type: selectedMatchType,
 			settings: {
@@ -60,9 +72,9 @@ export async function createMatchHandler(req: Request, res: Response) {
 					isBot: false,
 					team: 1,
 					placement: 0,
-					points: session.user.points ?? 0,
+					points: data.points,
 					matchPoints: 0,
-					leftAt: null,
+					leftAt: 0,
 					status: "PLAYED",
 					shotsHit: 0,
 					shotsTotal: 0

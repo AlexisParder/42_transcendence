@@ -1,8 +1,9 @@
 import { Server } from "socket.io";
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
-import { isTeamEliminated, setFinalPlacement } from "./matchUtils.ts";
+import { filterMatchForUser, isTeamEliminated, setFinalPlacement, updatePlayer } from "./matchUtils.ts";
 import { currentMatches } from "../../mapMatches.ts";
 import { fillRandomShips } from "./shipValidation.ts";
+import { finishMatch } from "./finishMatch.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -13,13 +14,13 @@ export function getRemaining(match: Matchs): number {
 	return Math.max(0, Math.ceil((((match.step === "deploy" ? 30 : match.settings.time_turn) * 1000) - elapsed) / 1000))
 }
 
-function emitTurn(match: Matchs, io: IO) {
+export function emitTurn(match: Matchs, io: IO) {
 	const data = { remaining: getRemaining(match) }
 
 	for (const player of match.players) {
 		if (player.userId) {
 			io.to(player.userId).emit("turn_update", data)
-			io.to(player.userId).emit("refresh_joined_match", match)
+			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 	}
 }
@@ -55,9 +56,20 @@ export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 		for (const player of players)
 			setFinalPlacement(match, player.userId ?? "")
 
-		// TODO: ajouter la logique de fin
-		emitTurn(match, io)
-		// currentMatches.delete(match.hostId)
+		for (const player of match.players) {
+			if (player.isBot || !player.userId)
+				continue
+
+			let shotsCount = 0
+			let hitsCount = 0
+			for (const team of match.teams.filter(t => t.id !== player.team)) {
+				shotsCount += team.shots.filter(s => s.authorId === player.userId).length
+				hitsCount += team.shots.filter(s => s.authorId === player.userId && s.status !== "miss").length
+			}
+			updatePlayer(match, player.userId, { shotsHit: hitsCount, shotsTotal: shotsCount })
+		}
+
+		finishMatch(match, io).catch(err => console.log("finish match:", err))
 		return
 	}
 

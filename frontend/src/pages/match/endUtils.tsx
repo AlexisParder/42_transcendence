@@ -12,12 +12,6 @@ export function EndDisplay({ match }: {
 	const player = match.players.find(p => p.userId === session?.user.id)
 	const playerTeamData = match.teams.find(t => t.id === player?.team)
 	const isWin = (player?.matchPoints ?? 0) >= 0
-	let shotsCount = 0
-	let hitsCount = 0
-	for (const team of match.teams.filter(t => t.id !== player?.team)) {
-		shotsCount += team.shots.filter(s => s.authorId === session?.user.id).length
-		hitsCount += team.shots.filter(s => s.authorId === session?.user.id && s.status !== "miss").length
-	}
 
 	const sunkShip = [
 		...new Map(
@@ -44,8 +38,8 @@ export function EndDisplay({ match }: {
 			<div className="shrink-0 grid grid-cols-1 text-center md:text-left md:grid-cols-3 border-t border-base-300 w-full">
 				<div className="flex-1/3 p-4">
 					<p className="text-xs text-neutral-content/50 first-letter:uppercase">accuracy</p>
-					<p className="font-bold text-2xl font-mono">{Math.floor(hitsCount / (shotsCount) * 100)} %</p>
-					<p className="text-xs text-neutral-content/50">{shotsCount} shots - {hitsCount} hits</p>
+					<p className="font-bold text-2xl font-mono">{Math.floor(player!.shotsHit / (player!.shotsTotal) * 100)} %</p>
+					<p className="text-xs text-neutral-content/50">{player!.shotsTotal} shots - {player!.shotsHit} hits</p>
 				</div>
 				<div className="flex-1/3 p-4 md:border-l max-md:border-t border-base-300">
 					<p className="text-xs text-neutral-content/50 first-letter:uppercase">ships lost</p>

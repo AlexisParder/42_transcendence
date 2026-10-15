@@ -83,6 +83,8 @@ export async function playerFireHandler(req: Request, res: Response) {
 				authorId: session.user.id,
 				authorTeam: match.players.find(p => p.userId === session.user.id)?.team ?? 0
 			}
+
+			team.shots.push(shot)
 		} else {
 			const previousHits = team.shots.filter(s => s.status === "hit" && isOnShip(ship, s.coords))
 			const isSunk = previousHits.length + 1 >= ship.size
@@ -94,6 +96,8 @@ export async function playerFireHandler(req: Request, res: Response) {
 				authorId: session.user.id,
 				authorTeam: match.players.find(p => p.userId === session.user.id)?.team ?? 0
 			}
+
+			team.shots.push(shot)
 
 			if (isSunk) {
 				previousHits.forEach(s => {
@@ -108,8 +112,6 @@ export async function playerFireHandler(req: Request, res: Response) {
 				}
 			}
 		}
-
-		team.shots.push(shot)
 
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {

@@ -184,7 +184,7 @@ model MatchPlayers {
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
-  isBot  Boolean @default(true)
+  isBot  Boolean @default(false)
 
   team      Int
   placement Int?
@@ -229,6 +229,7 @@ enum MatchType {
   TWO_V_TWO
   THREE_FFA
   FOUR_FFA
+  BOT
 }
 
 enum PlayerStatus {

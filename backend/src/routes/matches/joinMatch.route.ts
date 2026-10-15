@@ -4,6 +4,8 @@ import { auth } from "../../auth.ts";
 import type { ClientToServerEvents, MatchPlayers, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
 import { filterMatchForUser, firstFreeTeam, isInAnyMatch } from "../../lib/matchs/matchUtils.ts";
 import type { Server } from "socket.io"
+import { prisma } from "../../db/client.ts";
+import { canJoinRankedMatch } from "../../lib/matchs/eloLib.ts";
 
 export async function joinMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -17,9 +19,16 @@ export async function joinMatchHandler(req: Request, res: Response) {
 
 		const userId = session.user.id
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const data = await prisma.user.findUnique({
+			where: { id: session.user.id },
+			select: { points: true }
+		})
+
+		if (!data)
+			return res.status(400).json({ ok: false })
 
 		const match = currentMatches.get(hostId)
-		if (!match)
+		if (!match || match.visibility !== "public")
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		if (isInAnyMatch(currentMatches, userId))
@@ -31,6 +40,13 @@ export async function joinMatchHandler(req: Request, res: Response) {
 		if (match.startedAt !== 0)
 			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
+		if (match.isRanked) {
+			const ratingsInMatch = match.players.filter(p => !p.isBot).map(p => p.points)
+
+			if (!canJoinRankedMatch(data.points, ratingsInMatch))
+				return res.status(403).json({ ok: false, code: "match_err_rating_gap" })
+		}
+
 		const team = firstFreeTeam(match.players, match.type === "TWO_V_TWO" ? 2 : 1)
 		const newPlayer: MatchPlayers = {
 			userId,
@@ -40,9 +56,9 @@ export async function joinMatchHandler(req: Request, res: Response) {
 			isBot: false,
 			team,
 			placement: 0,
-			points: session.user.points ?? 0,
+			points: data.points,
 			matchPoints: 0,
-			leftAt: null,
+			leftAt: 0,
 			status: "PLAYED",
 			shotsHit: 0,
 			shotsTotal: 0

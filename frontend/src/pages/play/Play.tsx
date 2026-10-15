@@ -19,7 +19,7 @@ export function Play() {
 	const socket = useSocket()
 	const [friends, setFriends] = useState<Friend[]>([])
 	const [presence, setPresence] = useState<Record<string, PresenceStatus>>({})
-	const [visibility, setVisibility] = useState<visibilityType>("private")
+	const [visibility, setVisibility] = useState<visibilityType>("public")
 	const [selectedMatchType, setSelectedMatchType] = useState<matchType>("ONE_V_ONE")
 	const [replace, setReplace] = useState(false)
 	const [spectators, setSpectators] = useState(false)
