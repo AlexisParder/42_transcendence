@@ -330,10 +330,11 @@ export function MatchItem({ username, image, type, players, maxPlayers, canJoin,
 	</div>
 }
 
-export function SidebarRight({ children, format, replace }: {
+export function SidebarRight({ children, format, replace, visibility }: {
 	children: React.ReactNode,
 	format: matchType,
-	replace: boolean
+	replace: boolean,
+	visibility: "public" | "private"
 }) {
 	let players = "3-4"
 	if (format === "ONE_V_ONE")
@@ -344,7 +345,7 @@ export function SidebarRight({ children, format, replace }: {
 		players = "4"
 
 	let ranked = "ON"
-	if (format === "BOT" || replace)
+	if (format === "BOT" || replace || visibility === "private")
 		ranked = "OFF"
 
 	return <>
@@ -363,8 +364,11 @@ export function SidebarRight({ children, format, replace }: {
 						<SidebarRightItem label={t("play_ships_per_fleet")} value="5" />
 						<SidebarRightItem label={t("txt_ranked")} value={ranked} />
 
-						{ranked !== "ON" && format !== "BOT" && <div className="bg-base-100 rounded-md m-1">
+						{ranked !== "ON" && format !== "BOT" && replace && <div className="bg-base-100 rounded-md m-1">
 							<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoWarning className="text-warning size-7" /> {t("play_ranked_off")}.</p>
+						</div>}
+						{ranked !== "ON" && format !== "BOT" && visibility === "private" && <div className="bg-base-100 rounded-md m-1">
+							<p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4 text-neutral-content/60 text-xs"><IoWarning className="text-warning size-7" /> {t("play_ranked_off_private")}.</p>
 						</div>}
 
 						<div className="bg-base-100 rounded-md m-1">

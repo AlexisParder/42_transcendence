@@ -329,7 +329,7 @@ export function Play() {
 	}
 
 	return <Sidebar>
-		{view === "none" && <SidebarRight format={selectedMatchType} replace={replace}>
+		{view === "none" && <SidebarRight format={selectedMatchType} replace={replace} visibility={visibility}>
 			<div className="p-6 flex flex-col h-full min-h-0 min-w-0 max-lg:overflow-y-auto">
 				<div className="flex items-center justify-between max-sm:flex-col max-sm:gap-2 max-sm:pb-2">
 					<div>

@@ -167,6 +167,7 @@
 	"play_selected_format": "selected format",
 	"play_ships_per_fleet": "ships per fleet",
 	"play_ranked_off": "Ranked is off because Replace leavers with a bot is on. Turn it off to play for points",
+	"play_ranked_off_private": "Ranked is off because the match is private. Turn it off to play for points",
 	"play_match_info": "Sink every enemy to win. Leaving a ranked match early counts as a loss",
 
 	"select_header_title": "deployment",
