@@ -78,33 +78,6 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 				<p className="text-neutral-content/50 text-xs pt-1">{t("match_target_desc")}</p>
 			</div>}
 		</div>
-		<div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
-			<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{match.type === "TWO_V_TWO" ? t("match_team_fleet") : t("match_your_fleet")}</p>
-			<FleetStatItem title="carrier" leftBox={5} totalBox={5} />
-			<FleetStatItem title="frigate" leftBox={3} totalBox={4} />
-			<FleetStatItem title="cruiser" leftBox={2} totalBox={3} />
-			<FleetStatItem title="submarine" leftBox={0} totalBox={3} />
-			<FleetStatItem title="destroyer" leftBox={2} totalBox={2} />
-		</div>
-	</div>
-}
-
-function FleetStatItem({ title, leftBox, totalBox }: {
-	title: string
-	leftBox: number,
-	totalBox: number
-}) {
-	let fleetColor = "text-info"
-	const fleetPercent = leftBox / totalBox
-	if (fleetPercent < 0.25)
-		fleetColor = "text-error"
-	else if (fleetPercent < 0.75)
-		fleetColor = "text-warning"
-
-	return <div className={`flex justify-between items-center p-0.5 ${leftBox < 1 ? "opacity-50" : ""}`}>
-		<p className="text-xs font-medium first-letter:uppercase">{title}</p>
-		{leftBox > 0 && <p className={`text-xs font-mono font-medium ${fleetColor}`}>{leftBox}/{totalBox}</p>}
-		{leftBox < 1 && <p className="text-xs font-mono font-medium text-error uppercase">{t("match_sunk")}</p>}
 	</div>
 }
 
