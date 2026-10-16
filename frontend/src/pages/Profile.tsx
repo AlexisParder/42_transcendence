@@ -156,10 +156,11 @@ export function Profile() {
 					<p className="font-bold text-2xl font-mono">{stats?.shotAccuracy} %</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_shot_accuracy")}</p>
 				</div>
-				<div className="flex-1/4 p-4 border-l border-base-300">
+				{/* TODO: Remplacer par le nombre d'achievement debloqués */}
+				{/* <div className="flex-1/4 p-4 border-l border-base-300">
 					<p className="font-bold text-2xl text-warning font-mono">{stats?.tournamentsWon}</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_tournaments_won")}</p>
-				</div>
+				</div> */}
 			</div>
 
 			<div className="shrink-0 join lg:hidden pt-4 px-4">

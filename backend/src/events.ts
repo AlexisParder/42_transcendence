@@ -98,7 +98,6 @@ export interface Stat {
 	total: number,
 	winRate: number,
 	shotAccuracy: number,
-	tournamentsWon: number,
 }
 
 export interface Rank {

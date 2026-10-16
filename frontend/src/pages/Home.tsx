@@ -23,7 +23,7 @@ const features = [
 const stats = [
 	{ value: "2,148", label: t("home_matches_played") },
 	{ value: "37", label: t("home_in_progress") },
-	{ value: "4", label: t("home_open_tournaments") },
+	{ value: "4", label: t("home_open_matches") },
 ]
 
 export function Home() {

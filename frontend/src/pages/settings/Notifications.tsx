@@ -25,7 +25,7 @@ export function SettingsNotif() {
 				<NotifLine title={t("settings_notif_title_2")} desc={t("settings_notif_desc_2")} inputName="match" />
 				<NotifLine title={t("settings_notif_title_3")} desc={t("settings_notif_desc_3")} inputName="friend" controls={controls} />
 				<NotifLine title={t("settings_notif_title_4")} desc={t("settings_notif_desc_4")} inputName="chat" controls={controls} />
-				<NotifLine title={t("settings_notif_title_5")} desc={t("settings_notif_desc_5")} inputName="tournament" />
+				<NotifLine title={t("settings_notif_title_5")} desc={t("settings_notif_desc_5")} inputName="matches" />
 				<NotifLine title={t("settings_notif_title_6")} desc={t("settings_notif_desc_6")} inputName="rank" />
 				<NotifLine title={t("settings_notif_title_7")} desc={t("settings_notif_desc_7")} inputName="achievements" />
 				<NotifLine title={t("settings_notif_title_8")} desc={t("settings_notif_desc_8")} inputName="security" />

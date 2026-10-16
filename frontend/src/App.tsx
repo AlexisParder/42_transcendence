@@ -9,7 +9,6 @@ import { Home } from './pages/Home'
 import { Settings } from './pages/settings/Settings'
 import { Verified } from './pages/auth/Verified'
 import { Play } from './pages/play/Play'
-import { Tournaments } from './pages/Tournaments'
 import { Leaderboard } from './pages/Leaderboard'
 import { Friends } from './pages/Friends'
 import { TwoFactor } from './pages/auth/TwoFactor'
@@ -68,11 +67,6 @@ const router = createBrowserRouter([
 	{
 		path: '/play',
 		element: <Play />,
-		errorElement: <PageError />
-	},
-	{
-		path: '/tournaments',
-		element: <Tournaments />,
 		errorElement: <PageError />
 	},
 	{

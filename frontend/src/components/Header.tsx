@@ -8,7 +8,6 @@ function Links() {
 	return <>
 		<li><Link to="/play">{t("play_title")}</Link></li>
 		<li><Link to="/leaderboard">{t("leaderboard_title")}</Link></li>
-		<li><Link to="/tournaments">{t("tournaments_title")}</Link></li>
 		<li><Link to="/terms">{t("rules_title")}</Link></li>
 	</>
 }

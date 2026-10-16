@@ -1,15 +1,14 @@
 import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
-import { TbTournament } from "react-icons/tb";
 import { NavLink } from "react-router-dom";
 import type React from "react";
-import { FaBars } from "react-icons/fa6";
+import { FaBars, FaUser } from "react-icons/fa6";
 import { t } from "../lib/translate";
 
 const navItems = [
 	{ to: "/play", icon: GiBombingRun, label: t("play_title") },
-	{ to: "/tournaments", icon: TbTournament, label: t("tournaments_title") },
 	{ to: "/leaderboard", icon: MdLeaderboard, label: t("leaderboard_title") },
+	{ to: "/profile", icon: FaUser, label: t("profile_title") },
 ]
 
 export function Dockbar({ children, className = "h-dvh", fixed = false }: { children: React.ReactNode, className?: string, fixed?: boolean }) {

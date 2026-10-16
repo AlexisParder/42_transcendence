@@ -98,7 +98,6 @@ export interface Stat {
 	total: number,
 	winRate: number,
 	shotAccuracy: number,
-	tournamentsWon: number,
 }
 
 export interface Rank {
@@ -176,7 +175,7 @@ export interface Ship {
 	start: vect2,
 	end: vect2,
 	size: number,
-	image: string
+	image?: string
 }
 
 export interface Shot {

@@ -2,7 +2,7 @@ import type { IconType } from "react-icons";
 import { FaRegCircle, FaUserFriends, FaDoorOpen } from "react-icons/fa";
 import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
-import { TbSettingsFilled, TbTournament } from "react-icons/tb";
+import { TbSettingsFilled } from "react-icons/tb";
 import { Link, Navigate, NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
 import type React from "react";
@@ -22,7 +22,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
 	{ to: "/play", icon: GiBombingRun, label: t("play_title"), end: true },
-	{ to: "/tournaments", icon: TbTournament, label: t("tournaments_title") },
 	{ to: "/leaderboard", icon: MdLeaderboard, label: t("leaderboard_title") },
 	{ to: "/friends", icon: FaUserFriends, label: t("friends_title") },
 	{ to: "/notifications", icon: FaBell, label: t("notifications_title") },
