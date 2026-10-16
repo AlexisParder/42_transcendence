@@ -67,6 +67,44 @@
 
 	--animate-sweep: sweep 4.5s linear infinite;
 	--animate-radar-echo: radar-echo 4.5s linear infinite;
+	--animate-notification-timer: notification-timer linear forwards;
+	--animate-notification-in: notification-in 300ms ease-out;
+	--animate-notification-out: notification-out 450ms ease-out forwards;
+}
+
+@keyframes notification-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem);
+	}
+}
+
+@keyframes notification-out {
+	from {
+		grid-template-rows: 1fr;
+	}
+
+	60% {
+		opacity: 0;
+		transform: translateX(1rem);
+		grid-template-rows: 1fr;
+	}
+
+	to {
+		opacity: 0;
+		transform: translateX(1rem);
+		grid-template-rows: 0fr;
+	}
+}
+
+@keyframes notification-timer {
+	from {
+		width: 100%;
+	}
+
+	to {
+		width: 0%;
+	}
 }
 
 @keyframes sweep {

@@ -21,10 +21,15 @@ export interface ServerToClientEvents {
 	turn_update: (payload: {remaining: number}) => void
 }
 
+export type NotificationParams = Record<string, string | number>
+
 export interface NotificationEvent {
 	id: string
-	type: string
-	message: string
+	fromUserId?: string
+	title: string
+	description: string
+	params?: NotificationParams
+	time: number
 	read: boolean
 	createdAt: string
 	requestId?: string

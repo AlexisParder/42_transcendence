@@ -1,24 +1,85 @@
+import { randomUUID } from "node:crypto"
 import type { Server } from "socket.io"
-import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../events.ts"
+import type { ClientToServerEvents, NotificationParams, ServerToClientEvents, SocketData } from "../events.ts"
 import { prisma } from "../db/client.ts"
 import { sendMail } from "./mail.ts"
-import { deliverNotification } from "./deliverNotification.ts"
+import { defaultNotificationPreferences } from "./notificationPreferences.ts"
 
-export function notify(
+export const defaultNotificationTime = 5000
+
+type NotificationCategory = "friend" | "chat"
+
+type NotificationInput = {
+	userId: string
+	fromUserId?: string
+	title: string
+	description: string
+	params?: NotificationParams
+	time?: number
+	save?: boolean
+	category?: NotificationCategory
+	requestId?: string
+}
+
+const emails: Record<NotificationCategory, { subject: string, html: string }> = {
+	chat: {
+		subject: "SONAR - New message",
+		html: "<p>You have a new message. Open SONAR to read it.</p>",
+	},
+	friend: {
+		subject: "SONAR - Friend request",
+		html: "<p>You have a new friend request. Open SONAR to respond.</p>",
+	},
+}
+
+export function withUsername(params: NotificationParams | undefined, username: string | null | undefined): NotificationParams {
+	return { ...params, username: username ?? "?" }
+}
+
+async function emitNotification(
 	io: Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>,
-	input: Parameters<typeof deliverNotification>[0],
+	input: NotificationInput,
 ) {
-	return deliverNotification(input, {
-		getRecipient: userId => prisma.user.findUnique({
-			where: { id: userId },
-			select: { email: true, emailVerified: true, notificationPreferences: true },
-		}),
-		create: async data => {
-			const row = await prisma.notification.create({ data })
-			return { ...row, createdAt: row.createdAt.toISOString() }
-		},
-		emit: (userId, notification) => { io.to(userId).emit("notification_received", notification) },
-		sendEmail: sendMail,
-		onError: error => console.error("notification delivery error:", error),
+	const content = { fromUserId: input.fromUserId, title: input.title, description: input.description }
+	const notification = input.save
+		? await prisma.notification.create({ data: { userId: input.userId, ...content, params: input.params } })
+		: { id: randomUUID(), read: false, createdAt: new Date() }
+
+	const sender = input.fromUserId
+		? await prisma.user.findUnique({ where: { id: input.fromUserId }, select: { username: true } })
+		: null
+
+	io.to(input.userId).emit("notification_received", {
+		...content,
+		id: notification.id,
+		read: notification.read,
+		createdAt: notification.createdAt.toISOString(),
+		params: input.fromUserId ? withUsername(input.params, sender?.username) : input.params,
+		time: input.time ?? defaultNotificationTime,
+		requestId: input.requestId,
 	})
+}
+
+export async function notify(
+	io: Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>,
+	input: NotificationInput,
+) {
+	try {
+		const recipient = await prisma.user.findUnique({
+			where: { id: input.userId },
+			select: { email: true, emailVerified: true, notificationPreferences: true },
+		})
+		if (!recipient) return
+		const preferences = recipient.notificationPreferences ?? defaultNotificationPreferences
+		const category = input.category
+		const jobs: Promise<void>[] = []
+		if (!category || preferences[`app_${category}`])
+			jobs.push(emitNotification(io, input))
+		if (category && preferences[`email_${category}`] && recipient.emailVerified)
+			jobs.push(sendMail({ to: recipient.email, ...emails[category] }))
+		const results = await Promise.allSettled(jobs)
+		for (const result of results) if (result.status === "rejected") console.error("notification delivery error:", result.reason)
+	} catch (error) {
+		console.error("notification delivery error:", error)
+	}
 }

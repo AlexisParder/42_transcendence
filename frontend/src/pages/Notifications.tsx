@@ -5,13 +5,14 @@ import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { Modal, ShowModal, HideModal } from "../components/Modal"
 import { authClient } from "../lib/auth-client"
 import { t } from "../lib/translate"
-import { notificationMessage } from "../lib/notificationMessage"
 import { apiPost, apiGet } from "../lib/api"
+import type { NotificationParams } from "../types/events"
 
 type NotificationItem = {
 	id: string
-	type: string
-	message: string
+	title: string
+	description: string
+	params?: NotificationParams
 	read: boolean
 	createdAt: string
 }
@@ -102,7 +103,7 @@ export function Notifications() {
 						>
 							<div className="flex items-center justify-between gap-3">
 								<p className="font-bold text-info">
-									{notification.type === "FRIEND_REQUEST" ? t("notifications_friend_request") : t("notifications_item")}
+									{t(notification.title, notification.params)}
 								</p>
 								<div className="flex items-center gap-2">
 									{!notification.read && <span className="badge badge-warning badge-sm">{t("notifications_unread")}</span>}
@@ -119,7 +120,7 @@ export function Notifications() {
 									</button>
 								</div>
 							</div>
-							<p className="mt-2 text-sm">{notificationMessage(notification.message)}</p>
+							<p className="mt-2 text-sm">{t(notification.description, notification.params)}</p>
 							<p className="mt-2 text-xs text-base-content/60">
 								{new Date(notification.createdAt).toLocaleString(dateLocale)}
 							</p>

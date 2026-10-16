@@ -44,7 +44,8 @@ model User {
   ReceivedBlock UserBlocked[]  @relation("ReceivedBlock")
   matchPlayers  MatchPlayers[]
 
-  notifications           Notification[]
+  notifications           Notification[]           @relation("ReceivedNotifications")
+  sentNotifications       Notification[]           @relation("SentNotifications")
   notificationPreferences NotificationPreferences?
 
   @@unique([username])
@@ -211,14 +212,17 @@ model NotificationPreferences {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String
-  message   String
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  fromUserId  String?
+  title       String
+  description String
+  params      Json?
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User  @relation("ReceivedNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  fromUser User? @relation("SentNotifications", fields: [fromUserId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("notifications")

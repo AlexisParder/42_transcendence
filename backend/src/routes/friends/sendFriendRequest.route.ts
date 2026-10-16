@@ -59,8 +59,11 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 
 		void notify(io, {
 			userId: target.id,
-			type: "FRIEND_REQUEST",
-			message: `${session.user.username ?? "Someone"} sent you a friend request`,
+			fromUserId: userId,
+			title: "notifications_friend_request",
+			description: "notifications_friend_request_message",
+			save: true,
+			category: "friend",
 			requestId: request.id,
 		})
 		res.json({ ok: true, request })

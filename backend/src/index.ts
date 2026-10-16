@@ -28,6 +28,7 @@ import { setNotificationReadHandler } from "./routes/setNotificationRead.route.t
 import { setAllNotificationsReadHandler } from "./routes/setAllNotificationsRead.route.ts"
 import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
+import { createNotificationHandler } from "./routes/createNotification.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
 import { leaderboardLimit } from "./rateLimit.ts"
 import { notificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
@@ -96,6 +97,7 @@ app.post("/api/notifications/read", setNotificationReadHandler)
 app.post("/api/notifications/read-all", setAllNotificationsReadHandler)
 app.post("/api/notifications/delete", deleteNotificationHandler)
 app.post("/api/notifications/delete-all", deleteAllNotificationsHandler)
+app.post("/api/notifications/create", createNotificationHandler)
 app.post("/api/block-user", blockUserHandler)
 app.post("/api/unblock-user", unblockUserHandler)
 app.post("/api/get-blocked", getBlockedHandler)
@@ -197,7 +199,15 @@ io.on("connection", async (socket) => {
 			io.to(fromUserId).emit("new_message", wire)
 			const recipientSockets = await io.in(toUserId).fetchSockets()
 			if (!recipientSockets.some(recipient => recipient.data.activeConversationPeerId === fromUserId))
-				void notify(io, { userId: toUserId, type: "MESSAGE", message: `New message: ${message}` })
+				void notify(io, {
+					userId: toUserId,
+					fromUserId,
+					title: "notifications_new_message",
+					description: "notifications_new_message_body",
+					params: { message },
+					save: true,
+					category: "chat",
+				})
 		} catch (err) {
 			console.error("send_message error:", err)
 		}
