@@ -2,7 +2,7 @@ import type { MatchPlayers, Matchs, matchType } from "../../events.ts";
 
 export function isInAnyMatch(currentMatches: Map<string, Matchs>, userId: string): boolean {
 	for (const match of currentMatches.values()) {
-		if (match.players.some(p => p.userId === userId))
+		if (match.players.some(p => p.userId === userId && p.status !== "LEFT"))
 			return true
 	}
 	return false
@@ -73,6 +73,10 @@ export function isTeamEliminated(match: Matchs, teamId: number) {
 	if (!teamData)
 		return true
 
+	const teamPlayers = match.players.filter(p => p.team === teamId)
+	if (teamPlayers.length > 0 && teamPlayers.every(p => p.status === "LEFT"))
+		return true
+
 	const sunkCount = new Set(
 		(teamData?.shots ?? [])
 			.filter(s => s.ship !== null)
@@ -82,16 +86,22 @@ export function isTeamEliminated(match: Matchs, teamId: number) {
 	return teamData.ships.length > 0 && sunkCount >= teamData.ships.length
 }
 
-export function setFinalPlacement(match: Matchs, playerId: string, playerStatus?: "PLAYED" | "LEFT") {
+export function setFinalPlacement(match: Matchs, playerId: string) {
 	const playersPlaced = match.players.filter(p => p.placement > 0).length
 
-	if (playerStatus)
-		updatePlayer(match, playerId, {
-			placement: match.players.length - playersPlaced,
-			status: playerStatus
-		})
-	else
-		updatePlayer(match, playerId, {
-			placement: match.players.length - playersPlaced
-		})
+	updatePlayer(match, playerId, {
+		placement: match.players.length - playersPlaced
+	})
+}
+
+export function findActiveMatchOf(currentMatches: Map<string, Matchs>, userId: string) {
+	for (const match of currentMatches.values()) {
+		if (match.endedAt !== 0)
+			continue
+
+		const player = match.players.find(p => p.userId === userId)
+		if (player && player.status === "PLAYED")
+			return match
+	}
+	return undefined
 }

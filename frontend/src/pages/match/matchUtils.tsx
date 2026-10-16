@@ -7,12 +7,13 @@ import { useMediaQuery } from "../../hooks/useMediaQuery"
 import { formatMS } from "../../lib/formatTime"
 import { ordinal } from "../../lib/ordinal"
 
-export function MatchHeader({ type, title, description, remaining, isMyTurn }: {
+export function MatchHeader({ type, title, description, remaining, isMyTurn, openForfeitModal }: {
 	type?: matchType
 	title: string
 	description: string,
 	remaining: number,
-	isMyTurn: boolean
+	isMyTurn: boolean,
+	openForfeitModal: () => void
 }) {
 	return <div className="flex items-center justify-between bg-base-200 py-4 px-6">
 		<div className="flex items-center max-sm:gap-2 gap-4">
@@ -23,8 +24,8 @@ export function MatchHeader({ type, title, description, remaining, isMyTurn }: {
 		<div className="flex items-center max-sm:gap-2 gap-4">
 			{isMyTurn && <p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>}
 			<p className="font-mono text-sm text-info font-semibold border border-info rounded-full px-2 py-1 text-center">{formatMS(remaining)}</p>
-			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("match_forfeit")}</button>
-			<button className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
+			<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("match_forfeit")}</button>
+			<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
 		</div>
 	</div>
 }
@@ -46,7 +47,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 						.map(id => match.players.find(p => p.userId === id && p.team === 1))
 						.filter(Boolean)
 						.map(p => (
-							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} hasLeft={p?.status === "LEFT"} />
 						))}
 
 					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">{t("match_enemy_team")}</p>}
@@ -55,14 +56,14 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 						.map(id => match.players.find(p => p.userId === id && p.team === 2))
 						.filter(Boolean)
 						.map(p => (
-							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} hasLeft={p?.status === "LEFT"} />
 						))}
 
 					{match.type !== "TWO_V_TWO" && match.turns.turnOrder
 						.map(id => match.players.find(p => p.userId === id))
 						.filter(Boolean)
 						.map(p => (
-							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} hasLeft={p?.status === "LEFT"} />
 						))}
 				</div>
 			</div>
@@ -107,7 +108,7 @@ function FleetStatItem({ title, leftBox, totalBox }: {
 	</div>
 }
 
-function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchType, maxFleet = 5, isBot = false, match, placement }: {
+function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchType, maxFleet = 5, isBot = false, match, placement, hasLeft }: {
 	username: string | null | undefined,
 	image: string | null | undefined,
 	points: number,
@@ -118,7 +119,8 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 	maxFleet?: number,
 	isBot?: boolean,
 	match: Matchs,
-	placement: number
+	placement: number,
+	hasLeft: boolean
 }) {
 	const targetTeamData = match.teams.find(t => t.id === teamNumber)
 	const sunkShip = [
@@ -149,7 +151,7 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 		"divider-error",
 	] as const
 
-	return <div className={`${isTurn ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50"} ${currFleet < 1 ? "opacity-50" : ""} rounded-lg p-2 flex min-w-0 max-sm:flex-1`}>
+	return <div className={`${isTurn ? "bg-info/10 border border-info/50" : "bg-neutral/10 border border-neutral/50"} ${(currFleet < 1 || hasLeft) ? "opacity-50" : ""} rounded-lg p-2 flex min-w-0 max-sm:flex-1`}>
 		<div className="flex flex-1 items-center gap-1 min-w-0">
 			<div className={`divider divider-horizontal ${dividerColor[teamNumber - 1]} m-0`}></div>
 			<div className="max-sm:hidden flex items-center">
@@ -159,12 +161,12 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 				<div className="flex items-center justify-between gap-2">
 					{!isBot && <p className={`text-xs font-semibold truncate ${isMine ? "text-info" : ""}`}>{username} {isMine && <span className="max-sm:hidden">({t("match_you")})</span>}</p>}
 					{isBot && <p className="text-xs font-semibold truncate text-warning uppercase">{t("match_bot")}</p>}
-					{currFleet > 0 && <p className={`text-xs font-mono font-semibold max-sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
+					{currFleet > 0 && !hasLeft && <p className={`text-xs font-mono font-semibold max-sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
 				</div>
 				{currFleet > 0 && <p className={`text-xs font-mono font-semibold sm:hidden ${fleetColor}`}>{currFleet}/{maxFleet}</p>}
 				{isTurn && match.endedAt === 0 && <p className="text-info uppercase font-mono text-xs max-sm:hidden">{t("match_taking_aim")}</p>}
-				{!isTurn && !isBot && match.endedAt === 0 && currFleet > 0 && <p className="text-neutral-content/50 font-mono text-xs max-sm:hidden">{t("match_pts_waiting", { pts: points.toLocaleString() })}</p>}
-				{!isTurn && isBot && currFleet > 0 && <p className="text-warning font-mono text-xs first-letter:uppercase max-sm:hidden">{t("match_player_left")}</p>}
+				{!isTurn && !isBot && match.endedAt === 0 && !hasLeft && currFleet > 0 && <p className="text-neutral-content/50 font-mono text-xs max-sm:hidden">{t("match_pts_waiting", { pts: points.toLocaleString() })}</p>}
+				{!isTurn && currFleet > 0 && hasLeft && <p className="text-warning font-mono text-xs first-letter:uppercase max-sm:hidden">{t("match_player_left")}</p>}
 				{currFleet < 1 && <p className="text-neutral-content/50 font-mono text-xs truncate">{t("match_flunk_place", { place: ordinal(placement) })}</p>}
 				{currFleet > 0 && match.endedAt !== 0 && <p className="text-neutral-content/50 font-mono text-xs truncate">{t("match_end_place", { place: ordinal(placement) })}</p>}
 			</div>
@@ -211,7 +213,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 						.map(id => match.players.find(p => p.userId === id && p.team === 1))
 						.filter(Boolean)
 						.map(p => (
-							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} hasLeft={p?.status === "LEFT"} />
 						))}
 
 					{match.type === "TWO_V_TWO" && <p className="text-neutral-content/50 font-mono uppercase text-xs font-semibold">{t("match_vs")}</p>}
@@ -220,14 +222,14 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 						.map(id => match.players.find(p => p.userId === id && p.team === 2))
 						.filter(Boolean)
 						.map(p => (
-							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} hasLeft={p?.status === "LEFT"} />
 						))}
 
 					{match.type !== "TWO_V_TWO" && match.turns.turnOrder
 						.map(id => match.players.find(p => p.userId === id))
 						.filter(Boolean)
 						.map(p => (
-							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} />
+							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} hasLeft={p?.status === "LEFT"} />
 						))}
 				</div>
 			</div>

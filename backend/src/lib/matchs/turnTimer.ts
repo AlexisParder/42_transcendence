@@ -4,6 +4,7 @@ import { filterMatchForUser, isTeamEliminated, setFinalPlacement, updatePlayer }
 import { currentMatches } from "../../mapMatches.ts";
 import { fillRandomShips } from "./shipValidation.ts";
 import { finishMatch } from "./finishMatch.ts";
+import { cancelDisconnectTimer, clearMatchDisconnectTimers } from "./disconnectTimers.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -80,9 +81,9 @@ export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 		let next: string | null = null
 		for (let i = 1; i <= order.length; i++) {
 			const candidate = order[(current + i) % order.length]
-			const teamId = match.players.find(p => p.userId === candidate)?.team
+			const candidatePlayer = match.players.find(p => p.userId === candidate)
 
-			if (candidate && teamId !== undefined && !isTeamEliminated(match, teamId)) {
+			if (candidate && candidatePlayer && candidatePlayer.status !== "LEFT" && !isTeamEliminated(match, candidatePlayer.team)) {
 				next = candidate
 				break
 			}
@@ -100,4 +101,49 @@ export function stopTurns(match: Matchs) {
 	clearTimeout(timers.get(match.hostId))
 	match.endedAt = Date.now()
 	timers.delete(match.hostId)
+}
+
+export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
+	const player = match.players.find(p => p.userId === userId)
+
+	cancelDisconnectTimer(match.hostId, userId)
+	if (match.endedAt !== 0 || !player || player.status === "LEFT")
+		return
+
+	if (match.startedAt === 0) {
+		if (match.hostId === userId) {
+			for (const player of match.players) {
+				if (player.userId)
+					io.to(player.userId).emit("refresh_joined_match", undefined)
+			}
+
+			clearMatchDisconnectTimers(match.hostId)
+			currentMatches.delete(userId)
+		} else {
+			match.players = match.players.filter(p => p.userId !== userId)
+			for (const player of match.players) {
+				if (player.userId)
+					io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
+			}
+		}
+		return
+	}
+
+	if (player.placement > 0)
+		return
+
+	updatePlayer(match, userId, {
+		status: "LEFT",
+		leftAt: player.leftAt === 0 ? Date.now() : player.leftAt
+	})
+	setFinalPlacement(match, userId)
+
+	const aliveTeams = match.teams.filter(t => !isTeamEliminated(match, t.id))
+
+	if (match.turns.userTurn === userId)
+		nextTurn(match, io, true)
+	else if (aliveTeams.length <= 1)
+		nextTurn(match, io, false)
+	else
+		emitTurn(match, io)
 }

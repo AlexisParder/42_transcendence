@@ -9,6 +9,8 @@ import { apiPost } from "../../lib/api";
 import { t } from "../../lib/translate";
 import type { shipRotation } from "../../types/types";
 import { EndDisplay } from "./endUtils";
+import { HideModal, Modal, ShowModal } from "../../components/Modal";
+import { data } from "react-router-dom";
 
 type categoryType = "select" | "match"
 export function Match() {
@@ -144,6 +146,19 @@ export function Match() {
 		}
 	}
 
+	async function handleForfeit() {
+		try {
+			const { ok, data } = await apiPost("/api/forfeit-match", { hostId: joinedMatch?.hostId })
+
+			if (!ok)
+				return console.log(data.code)
+
+			HideModal("forfeitModal")
+		} catch (error) {
+			console.error("forfeit:", error)
+		}
+	}
+
 	if (!joinedMatch || joinedMatch.startedAt === 0)
 		return
 
@@ -151,7 +166,7 @@ export function Match() {
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && joinedMatch.endedAt === 0 && <>
-			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} />
+			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} openForfeitModal={() => ShowModal("forfeitModal")} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
@@ -161,7 +176,7 @@ export function Match() {
 		</>}
 
 		{category === "match" && joinedMatch.endedAt === 0 && <>
-			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} />
+			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} openForfeitModal={() => ShowModal("forfeitModal")} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} />
@@ -172,5 +187,14 @@ export function Match() {
 		{joinedMatch.endedAt !== 0 && <>
 			<EndDisplay match={joinedMatch} />
 		</>}
+
+		<Modal id="forfeitModal">
+			<p className="pb-2 first-letter:uppercase">{t("match_forfeit")}</p>
+			<p>This action is irreversible and will result in a loss of points</p>
+			<div className="flex gap-2 pt-2 justify-end">
+				<button onClick={() => HideModal("forfeitModal")} className="btn btn-neutral">{t("btn_cancel")}</button>
+				<button className="btn btn-error btn-outline" onClick={handleForfeit}>{t("btn_confirm")}</button>
+			</div>
+		</Modal>
 	</div>
 }

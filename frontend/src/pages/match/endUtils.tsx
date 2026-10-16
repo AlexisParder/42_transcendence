@@ -38,7 +38,7 @@ export function EndDisplay({ match }: {
 			<div className="shrink-0 grid grid-cols-1 text-center md:text-left md:grid-cols-3 border-t border-base-300 w-full">
 				<div className="flex-1/3 p-4">
 					<p className="text-xs text-neutral-content/50 first-letter:uppercase">{t("txt_accuracy")}</p>
-					<p className="font-bold text-2xl font-mono">{Math.floor(player!.shotsHit / (player!.shotsTotal) * 100)} %</p>
+					<p className="font-bold text-2xl font-mono">{player!.shotsTotal > 0 ? Math.floor(player!.shotsHit / (player!.shotsTotal) * 100) : 0} %</p>
 					<p className="text-xs text-neutral-content/50">{t("end_shots_hits", { shots: player!.shotsTotal, hits: player!.shotsHit })}</p>
 				</div>
 				<div className="flex-1/3 p-4 md:border-l max-md:border-t border-base-300">
@@ -48,7 +48,7 @@ export function EndDisplay({ match }: {
 				<div className="flex-1/3 p-4 md:border-l max-md:border-t border-base-300">
 					<p className="text-xs text-neutral-content/50 first-letter:uppercase">{t("select_mode")}</p>
 					<p className="font-bold text-2xl font-mono">{t(`txt_${match.type}`)}</p>
-					<p className="text-xs text-neutral-content/50">{t(match.isRanked ? "txt_ranked" : "txt_unranked") } - {t(`play_${match.visibility}`)}</p>
+					<p className="text-xs text-neutral-content/50">{t(match.isRanked ? "txt_ranked" : "txt_unranked")} - {t(`play_${match.visibility}`)}</p>
 				</div>
 			</div>
 

@@ -28,6 +28,9 @@ export async function createMatchHandler(req: Request, res: Response) {
 		if (isInAnyMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
+		if (currentMatches.has(userId))
+			return res.status(409).json({ ok: false, code: "match_err_your_host_match_not_end" })
+
 		if (!isMatchType(selectedMatchType))
 			return res.status(400).json({ ok: false })
 

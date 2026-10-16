@@ -106,7 +106,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 				})
 
 				if (isTeamEliminated(match, targetTeamId)) {
-					const players = match.players.filter(p => p.team === targetTeamId)
+					const players = match.players.filter(p => p.team === targetTeamId && p.placement === 0)
 					for (const player of players)
 						setFinalPlacement(match, player.userId ?? "")
 				}

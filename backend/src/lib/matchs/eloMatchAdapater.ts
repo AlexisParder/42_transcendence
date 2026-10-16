@@ -7,7 +7,7 @@ export function isRankedmatch(match: Pick<Matchs, "isRanked" | "visibility">) {
 }
 
 export function hasLeft(p: MatchPlayers) {
-	return p.status === 'LEFT' || p.leftAt !== 0
+	return p.status === 'LEFT'
 }
 
 function isPlaced(p: MatchPlayers) {

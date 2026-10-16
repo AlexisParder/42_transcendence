@@ -6,6 +6,7 @@ import { prisma } from "../../db/client.ts";
 import type { PairMatchIndex } from "./eloLib.ts";
 import { filterMatchForUser } from "./matchUtils.ts";
 import { applyEloToMatch, computeMatchElo, isRankedmatch } from "./eloMatchAdapater.ts";
+import { clearMatchDisconnectTimers } from "./disconnectTimers.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
@@ -66,7 +67,7 @@ async function saveMatch(match: Matchs, ranked: boolean, deltas: Map<string, num
 					team: p.team,
 					placement: p.placement,
 					points: p.matchPoints,
-					leftAt: p.leftAt !== 0 ? new Date(p.leftAt) : null,
+					leftAt: p.status === "LEFT" && p.leftAt !== 0 ? new Date(p.leftAt) : null,
 					status: p.status,
 					shotsHit: p.shotsHit,
 					shotsTotal: p.shotsTotal
@@ -93,6 +94,8 @@ function emitFinalState(match: Matchs, io: IO) {
 }
 
 export async function finishMatch(match: Matchs, io: IO) {
+	clearMatchDisconnectTimers(match.hostId)
+
 	try {
 		const ranked = isRankedmatch(match)
 		const deltas = new Map<string, number>()
@@ -115,6 +118,8 @@ export async function finishMatch(match: Matchs, io: IO) {
 		await saveMatch(match, ranked, deltas)
 	} finally {
 		emitFinalState(match, io)
-		currentMatches.delete(match.hostId)
+
+		if (currentMatches.get(match.hostId) === match)
+			currentMatches.delete(match.hostId)
 	}
 }

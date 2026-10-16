@@ -46,6 +46,9 @@ import { playerFireHandler } from "./routes/matches/playerFire.route.ts"
 import { startMatchHandler } from "./routes/matches/startMatch.route.ts"
 import { setPlayerReadyOnSelectHandler, setPlayerShipsHandler } from "./routes/matches/setShips.route.ts"
 import { currentMatches } from "./mapMatches.ts"
+import { findActiveMatchOf } from "./lib/matchs/matchUtils.ts"
+import { reconnectPlayer, startDisconnectTimer } from "./lib/matchs/disconnectTimers.ts"
+import { forfeitMatchHandler } from "./routes/matches/forfeitMatch.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -114,6 +117,7 @@ app.post("/api/start-match", startMatchHandler)
 app.post("/api/player-fire", playerFireHandler)
 app.post("/api/set-player-ships", setPlayerShipsHandler)
 app.post("/api/set-player-ready-on-select", setPlayerReadyOnSelectHandler)
+app.post("/api/forfeit-match", forfeitMatchHandler)
 
 io.use(async (socket, next) => {
 	try {
@@ -211,11 +215,6 @@ io.on("connection", async (socket) => {
 	const before = onlineUsers.get(userId) ?? 0
 	onlineUsers.set(userId, before + 1)
 
-	if (before === 0) {
-		activityStatus.set(userId, "available")
-		await notifyFriendsOfPresence(userId, "available")
-	}
-
 	socket.on("set_activity", async (payload) => {
 		if (!onlineUsers.has(userId))
 			return
@@ -229,33 +228,24 @@ io.on("connection", async (socket) => {
 		if (count <= 1) {
 			onlineUsers.delete(userId)
 			activityStatus.delete(userId)
+
+			const match = findActiveMatchOf(currentMatches, userId)
+			if (match)
+				startDisconnectTimer(match, userId, io)
+
 			await notifyFriendsOfPresence(userId, "offline")
 		} else
 			onlineUsers.set(userId, count - 1)
-
-		const matches = Array.from(currentMatches.values())
-		let joinedMath = null
-		for (const match of matches) {
-			if (match.players.some(p => p.userId === userId)) {
-				joinedMath = match
-				break
-			}
-		}
-
-		if (joinedMath && joinedMath.hostId === userId && joinedMath.startedAt === 0) {
-			for (const player of joinedMath.players) {
-				if (player.userId)
-					io.to(player.userId).emit("refresh_joined_match", undefined)
-			}
-			currentMatches.delete(userId)
-		} else if (joinedMath && joinedMath.startedAt === 0) {
-			joinedMath.players = joinedMath.players.filter(p => p.userId !== userId)
-			for (const player of joinedMath.players) {
-				if (player.userId)
-					io.to(player.userId).emit("refresh_joined_match", joinedMath)
-			}
-		}
 	})
+
+	if (before === 0) {
+		const match = findActiveMatchOf(currentMatches, userId)
+		if (match && match.players.find(p => p.userId === userId)?.leftAt !== 0)
+			reconnectPlayer(match, userId, io)
+
+		activityStatus.set(userId, "available")
+		await notifyFriendsOfPresence(userId, "available")
+	}
 })
 
 const PORT = 3000
