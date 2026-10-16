@@ -26,7 +26,7 @@ export function Notifications() {
 	useEffect(() => {
 		async function loadNotifications() {
 			try {
-				const {ok, data} = await apiGet("/api/notifications")
+				const { ok, data } = await apiGet("/api/notifications")
 				if (!ok)
 					return
 
@@ -78,20 +78,11 @@ export function Notifications() {
 			<div className="p-4">
 				<h1 className="text-xl font-bold text-white">{t("notifications_title")}</h1>
 				<p className="mt-1 text-sm text-neutral-content/60">{t("notifications_history")}</p>
-				<button
-					type="button"
-					className="btn btn-info btn-sm mt-4"
-					onClick={markAllAsRead}
-				>
-					{t("notifications_mark_all_read")}
-				</button>
-				<button
-					type="button"
-					className="btn btn-error btn-sm ml-2 mt-4"
-					onClick={() => ShowModal("DeleteAllNotificationsModal")}
-				>
-					{t("notifications_delete_all")}
-				</button>
+
+				<div className="flex mt-4 gap-2">
+					<button className="btn btn-soft btn-info border-info/50 hover:border-info" onClick={markAllAsRead}>{t("notifications_mark_all_read")}</button>
+					<button className="btn btn-soft btn-error border-error/50 hover:border-error" onClick={() => ShowModal("DeleteAllNotificationsModal")}>{t("notifications_delete_all")}</button>
+				</div>
 
 				<div className="mt-6 space-y-3">
 					{notifications.length === 0 && (
