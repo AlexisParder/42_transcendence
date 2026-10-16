@@ -49,6 +49,7 @@ import { currentMatches } from "./mapMatches.ts"
 import { findActiveMatchOf } from "./lib/matchs/matchUtils.ts"
 import { reconnectPlayer, startDisconnectTimer } from "./lib/matchs/disconnectTimers.ts"
 import { forfeitMatchHandler } from "./routes/matches/forfeitMatch.route.ts"
+import { getUserPointsHandler } from "./routes/getUserPoints.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -99,6 +100,7 @@ app.post("/api/block-user", blockUserHandler)
 app.post("/api/unblock-user", unblockUserHandler)
 app.post("/api/get-blocked", getBlockedHandler)
 app.post("/api/get-user-info", getUserInfoHandler)
+app.post("/api/get-user-points", getUserPointsHandler)
 app.post("/api/get-user-stats", getUserStatsHandler)
 app.post("/api/otp/cooldown", getSentHandler)
 app.post("/api/otp/send", setSentHandler)

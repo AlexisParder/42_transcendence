@@ -4,7 +4,7 @@ import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled } from "react-icons/tb";
 import { Link, Navigate, NavLink, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
 import { FaBell, FaUser, FaXmark } from "react-icons/fa6";
@@ -12,6 +12,7 @@ import { Avatar } from "./Avatar";
 import { t } from "../lib/translate";
 import { truncateText } from "../lib/truncateText";
 import { Dockbar } from "../components/Dockbar"
+import { apiPost } from "../lib/api";
 
 interface NavItem {
 	to: string,
@@ -34,6 +35,24 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 	const { data: session, isPending } = authClient.useSession()
 	const location = useLocation()
 	const [open, setOpen] = useState(false)
+	const [points, setPoints] = useState(session?.user.points ?? 0)
+
+	useEffect(() => {
+		async function loadPoints() {
+			try {
+				const { ok, data } = await apiPost("/api/get-user-points")
+
+				if (!ok)
+					return
+
+				setPoints(data.points ?? 0)
+			} catch (error) {
+				console.log(error)
+			}
+		}
+
+		loadPoints()
+	})
 
 	if (!guest && isPending)
 		return <p>{t("sidebar_loading")}</p>
@@ -75,7 +94,7 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 						<div className="ml-3 text-lg md:text-sm">
 							<p className="font-bold md:hidden">{truncateText(username, 20)}</p>
 							<p className="font-bold hidden md:block">{truncateText(username, 11)}</p>
-							<p className="text-warning">{session.user.points?.toLocaleString()} {t("txt_pts")}</p>
+							<p className="text-warning">{points.toLocaleString()} {t("txt_pts")}</p>
 						</div>
 					</div>}
 					<div className="flex gap-3 md:gap-2">
