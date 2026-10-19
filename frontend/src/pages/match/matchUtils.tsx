@@ -147,6 +147,12 @@ function OrderItem({ username, image, points, isTurn, isMine, teamNumber, matchT
 	</div>
 }
 
+function getRowName(coords: vect2) {
+	const rowName = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	return `${rowName[coords.y]}${coords.x + 1}`
+}
+
 export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire }: {
 	match: Matchs,
 	myId: string | null | undefined,
@@ -157,7 +163,6 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	targetLocked: vect2,
 	setTargetLocked: (coords: vect2) => void,
 	handleFire: () => void
-
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
 	const view = isDesktop ? "attack" : waterView
@@ -165,7 +170,6 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	const targetTeamData = match.teams.find(t => t.id === selectedTarget)
 	const myTeam = match.players.find(p => p.userId === myId)?.team
 	const myTeamData = match.teams.find(t => t.id === myTeam)
-	const rowName = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 	const sunkShip = [
 		...new Map(
@@ -240,37 +244,34 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>
 
 		<div className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none">
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
-			<LogItem log={{ text: "you sink bob's destroyer", type: "info" }} />
-			<LogItem log={{ text: "tom fires at gael on H11, miss", type: "neutral" }} />
-			<LogItem log={{ text: "bob left, bot took over", type: "warning" }} />
+			<LogItem log={{
+				authorId: "yuyvL5UvdyDRbJDhp8neeSQnDlvonAMy", authorUsername: "alexis", targetId: "789", targetUsername: "bob", logType: "fire", shot: {
+					coords: { x: 5, y: 3 },
+					status: "sunk",
+					ship: {
+						name: "destroyer",
+						start: {x: 5, y: 0},
+						end: {x: 5, y: 4},
+						size: 5
+					},
+					authorId: "123",
+					authorTeam: 1
+				}
+			}} myId={myId} replace={match.settings.replace} />
+			<LogItem log={{
+				authorId: "123", authorUsername: "tom", targetId: "147", targetUsername: "gael", logType: "fire", shot: {
+					coords: { x: 1, y: 1 },
+					status: "miss",
+					ship: null,
+					authorId: "123",
+					authorTeam: 1
+				}
+			}} myId={myId} replace={match.settings.replace} />
+			<LogItem log={{ authorId: "yuyvL5UvdyDRbJDhp8neeSQnDlvonAMy", authorUsername: "alexis", targetId: null, targetUsername: null, logType: "left", shot: null }} myId={myId} replace={match.settings.replace} />
 		</div>
 
 		<div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
-			{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{rowName[targetLocked.y]}{targetLocked.x + 1}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
+			{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{getRowName(targetLocked)}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
 
 			{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_no_target")}</p>}
 
@@ -346,19 +347,26 @@ function FleetColorIndicator({ title, badge }: {
 	</div>
 }
 
-function LogItem({ log }: { log: Log }) {
-	let textColor = "text-info"
-	let bgColor = "bg-info/10"
+function LogItem({ log, myId, replace }: { log: Log, myId: string | null | undefined, replace: boolean }) {
+	let textColor = "text-neutral-content/50"
+	let bgColor = "bg-neutral/10"
 
-	if (log.type === "warning") {
+	if (log.logType === "left") {
 		textColor = "text-warning"
 		bgColor = "bg-warning/10"
-	} else if (log.type === "neutral") {
-		textColor = "text-neutral-content/50"
-		bgColor = "bg-neutral/10"
+
+	} else if (log.logType === "fire" && log.shot && log.shot.status === "sunk") {
+		textColor = "text-info/50"
+		bgColor = "bg-info/10"
 	}
 
+	let text = ""
+	if (log.logType === "left")
+		text = `${log.authorId === myId ? "you" : log.authorUsername} left ${replace ? "bot took over" : ""}`
+	else if (log.logType === "fire" && log.shot && log.shot.status !== "sunk")
+		text = `${log.authorId === myId ? "you" : log.authorUsername} fires at ${log.targetId === myId ? "you" : log.targetUsername} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
+
 	return <div className={`p-2 ${bgColor} rounded-md`}>
-		<p className={`text-xs font-mono first-letter:uppercase ${textColor}`}>{log.text}</p>
+		<p className={`text-xs font-mono first-letter:uppercase ${textColor}`}>{text}</p>
 	</div>
 }

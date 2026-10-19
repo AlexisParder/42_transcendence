@@ -214,6 +214,10 @@ export interface MatchSettings {
 }
 
 export interface Log {
-	text: string,
-	type: "info" | "warning" | "neutral"
+	authorId: string | null | undefined,
+	authorUsername: string,
+	targetId: string | null | undefined,
+	targetUsername: string | null,
+	logType: "fire" | "left",
+	shot: Shot | null
 }
