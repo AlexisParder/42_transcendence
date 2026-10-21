@@ -137,7 +137,7 @@ export function Grid({ ships = [], shots = [], className = "", hoverable = true,
 						<img src={IMG_SHIP[status][ship.name]} alt={ship.name} draggable={false} className="absolute top-1/2 left-1/2 max-w-none object-fill" style={{
 							width: vertical ? "100cqh" : "100cqw",
 							height: vertical ? "100cqw" : "100cqh",
-							transform: `translate(-50%, -50%) rotate(${angle}deg)`
+							transform: `translate(-50%, -50%) rotate(${angle}deg) ${angle === 180 ? "scaleY(-1)" : ""}`
 						}} />
 					</div>
 				)

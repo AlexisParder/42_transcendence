@@ -157,6 +157,7 @@ export interface Matchs {
 	invitedPlayers: string[],
 	teams: Teams[],
 	turns: Turns,
+	logs: Log[],
 }
 
 export interface Turns {
@@ -215,7 +216,7 @@ export interface MatchSettings {
 
 export interface Log {
 	authorId: string | null | undefined,
-	authorUsername: string,
+	authorUsername: string | null | undefined,
 	targetId: string | null | undefined,
 	targetUsername: string | null | undefined,
 	logType: "fire" | "left",

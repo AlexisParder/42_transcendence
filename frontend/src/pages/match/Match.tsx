@@ -10,7 +10,6 @@ import { t } from "../../lib/translate";
 import type { shipRotation } from "../../types/types";
 import { EndDisplay } from "./endUtils";
 import { HideModal, Modal, ShowModal } from "../../components/Modal";
-import { data } from "react-router-dom";
 
 type categoryType = "select" | "match"
 export function Match() {
@@ -72,7 +71,7 @@ export function Match() {
 			socket.off("refresh_joined_match", onRefreshMatch)
 			socket.off("turn_update", onTurnUpdate)
 		}
-	}, [socket])
+	}, [socket, joinedMatch])
 
 	useEffect(() => {
 		if (!turnEndsAt)

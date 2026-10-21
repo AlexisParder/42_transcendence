@@ -36,7 +36,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 	selectedTarget: number,
 	setSelectedTarget: (team: number) => void
 }) {
-	return <div className="bg-base-200 p-4 flex flex-col justify-between max-w-60 max-sm:hidden">
+	return <div className="bg-base-200 p-4 flex flex-col justify-between w-60 max-w-60 max-md:hidden">
 		<div className="flex flex-col gap-10">
 			<div className="flex flex-col gap-2">
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{t("match_turn_order")}</p>
@@ -162,7 +162,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	setWaterView: (view: "attack" | "my waters") => void,
 	targetLocked: vect2,
 	setTargetLocked: (coords: vect2) => void,
-	handleFire: () => void
+	handleFire: () => void,
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
 	const view = isDesktop ? "attack" : waterView
@@ -244,30 +244,11 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>
 
 		<div className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none">
-			<LogItem log={{
-				authorId: "yuyvL5UvdyDRbJDhp8neeSQnDlvonAMy", authorUsername: "alexis", targetId: "789", targetUsername: "bob", logType: "fire", shot: {
-					coords: { x: 5, y: 3 },
-					status: "sunk",
-					ship: {
-						name: "destroyer",
-						start: { x: 5, y: 0 },
-						end: { x: 5, y: 4 },
-						size: 5
-					},
-					authorId: "123",
-					authorTeam: 1
-				}
-			}} myId={myId} replace={match.settings.replace} />
-			<LogItem log={{
-				authorId: "123", authorUsername: "tom", targetId: "147", targetUsername: "gael", logType: "fire", shot: {
-					coords: { x: 1, y: 1 },
-					status: "miss",
-					ship: null,
-					authorId: "123",
-					authorTeam: 1
-				}
-			}} myId={myId} replace={match.settings.replace} />
-			<LogItem log={{ authorId: "yuyvL5UvdyDRbJDhp8neeSQnDlvonAMy", authorUsername: "alexis", targetId: null, targetUsername: null, logType: "left", shot: null }} myId={myId} replace={match.settings.replace} />
+			{match.logs.length > 0 && match.logs.map(l => (
+				<LogItem log={l} myId={myId} replace={match.settings.replace} />
+			))}
+
+			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 		</div>
 
 		<div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
@@ -296,38 +277,17 @@ export function GameInfos({ match, myId }: {
 			<FleetColorIndicator title={t("match_sunk")} badge="badge-error" />
 		</div>
 
-
 		<div className="flex">
 			<button className="btn text-info text-xs font-semibold border-b-info rounded-none outline-none">{t("match_log")}</button>
 			{match.type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold outline-none">{t("match_team_chat")} <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
 		</div>
 		<div className="divider m-0"></div>
 
-		<div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none">
-			<LogItem log={{
-				authorId: "yuyvL5UvdyDRbJDhp8neeSQnDlvonAMy", authorUsername: "alexis", targetId: "789", targetUsername: "bob", logType: "fire", shot: {
-					coords: { x: 5, y: 3 },
-					status: "sunk",
-					ship: {
-						name: "destroyer",
-						start: { x: 5, y: 0 },
-						end: { x: 5, y: 4 },
-						size: 5
-					},
-					authorId: "123",
-					authorTeam: 1
-				}
-			}} myId={myId} replace={match.settings.replace} />
-			<LogItem log={{
-				authorId: "123", authorUsername: "tom", targetId: "147", targetUsername: "gael", logType: "fire", shot: {
-					coords: { x: 1, y: 1 },
-					status: "miss",
-					ship: null,
-					authorId: "123",
-					authorTeam: 1
-				}
-			}} myId={myId} replace={match.settings.replace} />
-			<LogItem log={{ authorId: "yuyvL5UvdyDRbJDhp8neeSQnDlvonAMy", authorUsername: "alexis", targetId: null, targetUsername: null, logType: "left", shot: null }} myId={myId} replace={match.settings.replace} />
+		<div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scroll-auto">
+			{match.logs.length > 0 && match.logs.map(l => (
+				<LogItem log={l} myId={myId} replace={match.settings.replace} />
+			))}
+			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 		</div>
 	</div>
 }
