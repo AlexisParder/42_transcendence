@@ -333,7 +333,7 @@ function LogItem({ log, myId, replace }: { log: Log, myId: string | null | undef
 	else if (log.logType === "fire" && log.shot && log.shot.status !== "sunk")
 		text = `${log.authorId === myId ? "you" : log.authorUsername} fires at ${log.targetId === myId ? "you" : log.targetUsername} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
 	else if (log.logType === "fire" && log.shot && log.shot.status === "sunk")
-		text = `${log.authorId === myId ? "you" : log.authorUsername} sink ${log.targetId === myId ? "you" : log.targetUsername}'s ${log.shot.ship?.name}`
+		text = `${log.authorId === myId ? "you" : log.authorUsername} sink ${log.targetId === myId ? "your" : `${log.targetUsername}'s`} ${log.shot.ship?.name}`
 
 	return <div className={`p-2 ${bgColor} rounded-md`}>
 		<p className={`text-xs font-mono first-letter:uppercase ${textColor}`}>{text}</p>

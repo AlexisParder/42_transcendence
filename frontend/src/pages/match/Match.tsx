@@ -10,13 +10,15 @@ import { t } from "../../lib/translate";
 import type { shipRotation } from "../../types/types";
 import { EndDisplay } from "./endUtils";
 import { HideModal, Modal, ShowModal } from "../../components/Modal";
+import { Navigate, useNavigate } from "react-router-dom";
 
 type categoryType = "select" | "match"
 export function Match() {
 	useDocumentTitle(t("match_title"))
 
-	const { data: session } = authClient.useSession()
+	const { data: session, isPending } = authClient.useSession()
 	const socket = useSocket()
+	const navigate = useNavigate()
 	const [category, setCategory] = useState<categoryType>("match")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState(0)
@@ -29,6 +31,7 @@ export function Match() {
 	const [remaining, setRemaining] = useState(0)
 	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
 	const [errors, setErrors] = useState<{ action?: string }>({})
+	const [isLoading, setIsLoading] = useState(true)
 
 	function updatePlacedShips(ships: Ship[]) {
 		setPlacedShips(ships)
@@ -115,6 +118,9 @@ export function Match() {
 					setTurnEndsAt(Date.now() + data.remaining * 1000)
 			} catch (error) {
 				console.error("load joined match:", error)
+			} finally {
+				if (!cancelled)
+					setIsLoading(false)
 			}
 		}
 
@@ -155,13 +161,17 @@ export function Match() {
 				return console.log(data.code)
 
 			HideModal("forfeitModal")
+			navigate("/play")
 		} catch (error) {
 			console.error("forfeit:", error)
 		}
 	}
 
+	if (isLoading || isPending)
+		return <p>Loading...</p>
+
 	if (!joinedMatch || joinedMatch.startedAt === 0)
-		return
+		return <Navigate to="/play" replace />
 
 	const isLocked = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
 
