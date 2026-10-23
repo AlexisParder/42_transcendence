@@ -1,10 +1,11 @@
 import { Server } from "socket.io";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
+import type { ClientToServerEvents, Log, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
 import { filterMatchForUser, isTeamEliminated, setFinalPlacement, updatePlayer } from "./matchUtils.ts";
 import { currentMatches } from "../../mapMatches.ts";
 import { fillRandomShips } from "./shipValidation.ts";
 import { finishMatch } from "./finishMatch.ts";
 import { cancelDisconnectTimer, clearMatchDisconnectTimers } from "./disconnectTimers.ts";
+import { addLog } from "./logMatch.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -19,7 +20,7 @@ export function emitTurn(match: Matchs, io: IO) {
 	const data = { remaining: getRemaining(match) }
 
 	for (const player of match.players) {
-		if (player.userId) {
+		if (player.userId && player.status !== "LEFT") {
 			io.to(player.userId).emit("turn_update", data)
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
@@ -113,7 +114,7 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 	if (match.startedAt === 0) {
 		if (match.hostId === userId) {
 			for (const player of match.players) {
-				if (player.userId)
+				if (player.userId && player.status !== "LEFT")
 					io.to(player.userId).emit("refresh_joined_match", undefined)
 			}
 
@@ -122,7 +123,7 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 		} else {
 			match.players = match.players.filter(p => p.userId !== userId)
 			for (const player of match.players) {
-				if (player.userId)
+				if (player.userId && player.status !== "LEFT")
 					io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 			}
 		}
@@ -139,6 +140,17 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 	setFinalPlacement(match, userId)
 
 	const aliveTeams = match.teams.filter(t => !isTeamEliminated(match, t.id))
+
+	const log: Log = {
+		timestamp: Date.now(),
+		authorId: userId,
+		authorUsername: player.username,
+		logType: "left",
+		targetId: null,
+		targetUsername: null,
+		shot: null
+	}
+	addLog(match, log, io, false)
 
 	if (match.turns.userTurn === userId)
 		nextTurn(match, io, true)

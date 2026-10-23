@@ -16,7 +16,7 @@ function timerKey(hostId: string, userId: string) {
 
 function emitMatch(match: Matchs, io: IO) {
 	for (const player of match.players) {
-		if (player.userId)
+		if (player.userId && player.status !== "LEFT")
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 	}
 }

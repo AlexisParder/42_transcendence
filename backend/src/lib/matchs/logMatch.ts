@@ -9,7 +9,7 @@ export function addLog(match: Matchs, log: Log, io: IO, emitSocket: boolean) {
 
 	if (emitSocket) {
 		for (const player of match.players) {
-			if (player.userId)
+			if (player.userId && player.status !== "LEFT")
 				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 	}

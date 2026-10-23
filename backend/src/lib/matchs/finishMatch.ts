@@ -88,7 +88,7 @@ async function saveMatch(match: Matchs, ranked: boolean, deltas: Map<string, num
 
 function emitFinalState(match: Matchs, io: IO) {
 	for (const player of match.players) {
-		if (player.userId && !player.isBot)
+		if (player.userId && !player.isBot && player.status !== "LEFT")
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 	}
 }
