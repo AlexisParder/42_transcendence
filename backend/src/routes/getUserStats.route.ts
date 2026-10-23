@@ -71,7 +71,7 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 				where: {
 					userId,
 					OR: [
-						{ matchs: { isRanked: true }, points: { gt: 0 } },
+						{ matchs: { isRanked: true }, points: { gte: 0 } },
 						{ matchs: { isRanked: false }, placement: 1 }
 					]
 				}
