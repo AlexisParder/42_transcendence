@@ -28,6 +28,7 @@ export function Match() {
 	const [turnEndsAt, setTurnEndsAt] = useState(0)
 	const [remaining, setRemaining] = useState(0)
 	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
+	const [errors, setErrors] = useState<{ action?: string }>({})
 
 	function updatePlacedShips(ships: Ship[]) {
 		setPlacedShips(ships)
@@ -128,6 +129,7 @@ export function Match() {
 			return
 
 		try {
+			setErrors({})
 			const { ok, data } = await apiPost("/api/player-fire", {
 				hostId: joinedMatch?.hostId,
 				coords: targetLocked,
@@ -136,7 +138,7 @@ export function Match() {
 
 			setTargetLocked({ x: -1, y: -1 })
 			if (!ok)
-				return console.log(data.code)
+				return setErrors({ action: data.code })
 
 			const match: Matchs | undefined = data.match ?? undefined
 			setJoinedMatch(match)
@@ -178,7 +180,7 @@ export function Match() {
 			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} openForfeitModal={() => ShowModal("forfeitModal")} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
-				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} />
+				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} />
 				<GameInfos match={joinedMatch} myId={session?.user.id} />
 			</div>
 		</>}

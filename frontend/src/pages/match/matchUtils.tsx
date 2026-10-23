@@ -155,7 +155,7 @@ function getRowName(coords: vect2) {
 	return `${rowName[coords.y]}${coords.x + 1}`
 }
 
-export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire }: {
+export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire, errorMsg }: {
 	match: Matchs,
 	myId: string | null | undefined,
 	selectedTarget: number,
@@ -165,6 +165,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	targetLocked: vect2,
 	setTargetLocked: (coords: vect2) => void,
 	handleFire: () => void,
+	errorMsg: string
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
 	const logsRef = useRef<HTMLDivElement>(null)
@@ -256,9 +257,13 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>
 
 		<div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
-			{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{getRowName(targetLocked)}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
+			<div>
+				{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{getRowName(targetLocked)}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
 
-			{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_no_target")}</p>}
+				{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_no_target")}</p>}
+
+				{errorMsg && <p className="text-error block text-xs">{t(errorMsg)}.</p>}
+			</div>
 
 			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={(targetLocked.x < 0 && targetLocked.y < 0) || match.turns.userTurn !== myId || match.endedAt !== 0} onClick={handleFire}>{t("match_btn_fire")}</button>
 		</div>
