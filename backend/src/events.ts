@@ -158,6 +158,7 @@ export interface Matchs {
 	teams: Teams[],
 	turns: Turns,
 	logs: Log[],
+	spectators: string[],
 }
 
 export interface Turns {

@@ -84,6 +84,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 				}
 			],
 			logs: [],
+			spectators: [],
 		}
 
 		currentMatches.set(userId, newMatch)
