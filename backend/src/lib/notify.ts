@@ -4,6 +4,7 @@ import type { ClientToServerEvents, NotificationParams, ServerToClientEvents, So
 import { prisma } from "../db/client.ts"
 import { sendMail } from "./mail.ts"
 import { defaultNotificationPreferences } from "./notificationPreferences.ts"
+import { t } from "./translate.ts"
 
 export const defaultNotificationTime = 5000
 
@@ -21,15 +22,11 @@ type NotificationInput = {
 	requestId?: string
 }
 
-const emails: Record<NotificationCategory, { subject: string, html: string }> = {
-	chat: {
-		subject: "SONAR - New message",
-		html: "<p>You have a new message. Open SONAR to read it.</p>",
-	},
-	friend: {
-		subject: "SONAR - Friend request",
-		html: "<p>You have a new friend request. Open SONAR to respond.</p>",
-	},
+function email(category: NotificationCategory, language: string) {
+	return {
+		subject: t(language, `mail_${category}_subject`),
+		html: t(language, `mail_${category}_body`),
+	}
 }
 
 export function withUsername(params: NotificationParams | undefined, username: string | null | undefined): NotificationParams {
@@ -67,7 +64,7 @@ export async function notify(
 	try {
 		const recipient = await prisma.user.findUnique({
 			where: { id: input.userId },
-			select: { email: true, emailVerified: true, notificationPreferences: true },
+			select: { email: true, emailVerified: true, language: true, notificationPreferences: true },
 		})
 		if (!recipient) return
 		const preferences = recipient.notificationPreferences ?? defaultNotificationPreferences
@@ -76,7 +73,7 @@ export async function notify(
 		if (!category || preferences[`app_${category}`])
 			jobs.push(emitNotification(io, input))
 		if (category && preferences[`email_${category}`] && recipient.emailVerified)
-			jobs.push(sendMail({ to: recipient.email, ...emails[category] }))
+			jobs.push(sendMail({ to: recipient.email, ...email(category, recipient.language) }))
 		const results = await Promise.allSettled(jobs)
 		for (const result of results) if (result.status === "rejected") console.error("notification delivery error:", result.reason)
 	} catch (error) {

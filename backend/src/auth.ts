@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./db/client.ts"
 import { sendMail } from "./lib/mail.ts"
+import { getUserLanguage, resolveLanguage, t } from "./lib/translate.ts"
 import { twoFactor, username, emailOTP } from "better-auth/plugins"
 
 const trustedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
@@ -70,11 +71,12 @@ export const auth = betterAuth({
 		emailOTP({
 			otpLength: 6,
 			expiresIn: 600,
-			sendVerificationOTP: async ({ email, otp }) => {
+			sendVerificationOTP: async ({ email, otp }, ctx) => {
+				const language = await getUserLanguage({ email }) ?? resolveLanguage(ctx?.headers?.get("accept-language"))
 				void sendMail({
 					to: email,
-					subject: "Your Sonar code",
-					html: `<p>Your code: <strong>${otp}</strong></p>`,
+					subject: t(language, "mail_otp_subject"),
+					html: t(language, "mail_otp_body", { otp }),
 				})
 			},
 		})

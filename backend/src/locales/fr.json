@@ -1,0 +1,8 @@
+{
+	"mail_otp_subject": "Ton code Sonar",
+	"mail_otp_body": "<p>Ton code : <strong>{{otp}}</strong></p><p>Il expire dans 10 minutes.</p>",
+	"mail_chat_subject": "SONAR - Nouveau message",
+	"mail_chat_body": "<p>Tu as reçu un nouveau message. Ouvre SONAR pour le lire.</p>",
+	"mail_friend_subject": "SONAR - Demande d'ami",
+	"mail_friend_body": "<p>Tu as reçu une nouvelle demande d'ami. Ouvre SONAR pour y répondre.</p>"
+}
