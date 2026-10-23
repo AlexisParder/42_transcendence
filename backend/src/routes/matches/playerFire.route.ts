@@ -125,7 +125,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 			targetId: targetData?.userId,
 			targetUsername: targetData?.username,
 			logType: "fire",
-			shot
+			shot: { ...shot }
 		}
 
 		addLog(match, log, io, false)
