@@ -154,7 +154,7 @@ export function Friends() {
 
 	async function loadFriendsPending() {
 		try {
-			const { ok, data } = await apiPost("/api/get-friends-pending")
+			const { ok, data } = await apiGet("/api/get-friends-pending")
 
 			if (!ok)
 				return

@@ -87,7 +87,7 @@ export function Notifications() {
 
 				<div className="mt-6 space-y-3">
 					{notifications.length === 0 && (
-						<div className="rounded-box border border-neutral bg-base-100 p-4 text-sm text-neutral-content/60">
+						<div className="rounded-md border border-neutral/50 bg-neutral/10 p-4 text-sm text-neutral-content/50">
 							{t("notifications_empty")}
 						</div>
 					)}
@@ -99,17 +99,23 @@ export function Notifications() {
 								if (!notification.read)
 									markAsRead(notification.id)
 							}}
-							className={`w-full rounded-box border border-neutral bg-base-100 p-4 text-left ${notification.read ? "opacity-60" : "bg-info/10"}`}
+							className={`w-full rounded-md border p-4 text-left ${notification.read
+								? "bg-neutral/10 border-neutral/50"
+								: "cursor-pointer bg-info/10 border-info/50"}`}
 						>
 							<div className="flex items-center justify-between gap-3">
-								<p className="font-bold text-info">
+								<p className={`text-sm font-bold ${notification.read ? "text-neutral-content/60" : "text-info"}`}>
 									{t(notification.title, notification.params)}
 								</p>
-								<div className="flex items-center gap-2">
-									{!notification.read && <span className="badge badge-warning badge-sm">{t("notifications_unread")}</span>}
+								<div className="flex shrink-0 items-center gap-2">
+									{!notification.read && (
+										<span className="uppercase bg-info/10 border border-info/50 rounded-xl py-0.5 px-2 text-xs text-info">
+											{t("notifications_unread")}
+										</span>
+									)}
 									<button
 										type="button"
-										className="btn btn-error btn-ghost btn-sm btn-circle"
+										className="btn btn-xs bg-error/10 border border-error/50 text-error"
 										onClick={event => {
 											event.stopPropagation()
 											deleteNotification(notification.id)
@@ -120,8 +126,8 @@ export function Notifications() {
 									</button>
 								</div>
 							</div>
-							<p className="mt-2 text-sm">{t(notification.description, notification.params)}</p>
-							<p className="mt-2 text-xs text-base-content/60">
+							<p className="mt-2 text-sm text-neutral-content/80">{t(notification.description, notification.params)}</p>
+							<p className="mt-2 text-xs text-neutral-content/50">
 								{new Date(notification.createdAt).toLocaleString(dateLocale)}
 							</p>
 						</div>
