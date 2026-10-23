@@ -215,6 +215,7 @@ export interface MatchSettings {
 }
 
 export interface Log {
+	timestamp: number,
 	authorId: string | null | undefined,
 	authorUsername: string | null | undefined,
 	targetId: string | null | undefined,

@@ -119,6 +119,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 		const targetData = match.players.find(p => p.team === targetTeamId)
 
 		const log: Log = {
+			timestamp: Date.now(),
 			authorId: session.user.id,
 			authorUsername: player.username,
 			targetId: targetData?.userId,

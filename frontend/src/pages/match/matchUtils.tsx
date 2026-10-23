@@ -6,6 +6,8 @@ import type { Log, Matchs, matchType, vect2 } from "../../types/events"
 import { useMediaQuery } from "../../hooks/useMediaQuery"
 import { formatMS } from "../../lib/formatTime"
 import { ordinal } from "../../lib/ordinal"
+import { useAutoScroll } from "../../hooks/useAutoScroll"
+import { useRef } from "react"
 
 export function MatchHeader({ type, title, description, remaining, isMyTurn, openForfeitModal }: {
 	type?: matchType
@@ -165,6 +167,8 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	handleFire: () => void,
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
+	const logsRef = useRef<HTMLDivElement>(null)
+	useAutoScroll(logsRef, match.logs.length)
 	const view = isDesktop ? "attack" : waterView
 	const target = match.players.find(p => p.team === selectedTarget)
 	const targetTeamData = match.teams.find(t => t.id === selectedTarget)
@@ -243,9 +247,9 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			<Grid className="aspect-square w-[min(100cqw,100cqh)]" hoverable={view !== "my waters"} ships={ships} shots={shots} targetLocked={view === "my waters" ? { x: -1, y: -1 } : targetLocked} setTargetLocked={view === "my waters" ? undefined : setTargetLocked} />
 		</div>
 
-		<div className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none">
+		<div ref={logsRef} className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none scrollbar-none">
 			{match.logs.length > 0 && match.logs.map(l => (
-				<LogItem log={l} myId={myId} replace={match.settings.replace} />
+				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} />
 			))}
 
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
@@ -267,6 +271,8 @@ export function GameInfos({ match, myId }: {
 }) {
 	const myTeam = match.players.find(p => p.userId === myId)?.team
 	const myTeamData = match.teams.find(t => t.id === myTeam)
+	const logsRef = useRef<HTMLDivElement>(null)
+	useAutoScroll(logsRef, match.logs.length)
 
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
 		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? t("match_your_team_waters") : t("match_your_waters")}</p>
@@ -283,9 +289,9 @@ export function GameInfos({ match, myId }: {
 		</div>
 		<div className="divider m-0"></div>
 
-		<div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scroll-auto">
+		<div ref={logsRef} className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scrollbar-none">
 			{match.logs.length > 0 && match.logs.map(l => (
-				<LogItem log={l} myId={myId} replace={match.settings.replace} />
+				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} />
 			))}
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 		</div>
