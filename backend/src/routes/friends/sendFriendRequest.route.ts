@@ -29,6 +29,18 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 		if (target.id === userId)
 			return res.status(400).json({ ok: false, error: "friend_err_user_self" })
 
+		const block = await prisma.userBlocked.findFirst({
+			where: {
+				OR: [
+					{ userId, targetId: target.id },
+					{ userId: target.id, targetId: userId },
+				]
+			}
+		})
+
+		if (block)
+			return res.status(403).json({ ok: false, error: block.userId === userId ? "friend_block_err_blocked" : "friend_err_user_not_found" })
+
 		const existing = await prisma.friends.findFirst({
 			where: {
 				OR: [
