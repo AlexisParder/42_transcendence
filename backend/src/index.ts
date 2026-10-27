@@ -5,7 +5,7 @@ import { auth } from "./auth.ts"
 import { setPwdHandler } from "./routes/setPwd.route.ts"
 import { checkPwdHandler } from "./routes/checkPwd.route.ts"
 import { getBackupCodesHandler } from "./routes/getBackupCodes.route.ts"
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "./events.ts"
+import type { Matchs } from "./events.ts"
 import { prisma } from "./db/client.ts"
 import { getConvHistoryHandler } from "./routes/friends/getConvHistory.route.ts"
 import { getFriendsHandler } from "./routes/friends/getFriends.route.ts"
@@ -56,7 +56,6 @@ import { leaveSpecMatchHandler } from "./routes/matches/leaveSpecMatch.route.ts"
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
 
-app.set("io", io)
 app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
 app.set("currentMatches", currentMatches)
@@ -193,7 +192,7 @@ io.on("connection", async (socket) => {
 			io.to(fromUserId).emit("new_message", wire)
 			const recipientSockets = await io.in(toUserId).fetchSockets()
 			if (!recipientSockets.some(recipient => recipient.data.activeConversationPeerId === fromUserId))
-				void notify(io, {
+				void notify({
 					userId: toUserId,
 					fromUserId,
 					title: "notifications_new_message",

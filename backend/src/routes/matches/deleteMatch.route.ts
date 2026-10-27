@@ -1,8 +1,8 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
-import type { Server } from "socket.io";
+import type { Matchs } from "../../events.ts";
+import { io } from "../../server.ts";
 
 export async function deleteMatchHandler(req: Request, res: Response) {
 	try {
@@ -23,7 +23,6 @@ export async function deleteMatchHandler(req: Request, res: Response) {
 		if (match.hostId !== userId)
 			return res.status(400).json({ ok: false, code: "match_err_host" })
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
 			if (player.userId)
 				io.to(player.userId).emit("refresh_joined_match", undefined)

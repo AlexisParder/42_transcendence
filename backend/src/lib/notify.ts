@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto"
-import type { Server } from "socket.io"
-import type { ClientToServerEvents, NotificationParams, ServerToClientEvents, SocketData } from "../events.ts"
+import type { NotificationParams } from "../events.ts"
 import { prisma } from "../db/client.ts"
 import { sendMail } from "./mail.ts"
 import { defaultNotificationPreferences } from "./notificationPreferences.ts"
@@ -43,10 +42,7 @@ export function withUsername(params: NotificationParams | undefined, username: s
 	return { ...params, username: username ?? "?" }
 }
 
-async function emitNotification(
-	io: Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>,
-	input: NotificationInput,
-) {
+async function emitNotification(input: NotificationInput) {
 	const content = { fromUserId: input.fromUserId, title: input.title, description: input.description }
 	const notification = input.save
 		? await prisma.notification.create({ data: { userId: input.userId, ...content, params: input.params } })
@@ -67,10 +63,7 @@ async function emitNotification(
 	})
 }
 
-export async function notify(
-	io: Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>,
-	input: NotificationInput,
-) {
+export async function notify(input: NotificationInput) {
 	try {
 		const recipient = await prisma.user.findUnique({
 			where: { id: input.userId },
@@ -81,7 +74,7 @@ export async function notify(
 		const category = input.category
 		const jobs: Promise<void>[] = []
 		if (!category || preferences[`app_${category}`])
-			jobs.push(emitNotification(io, input))
+			jobs.push(emitNotification(input))
 		if (category && preferences[`email_${category}`] && recipient.emailVerified)
 			jobs.push(sendMail({ to: recipient.email, ...email(input.mail ?? category, recipient.language, input.params) }))
 		const results = await Promise.allSettled(jobs)
@@ -92,7 +85,7 @@ export async function notify(
 }
 
 export function notifySecurity(userId: string, event: SecurityEvent, params?: NotificationParams) {
-	void notify(io, {
+	void notify({
 		userId,
 		title: "notifications_security",
 		description: `notifications_security_${event}`,

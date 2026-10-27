@@ -2,8 +2,7 @@ import type { Request, Response } from "express"
 import { auth } from "../../auth.ts"
 import { fromNodeHeaders } from "better-auth/node"
 import { prisma } from "../../db/client.ts"
-import type { Server } from "socket.io"
-import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../../events.ts"
+import { io } from "../../server.ts"
 
 export async function declineFriendRequestHandler(req: Request, res: Response) {
 	try {
@@ -33,7 +32,6 @@ export async function declineFriendRequestHandler(req: Request, res: Response) {
 		if (deleted.count === 0)
 			return res.status(409).json({ ok: false, error: "friend_err_user_aready_friends" })
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		io.to(userId).emit("friend_request_resolved", { requestId, accepted: false })
 
 		res.json({ ok: true })

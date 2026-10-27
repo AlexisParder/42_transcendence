@@ -1,11 +1,11 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
-import type { Server } from "socket.io"
+import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { endDeploy } from "../../lib/matchs/turnTimer.ts";
 import { SHIP_COUNT, validateShips } from "../../lib/matchs/shipValidation.ts";
+import { io } from "../../server.ts";
 
 export async function setPlayerShipsHandler(req: Request, res: Response) {
 	const { ships } = req.body
@@ -48,7 +48,6 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 		match.teams[player.team - 1].ships = validShips
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const p of match.players) {
 			if (p.userId && p.status !== "LEFT")
 				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))
@@ -99,7 +98,6 @@ export async function setPlayerReadyOnSelectHandler(req: Request, res: Response)
 
 		updatePlayer(match, session.user.id, { isReady: true })
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const p of match.players) {
 			if (p.userId)
 				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))

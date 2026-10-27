@@ -2,8 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express";
 import { auth } from "../../auth.ts";
 import { prisma } from "../../db/client.ts";
-import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../../events.ts";
-import type { Server } from "socket.io";
+import { io } from "../../server.ts";
 
 export async function blockUserHandler(req: Request, res: Response) {
 	try {
@@ -42,7 +41,6 @@ export async function blockUserHandler(req: Request, res: Response) {
 			})
 		])
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		io.to(targetId).emit("friend_removed", { userId })
 		res.json({ ok: true })
 	} catch (error) {

@@ -1,11 +1,11 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Log, Matchs, ServerToClientEvents, Ship, Shot, SocketData, vect2 } from "../../events.ts";
-import type { Server } from "socket.io"
+import type { Log, Matchs, Ship, Shot, vect2 } from "../../events.ts";
 import { filterMatchForUser, isExpired, isTeamEliminated, setFinalPlacement } from "../../lib/matchs/matchUtils.ts";
 import { nextTurn } from "../../lib/matchs/turnTimer.ts";
 import { addLog } from "../../lib/matchs/logMatch.ts";
+import { io } from "../../server.ts";
 
 const sameCoords = (a: vect2, b: vect2) => a.x === b.x && a.y === b.y
 const isValidCell = (c: any): c is vect2 => c && Number.isInteger(c.x) && Number.isInteger(c.y) && c.x >= 0 && c.x < 14 && c.y >= 0 && c.y < 14
@@ -114,7 +114,6 @@ export async function playerFireHandler(req: Request, res: Response) {
 			}
 		}
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
 		const targetData = match.players.find(p => p.team === targetTeamId)
 

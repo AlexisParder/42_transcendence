@@ -1,9 +1,9 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
+import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, isInAnyMatch } from "../../lib/matchs/matchUtils.ts";
-import type { Server } from "socket.io"
+import { io } from "../../server.ts";
 
 export async function inviteMatchHandler(req: Request, res: Response) {
 	const { hostId, peerId } = req.body
@@ -38,7 +38,6 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 
 		match.invitedPlayers.push(peerId)
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
 			if (player.userId)
 				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))

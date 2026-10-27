@@ -1,11 +1,11 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
-import type { Server } from "socket.io"
+import type { Matchs } from "../../events.ts";
 import { updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { buildTurnOrder } from "../../lib/matchs/playerOrder.ts";
 import { startTurnTimer } from "../../lib/matchs/turnTimer.ts";
+import { io } from "../../server.ts";
 
 export async function startMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -52,7 +52,6 @@ export async function startMatchHandler(req: Request, res: Response) {
 		match.startedAt = Date.now()
 		match.turns.timerStart = match.startedAt
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		for (const player of match.players) {
 			if (player.userId)
 				io.to(player.userId).emit("start_match")

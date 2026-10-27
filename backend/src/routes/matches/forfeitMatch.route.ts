@@ -1,9 +1,9 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
-import type { Server } from "socket.io"
+import type { Matchs } from "../../events.ts";
 import { markPlayerLeft } from "../../lib/matchs/turnTimer.ts";
+import { io } from "../../server.ts";
 
 export async function forfeitMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -35,7 +35,6 @@ export async function forfeitMatchHandler(req: Request, res: Response) {
 		if (player.status === "LEFT")
 			return res.status(400).json({ ok: false, code: "match_err_player_already_left" })
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
 		markPlayerLeft(match, userId, io)
 

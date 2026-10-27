@@ -2,8 +2,7 @@ import type { Request, Response } from "express";
 import { auth } from "../../auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
 import { prisma } from "../../db/client.ts";
-import type { Server } from "socket.io";
-import type { ClientToServerEvents, ServerToClientEvents, SocketData } from "../../events.ts";
+import { io } from "../../server.ts";
 
 export async function setReadHandler(req: Request, res: Response) {
 	try {
@@ -26,7 +25,6 @@ export async function setReadHandler(req: Request, res: Response) {
 			data: { isRead: true }
 		})
 
-		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 		io.to(peer).emit("messages_read", { by: userId })
 
 		res.json({ ok: true })
