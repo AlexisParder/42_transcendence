@@ -342,11 +342,9 @@ function LogItem({ log, myId, replace, match }: {
 			text = `${log.authorId === myId ? "you fire" : `${log.authorUsername} fires`} at ${teamTargetData?.team === myTeamData?.team ? "your team" : "enemy team"} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
 		else
 			text = `${log.authorId === myId ? "you fire" : `${log.authorUsername} fires`} at ${log.targetId === myId ? "you" : log.targetUsername} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
-	}
-	else if (log.logType === "fire" && log.shot && log.shot.status === "sunk") {
+	} else if (log.logType === "fire" && log.shot && log.shot.status === "sunk") {
 		if (match.type === "TWO_V_TWO")
 			text = `${log.authorId === myId ? "you sink" : `${log.authorUsername} sinks`} ${teamTargetData?.team === myTeamData?.team ? "your" : `the enemy's`} ${log.shot.ship?.name}`
-
 		else
 			text = `${log.authorId === myId ? "you sink" : `${log.authorUsername} sinks`} ${log.targetId === myId ? "your" : `${log.targetUsername}'s`} ${log.shot.ship?.name}`
 	}
