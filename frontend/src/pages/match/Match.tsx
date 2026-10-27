@@ -62,6 +62,10 @@ export function Match() {
 		function onRefreshMatch(payload: Matchs | undefined) {
 			setJoinedMatch(payload)
 			setCategory(payload?.step === "game" ? "match" : "select")
+			if (payload && payload.step === "deploy"){
+				const myTeam = payload.players.find(p => p.userId === session?.user.id)?.team
+				setPlacedShips(payload.teams.find(t => t.id === myTeam)?.ships ?? [])
+			}
 		}
 		function onTurnUpdate(payload: { remaining: number }) {
 			setTurnEndsAt(Date.now() + payload.remaining * 1000)
@@ -75,7 +79,7 @@ export function Match() {
 			socket.off("refresh_joined_match", onRefreshMatch)
 			socket.off("turn_update", onTurnUpdate)
 		}
-	}, [socket, joinedMatch])
+	}, [socket, joinedMatch, session])
 
 	useEffect(() => {
 		if (!turnEndsAt)

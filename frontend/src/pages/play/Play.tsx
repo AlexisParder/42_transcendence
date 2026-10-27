@@ -213,6 +213,24 @@ export function Play() {
 		}
 	}
 
+	async function handleJoinedSpecMatch(match: Matchs) {
+		if (match.visibility !== "public" || !match.settings.spectators)
+			return
+
+		try {
+			const { ok, data } = await apiPost("/api/join-spec-match", { hostId: match.hostId })
+
+			if (!ok) {
+				setErrors({ matchJoin: data.code ? t(data.code) : t("match_err_join_failure") })
+				return
+			}
+
+			return navigate("/match")
+		} catch (error) {
+			console.error("join match:", error)
+		}
+	}
+
 	async function handleLeaveMatch() {
 		if (!joinedMatch)
 			return
@@ -444,6 +462,7 @@ export function Play() {
 								canJoin={canJoin}
 								canSpec={canSpec}
 								handleJoinedPublicMatch={handleJoinedPublicMatch}
+								handleJoinedSpecMatch={handleJoinedSpecMatch}
 								match={m}
 								joinMatchErr={errors.matchJoin} />
 						))}

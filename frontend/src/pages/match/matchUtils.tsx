@@ -308,9 +308,7 @@ function FleetColorIndicator({ title, badge }: {
 	badge: "badge-neutral" | "badge-warning" | "badge-error"
 }) {
 	return <div className="flex items-center gap-1">
-		<span
-			className={`indicator-item indicator-middle indicator-start badge ${badge} badge-xs`}
-		></span>
+		<span className={`indicator-item indicator-middle indicator-start badge ${badge} badge-xs`}></span>
 		<div className="uppercase text-xs text-neutral-content/50 font-medium">{title}</div>
 	</div>
 }

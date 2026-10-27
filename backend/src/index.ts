@@ -51,6 +51,8 @@ import { findActiveMatchOf } from "./lib/matchs/matchUtils.ts"
 import { reconnectPlayer, startDisconnectTimer } from "./lib/matchs/disconnectTimers.ts"
 import { forfeitMatchHandler } from "./routes/matches/forfeitMatch.route.ts"
 import { getUserPointsHandler } from "./routes/getUserPoints.route.ts"
+import { joinSpecMatchHandler } from "./routes/matches/joinSpecMatch.route.ts"
+import { leaveSpecMatchHandler } from "./routes/matches/leaveSpecMatch.route.ts"
 
 const app = express()
 const server = createServer(app)
@@ -110,8 +112,10 @@ app.post("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHand
 app.post("/api/get-matches", getPublicMatchesHandler)
 app.post("/api/get-joined-match", getJoinedMatchHandler)
 app.post("/api/join-match", joinMatchHandler)
+app.post("/api/join-spec-match", joinSpecMatchHandler)
 app.post("/api/join-code-match", joinCodeMatchHandler)
 app.post("/api/leave-match", leaveMatchHandler)
+app.post("/api/leave-spec-match", leaveSpecMatchHandler)
 app.post("/api/create-match", createMatchHandler)
 app.post("/api/delete-match", deleteMatchHandler)
 app.post("/api/update-player-status-match", updatePlayerStatusMatchHandler)

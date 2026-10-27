@@ -8,6 +8,14 @@ export function isInAnyMatch(currentMatches: Map<string, Matchs>, userId: string
 	return false
 }
 
+export function isInAnySpecMatch(currentMatches: Map<string, Matchs>, userId: string): boolean {
+	for (const match of currentMatches.values()) {
+		if (match.spectators.some(p => p === userId))
+			return true
+	}
+	return false
+}
+
 export function firstFreeTeam(players: MatchPlayers[], teamSize: number): number {
 	const counts = new Map<number, number>()
 	for (const p of players)

@@ -25,6 +25,12 @@ export function emitTurn(match: Matchs, io: IO) {
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 	}
+	for (const spectator of match.spectators) {
+		if (spectator) {
+			io.to(spectator).emit("turn_update", data)
+			io.to(spectator).emit("refresh_joined_match", filterMatchForUser(match, spectator))
+		}
+	}
 }
 
 export function startTurnTimer(match: Matchs, io: IO) {
