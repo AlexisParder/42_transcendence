@@ -22,9 +22,6 @@ export function NotifLine({ title, desc, inputName, controls }: {
 				disabled={!controls || controls.disabled}
 				onChange={event => controls?.onChange(`app_${inputName}` as keyof NotificationPreferences, event.target.checked)} />
 		</td>
-		{/* <td>
-			<Togglebox name={`push_${inputName}`} type="info" />
-		</td> */}
 		<td>
 			<Togglebox name={`email_${inputName}`} type="info" aria-label={`${title} - ${t("txt_email")}`}
 				checked={controls?.preferences?.[`email_${inputName}` as keyof NotificationPreferences] ?? false}
