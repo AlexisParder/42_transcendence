@@ -49,9 +49,9 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 
 		match.teams[player.team - 1].ships = validShips
 		const io = req.app.get("io") as Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
-		for (const player of match.players) {
-			if (player.userId && player.status !== "LEFT")
-				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
+		for (const p of match.players) {
+			if (p.userId && p.status !== "LEFT")
+				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))
 		}
 
 		res.json({ ok: true, match: filterMatchForUser(match, session.user.id) })
