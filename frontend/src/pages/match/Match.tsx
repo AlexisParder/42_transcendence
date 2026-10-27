@@ -8,9 +8,10 @@ import { authClient } from "../../lib/auth-client";
 import { apiPost } from "../../lib/api";
 import { t } from "../../lib/translate";
 import type { shipRotation } from "../../types/types";
-import { EndDisplay } from "./endUtils";
+import { EndDisplay, EndSpecDisplay } from "./endUtils";
 import { HideModal, Modal, ShowModal } from "../../components/Modal";
 import { Navigate, useNavigate } from "react-router-dom";
+import { isSpectator } from "../../lib/spectator";
 
 type categoryType = "select" | "match"
 export function Match() {
@@ -62,7 +63,7 @@ export function Match() {
 		function onRefreshMatch(payload: Matchs | undefined) {
 			setJoinedMatch(payload)
 			setCategory(payload?.step === "game" ? "match" : "select")
-			if (payload && payload.step === "deploy"){
+			if (payload && payload.step === "deploy") {
 				const myTeam = payload.players.find(p => p.userId === session?.user.id)?.team
 				setPlacedShips(payload.teams.find(t => t.id === myTeam)?.ships ?? [])
 			}
@@ -171,6 +172,19 @@ export function Match() {
 		}
 	}
 
+	async function handleSpecLeave() {
+		try {
+			const { ok, data } = await apiPost("/api/leave-spec-match", { hostId: joinedMatch?.hostId })
+
+			if (!ok)
+				return console.log(data.code)
+
+			navigate("/play")
+		} catch (error) {
+			console.error("leave spec match:", error)
+		}
+	}
+
 	if (isLoading || isPending)
 		return <p>Loading...</p>
 
@@ -181,7 +195,7 @@ export function Match() {
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && joinedMatch.endedAt === 0 && <>
-			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} openForfeitModal={() => ShowModal("forfeitModal")} />
+			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
 			<div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
@@ -191,7 +205,7 @@ export function Match() {
 		</>}
 
 		{category === "match" && joinedMatch.endedAt === 0 && <>
-			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} openForfeitModal={() => ShowModal("forfeitModal")} />
+			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} />
@@ -199,9 +213,8 @@ export function Match() {
 			</div>
 		</>}
 
-		{joinedMatch.endedAt !== 0 && <>
-			<EndDisplay match={joinedMatch} />
-		</>}
+		{joinedMatch.endedAt !== 0 && !isSpectator(joinedMatch, session?.user.id) && <EndDisplay match={joinedMatch} />}
+		{joinedMatch.endedAt !== 0 && isSpectator(joinedMatch, session?.user.id) && <EndSpecDisplay match={joinedMatch} />}
 
 		<Modal id="forfeitModal">
 			<p className="pb-2 first-letter:uppercase">{t("match_forfeit")}</p>

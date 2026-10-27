@@ -227,7 +227,7 @@ export function Play() {
 
 			return navigate("/match")
 		} catch (error) {
-			console.error("join match:", error)
+			console.error("join spec match:", error)
 		}
 	}
 

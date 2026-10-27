@@ -56,3 +56,16 @@ export function EndDisplay({ match }: {
 		</div>
 	</div>
 }
+
+export function EndSpecDisplay({ match }: {
+	match: Matchs,
+}) {
+	return <div className="flex items-center justify-center flex-1">
+		<div className="flex flex-col items-center gap-3 bg-base-200 p-4 rounded-lg border border-neutral max-md:min-w-75 min-w-150">
+			<p className="uppercase text-xs font-medium font-mono tracking-[0.24em] text-info">{t("end_match_over")}</p>
+			<p className="first-letter:uppercase text-neutral-content/50 text-sm font-medium font-mono tracking-[0.06em]">{t("end_match_time", { time: formatMS((match.endedAt - match.startedAt) / 1000) })}</p>
+
+			<Link to="/play" className="btn btn-outline" >{t("end_btn_back_lobby")}</Link>
+		</div>
+	</div>
+}

@@ -91,6 +91,10 @@ function emitFinalState(match: Matchs, io: IO) {
 		if (player.userId && !player.isBot && player.status !== "LEFT")
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 	}
+	for (const spectator of match.spectators) {
+		if (spectator)
+			io.to(spectator).emit("refresh_joined_match", filterMatchForUser(match, spectator))
+	}
 }
 
 export async function finishMatch(match: Matchs, io: IO) {

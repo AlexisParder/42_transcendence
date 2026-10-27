@@ -8,26 +8,39 @@ import { formatMS } from "../../lib/formatTime"
 import { ordinal } from "../../lib/ordinal"
 import { useAutoScroll } from "../../hooks/useAutoScroll"
 import { useRef } from "react"
+import { FaDoorOpen } from "react-icons/fa6"
+import { BsEyeFill } from "react-icons/bs"
+import { isSpectator } from "../../lib/spectator"
 
-export function MatchHeader({ type, title, description, remaining, isMyTurn, openForfeitModal }: {
+export function MatchHeader({ type, title, description, remaining, isMyTurn, openForfeitModal, myId, match, handleSpecLeave }: {
 	type?: matchType
 	title: string
 	description: string,
 	remaining: number,
 	isMyTurn: boolean,
-	openForfeitModal: () => void
+	openForfeitModal: () => void,
+	myId: string | null | undefined,
+	match: Matchs,
+	handleSpecLeave: () => void
 }) {
 	return <div className="flex items-center justify-between bg-base-200 py-4 px-6">
 		<div className="flex items-center max-sm:gap-2 gap-4">
 			<h2 className="uppercase text-sm font-bold tracking-brand max-sm:hidden">sonar</h2>
 			{type && <p className="bg-info rounded-md text-info-content font-semibold text-xs px-2 py-0.5">{t(`txt_${type}`)}</p>}
 			<p className="text-xs uppercase tracking-brand font-medium text-neutral-content/50">{title}</p>
+			{match.spectators.length > 0 && <p className="flex items-center gap-1 text-xs text-neutral-content/50 font-semibold font-mono"><BsEyeFill /> {match.spectators.length}</p>}
 		</div>
 		<div className="flex items-center max-sm:gap-2 gap-4">
 			{isMyTurn && <p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>}
 			<p className="font-mono text-sm text-info font-semibold border border-info rounded-full px-2 py-1 text-center">{formatMS(remaining)}</p>
-			<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("match_forfeit")}</button>
-			<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
+			{!isSpectator(match, myId) && <>
+				<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("match_forfeit")}</button>
+				<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
+			</>}
+			{isSpectator(match, myId) && <>
+				<button onClick={handleSpecLeave} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("quit_title")}</button>
+				<button onClick={handleSpecLeave} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><FaDoorOpen /></button>
+			</>}
 		</div>
 	</div>
 }
@@ -228,7 +241,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				</div>
 			</div>}
 
-			<div className="flex items-center gap-2 py-2 lg:hidden">
+			{!isSpectator(match, myId) && <div className="flex items-center gap-2 py-2 lg:hidden">
 				<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => {
 					setWaterView("attack")
 					setTargetLocked({ x: -1, y: -1 })
@@ -237,7 +250,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 					setWaterView("my waters")
 					setTargetLocked({ x: -1, y: -1 })
 				}}>{t("match_btn_my_waters")}</button>
-			</div>
+			</div>}
 
 			{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? t("match_enemy_team_waters") : t("match_player_waters", { name: target?.username ?? "?" })}</p>}
 
