@@ -1,8 +1,12 @@
 export const defaultNotificationPreferences = {
 	app_friend: true,
 	app_chat: true,
+	app_achievements: true,
+	app_security: true,
 	email_friend: false,
 	email_chat: false,
+	email_achievements: false,
+	email_security: true,
 }
 
 export type NotificationPreferences = typeof defaultNotificationPreferences

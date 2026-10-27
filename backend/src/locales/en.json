@@ -4,5 +4,15 @@
 	"mail_chat_subject": "SONAR - New message",
 	"mail_chat_body": "<p>You have a new message. Open SONAR to read it.</p>",
 	"mail_friend_subject": "SONAR - Friend request",
-	"mail_friend_body": "<p>You have a new friend request. Open SONAR to respond.</p>"
+	"mail_friend_body": "<p>You have a new friend request. Open SONAR to respond.</p>",
+	"mail_achievements_subject": "SONAR - New achievement",
+	"mail_achievements_body": "<p>You unlocked a new achievement. Open SONAR to see it.</p>",
+	"mail_security_password_changed_subject": "SONAR - Password changed",
+	"mail_security_password_changed_body": "<p>Your password has been changed. If this wasn't you, reset your password immediately.</p>",
+	"mail_security_2fa_enabled_subject": "SONAR - Two-factor authentication enabled",
+	"mail_security_2fa_enabled_body": "<p>Two-factor authentication has been enabled on your account. If this wasn't you, change your password immediately.</p>",
+	"mail_security_2fa_disabled_subject": "SONAR - Two-factor authentication disabled",
+	"mail_security_2fa_disabled_body": "<p>Two-factor authentication has been disabled on your account. If this wasn't you, change your password immediately.</p>",
+	"mail_security_new_session_subject": "SONAR - New sign-in",
+	"mail_security_new_session_body": "<p>A new sign-in to your account was detected.</p><p>Device: <strong>{{device}}</strong><br>IP address: <strong>{{ip}}</strong></p><p>If this wasn't you, change your password immediately.</p>"
 }

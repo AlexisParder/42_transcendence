@@ -5,8 +5,6 @@ import { auth } from "./auth.ts"
 import { setPwdHandler } from "./routes/setPwd.route.ts"
 import { checkPwdHandler } from "./routes/checkPwd.route.ts"
 import { getBackupCodesHandler } from "./routes/getBackupCodes.route.ts"
-import { createServer } from "node:http"
-import { Server } from "socket.io"
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "./events.ts"
 import { prisma } from "./db/client.ts"
 import { getConvHistoryHandler } from "./routes/friends/getConvHistory.route.ts"
@@ -31,8 +29,9 @@ import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.r
 import { createNotificationHandler } from "./routes/createNotification.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
 import { leaderboardLimit } from "./rateLimit.ts"
-import { notificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
+import { getNotificationPreferencesHandler, setNotificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
 import { notify } from "./lib/notify.ts"
+import { allowedOrigins, app, io, server } from "./server.ts"
 import { getPublicMatchesHandler } from "./routes/matches/getPublicMatches.route.ts"
 import { createMatchHandler } from "./routes/matches/createMatch.route.ts"
 import { deleteMatchHandler } from "./routes/matches/deleteMatch.route.ts"
@@ -54,17 +53,8 @@ import { getUserPointsHandler } from "./routes/getUserPoints.route.ts"
 import { joinSpecMatchHandler } from "./routes/matches/joinSpecMatch.route.ts"
 import { leaveSpecMatchHandler } from "./routes/matches/leaveSpecMatch.route.ts"
 
-const app = express()
-const server = createServer(app)
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
-const allowedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
-const io = new Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>(server, {
-	cors: {
-		origin: allowedOrigins,
-		credentials: true
-	}
-})
 
 app.set("io", io)
 app.set("onlineUsers", onlineUsers)
@@ -83,8 +73,7 @@ app.use(express.json())
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/notifications", getNotificationsHandler)
-app.get("/api/notification-preferences", notificationPreferencesHandler)
-app.patch("/api/notification-preferences", notificationPreferencesHandler)
+app.get("/api/notification-preferences", getNotificationPreferencesHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)
@@ -98,6 +87,7 @@ app.post("/api/set-read", setReadHandler)
 app.post("/api/notifications/read", setNotificationReadHandler)
 app.post("/api/notifications/read-all", setAllNotificationsReadHandler)
 app.post("/api/notifications/delete", deleteNotificationHandler)
+app.post("/api/notification-preferences", setNotificationPreferencesHandler)
 app.post("/api/notifications/delete-all", deleteAllNotificationsHandler)
 app.post("/api/notifications/create", createNotificationHandler)
 app.post("/api/block-user", blockUserHandler)

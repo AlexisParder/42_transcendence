@@ -4,6 +4,15 @@ import { prisma } from "./db/client.ts"
 import { sendMail } from "./lib/mail.ts"
 import { getUserLanguage, resolveLanguage, t } from "./lib/translate.ts"
 import { twoFactor, username, emailOTP } from "better-auth/plugins"
+import { APIError, createAuthMiddleware } from "better-auth/api"
+import { notifyNewSession, notifySecurity } from "./lib/notify.ts"
+
+const signInPaths = [
+	"/sign-in/email",
+	"/callback/:id",
+	"/two-factor/verify-totp",
+	"/two-factor/verify-backup-code",
+]
 
 const trustedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
 export const auth = betterAuth({
@@ -81,8 +90,42 @@ export const auth = betterAuth({
 			},
 		})
 	],
+	hooks: {
+		after: createAuthMiddleware(async ctx => {
+			// newSession n'est défini que si la connexion a réussi (le callback OAuth finit toujours par un redirect, donc pas de test sur APIError ici)
+			const newSession = ctx.context.newSession
+			if (newSession && !ctx.context.session && signInPaths.includes(ctx.path)) {
+				const isNewAccount = Date.now() - new Date(newSession.user.createdAt).getTime() < 60_000
+				if (!isNewAccount)
+					notifyNewSession(newSession.user.id, newSession.session)
+			}
+
+			if (ctx.context.returned instanceof APIError)
+				return
+
+			if (ctx.path === "/change-password" || ctx.path === "/set-password") {
+				const userId = ctx.context.session?.user.id
+				if (userId)
+					notifySecurity(userId, "password_changed")
+			}
+
+			if (ctx.path === "/email-otp/reset-password" && typeof ctx.body?.email === "string") {
+				const user = await prisma.user.findUnique({ where: { email: ctx.body.email.toLowerCase() }, select: { id: true } })
+				if (user)
+					notifySecurity(user.id, "password_changed")
+			}
+		}),
+	},
 	databaseHooks: {
 		user: {
+			update: {
+				after: async (user, ctx) => {
+					if (ctx?.path === "/two-factor/disable")
+						notifySecurity(user.id, "2fa_disabled")
+					else if (ctx?.path === "/two-factor/verify-totp" && user.twoFactorEnabled)
+						notifySecurity(user.id, "2fa_enabled")
+				}
+			},
 			create: {
 				before: async (user, ctx) => {
 					if (user.username) return { data: user }

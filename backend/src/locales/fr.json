@@ -4,5 +4,15 @@
 	"mail_chat_subject": "SONAR - Nouveau message",
 	"mail_chat_body": "<p>Tu as reçu un nouveau message. Ouvre SONAR pour le lire.</p>",
 	"mail_friend_subject": "SONAR - Demande d'ami",
-	"mail_friend_body": "<p>Tu as reçu une nouvelle demande d'ami. Ouvre SONAR pour y répondre.</p>"
+	"mail_friend_body": "<p>Tu as reçu une nouvelle demande d'ami. Ouvre SONAR pour y répondre.</p>",
+	"mail_achievements_subject": "SONAR - Nouveau succès",
+	"mail_achievements_body": "<p>Tu as débloqué un nouveau succès. Ouvre SONAR pour le voir.</p>",
+	"mail_security_password_changed_subject": "SONAR - Mot de passe modifié",
+	"mail_security_password_changed_body": "<p>Ton mot de passe a été modifié. Si ce n'est pas toi, réinitialise ton mot de passe immédiatement.</p>",
+	"mail_security_2fa_enabled_subject": "SONAR - Double authentification activée",
+	"mail_security_2fa_enabled_body": "<p>La double authentification a été activée sur ton compte. Si ce n'est pas toi, change ton mot de passe immédiatement.</p>",
+	"mail_security_2fa_disabled_subject": "SONAR - Double authentification désactivée",
+	"mail_security_2fa_disabled_body": "<p>La double authentification a été désactivée sur ton compte. Si ce n'est pas toi, change ton mot de passe immédiatement.</p>",
+	"mail_security_new_session_subject": "SONAR - Nouvelle connexion",
+	"mail_security_new_session_body": "<p>Une nouvelle connexion à ton compte a été détectée.</p><p>Appareil : <strong>{{device}}</strong><br>Adresse IP : <strong>{{ip}}</strong></p><p>Si ce n'est pas toi, change ton mot de passe immédiatement.</p>"
 }

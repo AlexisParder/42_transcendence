@@ -201,12 +201,16 @@ model MatchPlayers {
 }
 
 model NotificationPreferences {
-  userId       String  @id
-  app_friend   Boolean @default(true)
-  app_chat     Boolean @default(true)
-  email_friend Boolean @default(false)
-  email_chat   Boolean @default(false)
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String  @id
+  app_friend         Boolean @default(true)
+  app_chat           Boolean @default(true)
+  app_achievements   Boolean @default(true)
+  app_security       Boolean @default(true)
+  email_friend       Boolean @default(false)
+  email_chat         Boolean @default(false)
+  email_achievements Boolean @default(false)
+  email_security     Boolean @default(true)
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
 }
