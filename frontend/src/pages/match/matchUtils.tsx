@@ -250,7 +250,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 
 		<div ref={logsRef} className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none scrollbar-none">
 			{match.logs.length > 0 && match.logs.map(l => (
-				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} />
+				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} match={match} />
 			))}
 
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
@@ -296,7 +296,7 @@ export function GameInfos({ match, myId }: {
 
 		<div ref={logsRef} className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scrollbar-none">
 			{match.logs.length > 0 && match.logs.map(l => (
-				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} />
+				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} match={match} />
 			))}
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 		</div>
@@ -315,7 +315,12 @@ function FleetColorIndicator({ title, badge }: {
 	</div>
 }
 
-function LogItem({ log, myId, replace }: { log: Log, myId: string | null | undefined, replace: boolean }) {
+function LogItem({ log, myId, replace, match }: {
+	log: Log,
+	myId: string | null | undefined,
+	replace: boolean,
+	match: Matchs
+}) {
 	let textColor = "text-neutral-content/50"
 	let bgColor = "bg-neutral/10"
 
@@ -328,12 +333,23 @@ function LogItem({ log, myId, replace }: { log: Log, myId: string | null | undef
 	}
 
 	let text = ""
+	const teamTargetData = match.players.find(p => p.userId === log.targetId)
+	const myTeamData = match.players.find(p => p.userId === myId)
 	if (log.logType === "left")
-		text = `${log.authorId === myId ? "you" : log.authorUsername} left ${replace ? "bot took over" : ""}`
-	else if (log.logType === "fire" && log.shot && log.shot.status !== "sunk")
-		text = `${log.authorId === myId ? "you" : log.authorUsername} fires at ${log.targetId === myId ? "you" : log.targetUsername} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
-	else if (log.logType === "fire" && log.shot && log.shot.status === "sunk")
-		text = `${log.authorId === myId ? "you" : log.authorUsername} sink ${log.targetId === myId ? "your" : `${log.targetUsername}'s`} ${log.shot.ship?.name}`
+		text = `${log.authorUsername} left ${replace ? "bot took over" : ""}`
+	else if (log.logType === "fire" && log.shot && log.shot.status !== "sunk") {
+		if (match.type === "TWO_V_TWO")
+			text = `${log.authorId === myId ? "you fire" : `${log.authorUsername} fires`} at ${teamTargetData?.team === myTeamData?.team ? "your team" : "enemy team"} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
+		else
+			text = `${log.authorId === myId ? "you fire" : `${log.authorUsername} fires`} at ${log.targetId === myId ? "you" : log.targetUsername} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
+	}
+	else if (log.logType === "fire" && log.shot && log.shot.status === "sunk") {
+		if (match.type === "TWO_V_TWO")
+			text = `${log.authorId === myId ? "you sink" : `${log.authorUsername} sinks`} ${teamTargetData?.team === myTeamData?.team ? "your" : `the enemy's`} ${log.shot.ship?.name}`
+
+		else
+			text = `${log.authorId === myId ? "you sink" : `${log.authorUsername} sinks`} ${log.targetId === myId ? "your" : `${log.targetUsername}'s`} ${log.shot.ship?.name}`
+	}
 
 	return <div className={`p-2 ${bgColor} rounded-md`}>
 		<p className={`text-xs font-mono first-letter:uppercase ${textColor}`}>{text}</p>
