@@ -70,6 +70,8 @@
 	"txt_typing": "{{name}} is typing",
 	"txt_team_blue": "Blue team",
 	"txt_team_red": "Red team",
+	"txt_team_1": "Team 1",
+	"txt_team_2": "Team 2",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
@@ -236,6 +238,8 @@
 	"match_hit": "hit",
 	"match_log": "Log",
 	"match_team_chat": "Team chat",
+	"match_players_placing": "players are placing their boats",
+	"match_wait": "please wait",
 
 	"end_match_over": "match over",
 	"end_enemy_fleet_sunk": "enemy fleet sunk",

@@ -23,6 +23,7 @@ export function MatchHeader({ type, title, description, remaining, isMyTurn, ope
 	match: Matchs,
 	handleSpecLeave: () => void
 }) {
+	const isSpec = isSpectator(match, myId)
 	return <div className="flex items-center justify-between bg-base-200 py-4 px-6">
 		<div className="flex items-center max-sm:gap-2 gap-4">
 			<h2 className="uppercase text-sm font-bold tracking-brand max-sm:hidden">sonar</h2>
@@ -31,13 +32,13 @@ export function MatchHeader({ type, title, description, remaining, isMyTurn, ope
 			{match.spectators.length > 0 && <p className="flex items-center gap-1 text-xs text-neutral-content/50 font-semibold font-mono"><BsEyeFill /> {match.spectators.length}</p>}
 		</div>
 		<div className="flex items-center max-sm:gap-2 gap-4">
-			{isMyTurn && <p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>}
+			{!isSpec && isMyTurn && <p className="first-letter:uppercase text-info text-xs font-semibold">{description}</p>}
 			<p className="font-mono text-sm text-info font-semibold border border-info rounded-full px-2 py-1 text-center">{formatMS(remaining)}</p>
-			{!isSpectator(match, myId) && <>
+			{!isSpec && <>
 				<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("match_forfeit")}</button>
 				<button onClick={openForfeitModal} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><IoFlagOutline /></button>
 			</>}
-			{isSpectator(match, myId) && <>
+			{isSpec && <>
 				<button onClick={handleSpecLeave} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer max-sm:hidden outline-none">{t("quit_title")}</button>
 				<button onClick={handleSpecLeave} className="text-xs text-neutral-content/50 hover:text-error first-letter:uppercase cursor-pointer sm:hidden outline-none"><FaDoorOpen /></button>
 			</>}
@@ -57,7 +58,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{t("match_turn_order")}</p>
 
 				<div className="flex flex-col gap-2">
-					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{t("match_your_team")}</p>}
+					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono">{t("txt_team_blue")}</p>}
 					{match.type === "TWO_V_TWO" && match.turns.turnOrder
 						.map(id => match.players.find(p => p.userId === id && p.team === 1))
 						.filter(Boolean)
@@ -65,7 +66,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 							<OrderItem key={p?.userId} username={p?.username} image={p?.image} points={p?.points ?? 0} isTurn={p?.userId === match.turns.userTurn} isMine={p?.userId === myId} teamNumber={p?.team ?? 0} isBot={p?.isBot} matchType={match.type} match={match} placement={p?.placement ?? 0} hasLeft={p?.status === "LEFT"} />
 						))}
 
-					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">{t("match_enemy_team")}</p>}
+					{match.type === "TWO_V_TWO" && <p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pt-2">{t("txt_team_red")}</p>}
 
 					{match.type === "TWO_V_TWO" && match.turns.turnOrder
 						.map(id => match.players.find(p => p.userId === id && p.team === 2))
@@ -185,9 +186,23 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	useAutoScroll(logsRef, match.logs.length)
 	const view = isDesktop ? "attack" : waterView
 	const target = match.players.find(p => p.team === selectedTarget)
-	const targetTeamData = match.teams.find(t => t.id === selectedTarget)
 	const myTeam = match.players.find(p => p.userId === myId)?.team
-	const myTeamData = match.teams.find(t => t.id === myTeam)
+	const isSpec = isSpectator(match, myId)
+
+	let targetTeamData
+	let myTeamData
+	if (!isSpec) {
+		targetTeamData = match.teams.find(t => t.id === selectedTarget)
+		myTeamData = match.teams.find(t => t.id === myTeam)
+	} else {
+		if (match.type !== "FOUR_FFA") {
+			targetTeamData = match.teams.find(t => t.id === (waterView === "attack" ? 1 : 2))
+			myTeamData = match.teams.find(t => t.id === (waterView === "attack" ? 1 : 2))
+		} else {
+			targetTeamData = match.teams.find(t => t.id === selectedTarget)
+			myTeamData = undefined
+		}
+	}
 
 	const sunkShip = [
 		...new Map(
@@ -241,24 +256,30 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				</div>
 			</div>}
 
-			{!isSpectator(match, myId) && <div className="flex items-center gap-2 py-2 lg:hidden">
-				<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => {
+			{(!isSpec || (isSpec && match.type !== "FOUR_FFA")) && <div className={`flex items-center gap-2 py-2 justify-center ${!isSpec ? "lg:hidden" : ""}`}>
+				<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none lg:max-w-105`} onClick={() => {
 					setWaterView("attack")
 					setTargetLocked({ x: -1, y: -1 })
-				}}>{t("match_btn_attack")}</button>
-				<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none`} onClick={() => {
+					if (isSpec)
+						setSelectedTarget(1)
+				}}>{isSpec ? t(match.type === "TWO_V_TWO" ? "txt_team_blue" : "txt_team_1") : t("match_btn_attack")}</button>
+				<button className={`w-full border ${waterView === "my waters" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none lg:max-w-105`} onClick={() => {
 					setWaterView("my waters")
 					setTargetLocked({ x: -1, y: -1 })
-				}}>{t("match_btn_my_waters")}</button>
+					if (isSpec)
+						setSelectedTarget(2)
+				}}>{isSpec ? t(match.type === "TWO_V_TWO" ? "txt_team_red" : "txt_team_2") : t("match_btn_my_waters")}</button>
 			</div>}
 
-			{waterView === "attack" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? t("match_enemy_team_waters") : t("match_player_waters", { name: target?.username ?? "?" })}</p>}
+			{waterView === "attack" && !isSpec && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? t("match_enemy_team_waters") : t("match_player_waters", { name: target?.username ?? "?" })}</p>}
 
-			{waterView === "my waters" && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? t("match_your_team_waters") : t("match_your_waters")}</p>}
+			{waterView === "my waters" && !isSpec && <p className="text-xs uppercase text-info font-medium tracking-brand text-center lg:hidden">{match.type === "TWO_V_TWO" ? t("match_your_team_waters") : t("match_your_waters")}</p>}
+
+			{isSpec && <p className="text-xs uppercase text-info font-medium tracking-brand text-center">{match.type === "TWO_V_TWO" ? t("match_player_waters", { name: t(selectedTarget === 1 ? "txt_team_blue" : "txt_team_red") }) : t("match_player_waters", { name: target?.username ?? "?" })}</p>}
 		</div>
 
 		<div className="flex-1 min-h-0 flex items-center justify-center @container-size py-2">
-			<Grid className="aspect-square w-[min(100cqw,100cqh)]" hoverable={view !== "my waters"} ships={ships} shots={shots} targetLocked={view === "my waters" ? { x: -1, y: -1 } : targetLocked} setTargetLocked={view === "my waters" ? undefined : setTargetLocked} />
+			<Grid className="aspect-square w-[min(100cqw,100cqh)]" hoverable={view !== "my waters" && !isSpec} ships={ships} shots={shots} targetLocked={(view === "my waters" || isSpec) ? { x: -1, y: -1 } : targetLocked} setTargetLocked={(view === "my waters" || isSpec) ? undefined : setTargetLocked} />
 		</div>
 
 		<div ref={logsRef} className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none scrollbar-none">
@@ -269,7 +290,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 		</div>
 
-		<div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
+		{!isSpec && <div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
 			<div>
 				{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{getRowName(targetLocked)}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
 
@@ -279,7 +300,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			</div>
 
 			<button className="btn btn-info px-6 max-sm:px-4 max-sm:btn-sm" disabled={(targetLocked.x < 0 && targetLocked.y < 0) || match.turns.userTurn !== myId || match.endedAt !== 0} onClick={handleFire}>{t("match_btn_fire")}</button>
-		</div>
+		</div>}
 	</div>
 }
 
@@ -291,19 +312,22 @@ export function GameInfos({ match, myId }: {
 	const myTeamData = match.teams.find(t => t.id === myTeam)
 	const logsRef = useRef<HTMLDivElement>(null)
 	useAutoScroll(logsRef, match.logs.length)
+	const isSpec = isSpectator(match, myId)
 
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
-		<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? t("match_your_team_waters") : t("match_your_waters")}</p>
-		<Grid className="w-full bg-abyss-900 my-2" hoverable={false} ships={myTeamData?.ships} shots={myTeamData?.shots} />
-		<div className="flex items-center gap-4 pb-4">
-			<FleetColorIndicator title={t("match_intact")} badge="badge-neutral" />
-			<FleetColorIndicator title={t("match_hit")} badge="badge-warning" />
-			<FleetColorIndicator title={t("match_sunk")} badge="badge-error" />
-		</div>
+		{!isSpec && <>
+			<p className="font-mono text-xs text-neutral-content/50 font-medium tracking-brand uppercase">{match.type === "TWO_V_TWO" ? t("match_your_team_waters") : t("match_your_waters")}</p>
+			<Grid className="w-full bg-abyss-900 my-2" hoverable={false} ships={myTeamData?.ships} shots={myTeamData?.shots} />
+			<div className="flex items-center gap-4 pb-4">
+				<FleetColorIndicator title={t("match_intact")} badge="badge-neutral" />
+				<FleetColorIndicator title={t("match_hit")} badge="badge-warning" />
+				<FleetColorIndicator title={t("match_sunk")} badge="badge-error" />
+			</div>
+		</>}
 
 		<div className="flex">
 			<button className="btn text-info text-xs font-semibold border-b-info rounded-none outline-none">{t("match_log")}</button>
-			{match.type === "TWO_V_TWO" && <button className="btn text-info text-xs font-semibold outline-none">{t("match_team_chat")} <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
+			{match.type === "TWO_V_TWO" && !isSpec && <button className="btn text-info text-xs font-semibold outline-none">{t("match_team_chat")} <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
 		</div>
 		<div className="divider m-0"></div>
 

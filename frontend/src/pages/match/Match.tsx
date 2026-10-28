@@ -12,6 +12,7 @@ import { EndDisplay, EndSpecDisplay } from "./endUtils";
 import { HideModal, Modal, ShowModal } from "../../components/Modal";
 import { Navigate, useNavigate } from "react-router-dom";
 import { isSpectator } from "../../lib/spectator";
+import { IoIosBoat } from "react-icons/io";
 
 type categoryType = "select" | "match"
 export function Match() {
@@ -193,15 +194,25 @@ export function Match() {
 
 	const isLocked = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
 
+	const isSpec = isSpectator(joinedMatch, session?.user.id)
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
-			<div className="flex flex-1 min-h-0">
+			{!isSpec && <div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
 				<Dock placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} onReady={setReady} />
-			</div>
-			<DeploymentFooter placedShips={placedShips} isLocked={isLocked} onReady={setReady} />
+			</div>}
+			{!isSpec && <DeploymentFooter placedShips={placedShips} isLocked={isLocked} onReady={setReady} />}
+			{isSpec && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+				<div className="flex flex-col min-h-full items-center justify-center">
+					<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">
+						<span className="border rounded-full p-3 text-neutral"><IoIosBoat className="size-5" /></span>
+						<h1 className="font-bold first-letter:uppercase">{t("match_players_placing")}</h1>
+						<p className="text-neutral-content/50 first-letter:uppercase">{t("match_wait")}..</p>
+					</div>
+				</div>
+			</div>}
 		</>}
 
 		{category === "match" && joinedMatch.endedAt === 0 && <>
