@@ -55,7 +55,7 @@ export function filterMatchForUser(match: Matchs, userId: string): Matchs {
 	return {
 		...match,
 		teams: match.teams.map(t =>
-			t.id === team ? t : { ...t, ships: [] }
+			t.id === team ? t : { ...t, ships: [], chat: [] }
 		)
 	}
 }

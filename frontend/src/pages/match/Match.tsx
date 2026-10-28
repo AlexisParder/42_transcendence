@@ -12,8 +12,10 @@ import { EndDisplay, EndSpecDisplay } from "./endUtils";
 import { HideModal, Modal, ShowModal } from "../../components/Modal";
 import { Navigate, useNavigate } from "react-router-dom";
 import { isSpectator } from "../../lib/spectator";
+import { IoIosBoat } from "react-icons/io";
 
 type categoryType = "select" | "match"
+export type gameInfosViewType = "logs" | "chat"
 export function Match() {
 	useDocumentTitle(t("match_title"))
 
@@ -21,6 +23,7 @@ export function Match() {
 	const socket = useSocket()
 	const navigate = useNavigate()
 	const [category, setCategory] = useState<categoryType>("match")
+	const [gameInfosView, setGameInfosView] = useState<gameInfosViewType>("logs")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState(0)
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
@@ -33,6 +36,8 @@ export function Match() {
 	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
 	const [errors, setErrors] = useState<{ action?: string }>({})
 	const [isLoading, setIsLoading] = useState(true)
+	const [hasUnreadMessage, setHasUnreadMessage] = useState(false)
+	const [sendInput, setSendInput] = useState("")
 
 	function updatePlacedShips(ships: Ship[]) {
 		setPlacedShips(ships)
@@ -68,19 +73,27 @@ export function Match() {
 				setPlacedShips(payload.teams.find(t => t.id === myTeam)?.ships ?? [])
 			}
 		}
+		function onRefreshMatchChat(payload: Matchs | undefined) {
+			setJoinedMatch(payload)
+			setCategory(payload?.step === "game" ? "match" : "select")
+			if (gameInfosView !== "chat")
+				setHasUnreadMessage(true)
+		}
 		function onTurnUpdate(payload: { remaining: number }) {
 			setTurnEndsAt(Date.now() + payload.remaining * 1000)
 			setRemaining(payload.remaining)
 		}
 
 		socket.on("refresh_joined_match", onRefreshMatch)
+		socket.on("refresh_chat_match", onRefreshMatchChat)
 		socket.on("turn_update", onTurnUpdate)
 
 		return () => {
 			socket.off("refresh_joined_match", onRefreshMatch)
+			socket.off("refresh_chat_match", onRefreshMatchChat)
 			socket.off("turn_update", onTurnUpdate)
 		}
-	}, [socket, joinedMatch, session])
+	}, [socket, joinedMatch, session, gameInfosView])
 
 	useEffect(() => {
 		if (!turnEndsAt)
@@ -185,31 +198,69 @@ export function Match() {
 		}
 	}
 
+	async function handleSend() {
+		if (!joinedMatch)
+			return
+
+		const message = sendInput.trim()
+		if (!message)
+			return
+
+		if (message.length > 1000)
+			return
+		// return setErrors({ messages: t("friend_err_msg_to_long") })
+
+		try {
+			setErrors({})
+			const { ok, data } = await apiPost("/api/match-send-message", {
+				hostId: joinedMatch.hostId,
+				message
+			})
+
+			if (!ok)
+				return setErrors({ action: data.code })
+
+			setSendInput("")
+		} catch (error) {
+			console.error("send message:", error)
+		}
+	}
+
 	if (isLoading || isPending)
-		return <p>Loading...</p>
+		return <p>{t("sidebar_loading")}</p>
 
 	if (!joinedMatch || joinedMatch.startedAt === 0)
 		return <Navigate to="/play" replace />
 
 	const isLocked = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
+	const isSpec = isSpectator(joinedMatch, session?.user.id)
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
-			<div className="flex flex-1 min-h-0">
+			{!isSpec && <div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
 				<Dock placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} onReady={setReady} />
-			</div>
-			<DeploymentFooter placedShips={placedShips} isLocked={isLocked} onReady={setReady} />
+			</div>}
+			{!isSpec && <DeploymentFooter placedShips={placedShips} isLocked={isLocked} onReady={setReady} />}
+			{isSpec && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+				<div className="flex flex-col min-h-full items-center justify-center">
+					<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">
+						<span className="border rounded-full p-3 text-neutral"><IoIosBoat className="size-5" /></span>
+						<h1 className="font-bold first-letter:uppercase">{t("match_players_placing")}</h1>
+						<p className="text-neutral-content/50 first-letter:uppercase">{t("match_wait")}..</p>
+					</div>
+				</div>
+			</div>}
 		</>}
 
 		{category === "match" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
-				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} />
-				<GameInfos match={joinedMatch} myId={session?.user.id} />
+				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} />
+				<GameInfos match={joinedMatch} myId={session?.user.id} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} />
 			</div>
 		</>}
 
@@ -218,7 +269,7 @@ export function Match() {
 
 		<Modal id="forfeitModal">
 			<p className="pb-2 first-letter:uppercase">{t("match_forfeit")}</p>
-			<p>This action is irreversible and will result in a loss of points</p>
+			<p>{t("match_forfeit_desc")}</p>
 			<div className="flex gap-2 pt-2 justify-end">
 				<button onClick={() => HideModal("forfeitModal")} className="btn btn-neutral">{t("btn_cancel")}</button>
 				<button className="btn btn-error btn-outline" onClick={handleForfeit}>{t("btn_confirm")}</button>

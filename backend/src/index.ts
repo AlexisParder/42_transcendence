@@ -52,6 +52,7 @@ import { forfeitMatchHandler } from "./routes/matches/forfeitMatch.route.ts"
 import { getUserPointsHandler } from "./routes/getUserPoints.route.ts"
 import { joinSpecMatchHandler } from "./routes/matches/joinSpecMatch.route.ts"
 import { leaveSpecMatchHandler } from "./routes/matches/leaveSpecMatch.route.ts"
+import { matchSendMessageHandler } from "./routes/matches/MatchSendMessage.route.ts"
 
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, "available" | "away">()
@@ -115,6 +116,7 @@ app.post("/api/player-fire", playerFireHandler)
 app.post("/api/set-player-ships", setPlayerShipsHandler)
 app.post("/api/set-player-ready-on-select", setPlayerReadyOnSelectHandler)
 app.post("/api/forfeit-match", forfeitMatchHandler)
+app.post("/api/match-send-message", matchSendMessageHandler)
 
 io.use(async (socket, next) => {
 	try {

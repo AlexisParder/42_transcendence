@@ -64,7 +64,8 @@ export async function createMatchHandler(req: Request, res: Response) {
 			teams: Array.from({ length: MATCH_CONFIG[selectedMatchType].teams }, (_, i) => ({
 				id: i + 1,
 				ships: [],
-				shots: []
+				shots: [],
+				chat: []
 			})),
 			players: [
 				{

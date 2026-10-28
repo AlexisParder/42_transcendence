@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { MatchPlayers, Matchs } from "../../events.ts";
-import { filterMatchForUser, firstFreeTeam, isInAnyMatch } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, firstFreeTeam, isInAnyMatch, isInAnySpecMatch } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
 import { canJoinRankedMatch } from "../../lib/matchs/eloLib.ts";
 import { io } from "../../server.ts";
@@ -31,7 +31,7 @@ export async function joinMatchHandler(req: Request, res: Response) {
 		if (!match || match.visibility !== "public")
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
-		if (isInAnyMatch(currentMatches, userId))
+		if (isInAnyMatch(currentMatches, userId) || isInAnySpecMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
 		if (match.players.length >= match.maxPlayers)
