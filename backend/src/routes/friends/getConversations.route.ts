@@ -22,24 +22,28 @@ export async function getConverstionsHandler(req: Request, res: Response) {
 					{ targetId: userId }
 				]
 			},
-			orderBy: { sendAt: "desc" },
-			include: {
-				user: { select: { id: true, username: true, image: true } },
-				target: { select: { id: true, username: true, image: true } },
-			}
+			orderBy: { sendAt: "desc" }
 		})
+
+		const peerIds = [...new Set(rows.map(row => row.userId === userId ? row.targetId : row.userId))]
+		const peers = await prisma.user.findMany({
+			where: { id: { in: peerIds } },
+			select: { id: true, username: true, image: true }
+		})
+		const peersById = new Map(peers.map(peer => [peer.id, peer]))
 
 		const conversations = new Map<string, ConversationSummary>()
 
 		for (const row of rows) {
-			const other = row.userId === userId ? row.target : row.user
-			const peerId = other.id
+			const peerId = row.userId === userId ? row.targetId : row.userId
+			const other = peersById.get(peerId)
 
 			if (!conversations.has(peerId)) {
 				conversations.set(peerId, {
 					peerId,
-					username: other.username,
-					image: other.image,
+					username: other?.username,
+					image: other?.image,
+					isDeleted: !other,
 					lastMessage: row.message,
 					lastAt: row.sendAt.toISOString(),
 					isMine: row.userId === userId,

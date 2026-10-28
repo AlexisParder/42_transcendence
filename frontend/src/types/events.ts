@@ -80,6 +80,7 @@ export interface ConversationSummary {
 	peerId: string
 	username: string | null | undefined
 	image: string | null | undefined
+	isDeleted: boolean
 	lastMessage: string
 	lastAt: string
 	isMine: boolean
@@ -92,6 +93,7 @@ export interface Match {
 	id: string,
 	result: 'win' | 'loss',
 	otherPlayer: string | null,
+	otherDeleted: boolean,
 	placement: number | null,
 	matchType: matchType,
 	matchTime: string,

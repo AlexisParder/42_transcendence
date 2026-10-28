@@ -300,11 +300,11 @@ export function SettingsCat() {
 			}
 		}
 
-		const { error } = await authClient.deleteUser();
+		const { error } = await authClient.deleteUser({ password });
 
 		HideModal("deleteModal")
 		if (error) {
-			setErrors({ form: t("settings_err_rmv_user") })
+			setErrors({ form: error.code ? t(error.code) : t("settings_err_rmv_user") })
 			return
 		}
 		setErrors({})

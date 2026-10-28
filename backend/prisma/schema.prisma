@@ -37,9 +37,6 @@ model User {
   sentFriends     Friends[] @relation("SentFriends")
   ReceivedFriends Friends[] @relation("ReceivedFriends")
 
-  sentMsg     Conversations[] @relation("SentMsg")
-  ReceivedMsg Conversations[] @relation("ReceivedMsg")
-
   sentBlock     UserBlocked[]  @relation("SentBlock")
   ReceivedBlock UserBlocked[]  @relation("ReceivedBlock")
   matchPlayers  MatchPlayers[]
@@ -137,9 +134,7 @@ model Conversations {
   sendAt   DateTime @default(now())
   isRead   Boolean  @default(false)
 
-  user   User @relation("SentMsg", fields: [userId], references: [id], onDelete: Cascade)
-  target User @relation("ReceivedMsg", fields: [targetId], references: [id], onDelete: Cascade)
-
+  // pas de relation vers User : les messages sont conservés après suppression d'un compte (affiché "Anonyme")
   @@index([userId])
   @@index([targetId])
   @@map("conversations")

@@ -84,7 +84,7 @@ export function Friends() {
 
 	const onlineFriends = friends.filter(f => (presence[f.id] ?? f.status) !== "offline").filter(f => matchesSearch(f.username))
 	const offlineFriends = friends.filter(f => (presence[f.id] ?? f.status) === "offline").filter(f => matchesSearch(f.username))
-	const filteredConversations = conversations.filter(c => matchesSearch(c.username))
+	const filteredConversations = conversations.filter(c => matchesSearch(c.isDeleted ? deletedUserName(c.peerId) : c.username))
 	const filteredBlocked = blocked.filter(b => matchesSearch(b.username))
 
 	useEffect(() => {
@@ -371,6 +371,7 @@ export function Friends() {
 			peerId: otherId,
 			username: existing?.username ?? null,
 			image: existing?.image ?? null,
+			isDeleted: existing?.isDeleted ?? false,
 			lastMessage: msg.message,
 			lastAt: msg.createdAt,
 			isMine,
@@ -635,7 +636,7 @@ export function Friends() {
 	return <Sidebar>
 		<SidebarRight search={search} setSearch={setSearch} filteredConversations={filteredConversations} setPeerId={selectPeer} peerId={peerId} closeCurrentConv={closeCurrentConv} requests={requests} handleAccept={handleAccept} handleDecline={handleDecline} onlineFriends={onlineFriends} offlineFriends={offlineFriends} filteredBlocked={filteredBlocked} presence={presence} handleUnblock={handleUnblock} ClearAndOpenFriendModal={ClearAndOpenFriendModal} >
 			<div className="flex flex-col h-full min-h-0 min-w-0">
-				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} handleInvite={handleInvite} inviteErr={errors.invite} />
+				<ConversationFriendDisplay friends={friends} blocked={blocked} peerId={peerId} isDeleted={conversations.find(c => c.peerId === peerId)?.isDeleted ?? false} onBlock={askBlock} onUnblock={handleUnblock} onProfile={handleProfile} closeCurrentConv={closeCurrentConv} status={presence[peerId ?? ""]} handleInvite={handleInvite} inviteErr={errors.invite} />
 				{!peerId && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full items-center justify-center">
 						<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">
@@ -770,11 +771,16 @@ function DisplayMessage({ message, isMine, createdAt, isLastMessage, isRead }: {
 	</div>
 }
 
-function ConversationFriendDisplay({ friends, blocked, peerId, inviteErr, onBlock, onUnblock, onProfile, closeCurrentConv, status, handleInvite }:
+function deletedUserName(id: string) {
+	return t("deleted_user_id", { id: id.slice(0, 8) })
+}
+
+function ConversationFriendDisplay({ friends, blocked, peerId, isDeleted, inviteErr, onBlock, onUnblock, onProfile, closeCurrentConv, status, handleInvite }:
 	{
 		friends: Friend[],
 		blocked: Friend[],
 		peerId: string | null,
+		isDeleted: boolean,
 		inviteErr?: string,
 		onBlock: (id: string) => void,
 		onUnblock: (id: string) => void,
@@ -788,19 +794,20 @@ function ConversationFriendDisplay({ friends, blocked, peerId, inviteErr, onBloc
 
 	const friend = friends.find(f => f.id === peerId)
 	const blockedData = blocked.find(b => b.id === peerId)
+	const username = isDeleted ? deletedUserName(peerId) : (friend?.username ?? blockedData?.username)
 
 	return <div className="flex items-center justify-between p-4 bg-base-200">
 		<div className="flex items-center w-full gap-2">
 			<button className="btn btn-sm p-0 md:hidden" onClick={() => closeCurrentConv()}><BiArrowBack className="size-4" /></button>
-			<Avatar username={friend?.username ?? blockedData?.username} image={friend?.image ?? blockedData?.image} size={40} />
+			<Avatar username={username} image={friend?.image ?? blockedData?.image} size={40} />
 			<div>
-				<p className="text-sm">{friend?.username ?? blockedData?.username}</p>
+				<p className="text-sm">{username}</p>
 				{friend && <p className="text-xs text-info">{friend && t(`txt_${status}`)}</p>}
 			</div>
 		</div>
 		<div className="flex flex-col items-end justify-between">
 			<div className="flex items-center gap-2">
-				<button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={() => onProfile(peerId)}>{t("settings_profile_title")}</button>
+				{!isDeleted && <button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={() => onProfile(peerId)}>{t("settings_profile_title")}</button>}
 				{friend && !blockedData && <button className="btn btn-outline btn-neutral text-neutral-content btn-sm" onClick={handleInvite}>{t("btn_invite")}</button>}
 				{friend && !blockedData && <button onClick={() => onBlock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_block")}</button>}
 				{!friend && blockedData && <button onClick={() => onUnblock(peerId)} className="btn btn-outline btn-error btn-sm">{t("btn_unblock")}</button>}
@@ -823,7 +830,7 @@ function ConversationsSection({ conversations, onSelect, closeConv, peerId }: {
 			<span className={`menu-dropdown-toggle ${isOpened ? "menu-dropdown-show" : ""} uppercase`} onClick={() => setIsOpened(!isOpened)}>{t("friends_conversations_title")}</span>
 			<ul className={`menu-dropdown ${isOpened ? "menu-dropdown-show" : ""} px-1 m-0`}>
 				{conversations.map(conv => (
-					<ConversationsItem key={conv.peerId} username={conv.username} image={conv.image} lastMsg={conv.lastMessage} lastTimeMsg={formatTime(conv.lastAt)} isMine={conv.isMine} isRead={conv.unreadCount === 0} isSelected={peerId === conv.peerId} onSelect={() => {
+					<ConversationsItem key={conv.peerId} username={conv.isDeleted ? deletedUserName(conv.peerId) : conv.username} image={conv.image} lastMsg={conv.lastMessage} lastTimeMsg={formatTime(conv.lastAt)} isMine={conv.isMine} isRead={conv.unreadCount === 0} isSelected={peerId === conv.peerId} onSelect={() => {
 						if (peerId === conv.peerId)
 							closeConv()
 						else

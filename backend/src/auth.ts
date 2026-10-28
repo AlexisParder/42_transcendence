@@ -4,8 +4,11 @@ import { prisma } from "./db/client.ts"
 import { sendMail } from "./lib/mail.ts"
 import { getUserLanguage, resolveLanguage, t } from "./lib/translate.ts"
 import { twoFactor, username, emailOTP } from "better-auth/plugins"
-import { APIError, createAuthMiddleware } from "better-auth/api"
+import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api"
 import { notifyNewSession, notifySecurity } from "./lib/notify.ts"
+import { io } from "./server.ts"
+import { currentMatches } from "./mapMatches.ts"
+import { isInAnyMatch, isInAnySpecMatch } from "./lib/matchs/matchUtils.ts"
 
 const signInPaths = [
 	"/sign-in/email",
@@ -46,9 +49,17 @@ export const auth = betterAuth({
 	user: {
 		deleteUser: {
 			enabled: true,
-			// beforeDelete: async (user, request) => {
-			// 	// ajouter la logique pour les historiques en mettant "Anonyme"
-			// },
+			beforeDelete: async (user) => {
+				const friends = await prisma.friends.findMany({
+					where: { OR: [{ userId: user.id }, { targetId: user.id }] },
+					select: { userId: true, targetId: true }
+				})
+				for (const row of friends)
+					io.to(row.userId === user.id ? row.targetId : row.userId).emit("friend_removed", { userId: user.id })
+			},
+			afterDelete: async (user) => {
+				io.in(user.id).disconnectSockets(true)
+			},
 		},
 		additionalFields: {
 			language: {
@@ -91,8 +102,15 @@ export const auth = betterAuth({
 		})
 	],
 	hooks: {
-		after: createAuthMiddleware(async ctx => {
-			// newSession n'est défini que si la connexion a réussi (le callback OAuth finit toujours par un redirect, donc pas de test sur APIError ici)
+		before: createAuthMiddleware(async ctx => {
+			if (ctx.path !== "/delete-user")
+				return
+
+			const session = await getSessionFromCtx(ctx)
+			if (session && (isInAnyMatch(currentMatches, session.user.id) || isInAnySpecMatch(currentMatches, session.user.id)))
+				return ctx.json({ ok: false, code: "settings_err_rmv_user_in_match" }, { status: 409 })
+		}),
+		after:createAuthMiddleware(async ctx => {
 			const newSession = ctx.context.newSession
 			if (newSession && !ctx.context.session && signInPaths.includes(ctx.path)) {
 				const isNewAccount = Date.now() - new Date(newSession.user.createdAt).getTime() < 60_000

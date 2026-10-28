@@ -7,19 +7,17 @@ export function formatMatch(row: any, userId: string) {
 
 	const min = match.endedAt ? Math.round((+new Date(match.endedAt) - +new Date(match.startedAt)) / 60000) : 0
 
-	let otherPlayer: string | null = null
+	let other: any = null
 	switch (match.type) {
-		case "ONE_V_ONE": {
-			const opp = others[0]
-			otherPlayer = opp?.isBot ? null : (opp?.user?.username ?? "?")
+		case "ONE_V_ONE":
+			other = others[0]
 			break;
-		}
-		case "TWO_V_TWO": {
-			const mate = others.find((p: any) => p.team === me.team)
-			otherPlayer = mate?.isBot ? null : (mate?.user?.username ?? "?")
+		case "TWO_V_TWO":
+			other = others.find((p: any) => p.team === me.team)
 			break;
-		}
 	}
+	const otherPlayer: string | null = other && !other.isBot ? (other.user?.username ?? null) : null
+	const otherDeleted = !!other && !other.isBot && !other.user
 
 	const result: 'win' | 'loss' = match.isRanked ? (me.points >= 0 ? 'win' : 'loss') : (me.placement === 1 ? 'win' : 'loss')
 
@@ -27,6 +25,7 @@ export function formatMatch(row: any, userId: string) {
 		id: match.id,
 		result,
 		otherPlayer,
+		otherDeleted,
 		placement: (me.placement ?? null) as number | null,
 		matchType: match.type as Type,
 		matchTime: min,

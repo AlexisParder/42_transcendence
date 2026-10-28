@@ -229,17 +229,19 @@ export function Profile() {
 	</Sidebar>
 }
 
-function matchDesc(type: Match["matchType"], otherPlayer: string | null, placement: number | null) {
+function matchDesc(type: Match["matchType"], otherPlayer: string | null, otherDeleted: boolean, placement: number | null) {
+	const name = otherDeleted ? t("deleted_user") : (otherPlayer ?? "Bot")
 	if (type === "ONE_V_ONE")
-		return t("profile_match_vs", { name: otherPlayer ?? "Bot" })
+		return t("profile_match_vs", { name })
 	if (type === "TWO_V_TWO")
-		return t("profile_match_duo_with", { name: otherPlayer ?? "Bot" })
+		return t("profile_match_duo_with", { name })
 	return placement ? t(`profile_match_place_${placement}`) : t("txt_FFA")
 }
 
-function MatchesItem({ result, otherPlayer, placement, type, matchTime, points }: {
+function MatchesItem({ result, otherPlayer, otherDeleted, placement, type, matchTime, points }: {
 	result: "win" | "loss",
 	otherPlayer: string | null,
+	otherDeleted: boolean,
 	placement: number | null,
 	type: matchType,
 	matchTime: string,
@@ -266,7 +268,7 @@ function MatchesItem({ result, otherPlayer, placement, type, matchTime, points }
 
 	return <div className={`grid grid-cols-[4rem_1fr_1fr_5rem] items-center gap-2 ${colorBg} p-2.5 rounded-md border-l-3 ${colorBd}`}>
 		<p className={`text-sm ${colorTxt} font-bold uppercase`}>{t(`txt_${result}`)}</p>
-		<p className="text-xs text-center">{matchDesc(type, otherPlayer, placement)}</p>
+		<p className="text-xs text-center">{matchDesc(type, otherPlayer, otherDeleted, placement)}</p>
 		<p className="flex items-center justify-center gap-1 text-xs">{t(`txt_${type}`)} <TbPointFilled className="size-1" /> {formatTimeProfile(matchTime)}</p>
 		<p className={`text-xs ${colorTxt} font-bold text-right`}>{pointsTxt === "unranked" ? t("txt_unranked") : pointsTxt}</p>
 	</div>
