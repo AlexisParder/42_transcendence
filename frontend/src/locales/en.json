@@ -121,6 +121,7 @@
 	"match_err_status_update_failure": "An error occurred while updating your status",
 	"match_err_kick_failure": "An error occurred while removing the player",
 	"match_err_invite_failure": "An error occurred while inviting the player",
+	"match_err_msg_to_short": "Your message is too short.",
 
 	"play_title": "Play",
 	"play_desc": "pick a format, then open it up or invite your crew",
@@ -236,10 +237,11 @@
 	"match_btn_fire": "Fire",
 	"match_intact": "intact",
 	"match_hit": "hit",
-	"match_log": "Log",
+	"match_log": "Logs",
 	"match_team_chat": "Team chat",
 	"match_players_placing": "players are placing their boats",
 	"match_wait": "please wait",
+	"match_forfeit_desc": "This action is irreversible and will result in a loss of points",
 
 	"end_match_over": "match over",
 	"end_enemy_fleet_sunk": "enemy fleet sunk",

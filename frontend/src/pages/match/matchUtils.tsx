@@ -8,10 +8,11 @@ import { formatMS } from "../../lib/formatTime"
 import { ordinal } from "../../lib/ordinal"
 import { useAutoScroll } from "../../hooks/useAutoScroll"
 import { useRef } from "react"
-import { FaDoorOpen } from "react-icons/fa6"
+import { FaArrowTurnUp, FaDoorOpen } from "react-icons/fa6"
 import { BsEyeFill } from "react-icons/bs"
 import { isSpectator } from "../../lib/spectator"
 import type { gameInfosViewType } from "./Match"
+import { Input } from "../../components/Input"
 
 export function MatchHeader({ type, title, description, remaining, isMyTurn, openForfeitModal, myId, match, handleSpecLeave }: {
 	type?: matchType
@@ -170,7 +171,7 @@ function getRowName(coords: vect2) {
 	return `${rowName[coords.y]}${coords.x + 1}`
 }
 
-export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire, errorMsg }: {
+export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire, errorMsg, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage, sendInput, setSendInput, handleSend }: {
 	match: Matchs,
 	myId: string | null | undefined,
 	selectedTarget: number,
@@ -180,15 +181,24 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	targetLocked: vect2,
 	setTargetLocked: (coords: vect2) => void,
 	handleFire: () => void,
-	errorMsg: string
+	errorMsg: string,
+	hasUnreadMessage: boolean
+	gameInfosView: gameInfosViewType,
+	setGameInfosView: (view: gameInfosViewType) => void,
+	setHasUnreadMessage: (hasUnread: boolean) => void,
+	sendInput: string,
+	setSendInput: (msg: string) => void,
+	handleSend: () => void
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
-	const logsRef = useRef<HTMLDivElement>(null)
-	useAutoScroll(logsRef, match.logs.length)
 	const view = isDesktop ? "attack" : waterView
 	const target = match.players.find(p => p.team === selectedTarget)
 	const myTeam = match.players.find(p => p.userId === myId)?.team
 	const isSpec = isSpectator(match, myId)
+	const logsRef = useRef<HTMLDivElement>(null)
+	const chatRef = useRef<HTMLDivElement>(null)
+	useAutoScroll(logsRef, match.logs.length)
+	useAutoScroll(chatRef, match.teams.find(t => t.id === myTeam)?.chat.length ?? 0)
 
 	let targetTeamData
 	let myTeamData
@@ -283,13 +293,40 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			<Grid className="aspect-square w-[min(100cqw,100cqh)]" hoverable={view !== "my waters" && !isSpec} ships={ships} shots={shots} targetLocked={(view === "my waters" || isSpec) ? { x: -1, y: -1 } : targetLocked} setTargetLocked={(view === "my waters" || isSpec) ? undefined : setTargetLocked} />
 		</div>
 
-		<div ref={logsRef} className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none scrollbar-none">
+		<div className={`flex items-center gap-2 ${gameInfosView === "logs" ? "py-2" : ""} lg:hidden`}>
+			<div className="flex">
+				<button className={`btn text-info text-xs font-semibold ${gameInfosView === "logs" ? "border-b-info" : ""} rounded-none outline-none bg-abyss-900 border-abyss-900`} onClick={() => setGameInfosView("logs")}>{t("match_log")}</button>
+				{match.type === "TWO_V_TWO" && !isSpec && <button className={`btn text-info text-xs font-semibold rounded-none outline-none bg-abyss-900 border-abyss-900 ${gameInfosView === "chat" ? "border-b-info" : ""}`} onClick={() => {
+					setGameInfosView("chat")
+					setHasUnreadMessage(false)
+				}}>{t("match_team_chat")} {hasUnreadMessage && <span className="bg-warning rounded-full w-2.5 h-2.5 animate-pulse flex items-center justify-center"></span>}</button>}
+			</div>
+
+			{gameInfosView === "chat" && <div className="flex flex-1 items-center justify-between gap-2">
+				<div className="w-full">
+					<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+						if (e.key === "Enter")
+							handleSend()
+					}} useLabel={false} />
+				</div>
+				{<button className="btn btn-outline btn-info" onClick={handleSend}><FaArrowTurnUp /></button>}
+			</div>}
+		</div>
+
+		{gameInfosView === "logs" && <div ref={logsRef} className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none scrollbar-none">
 			{match.logs.length > 0 && match.logs.map(l => (
 				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} match={match} />
 			))}
 
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
-		</div>
+		</div>}
+
+		{gameInfosView === "chat" && <div ref={chatRef} className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none scrollbar-none">
+			{(myTeamData?.chat.length ?? 0) > 0 && myTeamData?.chat.map((m, i) => (
+				<span key={i} className={`text-xs text-neutral-content/75 ${m.authorId === myId ? "bg-info/10" : "bg-neutral/25"} p-2 rounded-md whitespace-pre-wrap break-all`}>{m.message}</span>
+			))}
+			{(myTeamData?.chat.length ?? 0) < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
+		</div>}
 
 		{!isSpec && <div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
 			<div>
@@ -305,18 +342,23 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	</div>
 }
 
-export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage }: {
+export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage, sendInput, setSendInput, handleSend }: {
 	match: Matchs,
 	myId: string | null | undefined,
 	hasUnreadMessage: boolean
 	gameInfosView: gameInfosViewType,
 	setGameInfosView: (view: gameInfosViewType) => void,
-	setHasUnreadMessage: (hasUnread: boolean) => void
+	setHasUnreadMessage: (hasUnread: boolean) => void,
+	sendInput: string,
+	setSendInput: (msg: string) => void,
+	handleSend: () => void
 }) {
 	const myTeam = match.players.find(p => p.userId === myId)?.team
 	const myTeamData = match.teams.find(t => t.id === myTeam)
 	const logsRef = useRef<HTMLDivElement>(null)
+	const chatRef = useRef<HTMLDivElement>(null)
 	useAutoScroll(logsRef, match.logs.length)
+	useAutoScroll(chatRef, myTeamData?.chat.length ?? 0)
 	const isSpec = isSpectator(match, myId)
 
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
@@ -339,12 +381,29 @@ export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGam
 		</div>
 		<div className="divider m-0"></div>
 
-		<div ref={logsRef} className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scrollbar-none">
+		{gameInfosView === "logs" && <div ref={logsRef} className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scrollbar-none">
 			{match.logs.length > 0 && gameInfosView === "logs" && match.logs.map(l => (
 				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} match={match} />
 			))}
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
-		</div>
+		</div>}
+
+		{gameInfosView === "chat" && <div ref={chatRef} className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scrollbar-none">
+			{(myTeamData?.chat.length ?? 0) > 0 && myTeamData?.chat.map((m, i) => (
+				<span key={i} className={`text-xs text-neutral-content/75 ${m.authorId === myId ? "bg-info/10" : "bg-neutral/25"} p-1 rounded-md whitespace-pre-wrap break-all`}>{m.message}</span>
+			))}
+			{(myTeamData?.chat.length ?? 0) < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
+		</div>}
+
+		{gameInfosView === "chat" && <div className="flex items-center justify-between bg-base-200 gap-2">
+			<div className="w-full">
+				<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+					if (e.key === "Enter")
+						handleSend()
+				}} useLabel={false} />
+			</div>
+			{<button className="btn btn-outline btn-info" onClick={handleSend}><FaArrowTurnUp /></button>}
+		</div>}
 	</div>
 }
 
