@@ -16,7 +16,7 @@
     "@zxcvbn-ts/language-en": "^4.1.1",
     "@zxcvbn-ts/language-fr": "^4.1.2",
     "better-auth": "^1.7.1",
-    "daisyui": "^5.7.17",
+    "daisyui": "^5.7.50",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
