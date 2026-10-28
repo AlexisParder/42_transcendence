@@ -172,6 +172,12 @@ export interface Teams {
 	id: number,
 	ships: Ship[],
 	shots: Shot[],
+	chat: MatchMsg[]
+}
+
+export interface MatchMsg {
+	authorId: string | null | undefined,
+	message: string,
 }
 
 export type ShipName = "carrier" | "cruiser" | "destroyer" | "frigate" | "submarine"

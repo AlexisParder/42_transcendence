@@ -11,6 +11,7 @@ import { useRef } from "react"
 import { FaDoorOpen } from "react-icons/fa6"
 import { BsEyeFill } from "react-icons/bs"
 import { isSpectator } from "../../lib/spectator"
+import type { gameInfosViewType } from "./Match"
 
 export function MatchHeader({ type, title, description, remaining, isMyTurn, openForfeitModal, myId, match, handleSpecLeave }: {
 	type?: matchType
@@ -304,9 +305,13 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	</div>
 }
 
-export function GameInfos({ match, myId }: {
+export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage }: {
 	match: Matchs,
 	myId: string | null | undefined,
+	hasUnreadMessage: boolean
+	gameInfosView: gameInfosViewType,
+	setGameInfosView: (view: gameInfosViewType) => void,
+	setHasUnreadMessage: (hasUnread: boolean) => void
 }) {
 	const myTeam = match.players.find(p => p.userId === myId)?.team
 	const myTeamData = match.teams.find(t => t.id === myTeam)
@@ -326,13 +331,16 @@ export function GameInfos({ match, myId }: {
 		</>}
 
 		<div className="flex">
-			<button className="btn text-info text-xs font-semibold border-b-info rounded-none outline-none">{t("match_log")}</button>
-			{match.type === "TWO_V_TWO" && !isSpec && <button className="btn text-info text-xs font-semibold outline-none">{t("match_team_chat")} <span className="bg-warning rounded-full w-5 h-5 flex items-center justify-center text-info-content font-mono">2</span></button>}
+			<button className={`btn text-info text-xs font-semibold ${gameInfosView === "logs" ? "border-b-info" : ""} rounded-none outline-none`} onClick={() => setGameInfosView("logs")}>{t("match_log")}</button>
+			{match.type === "TWO_V_TWO" && !isSpec && <button className={`btn text-info text-xs font-semibold rounded-none outline-none ${gameInfosView === "chat" ? "border-b-info" : ""}`} onClick={() => {
+				setGameInfosView("chat")
+				setHasUnreadMessage(false)
+			}}>{t("match_team_chat")} {hasUnreadMessage && <span className="bg-warning rounded-full w-2.5 h-2.5 animate-pulse flex items-center justify-center"></span>}</button>}
 		</div>
 		<div className="divider m-0"></div>
 
 		<div ref={logsRef} className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scrollbar-none">
-			{match.logs.length > 0 && match.logs.map(l => (
+			{match.logs.length > 0 && gameInfosView === "logs" && match.logs.map(l => (
 				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} match={match} />
 			))}
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}

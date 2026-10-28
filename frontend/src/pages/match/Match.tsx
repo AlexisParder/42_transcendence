@@ -15,6 +15,7 @@ import { isSpectator } from "../../lib/spectator";
 import { IoIosBoat } from "react-icons/io";
 
 type categoryType = "select" | "match"
+export type gameInfosViewType = "logs" | "chat"
 export function Match() {
 	useDocumentTitle(t("match_title"))
 
@@ -22,6 +23,7 @@ export function Match() {
 	const socket = useSocket()
 	const navigate = useNavigate()
 	const [category, setCategory] = useState<categoryType>("match")
+	const [gameInfosView, setGameInfosView] = useState<gameInfosViewType>("logs")
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [selectedTarget, setSelectedTarget] = useState(0)
 	const [waterView, setWaterView] = useState<"attack" | "my waters">("attack")
@@ -34,6 +36,7 @@ export function Match() {
 	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
 	const [errors, setErrors] = useState<{ action?: string }>({})
 	const [isLoading, setIsLoading] = useState(true)
+	const [hasUnreadMessage, setHasUnreadMessage] = useState(true)
 
 	function updatePlacedShips(ships: Ship[]) {
 		setPlacedShips(ships)
@@ -193,8 +196,8 @@ export function Match() {
 		return <Navigate to="/play" replace />
 
 	const isLocked = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
-
 	const isSpec = isSpectator(joinedMatch, session?.user.id)
+
 	return <div className="h-dvh flex flex-col overflow-hidden">
 		{category === "select" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader title={t("select_header_title")} description={t("select_header_desc")} remaining={remaining} isMyTurn={true} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
@@ -220,7 +223,7 @@ export function Match() {
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
 				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} />
-				<GameInfos match={joinedMatch} myId={session?.user.id} />
+				<GameInfos match={joinedMatch} myId={session?.user.id} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} />
 			</div>
 		</>}
 
