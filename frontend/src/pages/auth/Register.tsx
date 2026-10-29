@@ -11,6 +11,7 @@ import { SignGoogle } from "../../lib/SignGoogle";
 import { SignDiscord } from "../../lib/SignDiscord";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { t } from "../../lib/translate";
+import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password";
 
 type Errors = {
 	username?: string
@@ -46,8 +47,13 @@ async function validateRegister(username: string, email: string, password: strin
 	else if (!isValidEmail(email))
 		errors.email = t("txt_err_email_invalid")
 
-	if (password.length <= 0)
+	if (password.length <= 0) {
 		errors.password = t("txt_err_pwd_empty")
+	} else {
+		const pwdErr = validatePassword(password, [email])
+		if (pwdErr)
+			errors.password = PASSWORD_MESSAGES[pwdErr]
+	}
 
 	if (password2.length <= 0)
 		errors.password2 = t("txt_err_pwd_empty")

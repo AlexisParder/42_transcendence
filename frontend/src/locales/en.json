@@ -88,6 +88,9 @@
 	"txt_err_2fa_invalid": "Code is invalid!",
 	"txt_err_agree_terms": "You must accept the terms!",
 	"txt_err_too_many_requests": "Too many requests. Please wait 1 minute before trying again",
+	"txt_err_pwd_too_short": "Password must be at least {{PASSWORD_MIN_LENGTH}} characters!",
+	"txt_err_pwd_too_long": "Password must be at most {{PASSWORD_MAX_LENGTH}} characters!",
+	"txt_err_pwd_too_weak": "Password is to weak!",
 
 	"match_err_already_in_match": "You're already in a match",
 	"match_err_no_match": "You haven't joined a match",

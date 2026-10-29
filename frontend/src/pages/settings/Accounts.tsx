@@ -13,6 +13,7 @@ import { IoWarning } from "react-icons/io5"
 import { setTranslationLanguage, t } from "../../lib/translate"
 import { Enable2FA, RecoveryCodes, ReScan2FA } from "./Security"
 import { apiPost } from "../../lib/api"
+import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password"
 
 type Errors = {
 	username?: string
@@ -66,8 +67,13 @@ export function SettingsCat() {
 
 		const newErrors: Errors = {}
 
-		if (password.length === 0)
+		if (password.length === 0) {
 			newErrors.password = t("txt_err_pwd_empty")
+		} else {
+			const pwdErr = validatePassword(password, [session?.user.email ?? ""])
+			if (pwdErr)
+				newErrors.password = PASSWORD_MESSAGES[pwdErr]
+		}
 
 		if (password2.length === 0)
 			newErrors.password2 = t("txt_err_pwd_empty")

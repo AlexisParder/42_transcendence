@@ -9,6 +9,7 @@ import { PasswordBar } from "../../components/PasswordBar";
 import { isValidEmail } from "../../lib/isValideEmail";
 import { formatMS } from "../../lib/formatTime";
 import { apiPost } from "../../lib/api";
+import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password";
 
 const COOLDOWN = 60
 
@@ -132,6 +133,13 @@ export function ForgotPwd() {
 		if (password.length <= 0) {
 			setErrors({ password: t("txt_err_pwd_empty") })
 			return
+		} else {
+			const pwdErr = validatePassword(password, [email])
+			if (pwdErr)
+			{
+				setErrors({password: PASSWORD_MESSAGES[pwdErr]})
+				return
+			}
 		}
 
 		if (password2.length <= 0) {

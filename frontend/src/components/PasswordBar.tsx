@@ -1,14 +1,5 @@
-import { ZxcvbnFactory } from "@zxcvbn-ts/core"
-import * as common from "@zxcvbn-ts/language-common"
-import * as en from "@zxcvbn-ts/language-en"
-import * as fr from "@zxcvbn-ts/language-fr"
+import { getPasswordScore } from "../lib/password"
 import { t } from "../lib/translate"
-
-const zxcvbn = new ZxcvbnFactory({
-	dictionary: { ...common.dictionary, ...en.dictionary, ...fr.dictionary },
-	graphs: common.adjacencyGraphs,
-	translations: en.translations
-})
 
 const Levels = [
 	{ text: t("txt_pwd_weak"), percent: 25, progress: 'progress-error', label: 'text-error' },
@@ -19,8 +10,7 @@ const Levels = [
 ] as const
 
 export function PasswordBar({ password }: { password: string }) {
-	const { score } = zxcvbn.check(password)
-	const level = Levels[score]
+	const level = Levels[getPasswordScore(password)]
 
 
 	return <div className="flex items-center w-full">

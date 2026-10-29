@@ -9,6 +9,7 @@ import { notifyNewSession, notifySecurity } from "./lib/notify.ts"
 import { io } from "./server.ts"
 import { currentMatches } from "./mapMatches.ts"
 import { isInAnyMatch, isInAnySpecMatch } from "./lib/matchs/matchUtils.ts"
+import { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MESSAGES, validatePassword } from "./lib/password.ts"
 
 const signInPaths = [
 	"/sign-in/email",
@@ -16,6 +17,14 @@ const signInPaths = [
 	"/two-factor/verify-totp",
 	"/two-factor/verify-backup-code",
 ]
+
+const PASSWORD_FIELDS: Record<string, string> = {
+	"/sign-up/email": "password",
+	"/email-otp/reset-password": "password",
+	"/reset-password": "newPassword",
+	"/change-password": "newPassword",
+	"/set-password": "newPassword",
+}
 
 const trustedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
 export const auth = betterAuth({
@@ -42,6 +51,8 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: true,
 		revokeSessionsOnPasswordReset: true,
+		minPasswordLength: PASSWORD_MIN_LENGTH,
+		maxPasswordLength: PASSWORD_MAX_LENGTH,
 	},
 	emailVerification: {
 		autoSignInAfterVerification: true,
@@ -103,6 +114,24 @@ export const auth = betterAuth({
 	],
 	hooks: {
 		before: createAuthMiddleware(async ctx => {
+			const field = PASSWORD_FIELDS[ctx.path]
+			if (field) {
+				const body = (ctx.body ?? {}) as Record<string, unknown>
+				const password = body[field]
+
+				if (typeof password !== "string")
+					return
+
+				const session = await getSessionFromCtx(ctx)
+				if (!session)
+					return
+
+				const error = validatePassword(password, [session.user.email])
+				if (error)
+					throw new APIError("BAD_REQUEST", { message: PASSWORD_MESSAGES[error] })
+				return ctx.json({ok: true})
+			}
+
 			if (ctx.path !== "/delete-user")
 				return
 
@@ -110,7 +139,7 @@ export const auth = betterAuth({
 			if (session && (isInAnyMatch(currentMatches, session.user.id) || isInAnySpecMatch(currentMatches, session.user.id)))
 				return ctx.json({ ok: false, code: "settings_err_rmv_user_in_match" }, { status: 409 })
 		}),
-		after:createAuthMiddleware(async ctx => {
+		after: createAuthMiddleware(async ctx => {
 			const newSession = ctx.context.newSession
 			if (newSession && !ctx.context.session && signInPaths.includes(ctx.path)) {
 				const isNewAccount = Date.now() - new Date(newSession.user.createdAt).getTime() < 60_000
