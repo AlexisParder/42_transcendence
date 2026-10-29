@@ -65,6 +65,7 @@ export function SettingsCat() {
 	const handleSubmitChangePwd: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
+		setErrors({})
 		const newErrors: Errors = {}
 
 		if (password.length === 0) {
@@ -129,6 +130,7 @@ export function SettingsCat() {
 	const handleChangePicture: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
+		setErrors({})
 		const form = new FormData(e.currentTarget)
 		const pictureRaw = form.get('picture')?.toString().trim() ?? ''
 
@@ -174,6 +176,7 @@ export function SettingsCat() {
 	const handleDisable2FA: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
+		setErrors({})
 		const form = e.currentTarget
 		const password = new FormData(form).get('confirmPwd')?.toString() ?? ""
 
@@ -190,12 +193,12 @@ export function SettingsCat() {
 			setErrors({ confirmPwd: t("txt_err_pwd_invalid") })
 			return
 		}
-		setErrors({})
 		HideModal("Disable2FAModal")
 		// ajouter une notif
 	}
 
 	async function handleRemovePicture() {
+		setErrors({})
 		if (!session?.user.image)
 			return
 
@@ -248,6 +251,7 @@ export function SettingsCat() {
 	}
 
 	const handleChangeLanguage = async (lang: string) => {
+		setErrors({})
 		if (lang !== "en" && lang !== "fr") {
 			setLanguage("en")
 			return
@@ -274,6 +278,7 @@ export function SettingsCat() {
 	const handleDeleteAccount: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
+		setErrors({})
 		const form = e.currentTarget
 		const formElem = new FormData(form)
 		const password = formElem.get("password")?.toString() ?? ""
@@ -313,7 +318,6 @@ export function SettingsCat() {
 			setErrors({ form: error.code ? t(error.code) : t("settings_err_rmv_user") })
 			return
 		}
-		setErrors({})
 		navigate('/')
 		// Ajouter une notif
 	}
