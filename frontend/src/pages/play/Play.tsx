@@ -410,11 +410,11 @@ export function Play() {
 						<p className="uppercase px-2 text-neutral-content/50">{t("play_visibility")}</p>
 						<div className="flex gap-2 p-2">
 							<button className={`btn btn-outline ${visibility === "private" ? "border-info bg-info/15" : "border-neutral bg-neutral/15 hover:btn-neutral hover:bg-neutral/50"} flex-1/2`} onClick={() => {
-								if (visibility !== "private")
-									setVisibility("private")
+								setVisibility("private")
+								setSpectators(false)
 							}}>{t("play_private")}</button>
 							<button className={`btn btn-outline ${visibility === "public" ? "border-info bg-info/15" : "border-neutral bg-neutral/15 hover:btn-neutral hover:bg-neutral/50"} flex-1/2`} onClick={() => {
-								if (visibility !== "public" && selectedMatchType !== "BOT")
+								if (selectedMatchType !== "BOT")
 									setVisibility("public")
 							}} disabled={selectedMatchType === "BOT"}>{t("play_public")}</button>
 						</div>
@@ -432,7 +432,7 @@ export function Play() {
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_spectators")}</p>
-								<Togglebox name={`tb_sp`} type="info" checked={spectators} onChange={() => setSpectators(!spectators)} />
+								<Togglebox name={`tb_sp`} type="info" checked={spectators} disabled={visibility === "private"} onChange={() => setSpectators(!spectators)} />
 							</div>
 						</div>
 					</div>
