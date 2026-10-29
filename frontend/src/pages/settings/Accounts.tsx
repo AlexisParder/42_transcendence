@@ -22,7 +22,9 @@ type Errors = {
 	password?: string
 	password2?: string
 	confirmPwd?: string
-	form?: string
+	pwdForm?: string
+	picture?: string
+	deleteAccount?: string
 	lang?: string
 	code?: string
 }
@@ -101,7 +103,7 @@ export function SettingsCat() {
 			})
 
 			if (error) {
-				setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ pwdForm: t("settings_err_updt_pwd") })
 				return
 			}
 
@@ -114,7 +116,7 @@ export function SettingsCat() {
 			const { ok } = await apiPost("/api/set-pwd", { newPassword: password })
 
 			if (!ok) {
-				setErrors({ form: t("settings_err_updt_pwd") })
+				setErrors({ pwdForm: t("settings_err_updt_pwd") })
 				return
 			}
 
@@ -157,7 +159,7 @@ export function SettingsCat() {
 				reader.readAsDataURL(blob)
 			})
 		} catch {
-			setErrors({ form: t("settings_err_updt_picture") })
+			setErrors({ picture: t("settings_err_updt_picture") })
 			return
 		}
 
@@ -166,7 +168,7 @@ export function SettingsCat() {
 		})
 
 		if (error)
-			setErrors({ form: t("settings_err_updt_picture") })
+			setErrors({ picture: t("settings_err_updt_picture") })
 		else {
 			setPicture('')
 			HideModal('pictureModal')
@@ -207,7 +209,7 @@ export function SettingsCat() {
 		})
 
 		if (error)
-			setErrors({ form: t("settings_err_rmv_picture") })
+			setErrors({ picture: t("settings_err_rmv_picture") })
 	}
 
 	async function handleChangeUsername() {
@@ -315,7 +317,7 @@ export function SettingsCat() {
 
 		HideModal("deleteModal")
 		if (error) {
-			setErrors({ form: error.code ? t(error.code) : t("settings_err_rmv_user") })
+			setErrors({ deleteAccount: error.code ? t(error.code) : t("settings_err_rmv_user") })
 			return
 		}
 		navigate('/')
@@ -334,6 +336,7 @@ export function SettingsCat() {
 					<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>{t("btn_remove")}</button>
 				</div>
 			</div>
+			{errors.picture && <span className="text-error block pt-2 pl-2">{errors.picture}</span>}
 			<div className="flex mt-2 flex-col md:flex-row w-full gap-2">
 				<InputWithText text={t("settings_profile_callsign")}>
 					<Input type="text" name="username" label={t("txt_username")} defaultValue={session?.user.username ?? ''} useLabel={false} onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
@@ -371,7 +374,7 @@ export function SettingsCat() {
 				</div>
 				{isFocused && <PasswordBar password={password} />}
 				<button className="btn btn-soft btn-info border-info/50 hover:border-info mt-2 w-full md:w-auto">{hasPwd === true ? t("settings_password_updt") : t("settings_password_add")}</button>
-				{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
+				{errors.pwdForm && <span className="text-error block pb-2 pl-2">{errors.pwdForm}</span>}
 			</form>
 		</SectionSetting>
 
@@ -426,16 +429,19 @@ export function SettingsCat() {
 						setErrors({})
 						ShowModal("deleteModal")
 					}} className="btn btn-outline btn-error border-error btn-sm">{t("settings_danger_dlt_btn")}</button>
-					{errors.form && <span className="text-error block pb-2 pl-2">{errors.form}</span>}
+					{errors.deleteAccount && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs">{errors.deleteAccount}</span>}
 				</div>
 			</div>
 			{hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_danger_dlt_need_pwd")}.<br />{t("settings_2fa_need_pwd_2")}.</span></p>}
 		</SectionSetting>
 
-		<Modal id="pictureModal" onClose={() => setPicture('')}>
+		<Modal id="pictureModal" onClose={() => {
+			setPicture('')
+			setErrors({})
+		}}>
 			<p className="pb-2">{t("settings_modal_upl_pic")}</p>
 			<form onSubmit={handleChangePicture}>
-				<Input type="text" label={t("settings_modal_upl_pic_link")} name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} />
+				<Input type="text" label={t("settings_modal_upl_pic_link")} name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} errorMsg={errors.picture} />
 				<div className="flex gap-2 pt-2 justify-end">
 					<button onClick={() => HideModal("pictureModal")} className="btn btn-neutral">{t("btn_cancel")}</button>
 					<button className="btn btn-info btn-outline">{t("btn_upload")}</button>
