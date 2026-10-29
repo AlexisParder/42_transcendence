@@ -64,8 +64,7 @@ export const MATCH_CONFIG: Record<matchType, { teams: number, maxPlayers: number
 	ONE_V_ONE: { teams: 2, maxPlayers: 2 },
 	BOT: { teams: 2, maxPlayers: 2 },
 	TWO_V_TWO: { teams: 2, maxPlayers: 4 },
-	THREE_FFA: { teams: 3, maxPlayers: 3 },
-	FOUR_FFA: { teams: 4, maxPlayers: 4 },
+	FFA: { teams: 4, maxPlayers: 4 },
 }
 
 export function isMatchType(value: unknown): value is matchType {

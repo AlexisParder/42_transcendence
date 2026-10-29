@@ -309,7 +309,7 @@ export function MatchItem({ username, image, type, players, maxPlayers, canJoin,
 		typeTxt = t("txt_ONE_V_ONE")
 	else if (type === "TWO_V_TWO")
 		typeTxt = t("txt_TWO_V_TWO")
-	else if (type === "THREE_FFA" || type === "FOUR_FFA")
+	else if (type === "FFA")
 		typeTxt = `3-4 ${t("play_players")}`
 
 	return <div className="grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_6rem_4rem_6rem] gap-4 items-center bg-neutral/10 border border-neutral/50 rounded-md p-4">

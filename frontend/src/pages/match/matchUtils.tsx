@@ -2,7 +2,7 @@ import { IoFlagOutline } from "react-icons/io5"
 import { Avatar } from "../../components/Avatar"
 import { Grid } from "../../components/Grid"
 import { t } from "../../lib/translate"
-import type { Log, Matchs, matchType, vect2 } from "../../types/events"
+import type { Log, Matchs, matchType, Ship, Shot, vect2 } from "../../types/events"
 import { useMediaQuery } from "../../hooks/useMediaQuery"
 import { formatMS } from "../../lib/formatTime"
 import { ordinal } from "../../lib/ordinal"
@@ -86,7 +86,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 				</div>
 			</div>
 
-			{match.type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
+			{match.type === "FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-2">{t("match_target")}</p>
 				<div className="flex flex-col gap-2">
 					{match.players.filter(p => p.userId !== myId).map(p => (
@@ -206,9 +206,9 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		targetTeamData = match.teams.find(t => t.id === selectedTarget)
 		myTeamData = match.teams.find(t => t.id === myTeam)
 	} else {
-		if (match.type !== "FOUR_FFA") {
-			targetTeamData = match.teams.find(t => t.id === (waterView === "attack" ? 1 : 2))
-			myTeamData = match.teams.find(t => t.id === (waterView === "attack" ? 1 : 2))
+		if (match.type !== "FFA") {
+			targetTeamData = match.teams.find(t => t.id === 1)
+			myTeamData = match.teams.find(t => t.id === 2)
 		} else {
 			targetTeamData = match.teams.find(t => t.id === selectedTarget)
 			myTeamData = undefined
@@ -223,9 +223,25 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		).values()
 	]
 
-	const ships = view === "my waters" ? myTeamData?.ships : sunkShip
-	const shots = view === "my waters" ? myTeamData?.shots : targetTeamData?.shots
+	let ships: Ship[] | undefined
+	let shots: Shot[] | undefined
 
+	if (!isSpec) {
+		ships = view === "my waters" ? myTeamData?.ships : sunkShip
+		shots = view === "my waters" ? myTeamData?.shots : targetTeamData?.shots
+	} else {
+		const sunkShipTeam2 = [
+			...new Map(
+				(myTeamData?.shots ?? [])
+					.filter(s => s.ship !== null)
+					.map(s => [s.ship!.name, s.ship!])
+			).values()
+		]
+		ships = view === "my waters" ? sunkShipTeam2 : sunkShip
+		shots = view === "my waters" ? myTeamData?.shots : targetTeamData?.shots
+	}
+
+	console.log(myTeamData)
 	return <div className="flex-1 p-4 flex flex-col min-h-0 min-w-0 w-full">
 		<div className="shrink-0">
 			<div className="flex items-center gap-2 sm:hidden">
@@ -255,7 +271,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				</div>
 			</div>
 
-			{match.type === "FOUR_FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 mt-1.5 rounded-md sm:hidden">
+			{match.type === "FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 mt-1.5 rounded-md sm:hidden">
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-1 text-center">{t("match_target")}</p>
 				<div className="flex gap-1 items-center">
 					{match.players.filter(p => p.userId !== myId).map(p => (
@@ -267,7 +283,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 				</div>
 			</div>}
 
-			{(!isSpec || (isSpec && match.type !== "FOUR_FFA")) && <div className={`flex items-center gap-2 py-2 justify-center ${!isSpec ? "lg:hidden" : ""}`}>
+			{(!isSpec || (isSpec && match.type !== "FFA")) && <div className={`flex items-center gap-2 py-2 justify-center ${!isSpec ? "lg:hidden" : ""}`}>
 				<button className={`w-full border ${waterView === "attack" ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50 hover:bg-neutral/50"} rounded-lg py-2 text-xs font-semibold cursor-pointer outline-none lg:max-w-105`} onClick={() => {
 					setWaterView("attack")
 					setTargetLocked({ x: -1, y: -1 })
@@ -330,7 +346,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 
 		{!isSpec && <div className="shrink-0 bg-info/10 border border-info/50 rounded-lg p-2 flex items-center justify-between mt-4 max-sm:mt-2">
 			<div>
-				{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{getRowName(targetLocked)}</span> {match.type === "FOUR_FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
+				{targetLocked.x >= 0 && targetLocked.y >= 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_target_locked")} <span className="text-info">{getRowName(targetLocked)}</span> {match.type === "FFA" && <span className="font-bold">({target?.username ?? "?"})</span>}</p>}
 
 				{targetLocked.x < 0 && targetLocked.y < 0 && <p className="first-letter:uppercase text-neutral-content/60 font-medium text-xs">{t("match_no_target")}</p>}
 

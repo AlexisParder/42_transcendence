@@ -88,7 +88,7 @@ export interface ConversationSummary {
 	unreadCount: number
 }
 
-export type matchType = "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA" | "BOT"
+export type matchType = "ONE_V_ONE" | "TWO_V_TWO" | "FFA" | "BOT"
 
 export interface Match {
 	id: string,

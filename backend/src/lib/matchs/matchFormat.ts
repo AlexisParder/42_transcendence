@@ -1,4 +1,4 @@
-type Type = "ONE_V_ONE" | "TWO_V_TWO" | "THREE_FFA" | "FOUR_FFA"
+type Type = "ONE_V_ONE" | "TWO_V_TWO" | "FFA"
 
 export function formatMatch(row: any, userId: string) {
 	const { matchs: match, ...me } = row

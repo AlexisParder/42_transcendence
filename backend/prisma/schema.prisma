@@ -230,8 +230,7 @@ model Notification {
 enum MatchType {
   ONE_V_ONE
   TWO_V_TWO
-  THREE_FFA
-  FOUR_FFA
+  FFA
   BOT
 }
 
