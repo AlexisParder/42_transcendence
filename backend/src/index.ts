@@ -61,6 +61,8 @@ app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
 app.set("currentMatches", currentMatches)
 
+app.set("trust proxy", 1)
+
 app.use(cors({
 	origin: allowedOrigins,
 	credentials: true,
