@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 
-export function useAutoScroll(ref: RefObject<HTMLDivElement | null>, count: number, threshold = 40) {
+export function useAutoScroll(ref: RefObject<HTMLDivElement | null>, count: number, resetKey?: string | number, threshold = 40) {
 	const isAtBottom = useRef(true)
 
 	useEffect(() => {
@@ -16,7 +16,19 @@ export function useAutoScroll(ref: RefObject<HTMLDivElement | null>, count: numb
 		return () => {
 			el.removeEventListener("scroll", onScroll)
 		}
-	}, [ref, threshold])
+	}, [ref, threshold, resetKey])
+
+	useEffect(() => {
+		const el = ref.current
+		if (!el)
+			return
+
+		isAtBottom.current = true
+		el.scrollTo({
+			top: el.scrollHeight,
+			behavior: "auto"
+		})
+	}, [ref, resetKey])
 
 	useEffect(() => {
 		const el = ref.current

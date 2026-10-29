@@ -197,8 +197,8 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	const isSpec = isSpectator(match, myId)
 	const logsRef = useRef<HTMLDivElement>(null)
 	const chatRef = useRef<HTMLDivElement>(null)
-	useAutoScroll(logsRef, match.logs.length)
-	useAutoScroll(chatRef, match.teams.find(t => t.id === myTeam)?.chat.length ?? 0)
+	useAutoScroll(logsRef, match.logs.length, gameInfosView)
+	useAutoScroll(chatRef, match.teams.find(t => t.id === myTeam)?.chat.length ?? 0, gameInfosView)
 
 	let targetTeamData
 	let myTeamData
@@ -357,8 +357,8 @@ export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGam
 	const myTeamData = match.teams.find(t => t.id === myTeam)
 	const logsRef = useRef<HTMLDivElement>(null)
 	const chatRef = useRef<HTMLDivElement>(null)
-	useAutoScroll(logsRef, match.logs.length)
-	useAutoScroll(chatRef, myTeamData?.chat.length ?? 0)
+	useAutoScroll(logsRef, match.logs.length, gameInfosView)
+	useAutoScroll(chatRef, myTeamData?.chat.length ?? 0, gameInfosView)
 	const isSpec = isSpectator(match, myId)
 
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
