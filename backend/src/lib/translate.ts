@@ -1,9 +1,10 @@
 import fr from "../locales/fr.json" with { type: "json" }
 import en from "../locales/en.json" with { type: "json" }
+import es from "../locales/es.json" with { type: "json" }
 import { prisma } from "../db/client.ts"
 
 type Translations = { [key: string]: string | Translations }
-const languages: Record<string, Translations> = { fr, en }
+const languages: Record<string, Translations> = { fr, en, es }
 
 export const defaultLanguage = "en"
 

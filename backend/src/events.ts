@@ -112,6 +112,7 @@ export interface Rank {
 	id: string,
 	en_label: string,
 	fr_label: string,
+	es_label: string,
 	min: number
 }
 
