@@ -91,6 +91,7 @@
 	"txt_err_pwd_too_weak": "Password is to weak!",
 
 	"match_err_already_in_match": "You're already in a match",
+	"match_err_user_already_in_match": "User already in a match",
 	"match_err_no_match": "You haven't joined a match",
 	"match_err_host": "You are not the host of this match",
 	"match_err_does_not_exist": "This match does not exist",
