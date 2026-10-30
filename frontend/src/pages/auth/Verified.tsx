@@ -25,8 +25,6 @@ export function Verified() {
 	const [errors, setErrors] = useState<{ code?: string }>({})
 	const [verifying, setVerifying] = useState(false)
 
-	const { data: session, isPending } = authClient.useSession()
-
 	const left = sentAt ? Math.max(0, COOLDOWN - Math.floor((now - sentAt) / 1000)) : 0
 
 	const verify = useCallback(async (otp: string) => {
@@ -92,9 +90,6 @@ export function Verified() {
 
 	if (!email)
 		return <Navigate to="/register" replace />
-
-	if (session && !isPending)
-		return <Navigate to="/" replace />
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
 		<div className="card bg-base-200 max-w-md w-full shadow-xl border border-neutral">

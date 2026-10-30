@@ -39,6 +39,8 @@
 	"txt_pwd_strong": "strong",
 	"txt_or": "or",
 	"txt_now": "now",
+	"txt_min": "min",
+	"txt_h": "h",
 	"txt_legal_doc": "legal document",
 	"txt_available": "available",
 	"txt_in a match": "in a match",
@@ -70,6 +72,10 @@
 	"txt_team_red": "Red team",
 	"txt_team_1": "Team 1",
 	"txt_team_2": "Team 2",
+	"txt_th": "th", 
+	"txt_st": "st", 
+	"txt_nd": "nd", 
+	"txt_rd": "rd",
 
 	"txt_err_user_empty": "Username is empty!",
 	"txt_err_user_short": "Username is too short!",
@@ -91,6 +97,7 @@
 	"txt_err_pwd_too_weak": "Password is to weak!",
 
 	"match_err_already_in_match": "You're already in a match",
+	"match_err_user_already_in_match": "User already in a match",
 	"match_err_no_match": "You haven't joined a match",
 	"match_err_host": "You are not the host of this match",
 	"match_err_does_not_exist": "This match does not exist",
@@ -381,6 +388,7 @@
 	"terms_contact_desc": "You can delete your account at any time from your settings. We may suspend an account that breaches these terms. French law applies. Any question? ",
 
 	"lg_fr": "French",
+	"lg_es": "Spain",
 	"lg_en": "English",
 
 	"otp_title": "Verify it's you",

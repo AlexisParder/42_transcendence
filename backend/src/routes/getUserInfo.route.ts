@@ -8,6 +8,7 @@ const FALLBACK_RANK: Rank = {
 	id: "custom",
 	en_label: "cabin boy",
 	fr_label: "mousse",
+	es_label: "grumete",
 	min: Number.MIN_SAFE_INTEGER
 }
 

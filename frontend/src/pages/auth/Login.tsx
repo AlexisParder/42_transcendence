@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../../components/Input";
 import { authClient } from "../../lib/auth-client";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { isValidEmail } from "../../lib/isValideEmail";
 import { SignGoogle } from "../../lib/SignGoogle";
 import { SignDiscord } from "../../lib/SignDiscord";
@@ -33,13 +33,8 @@ function validateLogin(email: string, password: string): Errors {
 
 export function Login() {
 	useDocumentTitle(t("btn_sign_in"))
-	const { data: session, isPending } = authClient.useSession()
 	const [errors, setErrors] = useState<Errors>({})
 	const navigate = useNavigate()
-	const location = useLocation()
-
-	if (session && !isPending)
-		return <Navigate to="/" state={{ from: location }} replace />
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -56,7 +51,6 @@ export function Login() {
 		if (Object.keys(newErrors).length > 0)
 			return
 
-		// BACK 
 		const { error } = await authClient.signIn.email({
 			email,
 			password,

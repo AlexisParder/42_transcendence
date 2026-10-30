@@ -1,13 +1,13 @@
 import { prisma } from './db/client.ts'
 
 const ranks = [
-	{ en_label: 'seaman', fr_label: 'matelot', min: 0 },
-	{ en_label: 'petty officer', fr_label: 'quartier-maître', min: 150 },
-	{ en_label: 'ensign', fr_label: 'enseigne de vaisseau', min: 400 },
-	{ en_label: 'lieutenant', fr_label: 'lieutenant de vaisseau', min: 800 },
-	{ en_label: 'commander', fr_label: 'capitaine de frégate', min: 1400 },
-	{ en_label: 'captain', fr_label: 'capitaine de vaisseau', min: 2200 },
-	{ en_label: 'admiral', fr_label: 'amiral', min: 3500 }
+	{ en_label: 'seaman', fr_label: 'matelot', es_label: 'marinero', min: 0 },
+	{ en_label: 'petty officer', fr_label: 'quartier-maître', es_label: 'suboficial', min: 150 },
+	{ en_label: 'ensign', fr_label: 'enseigne de vaisseau', es_label: 'alférez de navío', min: 400 },
+	{ en_label: 'lieutenant', fr_label: 'lieutenant de vaisseau', es_label: 'teniente de navío', min: 800 },
+	{ en_label: 'commander', fr_label: 'capitaine de frégate', es_label: 'capitán de fragata', min: 1400 },
+	{ en_label: 'captain', fr_label: 'capitaine de vaisseau', es_label: 'capitán de navío', min: 2200 },
+	{ en_label: 'admiral', fr_label: 'amiral', es_label: 'almirante', min: 3500 }
 ]
 
 async function main() {

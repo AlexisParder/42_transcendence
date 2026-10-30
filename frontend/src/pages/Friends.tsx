@@ -786,7 +786,7 @@ function ConversationFriendDisplay({ friends, blocked, peerId, isDeleted, invite
 		onUnblock: (id: string) => void,
 		onProfile: (id: string) => void,
 		closeCurrentConv: () => void,
-		status: "available" | "in a match" | "away" | "offline",
+		status: PresenceStatus,
 		handleInvite: () => void
 	}) {
 	if (!peerId)
@@ -929,7 +929,7 @@ function OnlineSection({ friends, presence, onSelect, closeConv, peerId }: {
 	</ul>
 }
 
-function OnlineItem({ username, image, status, isSelected, onSelect }: { username: string | null | undefined, image: string | null | undefined, status: "available" | "in a match" | "away" | "offline", isSelected: boolean, onSelect: () => void }) {
+function OnlineItem({ username, image, status, isSelected, onSelect }: { username: string | null | undefined, image: string | null | undefined, status: PresenceStatus, isSelected: boolean, onSelect: () => void }) {
 
 	return <li className="py-0.5">
 		<div className={`flex ${isSelected ? "bg-info/15" : ""}`} onClick={onSelect}>

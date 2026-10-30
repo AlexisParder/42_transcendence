@@ -25,7 +25,7 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		if (isInAnyMatch(currentMatches, peerId))
-			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
+			return res.status(409).json({ ok: false, code: "match_err_user_already_in_match" })
 
 		if (match.players.length >= match.maxPlayers)
 			return res.status(400).json({ ok: false, code: "match_err_full" })

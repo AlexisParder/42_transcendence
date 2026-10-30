@@ -1,7 +1,6 @@
 import type { Server } from "socket.io";
 import type { ClientToServerEvents, Matchs, matchType, ServerToClientEvents, SocketData } from "../../events.ts";
 import { currentMatches } from "../../mapMatches.ts";
-import { emitTurn } from "./turnTimer.ts";
 import { prisma } from "../../db/client.ts";
 import type { PairMatchIndex } from "./eloLib.ts";
 import { filterMatchForUser } from "./matchUtils.ts";

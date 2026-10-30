@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Log, Matchs, Ship, Shot, vect2 } from "../../events.ts";
-import { filterMatchForUser, isExpired, isTeamEliminated, setFinalPlacement } from "../../lib/matchs/matchUtils.ts";
+import { isExpired, isTeamEliminated, setFinalPlacement } from "../../lib/matchs/matchUtils.ts";
 import { nextTurn } from "../../lib/matchs/turnTimer.ts";
 import { addLog } from "../../lib/matchs/logMatch.ts";
 import { io } from "../../server.ts";
@@ -131,7 +131,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 
 		nextTurn(match, io, true)
 
-		res.json({ ok: true, match: filterMatchForUser(match, userId) })
+		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

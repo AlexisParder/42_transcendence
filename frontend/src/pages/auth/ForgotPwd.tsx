@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SonarTitle } from "../../components/SonarTitle";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle"
 import { useEffect, useState } from "react";
@@ -27,7 +27,6 @@ export function ForgotPwd() {
 	const [step, setStep] = useState<stepType>('email')
 	const [isFocused, setIsFocused] = useState(false)
 	const [password, setPassword] = useState('')
-	const { data: session, isPending } = authClient.useSession()
 
 	const left = sentAt ? Math.max(0, COOLDOWN - Math.floor((now - sentAt) / 1000)) : 0
 
@@ -68,9 +67,6 @@ export function ForgotPwd() {
 			setErrors({ code: t("verified_err_resend_email") })
 		}
 	}
-
-	if (session && !isPending)
-		return <Navigate to="/" replace />
 
 	const handleEmailStep: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()

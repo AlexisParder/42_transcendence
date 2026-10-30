@@ -1,8 +1,9 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { Matchs } from "../../events.ts";
+import type { Matchs, PresenceStatus } from "../../events.ts";
 import { io } from "../../server.ts";
+import { notifyFriendsOfPresence } from "../../index.ts";
 
 export async function deleteMatchHandler(req: Request, res: Response) {
 	try {
@@ -29,6 +30,10 @@ export async function deleteMatchHandler(req: Request, res: Response) {
 		}
 
 		currentMatches.delete(userId)
+
+		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
+		activityStatus.set(userId, "available")
+		await notifyFriendsOfPresence(userId, "available")
 		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })

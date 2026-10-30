@@ -1,13 +1,22 @@
 import { authClient } from "./auth-client"
 import fr from "../locales/fr.json"
 import en from "../locales/en.json"
+import es from "../locales/es.json"
 
 type Translations = { [key: string]: string | Translations }
-const languages: Record<string, Translations> = { fr, en }
+const languages: Record<string, Translations> = { fr, en, es }
 
 
 const { data: session } = await authClient.getSession()
-let language: string = session?.user.language || (navigator.language.startsWith("fr") ? "fr" : "en")
+let language: string = "en"
+if (!session?.user.language) {
+	if (navigator.language.startsWith("fr"))
+		language= "fr"
+	else if (navigator.language.startsWith("es"))
+		language= "es"
+} else {
+	language = session?.user.language
+}
 
 export function setTranslationLanguage(l: string) {
 	language = l

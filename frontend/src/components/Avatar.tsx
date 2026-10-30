@@ -1,3 +1,5 @@
+import type { PresenceStatus } from "../types/events"
+
 const StatusType: Record<string, string> = {
 	available: "status-info",
 	away: "status-warning",
@@ -5,7 +7,7 @@ const StatusType: Record<string, string> = {
 	offline: "status-neutral"
 }
 
-export function Avatar({ username, image, size, status = null }: { username: string | null | undefined, image: string | null | undefined, size: number, status?: null | "available" | "away" | "offline" | "in a match" }) {
+export function Avatar({ username, image, size, status = null }: { username: string | null | undefined, image: string | null | undefined, size: number, status?: null | PresenceStatus }) {
 	if (size < 4)
 		size = 4
 

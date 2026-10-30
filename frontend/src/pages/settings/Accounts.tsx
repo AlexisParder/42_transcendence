@@ -253,7 +253,7 @@ export function SettingsCat() {
 
 	const handleChangeLanguage = async (lang: string) => {
 		setErrors({})
-		if (lang !== "en" && lang !== "fr") {
+		if (lang !== "en" && lang !== "fr" && lang !== "es") {
 			setLanguage("en")
 			return
 		}
@@ -354,6 +354,7 @@ export function SettingsCat() {
 					}}>
 						<option value="fr">{t("lg_fr")}</option>
 						<option value="en">{t("lg_en")}</option>
+						<option value="es">{t("lg_es")}</option>
 					</select>
 					{errors.lang && <span className="text-error block pb-2 pl-2">{errors.lang}</span>}
 				</InputWithText>

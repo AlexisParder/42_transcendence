@@ -28,7 +28,8 @@ export function Play() {
 	const [matches, setMatches] = useState<Matchs[]>([])
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [code, setCode] = useState("")
-	const [errors, setErrors] = useState<{ matchCreation?: string, matchWaiting?: string, matchJoin?: string, matchJoinCode?: string }>({})
+	const [errors, setErrors] = useState<{ matchCreation?: string, matchWaiting?: string, matchJoinCode?: string }>({})
+	const [matchJoinError, setMatchJoinError] = useState<{ id?: string, error?: string }>({})
 
 	const ranked = !replace && visibility === "public"
 
@@ -116,7 +117,7 @@ export function Play() {
 				return
 
 			setMatches(data.matches ?? [])
-			setErrors({})
+			setMatchJoinError({})
 		} catch (error) {
 			console.error("load matches:", error)
 		}
@@ -201,13 +202,12 @@ export function Play() {
 			const { ok, data } = await apiPost("/api/join-match", { hostId: match.hostId })
 
 			if (!ok) {
-				setErrors({ matchJoin: data.code ? t(data.code) : t("match_err_join_failure") })
+				setMatchJoinError({ id: match.hostId, error: data.code ? t(data.code) : t("match_err_join_failure") })
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setView("guest")
-			setErrors({})
+			setMatchJoinError({})
 		} catch (error) {
 			console.error("join match:", error)
 		}
@@ -221,7 +221,7 @@ export function Play() {
 			const { ok, data } = await apiPost("/api/join-spec-match", { hostId: match.hostId })
 
 			if (!ok) {
-				setErrors({ matchJoin: data.code ? t(data.code) : t("match_err_join_failure") })
+				setMatchJoinError({ id: match.hostId, error: data.code ? t(data.code) : t("match_err_join_failure") })
 				return
 			}
 
@@ -243,7 +243,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(undefined)
 			setView("none")
 			setErrors({})
 		} catch (error) {
@@ -263,7 +262,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setErrors({})
 		} catch (error) {
 			console.error("update player status match:", error)
@@ -295,7 +293,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setErrors({})
 		} catch (error) {
 			console.error("kick user match:", error)
@@ -314,7 +311,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setCode("")
 			setView("guest")
 			setErrors({})
@@ -464,7 +460,7 @@ export function Play() {
 								handleJoinedPublicMatch={handleJoinedPublicMatch}
 								handleJoinedSpecMatch={handleJoinedSpecMatch}
 								match={m}
-								joinMatchErr={errors.matchJoin} />
+								joinMatchErr={matchJoinError.id === m.hostId ? matchJoinError.error : ""} />
 						))}
 						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>

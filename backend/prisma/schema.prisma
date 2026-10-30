@@ -156,7 +156,8 @@ model UserBlocked {
 model Ranks {
   id       String @id @default(cuid())
   en_label String @unique
-  fr_label String
+  fr_label String @unique
+  es_label String @unique
   min      Int    @unique
 
   @@map("ranks")
