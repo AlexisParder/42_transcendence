@@ -5,7 +5,7 @@ import { auth } from "./auth.ts"
 import { setPwdHandler } from "./routes/setPwd.route.ts"
 import { checkPwdHandler } from "./routes/checkPwd.route.ts"
 import { getBackupCodesHandler } from "./routes/getBackupCodes.route.ts"
-import type { Matchs } from "./events.ts"
+import type { PresenceStatus } from "./events.ts"
 import { prisma } from "./db/client.ts"
 import { getConvHistoryHandler } from "./routes/friends/getConvHistory.route.ts"
 import { getFriendsHandler } from "./routes/friends/getFriends.route.ts"
@@ -55,7 +55,7 @@ import { leaveSpecMatchHandler } from "./routes/matches/leaveSpecMatch.route.ts"
 import { matchSendMessageHandler } from "./routes/matches/MatchSendMessage.route.ts"
 
 const onlineUsers = new Map<string, number>()
-const activityStatus = new Map<string, "available" | "away">()
+const activityStatus = new Map<string, PresenceStatus>()
 
 app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
@@ -260,7 +260,7 @@ io.on("connection", async (socket) => {
 const PORT = 3000
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}`))
 
-async function notifyFriendsOfPresence(userId: string, status: "available" | "away" | "offline") {
+export async function notifyFriendsOfPresence(userId: string, status: PresenceStatus) {
 	const rows = await prisma.friends.findMany({
 		where: {
 			isAccepted: true,

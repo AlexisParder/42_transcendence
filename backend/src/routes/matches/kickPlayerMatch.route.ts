@@ -1,9 +1,10 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { Matchs } from "../../events.ts";
+import type { Matchs, PresenceStatus } from "../../events.ts";
 import { filterMatchForUser } from "../../lib/matchs/matchUtils.ts";
 import { io } from "../../server.ts";
+import { notifyFriendsOfPresence } from "../../index.ts";
 
 export async function kickPlayerMatchHandler(req: Request, res: Response) {
 	const { targetId } = req.body
@@ -43,6 +44,9 @@ export async function kickPlayerMatchHandler(req: Request, res: Response) {
 
 		io.to(targetId).emit("refresh_joined_match", undefined)
 
+		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
+		activityStatus.set(targetId, "available")
+		await notifyFriendsOfPresence(targetId, "available")
 		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })

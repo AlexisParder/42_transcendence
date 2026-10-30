@@ -1,10 +1,11 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { Matchs } from "../../events.ts";
+import type { Matchs, PresenceStatus } from "../../events.ts";
 import { filterMatchForUser, isInAnyMatch, isInAnySpecMatch } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
 import { io } from "../../server.ts";
+import { notifyFriendsOfPresence } from "../../index.ts";
 
 export async function joinSpecMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body
@@ -47,6 +48,9 @@ export async function joinSpecMatchHandler(req: Request, res: Response) {
 				io.to(spectator).emit("refresh_joined_match", filterMatchForUser(match, spectator))
 		}
 
+		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
+		activityStatus.set(userId, "in a match")
+		await notifyFriendsOfPresence(userId, "in a match")
 		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })

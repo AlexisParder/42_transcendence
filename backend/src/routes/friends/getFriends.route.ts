@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import { prisma } from "../../db/client.ts";
-import type { Friend } from "../../events.ts";
+import type { Friend, PresenceStatus } from "../../events.ts";
 
 export async function getFriendsHandler(req: Request, res: Response) {
 	try {
@@ -30,9 +30,9 @@ export async function getFriendsHandler(req: Request, res: Response) {
 		})
 
 		const onlineUsers = req.app.get("onlineUsers") as Map<string, number>
-		const activityStatus = req.app.get("activityStatus") as Map<string, "available" | "away">
+		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
 
-		function effectiveStatus(id: string): "available" | "away" | "offline" {
+		function effectiveStatus(id: string): PresenceStatus {
 			if (!onlineUsers.has(id))
 				return "offline"
 			return activityStatus.get(id) ?? "available"

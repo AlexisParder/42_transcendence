@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { socket } from "../lib/socket";
 import { authClient } from "../lib/auth-client";
 import { SocketContext } from "../components/socketContext";
+import type { PresenceStatus } from "../types/events";
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
 	const { data: session, isPending } = authClient.useSession()
@@ -26,7 +27,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 		const AWAY_DELAY = 5 * 60 * 1000
 		let timer: ReturnType<typeof setTimeout>
-		let currentStatus: "available" | "away" = "available"
+		let currentStatus: PresenceStatus = "available"
 
 		function goAway() {
 			if (currentStatus === "away")

@@ -1,9 +1,10 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { Matchs } from "../../events.ts";
+import type { Matchs, PresenceStatus } from "../../events.ts";
 import { filterMatchForUser, generateCode, isInAnyMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
+import { notifyFriendsOfPresence } from "../../index.ts";
 
 export async function createMatchHandler(req: Request, res: Response) {
 	const { selectedMatchType, visibility, timeTurn, replace, spectators } = req.body
@@ -89,6 +90,9 @@ export async function createMatchHandler(req: Request, res: Response) {
 		}
 
 		currentMatches.set(userId, newMatch)
+		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
+		activityStatus.set(userId, "in a match")
+		await notifyFriendsOfPresence(userId, "in a match")
 		res.json({ ok: true, match: filterMatchForUser(newMatch, userId) })
 	} catch (err) {
 		console.log(err)
