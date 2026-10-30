@@ -3,8 +3,6 @@ import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
 import { Terms } from './pages/legal/Terms'
 import { Privacy } from './pages/legal/Privacy'
-import { Header } from './components/Header'
-import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
 import { Settings } from './pages/settings/Settings'
 import { Verified } from './pages/auth/Verified'
@@ -18,6 +16,9 @@ import { SocketProvider } from './provider/SocketProvider'
 import { Notification } from './components/Notification'
 import { ForgotPwd } from './pages/auth/ForgotPwd'
 import { Match } from './pages/match/Match'
+import { ProtectedLayout } from './layout/ProtectedLayout'
+import { PublicLayout } from './layout/PublicLayout'
+import { MarketingLayout } from './layout/MarketingLayout'
 
 const router = createBrowserRouter([
 	{
@@ -26,97 +27,99 @@ const router = createBrowserRouter([
 		errorElement: <PageError />,
 		children: [
 			{
-				path: '',
-				element: <Home />
+				element: <ProtectedLayout />,
+				children: [
+					{
+						path: '/settings',
+						element: <Settings />,
+						errorElement: <PageError />
+					},
+					{
+						path: '/play',
+						element: <Play />,
+						errorElement: <PageError />
+					},
+					{
+						path: '/leaderboard',
+						element: <Leaderboard />,
+						errorElement: <PageError />
+					},
+					{
+						path: '/friends',
+						element: <Friends />,
+						errorElement: <PageError />
+					},
+					{
+						path: '/profile',
+						element: <Profile />,
+						errorElement: <PageError />
+					},
+					{
+						path: '/notifications',
+						element: <Notifications />,
+						errorElement: <PageError />
+					},
+					{
+						path: '/match',
+						element: <Match />,
+						errorElement: <PageError />
+					}
+				]
 			},
 			{
-				path: 'register',
-				element: <Register />
+				element: <PublicLayout />,
+				children: [
+					{
+						path: 'register',
+						element: <Register />
+					},
+					{
+						path: 'login',
+						element: <Login />
+					},
+					{
+						path: 'forgot-password',
+						element: <ForgotPwd />
+					},
+					{
+						path: 'two-factor',
+						element: <TwoFactor />
+					},
+					{
+						path: 'verified',
+						element: <Verified />
+					}
+				]
 			},
 			{
-				path: 'login',
-				element: <Login />
-			},
-			{
-				path: 'forgot-password',
-				element: <ForgotPwd />
-			},
-			{
-				path: 'terms',
-				element: <Terms />
-			},
-			{
-				path: 'privacy',
-				element: <Privacy />
-			},
-			{
-				path: 'two-factor',
-				element: <TwoFactor />
-			},
-			{
-				path: 'verified',
-				element: <Verified />
+				element: <MarketingLayout />,
+				children: [
+					{
+						path: '',
+						element: <Home />
+					},
+					{
+						path: 'terms',
+						element: <Terms />
+					},
+					{
+						path: 'privacy',
+						element: <Privacy />
+					},
+				]
 			}
 		]
-	},
-	{
-		path: '/settings',
-		element: <Settings />,
-		errorElement: <PageError />
-	},
-	{
-		path: '/play',
-		element: <Play />,
-		errorElement: <PageError />
-	},
-	{
-		path: '/leaderboard',
-		element: <Leaderboard />,
-		errorElement: <PageError />
-	},
-	{
-		path: '/friends',
-		element: <Friends />,
-		errorElement: <PageError />
-	},
-	{
-		path: '/profile',
-		element: <Profile />,
-		errorElement: <PageError />
-	},
-	{
-		path: '/notifications',
-		element: <Notifications />,
-		errorElement: <PageError />
-	},
-	{
-		path: '/match',
-		element: <Match />,
-		errorElement: <PageError />
 	}
 ])
 
 function PageError() {
-	// const error = useRouteError()
-
 	return <>
 		<h1>Error</h1>
-		{/* <p>
-      {error?.error?.toString() ?? error?.toString()}
-    </p> */}
 	</>
 }
 
 function Root() {
-	return (
-		<div className="flex flex-col min-h-dvh">
-			<Header />
-			<main className='flex-1 flex flex-col'>
-				<Outlet />
-			</main>
-			<Footer />
-		</div>
-	)
+	return <Outlet />
 }
 
 function App() {

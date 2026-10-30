@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../../components/Input";
 import { authClient } from "../../lib/auth-client";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { isValidEmail } from "../../lib/isValideEmail";
 import { PasswordBar } from "../../components/PasswordBar";
 import { SignGoogle } from "../../lib/SignGoogle";
@@ -71,15 +71,10 @@ async function validateRegister(username: string, email: string, password: strin
 
 export function Register() {
 	useDocumentTitle(t("btn_sign_up"))
-	const { data: session, isPending } = authClient.useSession()
 	const [errors, setErrors] = useState<Errors>({})
 	const [isFocused, setIsFocused] = useState(false)
 	const [password, setPassword] = useState('')
-	const location = useLocation()
 	const navigate = useNavigate()
-
-	if (session && !isPending)
-		return <Navigate to="/" state={{ from: location }} replace />
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
