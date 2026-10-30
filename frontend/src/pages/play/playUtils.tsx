@@ -289,21 +289,19 @@ export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, M
 	</div>
 }
 
-export function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec, match, joinMatchErr, handleJoinedPublicMatch, handleJoinedSpecMatch }:
-	{
-		username: string | null | undefined,
-		image: string | null | undefined,
-		type: matchType,
-		players: number,
-		maxPlayers: number,
-		canJoin?: boolean,
-		canSpec?: boolean,
-		match: Matchs,
-		joinMatchErr?: string,
-		handleJoinedPublicMatch: (match: Matchs) => void,
-		handleJoinedSpecMatch: (match: Matchs) => void,
-	}
-) {
+export function MatchItem({ username, image, type, players, maxPlayers, canJoin, canSpec, match, joinMatchErr, handleJoinedPublicMatch, handleJoinedSpecMatch }: {
+	username: string | null | undefined,
+	image: string | null | undefined,
+	type: matchType,
+	players: number,
+	maxPlayers: number,
+	canJoin?: boolean,
+	canSpec?: boolean,
+	match: Matchs,
+	joinMatchErr?: string,
+	handleJoinedPublicMatch: (match: Matchs) => void,
+	handleJoinedSpecMatch: (match: Matchs) => void,
+}) {
 	let typeTxt = ""
 	if (type === "ONE_V_ONE")
 		typeTxt = t("txt_ONE_V_ONE")
@@ -323,10 +321,10 @@ export function MatchItem({ username, image, type, players, maxPlayers, canJoin,
 		</div>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{typeTxt}</p>
 		<p className="text-xs text-neutral-content/50 max-lg:hidden">{players} / {maxPlayers}</p>
-		<div className="flex flex-col items-end justify-center">
+		<div className="flex items-center justify-center gap-2">
+			{joinMatchErr && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{joinMatchErr}</span>}
 			{canJoin && <button className="btn btn-outline btn-info btn-sm" onClick={() => handleJoinedPublicMatch(match)} >{t("btn_join")}</button>}
 			{!canJoin && canSpec && <button className="btn btn-neutral btn-outline btn-sm" onClick={() => handleJoinedSpecMatch(match)}>{t("btn_spectate")}</button>}
-			{joinMatchErr && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs text-center">{joinMatchErr}</span>}
 		</div>
 	</div>
 }
