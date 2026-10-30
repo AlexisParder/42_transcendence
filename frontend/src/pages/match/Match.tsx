@@ -163,9 +163,6 @@ export function Match() {
 			setTargetLocked({ x: -1, y: -1 })
 			if (!ok)
 				return setErrors({ action: data.code })
-
-			const match: Matchs | undefined = data.match ?? undefined
-			setJoinedMatch(match)
 		} catch (error) {
 			console.error("fire:", error)
 		}

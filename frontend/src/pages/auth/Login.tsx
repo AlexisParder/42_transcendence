@@ -51,7 +51,6 @@ export function Login() {
 		if (Object.keys(newErrors).length > 0)
 			return
 
-		// BACK 
 		const { error } = await authClient.signIn.email({
 			email,
 			password,

@@ -205,7 +205,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setView("guest")
 			setErrors({})
 		} catch (error) {
@@ -243,7 +242,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(undefined)
 			setView("none")
 			setErrors({})
 		} catch (error) {
@@ -263,7 +261,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setErrors({})
 		} catch (error) {
 			console.error("update player status match:", error)
@@ -295,7 +292,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setErrors({})
 		} catch (error) {
 			console.error("kick user match:", error)
@@ -314,7 +310,6 @@ export function Play() {
 				return
 			}
 
-			setJoinedMatch(data.match ?? undefined)
 			setCode("")
 			setView("guest")
 			setErrors({})

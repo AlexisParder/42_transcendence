@@ -106,7 +106,7 @@ export async function setPlayerReadyOnSelectHandler(req: Request, res: Response)
 		if (match.players.every(p => p.isReady || p.isBot))
 			endDeploy(match, io)
 
-		res.json({ ok: true, match: filterMatchForUser(match, session.user.id) })
+		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

@@ -43,7 +43,7 @@ export async function kickPlayerMatchHandler(req: Request, res: Response) {
 
 		io.to(targetId).emit("refresh_joined_match", undefined)
 
-		res.json({ ok: true, match: filterMatchForUser(match, userId) })
+		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

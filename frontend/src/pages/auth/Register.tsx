@@ -92,7 +92,6 @@ export function Register() {
 		if (Object.keys(newErrors).length > 0)
 			return
 
-		// BACK
 		const { error } = await authClient.signUp.email({
 			email,
 			password,

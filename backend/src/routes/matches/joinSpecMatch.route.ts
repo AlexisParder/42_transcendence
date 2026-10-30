@@ -1,10 +1,9 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { MatchPlayers, Matchs } from "../../events.ts";
-import { filterMatchForUser, firstFreeTeam, isInAnyMatch, isInAnySpecMatch } from "../../lib/matchs/matchUtils.ts";
+import type { Matchs } from "../../events.ts";
+import { filterMatchForUser, isInAnyMatch, isInAnySpecMatch } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
-import { canJoinRankedMatch } from "../../lib/matchs/eloLib.ts";
 import { io } from "../../server.ts";
 
 export async function joinSpecMatchHandler(req: Request, res: Response) {
@@ -48,7 +47,7 @@ export async function joinSpecMatchHandler(req: Request, res: Response) {
 				io.to(spectator).emit("refresh_joined_match", filterMatchForUser(match, spectator))
 		}
 
-		res.json({ ok: true, match: filterMatchForUser(match, userId) })
+		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}

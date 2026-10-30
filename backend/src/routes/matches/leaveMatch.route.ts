@@ -38,7 +38,7 @@ export async function leaveMatchHandler(req: Request, res: Response) {
 				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 
-		res.json({ ok: true, match: filterMatchForUser(match, userId) })
+		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })
 	}
