@@ -2,7 +2,7 @@ import type React from "react"
 import type { SessionRow } from "../../hooks/useSessions"
 import { Input, InputWithText } from "../../components/Input"
 import { PasswordBar } from "../../components/PasswordBar"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { authClient } from "../../lib/auth-client"
 import { prettyUA } from "../../lib/prettyUA"
 import { useSessions } from "../../hooks/useSessions"
@@ -14,6 +14,7 @@ import { setTranslationLanguage, t } from "../../lib/translate"
 import { Enable2FA, RecoveryCodes, ReScan2FA } from "./Security"
 import { apiPost } from "../../lib/api"
 import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password"
+import { AVATAR_INPUT_MAX_SIZE, AVATAR_INPUT_MAX_SIZE_MB, AVATAR_MAX_SIZE, AVATAR_MAX_SIZE_MB, AVATAR_TYPES, resizeAvatar } from "../../lib/avatar"
 
 type Errors = {
 	username?: string
@@ -39,7 +40,7 @@ export function SettingsCat() {
 	const [currPassword, setCurrPassword] = useState('')
 	const [password, setPassword] = useState('')
 	const [password2, setPassword2] = useState('')
-	const [picture, setPicture] = useState('')
+	const pictureInput = useRef<HTMLInputElement>(null)
 	const [username, setUsername] = useState(session?.user.username ?? "")
 	const [language, setLanguage] = useState(session?.user.language ?? "en")
 	const [hasPwd, setHasPwd] = useState<boolean | null>()
@@ -129,34 +130,36 @@ export function SettingsCat() {
 		}
 	}
 
-	const handleChangePicture: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
-		e.preventDefault()
-
+	const handleChangePicture = async (picture: File) => {
 		setErrors({})
-		const form = new FormData(e.currentTarget)
-		const pictureRaw = form.get('picture')?.toString().trim() ?? ''
-
-		let picture = ''
-		try {
-			const url = new URL(pictureRaw)
-			if (url.protocol === 'http:' || url.protocol === 'https:')
-				picture = url.href
-		} catch {
+		if (!AVATAR_TYPES.includes(picture.type)) {
+			setErrors({ picture: t("settings_err_picture_type") })
 			return
 		}
 
-		if (picture.length === 0)
+		if (picture.size > AVATAR_INPUT_MAX_SIZE) {
+			setErrors({ picture: t("settings_err_picture_too_big", { AVATAR_MAX_SIZE_MB: AVATAR_INPUT_MAX_SIZE_MB }) })
 			return
+		}
+
+		const resized = await resizeAvatar(picture)
+		if ("error" in resized) {
+			setErrors({ picture: t(resized.error) })
+			return
+		}
+
+		if (resized.blob.size > AVATAR_MAX_SIZE) {
+			setErrors({ picture: t("settings_err_picture_too_big", { AVATAR_MAX_SIZE_MB }) })
+			return
+		}
 
 		let base64: string
 		try {
-			const res = await fetch(picture)
-			const blob = await res.blob()
 			base64 = await new Promise<string>((resolve, reject) => {
 				const reader = new FileReader()
 				reader.onloadend = () => resolve(reader.result as string)
 				reader.onerror = reject
-				reader.readAsDataURL(blob)
+				reader.readAsDataURL(resized.blob)
 			})
 		} catch {
 			setErrors({ picture: t("settings_err_updt_picture") })
@@ -168,11 +171,7 @@ export function SettingsCat() {
 		})
 
 		if (error)
-			setErrors({ picture: t("settings_err_updt_picture") })
-		else {
-			setPicture('')
-			HideModal('pictureModal')
-		}
+			setErrors({ picture: error.code ? t(error.code, { AVATAR_MAX_SIZE_MB }) : t("settings_err_updt_picture") })
 	}
 
 	const handleDisable2FA: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -329,14 +328,20 @@ export function SettingsCat() {
 			<div className="flex gap-4 md:gap-2 items-center">
 				<Avatar username={session?.user.username} image={session?.user.image} size={64} />
 				<div className="flex gap-2">
+					<input type="file" ref={pictureInput} accept={AVATAR_TYPES.join(",")} className="hidden" onChange={e => {
+						const file = e.target.files?.[0]
+						e.target.value = ''
+						if (file)
+							handleChangePicture(file)
+					}} />
 					<button className="btn btn-outline border-neutral" onClick={() => {
 						setErrors({})
-						ShowModal('pictureModal')
+						pictureInput.current?.click()
 					}}>{t("btn_upload")}</button>
 					<button className="btn btn-outline border-neutral" onClick={handleRemovePicture} disabled={!session?.user.image ? true : false}>{t("btn_remove")}</button>
 				</div>
 			</div>
-			{errors.picture && <span className="text-error block pt-2 pl-2">{errors.picture}</span>}
+			{errors.picture && <span className="text-error block pt-2 pl-2 text-xs">{errors.picture}</span>}
 			<div className="flex mt-2 flex-col md:flex-row w-full gap-2">
 				<InputWithText text={t("settings_profile_callsign")}>
 					<Input type="text" name="username" label={t("txt_username")} defaultValue={session?.user.username ?? ''} useLabel={false} onChange={e => setUsername(e.target.value.trim())} onBlur={handleChangeUsername} errorMsg={errors.username} />
@@ -435,19 +440,6 @@ export function SettingsCat() {
 			{hasPwd !== true && <p className="border border-warning/50 bg-warning/10 rounded-md p-4 flex items-center gap-4"><IoWarning className="text-warning" /> <span className="text-xs text-neutral-content/60">{t("settings_danger_dlt_need_pwd")}.<br />{t("settings_2fa_need_pwd_2")}.</span></p>}
 		</SectionSetting>
 
-		<Modal id="pictureModal" onClose={() => {
-			setPicture('')
-			setErrors({})
-		}}>
-			<p className="pb-2">{t("settings_modal_upl_pic")}</p>
-			<form onSubmit={handleChangePicture}>
-				<Input type="text" label={t("settings_modal_upl_pic_link")} name="picture" autoComplete="off" onChange={e => setPicture(e.target.value)} value={picture} autoFocus={true} errorMsg={errors.picture} />
-				<div className="flex gap-2 pt-2 justify-end">
-					<button onClick={() => HideModal("pictureModal")} className="btn btn-neutral">{t("btn_cancel")}</button>
-					<button className="btn btn-info btn-outline">{t("btn_upload")}</button>
-				</div>
-			</form>
-		</Modal>
 		<Modal id="deleteModal" onClose={() => setCode("")}>
 			<p className="pb-2">{t("settings_modal_dlt_user")}</p>
 			<form onSubmit={handleDeleteAccount}>

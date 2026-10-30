@@ -10,6 +10,7 @@ import { io } from "./server.ts"
 import { currentMatches } from "./mapMatches.ts"
 import { isInAnyMatch, isInAnySpecMatch } from "./lib/matchs/matchUtils.ts"
 import { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MESSAGES, validatePassword } from "./lib/password.ts"
+import { importAvatar, processAvatar } from "./lib/avatar.ts"
 
 const signInPaths = [
 	"/sign-in/email",
@@ -132,6 +133,13 @@ export const auth = betterAuth({
 				return ctx.json({ok: true})
 			}
 
+			if (ctx.path === "/update-user" && typeof ctx.body?.image === "string") {
+				const result = await processAvatar(ctx.body.image)
+				if ("error" in result)
+					return ctx.json({ ok: false, code: result.error }, { status: 400 })
+				return { context: { body: { ...ctx.body, image: result.image } } }
+			}
+
 			if (ctx.path !== "/delete-user")
 				return
 
@@ -175,7 +183,8 @@ export const auth = betterAuth({
 			},
 			create: {
 				before: async (user, ctx) => {
-					if (user.username) return { data: user }
+					const image = await importAvatar(user.image)
+					if (user.username) return { data: { ...user, image } }
 
 					const base = (user.email?.split("@")[0] ?? user.name ?? "user").toLowerCase().replace(/[^a-z0-9_.]/g, "").slice(0, 24) || "user"
 
@@ -189,7 +198,7 @@ export const auth = betterAuth({
 						candidate = `${base}${i}`
 					}
 
-					return { data: { ...user, username: candidate, displayUsername: candidate } }
+					return { data: { ...user, image, username: candidate, displayUsername: candidate } }
 				}
 			},
 		},
