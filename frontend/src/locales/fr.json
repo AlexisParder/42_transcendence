@@ -84,7 +84,7 @@
 	"txt_ranked": "classée",
 	"txt_unranked": "non classée",
 	"txt_no_show_now": "Rien à afficher pour le moment",
-	"txt_worldwide": "n° {{pos}} mondial",
+	"txt_worldwide": "{{pos}} mondial",
 	"txt_player": "joueur",
 	"txt_accuracy": "précision",
 	"txt_all_quiet": "rien à signaler en surface",

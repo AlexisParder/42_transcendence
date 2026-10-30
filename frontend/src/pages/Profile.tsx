@@ -265,11 +265,11 @@ function MatchesItem({ result, otherPlayer, otherDeleted, placement, type, match
 			colorBd = "border-error"
 		}
 	}
-
+	const timeFormat = formatTimeProfile(matchTime)
 	return <div className={`grid grid-cols-[4rem_1fr_1fr_5rem] items-center gap-2 ${colorBg} p-2.5 rounded-md border-l-3 ${colorBd}`}>
 		<p className={`text-sm ${colorTxt} font-bold uppercase`}>{t(`txt_${result}`)}</p>
 		<p className="text-xs text-center">{matchDesc(type, otherPlayer, otherDeleted, placement)}</p>
-		<p className="flex items-center justify-center gap-1 text-xs">{t(`txt_${type}`)} <TbPointFilled className="size-1" /> {formatTimeProfile(matchTime)}</p>
+		<p className="flex items-center justify-center gap-1 text-xs">{t(`txt_${type}`)} {timeFormat && <TbPointFilled className="size-1" />} {timeFormat}</p>
 		<p className={`text-xs ${colorTxt} font-bold text-right`}>{pointsTxt === "unranked" ? t("txt_unranked") : pointsTxt}</p>
 	</div>
 }

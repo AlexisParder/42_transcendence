@@ -6,24 +6,24 @@ export function formatTime(iso: string): string {
 	if (min < 1)
 		return t("txt_now")
 	if (min < 60)
-		return `${min} min`
+		return `${min} ${t("txt_min")}`
 
 	const h = Math.floor(min / 60)
 	if (h < 24)
-		return `${h} h`
+		return `${h} ${t("txt_h")}`
 	return `${Math.floor(h / 24)} ${t("txt_day_u")}`
 }
 
 export function formatTimeProfile(min: string): string {
 	const minNb = Number(min)
 	if (minNb < 1)
-		return t("txt_now")
+		return ""
 	if (minNb < 60)
-		return `${minNb} min`
+		return `${minNb} ${t("txt_min")}`
 
 	const h = Math.floor(minNb / 60)
 	if (h < 24)
-		return `${h} h`
+		return `${h} ${t("txt_h")}`
 	return `${Math.floor(h / 24)} ${t("txt_day_u")}`
 }
 
