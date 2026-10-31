@@ -453,18 +453,24 @@ function LogItem({ log, myId, replace, match }: {
 	let text = ""
 	const teamTargetData = match.players.find(p => p.userId === log.targetId)
 	const myTeamData = match.players.find(p => p.userId === myId)
+	const isMine = log.authorId === myId
+	const isMyTeam = teamTargetData?.team === myTeamData?.team
 	if (log.logType === "left")
-		text = `${log.authorUsername} left ${replace ? "bot took over" : ""}`
+		text = t(replace ? "match_log_left_bot" : "match_log_left", { name: log.authorUsername ?? "?" })
 	else if (log.logType === "fire" && log.shot && log.shot.status !== "sunk") {
+		const vars = { author: log.authorUsername ?? "?", target: log.targetUsername ?? "?", cell: getRowName(log.shot.coords), status: t(`match_${log.shot.status}`) }
+
 		if (match.type === "TWO_V_TWO")
-			text = `${log.authorId === myId ? "you fire" : `${log.authorUsername} fires`} at ${teamTargetData?.team === myTeamData?.team ? "your team" : "enemy team"} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
+			text = t(isMine ? "match_log_fire_me_enemy_team" : isMyTeam ? "match_log_fire_your_team" : "match_log_fire_enemy_team", vars)
 		else
-			text = `${log.authorId === myId ? "you fire" : `${log.authorUsername} fires`} at ${log.targetId === myId ? "you" : log.targetUsername} on ${getRowName(log.shot.coords)} - ${log.shot.status}`
+			text = t(isMine ? "match_log_fire_me_player" : log.targetId === myId ? "match_log_fire_you" : "match_log_fire_player", vars)
 	} else if (log.logType === "fire" && log.shot && log.shot.status === "sunk") {
-		if (match.type === "TWO_V_TWO")
-			text = `${log.authorId === myId ? "you sink" : `${log.authorUsername} sinks`} ${teamTargetData?.team === myTeamData?.team ? "your" : `the enemy's`} ${log.shot.ship?.name}`
-		else
-			text = `${log.authorId === myId ? "you sink" : `${log.authorUsername} sinks`} ${log.targetId === myId ? "your" : `${log.targetUsername}'s`} ${log.shot.ship?.name}`
+		const shipName = log.shot.ship?.name
+		const shipVars = { ship: t(`ship_${shipName}`), shipDef: t(`ship_def_${shipName}`), name: log.targetUsername ?? "?" }
+		const isMyShip = match.type === "TWO_V_TWO" ? isMyTeam : log.targetId === myId
+		const ship = t(isMyShip ? "match_log_ship_yours" : match.type === "TWO_V_TWO" ? "match_log_ship_enemy" : "match_log_ship_player", shipVars)
+
+		text = isMine ? t("match_log_sink_me", { ship }) : t("match_log_sink", { author: log.authorUsername ?? "?", ship })
 	}
 
 	return <div className={`p-2 ${bgColor} rounded-md`}>

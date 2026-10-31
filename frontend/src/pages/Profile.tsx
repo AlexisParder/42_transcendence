@@ -132,7 +132,7 @@ export function Profile() {
 				<div className="flex items-center gap-4">
 					<Avatar username={targetInfo?.username} image={targetInfo?.image} size={88} />
 					<div className="flex flex-col gap-1 md:gap-0">
-						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(targetInfo?.username, 9)} {rank && <span className="badge badge-info badge-outline badge-sm uppercase">{getTranslationLanguage() === "fr" ? rank.fr_label : rank.en_label}</span>}</p>
+						<p className="text-3xl flex items-center gap-2 font-bold">{truncateText(targetInfo?.username, 9)} {rank && <span className="badge badge-info badge-outline badge-sm uppercase">{getTranslationLanguage() === "fr" ? rank.fr_label : getTranslationLanguage() === "es" ? rank.es_label : rank.en_label}</span>}</p>
 						<p className="text-sm text-neutral-content/50 first-letter:uppercase">{t("profile_txt_joined")} {targetInfo && new Date(targetInfo.createdAt).toLocaleDateString(getTranslationLanguage(), { day: "numeric", month: "long", year: "numeric" })}</p>
 					</div>
 				</div>
