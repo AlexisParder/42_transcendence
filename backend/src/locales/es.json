@@ -1,3 +1,18 @@
 {
-	
+	"mail_otp_subject": "Tu código de Sonar",
+	"mail_otp_body": "<p>Tu código: <strong>{{otp}}</strong></p><p>Caduca en 10 minutos.</p>",
+	"mail_chat_subject": "SONAR - Nuevo mensaje",
+	"mail_chat_body": "<p>Tienes un mensaje nuevo. Abre SONAR para leerlo.</p>",
+	"mail_friend_subject": "SONAR - Solicitud de amistad",
+	"mail_friend_body": "<p>Tienes una nueva solicitud de amistad. Abre SONAR para responder.</p>",
+	"mail_achievements_subject": "SONAR - Nuevo logro",
+	"mail_achievements_body": "<p>Has desbloqueado un nuevo logro. Abre SONAR para verlo.</p>",
+	"mail_security_password_changed_subject": "SONAR - Contraseña cambiada",
+	"mail_security_password_changed_body": "<p>Se ha cambiado tu contraseña. Si no has sido tú, restablece tu contraseña de inmediato.</p>",
+	"mail_security_2fa_enabled_subject": "SONAR - Verificación en dos pasos activada",
+	"mail_security_2fa_enabled_body": "<p>Se ha activado la verificación en dos pasos en tu cuenta. Si no has sido tú, cambia tu contraseña de inmediato.</p>",
+	"mail_security_2fa_disabled_subject": "SONAR - Verificación en dos pasos desactivada",
+	"mail_security_2fa_disabled_body": "<p>Se ha desactivado la verificación en dos pasos en tu cuenta. Si no has sido tú, cambia tu contraseña de inmediato.</p>",
+	"mail_security_new_session_subject": "SONAR - Nuevo inicio de sesión",
+	"mail_security_new_session_body": "<p>Se ha detectado un nuevo inicio de sesión en tu cuenta.</p><p>Dispositivo: <strong>{{device}}</strong><br>Dirección IP: <strong>{{ip}}</strong></p><p>Si no has sido tú, cambia tu contraseña de inmediato.</p>"
 }
