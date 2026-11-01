@@ -38,6 +38,12 @@ export async function createMatchHandler(req: Request, res: Response) {
 		if (visibility !== "public" && visibility !== "private")
 			return res.status(400).json({ ok: false })
 
+		if (!Number.isInteger(timeTurn) || timeTurn < 10 || timeTurn > 60)
+			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
+		if (typeof replace !== "boolean" || typeof spectators !== "boolean")
+			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
 		const code = generateCode(currentMatches)
 
 		const newMatch: Matchs = {

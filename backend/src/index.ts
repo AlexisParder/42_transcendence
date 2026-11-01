@@ -28,7 +28,7 @@ import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
 import { createNotificationHandler } from "./routes/createNotification.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
-import { leaderboardLimit } from "./rateLimit.ts"
+import { checkPwdLimit, friendRequestLimit, joinCodeLimit, leaderboardLimit, otpLimit } from "./rateLimit.ts"
 import { getNotificationPreferencesHandler, setNotificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
 import { notify } from "./lib/notify.ts"
 import { allowedOrigins, app, io, server } from "./server.ts"
@@ -78,10 +78,10 @@ app.get("/api/notifications", getNotificationsHandler)
 app.get("/api/notification-preferences", getNotificationPreferencesHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
-app.post("/api/check-pwd", checkPwdHandler)
+app.post("/api/check-pwd", checkPwdLimit, checkPwdHandler)
 app.post("/api/view-codes", getBackupCodesHandler)
 app.post("/api/get-conv-history", getConvHistoryHandler)
-app.post("/api/send-friend-request", sendFriendRequestHandler)
+app.post("/api/send-friend-request", friendRequestLimit, sendFriendRequestHandler)
 app.post("/api/accept-friend-request", acceptFriendRequestHandler)
 app.post("/api/decline-friend-request", declineFriendRequestHandler)
 app.post("/api/get-conversations", getConverstionsHandler)
@@ -99,13 +99,13 @@ app.post("/api/get-user-info", getUserInfoHandler)
 app.post("/api/get-user-points", getUserPointsHandler)
 app.post("/api/get-user-stats", getUserStatsHandler)
 app.post("/api/otp/cooldown", getSentHandler)
-app.post("/api/otp/send", setSentHandler)
+app.post("/api/otp/send", otpLimit, setSentHandler)
 app.post("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHandler)
 app.post("/api/get-matches", getPublicMatchesHandler)
 app.post("/api/get-joined-match", getJoinedMatchHandler)
 app.post("/api/join-match", joinMatchHandler)
 app.post("/api/join-spec-match", joinSpecMatchHandler)
-app.post("/api/join-code-match", joinCodeMatchHandler)
+app.post("/api/join-code-match", joinCodeLimit, joinCodeMatchHandler)
 app.post("/api/leave-match", leaveMatchHandler)
 app.post("/api/leave-spec-match", leaveSpecMatchHandler)
 app.post("/api/create-match", createMatchHandler)
@@ -210,13 +210,41 @@ io.on("connection", async (socket) => {
 		}
 	})
 
-	socket.on("set_typing", (payload) => {
-		const fromUserId = socket.data.userId
+	socket.on("set_typing", async (payload) => {
+		try {
+			const fromUserId = socket.data.userId
+			const toUserId = payload?.toUserId
 
-		io.to(payload.toUserId).emit("typing", {
-			fromUserId,
-			typing: payload.typing
-		})
+			if (typeof toUserId !== "string" || typeof payload.typing !== "boolean")
+				return
+
+			const areFriends = await prisma.friends.findFirst({
+				where: {
+					isAccepted: true,
+					OR: [
+						{ userId: fromUserId, targetId: toUserId },
+						{ userId: toUserId, targetId: fromUserId },
+					]
+				}
+			})
+
+			if (!areFriends)
+				return
+
+			const blocked = await prisma.userBlocked.findFirst({
+				where: { userId: toUserId, targetId: fromUserId },
+			})
+
+			if (blocked)
+				return
+
+			io.to(toUserId).emit("typing", {
+				fromUserId,
+				typing: payload.typing
+			})
+		} catch (err) {
+			console.error("set_typing error:", err)
+		}
 	})
 
 	socket.join(userId)
@@ -226,6 +254,9 @@ io.on("connection", async (socket) => {
 
 	socket.on("set_activity", async (payload) => {
 		if (!onlineUsers.has(userId))
+			return
+
+		if (payload?.status !== "available" && payload?.status !== "away")
 			return
 
 		activityStatus.set(userId, payload.status)

@@ -4,13 +4,17 @@ import { auth } from "../auth.ts"
 const lastSent = new Map<string, number>();
 const COOLDOWN_TIME = 60000;
 
+function normalizeEmail(email: unknown) {
+	return typeof email === "string" ? email.trim().toLowerCase() : "";
+}
+
 function leftFor(email: string) {
-	const last = lastSent.get(email.toLowerCase()) ?? 0;
+	const last = lastSent.get(email) ?? 0;
 	return Math.max(0, Math.floor((last + COOLDOWN_TIME - Date.now()) / 1000));
 }
 
 export async function getSentHandler(req: Request, res: Response) {
-	const { email } = req.body;
+	const email = normalizeEmail(req.body?.email);
 	if (!email) {
 		return res.status(400).json({ ok: false, error: "missing_email" });
 	}
@@ -19,7 +23,7 @@ export async function getSentHandler(req: Request, res: Response) {
 }
 
 export async function setSentHandler(req: Request, res: Response) {
-	const { email } = req.body;
+	const email = normalizeEmail(req.body?.email);
 	if (!email) {
 		return res.status(400).json({ ok: false, error: "missing_email" });
 	}
@@ -33,7 +37,7 @@ export async function setSentHandler(req: Request, res: Response) {
 		body: { email, type: "email-verification" },
 	})
 
-	lastSent.set(email.toLowerCase(), Date.now());
+	lastSent.set(email, Date.now());
 
 	res.json({ ok: true, left: COOLDOWN_TIME / 1000 });
 }
