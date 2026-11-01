@@ -124,13 +124,12 @@ export const auth = betterAuth({
 					return
 
 				const session = await getSessionFromCtx(ctx)
-				if (!session)
-					return
+				const email = session?.user.email ?? (typeof body.email === "string" ? body.email : null)
 
-				const error = validatePassword(password, [session.user.email])
+				const error = validatePassword(password, email ? [email] : [])
 				if (error)
 					throw new APIError("BAD_REQUEST", { message: PASSWORD_MESSAGES[error] })
-				return ctx.json({ok: true})
+				return
 			}
 
 			if (ctx.path === "/update-user" && typeof ctx.body?.image === "string") {

@@ -13,6 +13,9 @@ export async function deleteNotificationHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const { notificationId } = req.body
+
+		if (typeof notificationId !== "string")
+			return res.status(400).json({ ok: false })
 		const result = await prisma.notification.deleteMany({
 			where: {
 				id: notificationId,

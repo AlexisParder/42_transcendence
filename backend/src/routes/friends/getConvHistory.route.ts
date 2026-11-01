@@ -15,6 +15,9 @@ export async function getConvHistoryHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
+		if (typeof peerId !== "string" || (before !== undefined && Number.isNaN(new Date(before).getTime())))
+			return res.status(400).json({ ok: false })
+
 		const userId = session.user.id
 
 		const rows = await prisma.conversations.findMany({
