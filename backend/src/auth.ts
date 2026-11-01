@@ -197,7 +197,9 @@ export const auth = betterAuth({
 						candidate = `${base}${i}`
 					}
 
-					return { data: { ...user, image, username: candidate, displayUsername: candidate } }
+					const language = resolveLanguage(ctx?.headers?.get("accept-language"))
+
+					return { data: { ...user, image, language, username: candidate, displayUsername: candidate } }
 				}
 			},
 		},

@@ -19,6 +19,7 @@ import { Match } from './pages/match/Match'
 import { ProtectedLayout } from './layout/ProtectedLayout'
 import { PublicLayout } from './layout/PublicLayout'
 import { MarketingLayout } from './layout/MarketingLayout'
+import { t } from './lib/translate'
 
 const router = createBrowserRouter([
 	{
@@ -114,7 +115,7 @@ const router = createBrowserRouter([
 
 function PageError() {
 	return <>
-		<h1>Error</h1>
+		<h1>{t("txt_error")}</h1>
 	</>
 }
 

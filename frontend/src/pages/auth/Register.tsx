@@ -10,7 +10,7 @@ import { PasswordBar } from "../../components/PasswordBar";
 import { SignGoogle } from "../../lib/SignGoogle";
 import { SignDiscord } from "../../lib/SignDiscord";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
-import { t } from "../../lib/translate";
+import { getTranslationLanguage, t } from "../../lib/translate";
 import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password";
 
 type Errors = {
@@ -26,7 +26,7 @@ async function validateRegister(username: string, email: string, password: strin
 	const errors: Errors = {}
 
 	if (username.length <= 0)
-		errors.username = "Username is empty!"
+		errors.username = t("txt_err_user_empty")
 	else {
 		const { data, error } = await authClient.isUsernameAvailable({
 			username: username
@@ -97,7 +97,7 @@ export function Register() {
 			password,
 			name,
 			username: name,
-			language: "en",
+			language: getTranslationLanguage(),
 			points: 0
 		})
 

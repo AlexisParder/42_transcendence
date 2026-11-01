@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState } from "react";
+import { t } from "../lib/translate";
 
 export function Modal({id, children, onClose}: {id: string, children: React.ReactNode, onClose?: () => void}) {
 	const [resetKey, setResetKey] = useState(0)
@@ -13,7 +14,7 @@ export function Modal({id, children, onClose}: {id: string, children: React.Reac
 			{children}
 		</div>
 		<form method="dialog" className="modal-backdrop">
-			<button>close</button>
+			<button>{t("btn_close")}</button>
 		</form>
 	</dialog>
 }
