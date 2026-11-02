@@ -17,6 +17,8 @@
 	"mail_security_new_session_body": "<p>Se ha detectado un nuevo inicio de sesión en tu cuenta.</p><p>Dispositivo: <strong>{{device}}</strong><br>Dirección IP: <strong>{{ip}}</strong></p><p>Si no has sido tú, cambia tu contraseña de inmediato.</p>",
 	"mail_security_data_exported_subject": "SONAR - Exportación de tus datos",
 	"mail_security_data_exported_body": "<p>Se ha exportado una copia de tus datos desde tu cuenta.</p><p>Si no has sido tú, cambia tu contraseña de inmediato.</p>",
+	"mail_account_deleted_subject": "SONAR - Cuenta eliminada",
+	"mail_account_deleted_body": "<p>Tu cuenta de Sonar y tus datos personales han sido eliminados.</p><p>Si no has solicitado esta eliminación, contáctanos lo antes posible.</p>",
 	"txt_ONE_V_ONE": "1 vs 1",
 	"txt_TWO_V_TWO": "2 vs 2",
 	"txt_FFA": "FFA",

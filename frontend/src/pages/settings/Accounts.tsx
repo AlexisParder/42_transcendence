@@ -325,15 +325,17 @@ export function SettingsCat() {
 				setErrors({ code: t("txt_err_2fa_size") })
 				return
 			}
-
-			const { error } = await authClient.twoFactor.verifyTotp({ code })
-			if (error) {
-				setErrors({ code: t("txt_err_2fa_invalid") })
-				return
-			}
 		}
 
-		const { error } = await authClient.deleteUser({ password });
+		const { error } = await authClient.deleteUser({
+			password,
+			fetchOptions: { headers: { "x-2fa-code": code } },
+		})
+
+		if (error?.code === "txt_err_2fa_invalid" || error?.code === "txt_err_2fa_empty") {
+			setErrors({ code: t(error.code) })
+			return
+		}
 
 		HideModal("deleteModal")
 		if (error) {

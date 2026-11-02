@@ -17,6 +17,8 @@
 	"mail_security_new_session_body": "<p>Une nouvelle connexion à ton compte a été détectée.</p><p>Appareil : <strong>{{device}}</strong><br>Adresse IP : <strong>{{ip}}</strong></p><p>Si ce n'est pas toi, change ton mot de passe immédiatement.</p>",
 	"mail_security_data_exported_subject": "SONAR - Export de tes données",
 	"mail_security_data_exported_body": "<p>Une copie de tes données a été exportée depuis ton compte.</p><p>Si ce n'est pas toi, change ton mot de passe immédiatement.</p>",
+	"mail_account_deleted_subject": "SONAR - Compte supprimé",
+	"mail_account_deleted_body": "<p>Ton compte Sonar a bien été supprimé, ainsi que tes données personnelles.</p><p>Si ce n'est pas toi qui as demandé cette suppression, contacte-nous au plus vite.</p>",
 	"txt_ONE_V_ONE": "1 v 1",
 	"txt_TWO_V_TWO": "2 v 2",
 	"txt_FFA": "Chacun pour soi",

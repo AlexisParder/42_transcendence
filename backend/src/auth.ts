@@ -74,6 +74,15 @@ export const auth = betterAuth({
 			},
 			afterDelete: async (user) => {
 				io.in(user.id).disconnectSockets(true)
+
+				if (user.emailVerified) {
+					const language = (user as { language?: string }).language
+					sendMail({
+						to: user.email,
+						subject: t(language, "mail_account_deleted_subject"),
+						html: t(language, "mail_account_deleted_body"),
+					}).catch(error => console.error("account deleted mail error:", error))
+				}
 			},
 		},
 		additionalFields: {
@@ -161,6 +170,19 @@ export const auth = betterAuth({
 			})
 			if (hasPassword && (typeof ctx.body?.password !== "string" || !ctx.body.password))
 				return ctx.json({ ok: false, code: "settings_err_rmv_user" }, { status: 400 })
+
+			// Vérifie le code 2FA côté serveur (sinon on peut appeler l'API directement sans le code)
+			if (session.user.twoFactorEnabled) {
+				const code = ctx.headers?.get("x-2fa-code")
+				if (typeof code !== "string" || !code)
+					return ctx.json({ ok: false, code: "txt_err_2fa_empty" }, { status: 400 })
+
+				try {
+					await auth.api.verifyTOTP({ headers: ctx.headers, body: { code } })
+				} catch {
+					return ctx.json({ ok: false, code: "txt_err_2fa_invalid" }, { status: 401 })
+				}
+			}
 		}),
 		after: createAuthMiddleware(async ctx => {
 			const newSession = ctx.context.newSession

@@ -489,6 +489,7 @@
 	"settings_err_rmv_picture": "No se ha podido quitar la imagen",
 	"settings_err_rmv_user": "No se ha podido eliminar la cuenta",
 	"settings_err_rmv_user_in_match": "No puedes eliminar tu cuenta mientras estás en una partida",
+	"SESSION_EXPIRED": "Tu inicio de sesión es demasiado antiguo. Cierra sesión y vuelve a iniciarla para eliminar tu cuenta",
 	"deleted_user": "Cuenta eliminada",
 	"deleted_user_id": "Cuenta eliminada #{{id}}",
 	"settings_updt_email_wait": "Cambio pendiente a {{email}}: confírmalo desde tu bandeja de entrada",
