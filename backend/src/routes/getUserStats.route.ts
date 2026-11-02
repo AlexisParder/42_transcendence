@@ -1,16 +1,18 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express";
+import { isOptionalOffset, isOptionalString } from "../lib/validate.ts"
 import { auth } from "../auth.ts";
 import { prisma } from "../db/client.ts";
 import { formatMatch } from "../lib/matchs/matchFormat.ts";
 import type { Stat } from "../events.ts";
 
 export async function getUserStatsHandler(req: Request, res: Response) {
-	const { targetId, offset } = req.body
-	const skip = Math.max(0, Math.floor(Number(offset) || 0))
+	const { targetId, offset } = req.body ?? {}
 
-	if (targetId !== undefined && typeof targetId !== "string")
+	if (!isOptionalString(targetId) || !isOptionalOffset(offset))
 		return res.status(400).json({ ok: false })
+
+	const skip = offset ?? 0
 
 	try {
 		const session = await auth.api.getSession({

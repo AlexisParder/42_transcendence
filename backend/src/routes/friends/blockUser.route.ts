@@ -1,5 +1,6 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express";
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import { prisma } from "../../db/client.ts";
 import { io } from "../../server.ts";
@@ -14,9 +15,9 @@ export async function blockUserHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-		const { targetId } = req.body
+		const { targetId } = req.body ?? {}
 
-		if (typeof targetId !== "string" || !targetId)
+		if (!isString(targetId))
 			return res.status(400).json({ ok: false, error: 'friend_block_err_invalid' })
 		if (targetId === userId)
 			return res.status(400).json({ ok: false, error: 'friend_block_err_self' })

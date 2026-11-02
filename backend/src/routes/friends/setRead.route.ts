@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import { fromNodeHeaders } from "better-auth/node";
 import { prisma } from "../../db/client.ts";
@@ -14,9 +15,9 @@ export async function setReadHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-		const { peer } = req.body
+		const { peer } = req.body ?? {}
 
-		if (typeof peer !== "string")
+		if (!isString(peer))
 			return res.status(400).json({ ok: false })
 
 		await prisma.conversations.updateMany({

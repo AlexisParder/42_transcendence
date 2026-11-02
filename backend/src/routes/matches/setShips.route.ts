@@ -8,7 +8,7 @@ import { SHIP_COUNT, validateShips } from "../../lib/matchs/shipValidation.ts";
 import { io } from "../../server.ts";
 
 export async function setPlayerShipsHandler(req: Request, res: Response) {
-	const { ships } = req.body
+	const { ships } = req.body ?? {}
 
 	try {
 		const session = await auth.api.getSession({

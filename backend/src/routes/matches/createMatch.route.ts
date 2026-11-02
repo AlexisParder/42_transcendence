@@ -7,7 +7,7 @@ import { prisma } from "../../db/client.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
 
 export async function createMatchHandler(req: Request, res: Response) {
-	const { selectedMatchType, visibility, timeTurn, replace, spectators } = req.body
+	const { selectedMatchType, visibility, timeTurn, replace, spectators } = req.body ?? {}
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)

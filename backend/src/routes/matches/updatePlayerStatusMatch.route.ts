@@ -1,12 +1,17 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { MatchPlayers, Matchs } from "../../events.ts";
 import { filterMatchForUser, updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { io } from "../../server.ts";
 
 export async function updatePlayerStatusMatchHandler(req: Request, res: Response) {
-	const { hostId } = req.body
+	const { hostId } = req.body ?? {}
+
+	if (!isString(hostId))
+		return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)

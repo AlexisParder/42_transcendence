@@ -26,7 +26,7 @@ export async function createNotificationHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const { title, description, params } = req.body
+		const { title, description, params } = req.body ?? {}
 
 		if (!isValidText(title, 100) || !isValidText(description, 500) || !isValidParams(params))
 			return res.status(400).json({ ok: false })

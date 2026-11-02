@@ -1,4 +1,5 @@
 import type { Request, Response } from "express"
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts"
 import { fromNodeHeaders } from "better-auth/node"
 import { prisma } from "../../db/client.ts"
@@ -14,9 +15,9 @@ export async function acceptFriendRequestHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-		const { requestId } = req.body
+		const { requestId } = req.body ?? {}
 
-		if (typeof requestId !== "string")
+		if (!isString(requestId))
 			return res.status(400).json({ ok: false, error: "friend_err_user_not_found" })
 
 		const request = await prisma.friends.findUnique({

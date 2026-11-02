@@ -1,5 +1,6 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs, PresenceStatus } from "../../events.ts";
 import { filterMatchForUser } from "../../lib/matchs/matchUtils.ts";
@@ -7,7 +8,11 @@ import { io } from "../../server.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
 
 export async function kickPlayerMatchHandler(req: Request, res: Response) {
-	const { targetId } = req.body
+	const { targetId } = req.body ?? {}
+
+	if (!isString(targetId))
+		return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)

@@ -1,13 +1,14 @@
 import { fromNodeHeaders } from "better-auth/node"
 import type { Request, Response } from "express"
+import { isOptionalString } from "../lib/validate.ts"
 import { auth } from "../auth.ts"
 import { prisma } from "../db/client.ts"
 import { achievements } from "../lib/achievements.ts"
 
 export async function getUserAchievementsHandler(req: Request, res: Response) {
-	const { targetId } = req.body
+	const { targetId } = req.body ?? {}
 
-	if (targetId !== undefined && typeof targetId !== "string")
+	if (!isOptionalString(targetId))
 		return res.status(400).json({ ok: false })
 
 	try {

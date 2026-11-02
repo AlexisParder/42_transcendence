@@ -1,12 +1,20 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
+import { isOptionalOffset } from "../lib/validate.ts"
 import { auth } from "../auth.ts";
 import { prisma } from "../db/client.ts";
 import type { LeaderboardInfo } from "../events.ts";
 
 export async function getLeaderboardInfosHandler(req: Request, res: Response) {
-	const { offset, filter } = req.body
-	const skip = Math.max(0, Math.floor(Number(offset) || 0))
+	const { offset, filter } = req.body ?? {}
+
+	if (!isOptionalOffset(offset))
+		return res.status(400).json({ ok: false })
+
+	if (filter !== undefined && filter !== "global" && filter !== "friends")
+		return res.status(400).json({ ok: false })
+
+	const skip = offset ?? 0
 
 	try {
 		const session = await auth.api.getSession({

@@ -1,5 +1,6 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Log, Matchs, Ship, Shot, vect2 } from "../../events.ts";
 import { isExpired, isTeamEliminated, setFinalPlacement } from "../../lib/matchs/matchUtils.ts";
@@ -24,7 +25,10 @@ export async function playerFireHandler(req: Request, res: Response) {
 		hostId: string,
 		coords: vect2,
 		targetTeamId: number,
-	} = req.body
+	} = req.body ?? {}
+
+	if (!isString(hostId))
+		return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 	try {
 		const session = await auth.api.getSession({

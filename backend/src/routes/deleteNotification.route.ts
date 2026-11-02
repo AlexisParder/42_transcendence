@@ -1,4 +1,5 @@
 import type { Request, Response } from "express"
+import { isString } from "../lib/validate.ts"
 import { fromNodeHeaders } from "better-auth/node"
 import { auth } from "../auth.ts"
 import { prisma } from "../db/client.ts"
@@ -12,9 +13,9 @@ export async function deleteNotificationHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const { notificationId } = req.body
+		const { notificationId } = req.body ?? {}
 
-		if (typeof notificationId !== "string")
+		if (!isString(notificationId))
 			return res.status(400).json({ ok: false })
 		const result = await prisma.notification.deleteMany({
 			where: {

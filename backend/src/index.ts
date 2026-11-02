@@ -28,7 +28,7 @@ import { setAllNotificationsReadHandler } from "./routes/setAllNotificationsRead
 import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
 import { createNotificationHandler } from "./routes/createNotification.route.ts"
-import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
+import { getLeaderboardInfosHandler } from "./routes/getLeaderboardInfos.route.ts"
 import { apiLimit, checkPwdLimit, friendRequestLimit, joinCodeLimit, leaderboardLimit, otpLimit } from "./rateLimit.ts"
 import { getNotificationPreferencesHandler, setNotificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
 import { notify } from "./lib/notify.ts"

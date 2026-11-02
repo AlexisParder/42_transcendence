@@ -1,5 +1,6 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { MatchPlayers, Matchs, PresenceStatus } from "../../events.ts";
 import { filterMatchForUser, firstFreeTeam, isInAnyMatch, isInAnySpecMatch } from "../../lib/matchs/matchUtils.ts";
@@ -9,7 +10,7 @@ import { io } from "../../server.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
 
 export async function joinCodeMatchHandler(req: Request, res: Response) {
-	const { code } = req.body
+	const { code } = req.body ?? {}
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
@@ -18,7 +19,7 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		if (typeof code !== "string" || code.length === 0)
+		if (!isString(code))
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		const userId = session.user.id

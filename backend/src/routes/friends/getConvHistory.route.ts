@@ -1,11 +1,12 @@
 import { fromNodeHeaders } from "better-auth/node"
 import { auth } from "../../auth.ts"
 import type { Request, Response } from "express"
+import { isString } from "../../lib/validate.ts"
 import { prisma } from "../../db/client.ts"
 import type { Message } from "../../events.ts"
 
 export async function getConvHistoryHandler(req: Request, res: Response) {
-	const { peerId, before } = req.body
+	const { peerId, before } = req.body ?? {}
 
 	try {
 		const session = await auth.api.getSession({
@@ -15,7 +16,7 @@ export async function getConvHistoryHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		if (typeof peerId !== "string" || (before !== undefined && Number.isNaN(new Date(before).getTime())))
+		if (!isString(peerId) || (before !== undefined && (!isString(before) || Number.isNaN(new Date(before).getTime()))))
 			return res.status(400).json({ ok: false })
 
 		const userId = session.user.id

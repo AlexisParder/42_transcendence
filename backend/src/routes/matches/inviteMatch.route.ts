@@ -1,5 +1,6 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
+import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, isInAnyMatch } from "../../lib/matchs/matchUtils.ts";
@@ -7,7 +8,11 @@ import { io } from "../../server.ts";
 import { prisma } from "../../db/client.ts";
 
 export async function inviteMatchHandler(req: Request, res: Response) {
-	const { hostId, peerId } = req.body
+	const { hostId, peerId } = req.body ?? {}
+
+	if (!isString(hostId) || !isString(peerId))
+		return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
 	try {
 		const session = await auth.api.getSession({
 			headers: fromNodeHeaders(req.headers)
@@ -17,9 +22,6 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-
-		if (typeof peerId !== "string")
-			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 		if (hostId === peerId)
 			return res.status(400).json({ ok: false, code: "match_err_invite_host" })

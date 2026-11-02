@@ -171,7 +171,6 @@ export const auth = betterAuth({
 			if (hasPassword && (typeof ctx.body?.password !== "string" || !ctx.body.password))
 				return ctx.json({ ok: false, code: "settings_err_rmv_user" }, { status: 400 })
 
-			// Vérifie le code 2FA côté serveur (sinon on peut appeler l'API directement sans le code)
 			if (session.user.twoFactorEnabled) {
 				const code = ctx.headers?.get("x-2fa-code")
 				if (typeof code !== "string" || !code)
