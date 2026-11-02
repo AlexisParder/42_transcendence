@@ -57,7 +57,7 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 		if (match.startedAt !== 0)
 			return res.status(400).json({ ok: false, code: "match_err_already_started" })
 
-		if (match.invitedPlayers && match.invitedPlayers.some(p => p === peerId))
+		if (match.invitedPlayers.some(p => p === peerId))
 			return res.status(400).json({ ok: false, code: "match_err_already_invited" })
 
 		match.invitedPlayers.push(peerId)

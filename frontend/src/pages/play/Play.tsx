@@ -152,9 +152,6 @@ export function Play() {
 	}
 
 	async function handleCreateMatch() {
-		if (selectedMatchType === "BOT" && visibility !== "private")
-			setVisibility("private")
-
 		try {
 			const { ok, data } = await apiPost("/api/create-match", {
 				selectedMatchType,

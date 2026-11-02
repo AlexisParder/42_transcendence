@@ -40,7 +40,7 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 			}
 		}
 
-		if (!match || match === undefined)
+		if (!match)
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		if (isInAnyMatch(currentMatches, userId) || isInAnySpecMatch(currentMatches, userId))

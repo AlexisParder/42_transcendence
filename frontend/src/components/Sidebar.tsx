@@ -3,7 +3,7 @@ import { FaRegCircle, FaUserFriends, FaDoorOpen } from "react-icons/fa";
 import { GiBombingRun } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { TbSettingsFilled } from "react-icons/tb";
-import { Link, Navigate, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type React from "react";
 import { authClient } from "../lib/auth-client";
@@ -33,7 +33,6 @@ const navItems: NavItem[] = [
 
 export function Sidebar({ children, guest = false }: { children: React.ReactNode, guest?: boolean }) {
 	const { data: session, isPending } = authClient.useSession()
-	const location = useLocation()
 	const [open, setOpen] = useState(false)
 	const [points, setPoints] = useState(session?.user.points ?? 0)
 	const userId = session?.user.id
@@ -60,9 +59,6 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 
 	if (!guest && isPending)
 		return <p>{t("sidebar_loading")}</p>
-
-	if (!guest && !session)
-		return <Navigate to="/login" state={{ from: location }} replace />
 
 	const username = session?.user.username ? session?.user.username : ""
 	return <>

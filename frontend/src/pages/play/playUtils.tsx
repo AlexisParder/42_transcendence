@@ -89,7 +89,7 @@ export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, Matc
 	</div>
 }
 
-export function RadarWaiting({ className = "size-16" }: { className?: string }) {
+function RadarWaiting({ className = "size-16" }: { className?: string }) {
 	return <div className={`relative flex items-center justify-center overflow-hidden rounded-full border border-primary/20 bg-base-200 bg-radar-glow ${className}`}>
 		<div className="absolute w-3/4 h-3/4 rounded-full border border-primary/15" />
 		<div className="absolute w-1/2 h-1/2 rounded-full border border-primary/15" />
@@ -106,7 +106,7 @@ export function RadarWaiting({ className = "size-16" }: { className?: string }) 
 	</div>
 }
 
-export function WaitingPlayerItem() {
+function WaitingPlayerItem() {
 	return <div className="flex items-center gap-3 p-3 border border-dashed border-neutral/50 rounded-lg lg:flex-col lg:justify-center lg:gap-2 lg:h-52">
 		<RadarWaiting className="size-12 lg:size-16" />
 		<p className="uppercase text-neutral-content/50 font-mono text-xs">
@@ -116,7 +116,7 @@ export function WaitingPlayerItem() {
 	</div>
 }
 
-export function PlayerItem({ userId, username, image, points, isReady, isMine, isHost, canKick, team, isDuo, handleKick }: {
+function PlayerItem({ userId, username, image, points, isReady, isMine, isHost, canKick, team, isDuo, handleKick }: {
 	userId: string,
 	username: string | null | undefined,
 	image: string | null | undefined,
@@ -155,31 +155,31 @@ export function PlayerItem({ userId, username, image, points, isReady, isMine, i
 	</div>
 }
 
-export function HostBadge() {
+function HostBadge() {
 	return <span className="badge badge-warning badge-xs badge-outline uppercase">{t("play_host")}</span>
 }
 
-export function KickButton({ targetId, handleKick }: {
+function KickButton({ targetId, handleKick }: {
 	targetId: string,
 	handleKick: (id: string) => void
 }) {
 	return <button className="cursor-pointer text-neutral-content/50 hover:text-error" onClick={() => handleKick(targetId)}><RxCross1 className="size-4" /></button>
 }
 
-export function ReadyBadge({ isReady }: { isReady: boolean }) {
+function ReadyBadge({ isReady }: { isReady: boolean }) {
 	return isReady
 		? <p className="flex gap-1 items-center uppercase bg-info/10 border border-info/50 rounded-xl py-0.5 px-2 text-xs text-info"><BiCheck /> {t("play_ready")}</p>
 		: <p className="flex gap-1 items-center uppercase bg-neutral/10 border border-neutral/50 rounded-xl py-0.5 px-2 text-xs text-neutral-content/50">{t("play_not_ready")}</p>
 }
 
-export function CodeBox({ code }: { code: string }) {
+function CodeBox({ code }: { code: string }) {
 	return <div className="flex items-center justify-between gap-2 bg-info/10 border border-dashed border-info/50 rounded-md px-4 py-3">
 		<p className="text-info font-mono text-xl font-semibold tracking-brand uppercase">{code}</p>
 		<button className="btn btn-xs btn-ghost text-neutral-content/50" onClick={() => navigator.clipboard.writeText(code.toUpperCase())}>{t("btn_copy_code")}</button>
 	</div>
 }
 
-export function RulesPanel({ rules }: { rules: Rules }) {
+function RulesPanel({ rules }: { rules: Rules }) {
 	const summary = [
 		t(`txt_${rules.format}`),
 		t("play_s_turns", { time: rules.timeTurn }),
@@ -204,7 +204,7 @@ export function RulesPanel({ rules }: { rules: Rules }) {
 	</div>
 }
 
-export function RuleRow({ label, value, highlight }: {
+function RuleRow({ label, value, highlight }: {
 	label: string,
 	value: string,
 	highlight?: boolean
@@ -215,7 +215,7 @@ export function RuleRow({ label, value, highlight }: {
 	</div>
 }
 
-export function InvitePanel({ code, friends, presence, invitedPlayers, handleInvite }: {
+function InvitePanel({ code, friends, presence, invitedPlayers, handleInvite }: {
 	code: string,
 	friends: Friend[],
 	presence: Record<string, PresenceStatus>,
@@ -241,7 +241,7 @@ export function InvitePanel({ code, friends, presence, invitedPlayers, handleInv
 	</div >
 }
 
-export function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus, handleStart }: {
+function WaitingRoomFooter({ isHost, allReady, missing, total, isReady, MatchErr, handleDeleteMatch, handleLeaveMatch, handleStatus, handleStart }: {
 	isHost: boolean,
 	allReady: boolean,
 	missing: number,
@@ -380,7 +380,7 @@ export function SidebarRight({ children, format, replace, visibility }: {
 	</>
 }
 
-export function SidebarRightItem({ label, value }: { label: string, value: string }) {
+function SidebarRightItem({ label, value }: { label: string, value: string }) {
 	return <>
 		<div className="flex items-center justify-between p-1">
 			<p className="first-letter:uppercase text-xs text-neutral-content/60">{label}</p>

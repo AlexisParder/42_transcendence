@@ -6,7 +6,7 @@ import { prisma } from "../db/client.ts"
 type Translations = { [key: string]: string | Translations }
 const languages: Record<string, Translations> = { fr, en, es }
 
-export const defaultLanguage = "en"
+const defaultLanguage = "en"
 
 export function resolveLanguage(language: string | null | undefined) {
 	if (!language)

@@ -10,7 +10,7 @@ const notificationTime = 5000
 
 type NotificationCategory = "friend" | "chat" | "achievements" | "security"
 
-export type SecurityEvent = "password_changed" | "2fa_enabled" | "2fa_disabled" | "new_session" | "data_exported"
+type SecurityEvent = "password_changed" | "2fa_enabled" | "2fa_disabled" | "new_session" | "data_exported"
 
 
 type NotificationInput = {

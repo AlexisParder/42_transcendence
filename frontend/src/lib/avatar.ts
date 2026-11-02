@@ -2,7 +2,7 @@ export const AVATAR_MAX_SIZE = 1024 * 1024
 export const AVATAR_MAX_SIZE_MB = AVATAR_MAX_SIZE / (1024 * 1024)
 export const AVATAR_INPUT_MAX_SIZE = 10 * 1024 * 1024
 export const AVATAR_INPUT_MAX_SIZE_MB = AVATAR_INPUT_MAX_SIZE / (1024 * 1024)
-export const AVATAR_DIMENSION = 512
+const AVATAR_DIMENSION = 512
 export const AVATAR_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"]
 
 export async function resizeAvatar(file: File): Promise<{ error: string } | { blob: Blob }> {

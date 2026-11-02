@@ -5,7 +5,7 @@ import * as fr from "@zxcvbn-ts/language-fr"
 
 export const PASSWORD_MIN_LENGTH = 12
 export const PASSWORD_MAX_LENGTH = 128
-export const PASSWORD_MIN_SCORE = 3
+const PASSWORD_MIN_SCORE = 3
 
 const zxcvbn = new ZxcvbnFactory({
 	dictionary: { ...common.dictionary, ...en.dictionary, ...fr.dictionary },
@@ -13,7 +13,7 @@ const zxcvbn = new ZxcvbnFactory({
 	translations: en.translations
 })
 
-export type PasswordError = "too_short" | "too_long" | "too_weak"
+type PasswordError = "too_short" | "too_long" | "too_weak"
 
 export const PASSWORD_MESSAGES: Record<PasswordError, string> = {
 	too_short: "too short",

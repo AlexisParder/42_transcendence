@@ -6,7 +6,7 @@ export function isRankedmatch(match: Pick<Matchs, "isRanked" | "visibility">) {
 	return match.isRanked && match.visibility === "public"
 }
 
-export function hasLeft(p: MatchPlayers) {
+function hasLeft(p: MatchPlayers) {
 	return p.status === 'LEFT'
 }
 

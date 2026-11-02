@@ -4,9 +4,9 @@ import * as en from "@zxcvbn-ts/language-en"
 import * as fr from "@zxcvbn-ts/language-fr"
 import { t } from "./translate"
 
-export const PASSWORD_MIN_LENGTH = 12
-export const PASSWORD_MAX_LENGTH = 128
-export const PASSWORD_MIN_SCORE = 3
+const PASSWORD_MIN_LENGTH = 12
+const PASSWORD_MAX_LENGTH = 128
+const PASSWORD_MIN_SCORE = 3
 
 export const PASSWORD_MESSAGES: Record<PasswordError, string> = {
 	too_short: t("txt_err_pwd_too_short", {PASSWORD_MIN_LENGTH}),
@@ -20,7 +20,7 @@ const zxcvbn = new ZxcvbnFactory({
 	translations: en.translations
 })
 
-export type PasswordError = "too_short" | "too_long" | "too_weak"
+type PasswordError = "too_short" | "too_long" | "too_weak"
 
 export function getPasswordScore(password: string, userInputs: string[] = []): number {
 	return zxcvbn.check(password, userInputs).score

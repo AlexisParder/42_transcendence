@@ -28,9 +28,6 @@ export async function kickPlayerMatchHandler(req: Request, res: Response) {
 		if (!match)
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
-		if (userId !== match.hostId)
-			return res.status(400).json({ ok: false, code: "match_err_host" })
-
 		if (!match.players.some(p => p.userId === targetId))
 			return res.status(409).json({ ok: false, code: "match_err_no_match" })
 

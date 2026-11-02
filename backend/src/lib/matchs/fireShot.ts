@@ -6,7 +6,7 @@ import { addLog } from "./logMatch.ts"
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
-export function isOnShip(ship: Ship, c: vect2): boolean {
+function isOnShip(ship: Ship, c: vect2): boolean {
 	const minX = Math.min(ship.start.x, ship.end.x)
 	const maxX = Math.max(ship.start.x, ship.end.x)
 	const minY = Math.min(ship.start.y, ship.end.y)

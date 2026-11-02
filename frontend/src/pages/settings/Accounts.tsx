@@ -279,7 +279,6 @@ export function SettingsCat() {
 			return
 		}
 		setTranslationLanguage(lang)
-		sendNotification({ title: "settings_title", description: "settings_success_lang" })
 		location.reload()
 	}
 

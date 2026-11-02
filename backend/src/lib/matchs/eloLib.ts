@@ -1,5 +1,4 @@
-export const ELO = {
-	START_RATING: 0,
+const ELO = {
 	K: 32,
 	K_PROVISIONAL: 48,
 	PROVISIONAL_GAMES: 10,
@@ -12,7 +11,7 @@ export const ELO = {
 	JOIN_MAX_GAP: 400,
 } as const
 
-export interface PlayerState {
+interface PlayerState {
 	id: string,
 	rating: number,
 	rankedGames: number,
@@ -33,49 +32,47 @@ export type PairMatchIndex = (playerA: string, playerB: string) => number
 
 export interface EloResult {
 	id: string,
-	ratingBefore: number,
-	delta: number,
-	ratingAfer: number
+	delta: number
 }
 
-export function expectedScore(ratingA: number, ratingB: number) {
+function expectedScore(ratingA: number, ratingB: number) {
 	return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400))
 }
 
-export function eloDelta(k: number, score: 0 | 1, expected: number) {
+function eloDelta(k: number, score: 0 | 1, expected: number) {
 	return k * (score - expected)
 }
 
-export function teamRating(ratings: number[]) {
+function teamRating(ratings: number[]) {
 	return ratings.reduce((sum, r) => sum + r, 0) / ratings.length
 }
 
-export function isProvisional(player: Pick<PlayerState, "rankedGames">) {
+function isProvisional(player: Pick<PlayerState, "rankedGames">) {
 	return player.rankedGames < ELO.PROVISIONAL_GAMES
 }
 
-export function kFactor(player: Pick<PlayerState, "rankedGames">) {
+function kFactor(player: Pick<PlayerState, "rankedGames">) {
 	return isProvisional(player) ? ELO.K_PROVISIONAL : ELO.K
 }
 
-export function pairMultiplier(mathIndex: number) {
+function pairMultiplier(mathIndex: number) {
 	const i = Math.max(1, mathIndex) - 1
 
 	return ELO.PAIR_MULTS[Math.min(i, ELO.PAIR_MULTS.length - 1)]
 }
 
-export function provisionalMultiplier(opponent: Pick<PlayerState, "rankedGames">) {
+function provisionalMultiplier(opponent: Pick<PlayerState, "rankedGames">) {
 	return isProvisional(opponent) ? ELO.PROVISIONAL_OPPONENT_MULT : 1
 }
 
-export function thresholdMultiplier(opponent: Pick<PlayerState, "left" | "shotsFired">) {
+function thresholdMultiplier(opponent: Pick<PlayerState, "left" | "shotsFired">) {
 	if (!opponent.left)
 		return 1
 
 	return opponent.shotsFired >= ELO.MIN_SHOTS ? 1 : 0
 }
 
-export function eliminationMultipier(opponents: Pick<PlayerState, "eliminated">[]) {
+function eliminationMultipier(opponents: Pick<PlayerState, "eliminated">[]) {
 	return opponents.some((o) => o.eliminated) ? 1 : ELO.NO_ELIMINATION_MULT
 }
 
@@ -118,9 +115,7 @@ export function computeFFAMatch(players: FFAPlayer[], pairMatchIndex: PairMatchI
 		const delta = Math.round(total)
 		return {
 			id: p.id,
-			ratingBefore: p.rating,
-			delta,
-			ratingAfer: p.rating + delta
+			delta
 		}
 	})
 }
@@ -157,9 +152,7 @@ export function computeTeamMatch(players: TeamPlayer[], winningTeam: 0 | 1, pair
 		const rounded = Math.round(delta)
 		return {
 			id: p.id,
-			ratingBefore: p.rating,
-			delta: rounded,
-			ratingAfer: p.rating + rounded
+			delta: rounded
 		}
 	})
 }

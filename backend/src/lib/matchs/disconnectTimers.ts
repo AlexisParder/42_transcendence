@@ -6,7 +6,7 @@ import { emitTurn, markPlayerLeft } from "./turnTimer.ts"
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
-export const DISCONNECT_GRACE_MS = 30 * 1000
+const DISCONNECT_GRACE_MS = 30 * 1000
 
 const disconnectTimers = new Map<string, NodeJS.Timeout>()
 

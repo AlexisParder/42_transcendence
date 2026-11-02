@@ -9,7 +9,7 @@ export const defaultNotificationPreferences = {
 	email_security: true,
 }
 
-export type NotificationPreferences = typeof defaultNotificationPreferences
+type NotificationPreferences = typeof defaultNotificationPreferences
 
 export function parseNotificationPreferences(body: unknown): Partial<NotificationPreferences> | null {
 	if (!body || typeof body !== "object" || Array.isArray(body)) return null

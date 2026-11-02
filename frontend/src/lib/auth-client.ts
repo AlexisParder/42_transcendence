@@ -11,7 +11,7 @@ export const authClient = createAuthClient({
 		inferAdditionalFields({
 			user: {
 				language: {type: "string"},
-				points: {type: "number"},
+				points: {type: "number", input: false},
 			}
 		}),
 		emailOTPClient(),

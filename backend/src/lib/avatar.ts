@@ -1,7 +1,7 @@
 import sharp from "sharp"
 
-export const AVATAR_MAX_SIZE = 1024 * 1024
-export const AVATAR_DIMENSION = 512
+const AVATAR_MAX_SIZE = 1024 * 1024
+const AVATAR_DIMENSION = 512
 const AVATAR_MAX_PIXELS = 4096 * 4096
 const AVATAR_FORMATS = ["png", "jpeg", "gif", "webp"]
 

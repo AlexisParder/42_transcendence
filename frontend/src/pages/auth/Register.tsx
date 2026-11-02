@@ -98,7 +98,6 @@ export function Register() {
 			name,
 			username: name,
 			language: getTranslationLanguage(),
-			points: 0
 		})
 
 		if (error) {
