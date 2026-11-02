@@ -34,7 +34,7 @@ export function Match() {
 	const [turnEndsAt, setTurnEndsAt] = useState(0)
 	const [remaining, setRemaining] = useState(0)
 	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
-	const [errors, setErrors] = useState<{ action?: string }>({})
+	const [errors, setErrors] = useState<{ action?: string, forfeit?: string }>({})
 	const [isLoading, setIsLoading] = useState(true)
 	const [hasUnreadMessage, setHasUnreadMessage] = useState(false)
 	const [sendInput, setSendInput] = useState("")
@@ -46,7 +46,7 @@ export function Match() {
 			try {
 				const { ok, data } = await apiPost("/api/set-player-ships", { ships: ships.map(s => ({ name: s.name, size: s.size, start: s.start, end: s.end })) })
 				if (!ok)
-					console.log("set player ships:", data.code)
+					setErrors({ action: data.code ?? "match_err_invalid_input" })
 			} catch (error) {
 				console.error("set player ships:", error)
 			}
@@ -58,7 +58,7 @@ export function Match() {
 		try {
 			const { ok, data } = await apiPost("/api/set-player-ready-on-select")
 			if (!ok)
-				console.log("set player ready:", data.code)
+				setErrors({ action: data.code ?? "match_err_invalid_input" })
 		} catch (error) {
 			console.error("set player ready:", error)
 		}
@@ -173,7 +173,7 @@ export function Match() {
 			const { ok, data } = await apiPost("/api/forfeit-match", { hostId: joinedMatch?.hostId })
 
 			if (!ok)
-				return console.log(data.code)
+				return setErrors({ forfeit: data.code ?? "match_err_leave_failure" })
 
 			HideModal("forfeitModal")
 			navigate("/play")
@@ -187,7 +187,7 @@ export function Match() {
 			const { ok, data } = await apiPost("/api/leave-spec-match", { hostId: joinedMatch?.hostId })
 
 			if (!ok)
-				return console.log(data.code)
+				return setErrors({ action: data.code ?? "match_err_leave_failure" })
 
 			navigate("/play")
 		} catch (error) {
@@ -240,6 +240,7 @@ export function Match() {
 				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
 				<Dock placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} onReady={setReady} />
 			</div>}
+			{errors.action && <p className="text-error text-xs text-center px-4 py-1">{t(errors.action)}.</p>}
 			{!isSpec && <DeploymentFooter placedShips={placedShips} isLocked={isLocked} onReady={setReady} />}
 			{isSpec && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 				<div className="flex flex-col min-h-full items-center justify-center">
@@ -267,6 +268,7 @@ export function Match() {
 		<Modal id="forfeitModal">
 			<p className="pb-2 first-letter:uppercase">{t("match_forfeit")}</p>
 			<p>{t("match_forfeit_desc")}</p>
+			{errors.forfeit && <p className="text-error text-xs pt-2">{t(errors.forfeit)}.</p>}
 			<div className="flex gap-2 pt-2 justify-end">
 				<button onClick={() => HideModal("forfeitModal")} className="btn btn-neutral">{t("btn_cancel")}</button>
 				<button className="btn btn-error btn-outline" onClick={handleForfeit}>{t("btn_confirm")}</button>

@@ -54,6 +54,7 @@ import { joinSpecMatchHandler } from "./routes/matches/joinSpecMatch.route.ts"
 import { leaveSpecMatchHandler } from "./routes/matches/leaveSpecMatch.route.ts"
 import { matchSendMessageHandler } from "./routes/matches/MatchSendMessage.route.ts"
 import { exportDataHandler } from "./routes/exportData.route.ts"
+import { getStatsHandler } from "./routes/getStats.route.ts"
 
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, PresenceStatus>()
@@ -79,6 +80,7 @@ app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/notifications", getNotificationsHandler)
 app.get("/api/notification-preferences", getNotificationPreferencesHandler)
 app.get("/api/export-data", exportDataHandler)
+app.get("/api/stats", getStatsHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdLimit, checkPwdHandler)

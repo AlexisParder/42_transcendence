@@ -10,7 +10,7 @@ import { HideModal, Modal, ShowModal } from "../../components/Modal"
 import { useNavigate } from "react-router-dom"
 import { Avatar } from "../../components/Avatar"
 import { IoWarning } from "react-icons/io5"
-import { setTranslationLanguage, t } from "../../lib/translate"
+import { hasTranslation, setTranslationLanguage, t } from "../../lib/translate"
 import { Enable2FA, RecoveryCodes, ReScan2FA } from "./Security"
 import { apiGet, apiPost } from "../../lib/api"
 import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password"
@@ -173,7 +173,7 @@ export function SettingsCat() {
 		})
 
 		if (error)
-			setErrors({ picture: error.code ? t(error.code, { AVATAR_MAX_SIZE_MB }) : t("settings_err_updt_picture") })
+			setErrors({ picture: error.code && hasTranslation(error.code) ? t(error.code, { AVATAR_MAX_SIZE_MB }) : t("settings_err_updt_picture") })
 	}
 
 	const handleDisable2FA: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -339,7 +339,7 @@ export function SettingsCat() {
 
 		HideModal("deleteModal")
 		if (error) {
-			setErrors({ deleteAccount: error.code ? t(error.code) : t("settings_err_rmv_user") })
+			setErrors({ deleteAccount: error.status === 429 ? t("txt_err_too_many_requests") : error.code && hasTranslation(error.code) ? t(error.code) : t("settings_err_rmv_user") })
 			return
 		}
 		navigate('/')

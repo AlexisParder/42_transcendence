@@ -38,7 +38,7 @@ export function TwoFactor() {
 		})
 
 		if (error) {
-			setErrors({ form: t("txt_err_2fa_invalid") })
+			setErrors({ form: t(error.status === 429 ? "txt_err_too_many_requests" : "txt_err_2fa_invalid") })
 			return
 		}
 		location.assign("/")
@@ -62,7 +62,7 @@ export function TwoFactor() {
 		})
 
 		if (error) {
-			setErrors({ form: t("txt_err_2fa_invalid") })
+			setErrors({ form: t(error.status === 429 ? "txt_err_too_many_requests" : "txt_err_2fa_invalid") })
 			return
 		}
 		location.assign("/")

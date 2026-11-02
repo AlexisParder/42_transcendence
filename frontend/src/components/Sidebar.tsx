@@ -47,7 +47,7 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 
 				setPoints(data.points ?? 0)
 			} catch (error) {
-				console.log(error)
+				console.error("load points:", error)
 			}
 		}
 

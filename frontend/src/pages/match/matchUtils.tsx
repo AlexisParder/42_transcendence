@@ -241,7 +241,6 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		shots = view === "my waters" ? myTeamData?.shots : targetTeamData?.shots
 	}
 
-	console.log(myTeamData)
 	return <div className="flex-1 p-4 flex flex-col min-h-0 min-w-0 w-full">
 		<div className="shrink-0">
 			<div className="flex items-center gap-2 sm:hidden">

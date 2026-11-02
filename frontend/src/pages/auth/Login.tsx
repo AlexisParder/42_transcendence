@@ -57,7 +57,7 @@ export function Login() {
 		})
 
 		if (error)
-			setErrors({ form: t("sign_in_failed") })
+			setErrors({ form: t(error.status === 429 ? "txt_err_too_many_requests" : "sign_in_failed") })
 		else if (!(data && "twoFactorRedirect" in data))
 			location.assign("/")
 	}

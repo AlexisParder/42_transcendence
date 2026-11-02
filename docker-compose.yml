@@ -1,6 +1,12 @@
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -10,6 +16,12 @@ services:
     networks:
       - sonar_network
   backend:
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     build: 
       context: ./backend
       target: prod
@@ -25,6 +37,12 @@ services:
     networks:
       - sonar_network
   frontend:
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     build:
       context: ./frontend
       target: prod

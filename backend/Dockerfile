@@ -25,4 +25,5 @@ COPY --from=build /app/src/generated ./src/generated
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 COPY entrypoint.prod.sh ./
+USER node
 ENTRYPOINT ["sh", "/app/entrypoint.prod.sh"]

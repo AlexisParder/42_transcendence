@@ -119,7 +119,6 @@ export function Leaderboard() {
 					}} aria-label={t("friends_title")} />
 				</div>
 			</div>
-			<p className="flex items-center gap-1 text-xs text-neutral-content/50 shrink-0">{t("leaderboard_txt_season", { number: 1 })}.</p>
 			{reqError && <p className="text-error text-sm">{t(reqError)}.</p>}
 			<LeaderboardTable ldbInfos={ldbInfos} onProfile={handleProfile} scrollRef={scrollRef} />
 		</div>
