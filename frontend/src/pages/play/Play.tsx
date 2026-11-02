@@ -377,6 +377,7 @@ export function Play() {
 						subtitle={`${t("play_duo")}, ${ranked ? t("txt_ranked") : t("txt_unranked")}`}
 						onClick={() => {
 							setSelectedMatchType("TWO_V_TWO")
+							setReplace(false)
 						}}
 					/>
 					<MatchTypeBtn
@@ -395,6 +396,7 @@ export function Play() {
 							setSelectedMatchType("BOT")
 							setVisibility("private")
 							setSpectators(false)
+							setReplace(false)
 						}}
 					/>
 				</div>
@@ -422,7 +424,7 @@ export function Play() {
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_replace")}</p>
-								<Togglebox name={`tb_re`} type="info" checked={replace} onChange={() => setReplace(!replace)} />
+								<Togglebox name={`tb_re`} type="info" checked={replace} disabled={selectedMatchType === "TWO_V_TWO" || selectedMatchType === "BOT"} onChange={() => setReplace(!replace)} />
 							</div>
 							<div className="flex justify-between">
 								<p className="text-xs text-neutral-content/80 first-letter:uppercase">{t("play_spectators")}</p>

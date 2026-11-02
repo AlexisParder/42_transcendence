@@ -35,7 +35,7 @@ export async function leaveMatchHandler(req: Request, res: Response) {
 			return res.status(403).json({ ok: false, code: "match_err_already_started" })
 
 		if (userId === hostId)
-			return res.json({ ok: false, code: "match_err_must_close" })
+			return res.status(400).json({ ok: false, code: "match_err_must_close" })
 
 		match.players = match.players.filter(p => p.userId !== userId)
 

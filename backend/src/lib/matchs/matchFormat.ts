@@ -32,6 +32,6 @@ export function formatMatch(row: any, userId: string) {
 		matchType: match.type as Type,
 		matchTime: min,
 		ranked: match.isRanked,
-		points: (match.isRanked ? Math.abs(me.points) : 'unranked') as number | 'unranked',
+		points: (match.isRanked ? me.points : 'unranked') as number | 'unranked',
 	}
 }

@@ -6,6 +6,10 @@ import { filterMatchForUser, generateCode, isInAnyMatch, isInAnySpecMatch, isMat
 import { prisma } from "../../db/client.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
 import { createBotPlayer } from "../../lib/matchs/bot/botPlayer.ts";
+import { closeLobby } from "../../lib/matchs/turnTimer.ts";
+import { io } from "../../server.ts";
+
+const LOBBY_MAX_TIME = 30 * 60 * 1000
 
 export async function createMatchHandler(req: Request, res: Response) {
 	const { selectedMatchType, visibility, timeTurn, replace, spectators } = req.body ?? {}
@@ -43,6 +47,9 @@ export async function createMatchHandler(req: Request, res: Response) {
 			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 		if (typeof replace !== "boolean" || typeof spectators !== "boolean")
+			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
+		if (replace && selectedMatchType !== "ONE_V_ONE" && selectedMatchType !== "FFA")
 			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 		const code = generateCode(currentMatches)
@@ -100,6 +107,11 @@ export async function createMatchHandler(req: Request, res: Response) {
 			newMatch.players.push(createBotPlayer(userId, 2))
 
 		currentMatches.set(userId, newMatch)
+
+		setTimeout(() => {
+			if (currentMatches.get(userId) === newMatch && newMatch.startedAt === 0)
+				closeLobby(newMatch, io)
+		}, LOBBY_MAX_TIME)
 		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
 		activityStatus.set(userId, "in a match")
 		await notifyFriendsOfPresence(userId, "in a match")

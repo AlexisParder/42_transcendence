@@ -22,7 +22,7 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 			return res.status(400).json({ ok: false, error: "friend_err_user_not_found" })
 
 		const target = await prisma.user.findUnique({
-			where: { username },
+			where: { username: username.trim().toLowerCase() },
 			select: { id: true }
 		})
 
@@ -63,6 +63,23 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 				isAccepted: false
 			}
 		})
+
+		// si A et B s'envoient une demande en même temps, on ne garde que celle de l'id le plus petit
+		const pair = await prisma.friends.findMany({
+			where: {
+				OR: [
+					{ userId, targetId: target.id },
+					{ userId: target.id, targetId: userId },
+				]
+			}
+		})
+		if (pair.length > 1) {
+			const keptSender = userId < target.id ? userId : target.id
+			const removedSender = keptSender === userId ? target.id : userId
+			await prisma.friends.deleteMany({ where: { userId: removedSender, targetId: keptSender } })
+			if (removedSender === userId)
+				return res.status(409).json({ ok: false, error: "friend_err_user_already_pending" })
+		}
 
 		io.to(target.id).emit("friend_request_received", {
 			id: request.id,

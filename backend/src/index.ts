@@ -28,7 +28,7 @@ import { setAllNotificationsReadHandler } from "./routes/setAllNotificationsRead
 import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
 import { getLeaderboardInfosHandler } from "./routes/getLeaderboardInfos.route.ts"
-import { apiLimit, checkPwdLimit, friendRequestLimit, joinCodeLimit, leaderboardLimit, otpLimit } from "./rateLimit.ts"
+import { apiLimit, checkPwdLimit, viewCodesLimit, friendRequestLimit, joinCodeLimit, leaderboardLimit, otpLimit } from "./rateLimit.ts"
 import { getNotificationPreferencesHandler, setNotificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
 import { notify } from "./lib/notify.ts"
 import { allowedOrigins, app, io, server } from "./server.ts"
@@ -46,7 +46,7 @@ import { playerFireHandler } from "./routes/matches/playerFire.route.ts"
 import { startMatchHandler } from "./routes/matches/startMatch.route.ts"
 import { setPlayerReadyOnSelectHandler, setPlayerShipsHandler } from "./routes/matches/setShips.route.ts"
 import { currentMatches } from "./mapMatches.ts"
-import { findActiveMatchOf } from "./lib/matchs/matchUtils.ts"
+import { findActiveMatchOf, isInAnyMatch, isInAnySpecMatch } from "./lib/matchs/matchUtils.ts"
 import { reconnectPlayer, startDisconnectTimer } from "./lib/matchs/disconnectTimers.ts"
 import { forfeitMatchHandler } from "./routes/matches/forfeitMatch.route.ts"
 import { getUserPointsHandler } from "./routes/getUserPoints.route.ts"
@@ -63,7 +63,10 @@ app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
 app.set("currentMatches", currentMatches)
 
-app.set("trust proxy", 1)
+if (process.env.NODE_ENV === "production")
+	app.set("trust proxy", 1)
+
+app.disable("x-powered-by")
 
 app.use(cors({
 	origin: allowedOrigins,
@@ -84,7 +87,7 @@ app.get("/api/stats", getStatsHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdLimit, checkPwdHandler)
-app.post("/api/view-codes", checkPwdLimit, getBackupCodesHandler)
+app.post("/api/view-codes", viewCodesLimit, getBackupCodesHandler)
 app.post("/api/get-conv-history", getConvHistoryHandler)
 app.post("/api/send-friend-request", friendRequestLimit, sendFriendRequestHandler)
 app.post("/api/accept-friend-request", acceptFriendRequestHandler)
@@ -142,49 +145,36 @@ io.use(async (socket, next) => {
 	}
 })
 
-function createSocketLimit(limit: number, windowMs: number) {
-	let count = 0
-	let windowStart = Date.now()
-
-	return function isLimited() {
-		const now = Date.now()
-		if (now - windowStart > windowMs) {
-			windowStart = now
-			count = 0
-		}
-		count++
-		return count > limit
-	}
-}
-
 io.on("connection", async (socket) => {
 	const userId = socket.data.userId
-	const messageLimit = createSocketLimit(20, 10000)
-	const typingLimit = createSocketLimit(30, 10000)
-	const activityLimit = createSocketLimit(10, 10000)
 
 	socket.on("set_active_conversation", (peerId) => {
 		socket.data.activeConversationPeerId = typeof peerId === "string" ? peerId : null
 	})
 
-	socket.on("send_message", async (payload) => {
-		if (messageLimit())
-			return
+	socket.on("send_message", async (payload, ack) => {
+		function reply(ok: boolean, error?: string) {
+			if (typeof ack === "function")
+				ack({ ok, error })
+		}
 
 		try {
 			const fromUserId = socket.data.userId
 			const toUserId = payload?.toUserId
 
 			if (typeof toUserId !== "string" || typeof payload.message !== "string")
-				return
+				return reply(false, "txt_err_auth")
 
 			const message = payload.message.trim()
 
-			if (!message || message.length > 1000)
-				return
+			if (!message)
+				return reply(false, "txt_err_auth")
+
+			if (message.length > 1000)
+				return reply(false, "friend_err_msg_to_long")
 
 			if (toUserId === fromUserId)
-				return
+				return reply(false, "friend_err_forbidden")
 
 			const areFriends = await prisma.friends.findFirst({
 				where: {
@@ -197,14 +187,14 @@ io.on("connection", async (socket) => {
 			})
 
 			if (!areFriends)
-				return
+				return reply(false, "friend_err_forbidden")
 
 			const blocked = await prisma.userBlocked.findFirst({
 				where: { userId: toUserId, targetId: fromUserId },
 			})
 
 			if (blocked)
-				return
+				return reply(false, "friend_err_forbidden")
 
 			const row = await prisma.conversations.create({
 				data: {
@@ -225,6 +215,7 @@ io.on("connection", async (socket) => {
 
 			io.to(toUserId).emit("new_message", wire)
 			io.to(fromUserId).emit("new_message", wire)
+			reply(true)
 			const recipientSockets = await io.in(toUserId).fetchSockets()
 			if (!recipientSockets.some(recipient => recipient.data.activeConversationPeerId === fromUserId))
 				void notify({
@@ -238,13 +229,11 @@ io.on("connection", async (socket) => {
 				})
 		} catch (err) {
 			console.error("send_message error:", err)
+			reply(false, "txt_err_auth")
 		}
 	})
 
 	socket.on("set_typing", async (payload) => {
-		if (typingLimit())
-			return
-
 		try {
 			const fromUserId = socket.data.userId
 			const toUserId = payload?.toUserId
@@ -287,13 +276,13 @@ io.on("connection", async (socket) => {
 	onlineUsers.set(userId, before + 1)
 
 	socket.on("set_activity", async (payload) => {
-		if (activityLimit())
-			return
-
 		if (!onlineUsers.has(userId))
 			return
 
 		if (payload?.status !== "available" && payload?.status !== "away")
+			return
+
+		if (isInAnyMatch(currentMatches, userId) || isInAnySpecMatch(currentMatches, userId))
 			return
 
 		activityStatus.set(userId, payload.status)
@@ -328,9 +317,10 @@ io.on("connection", async (socket) => {
 		if (match && match.players.find(p => p.userId === userId)?.leftAt !== 0)
 			reconnectPlayer(match, userId, io)
 
-		activityStatus.set(userId, "available")
+		const status = isInAnyMatch(currentMatches, userId) || isInAnySpecMatch(currentMatches, userId) ? "in a match" : "available"
+		activityStatus.set(userId, status)
 		try {
-			await notifyFriendsOfPresence(userId, "available")
+			await notifyFriendsOfPresence(userId, status)
 		} catch (err) {
 			console.error("connection error:", err)
 		}

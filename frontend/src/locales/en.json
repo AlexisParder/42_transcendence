@@ -274,7 +274,7 @@
 	"ach_sniper": "sharpshooter",
 	"ach_sniper_desc": "win a match with at least 80% accuracy",
 	"ach_admiral": "admiral",
-	"ach_admiral_desc": "reach 1000 points",
+	"ach_admiral_desc": "reach 3500 points",
 	"profile_match_vs": "vs {{name}}",
 	"profile_match_duo_with": "Duo with {{name}}",
 	"profile_match_place_1": "FFA - 1st place",

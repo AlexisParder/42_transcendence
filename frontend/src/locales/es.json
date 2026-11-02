@@ -264,7 +264,7 @@
 	"ach_sniper": "francotirador",
 	"ach_sniper_desc": "gana una partida con al menos 80 % de precisión",
 	"ach_admiral": "almirante",
-	"ach_admiral_desc": "alcanza 1000 puntos",
+	"ach_admiral_desc": "alcanza 3500 puntos",
 	"profile_match_vs": "vs {{name}}",
 	"profile_match_duo_with": "En pareja con {{name}}",
 	"profile_match_place_1": "FFA - 1.er puesto",

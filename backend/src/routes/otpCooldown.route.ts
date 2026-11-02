@@ -35,9 +35,14 @@ export async function setSentHandler(req: Request, res: Response) {
 
 	const type = req.body?.type === "forget-password" ? "forget-password" : "email-verification"
 
-	await auth.api.sendVerificationOTP({
-		body: { email, type },
-	})
+	try {
+		await auth.api.sendVerificationOTP({
+			body: { email, type },
+		})
+	} catch (error) {
+		console.error("otp send error:", error)
+		return res.status(500).json({ ok: false, error: "send_failed" })
+	}
 
 	lastSent.set(email, Date.now());
 

@@ -34,6 +34,7 @@ export function Profile() {
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const loadedRef = useRef(0)
 	const targetIdRef = useRef<string | undefined>(undefined)
+	const [notFound, setNotFound] = useState(false)
 
 	const location = useLocation()
 	const targetId = (location.state as { targetId?: string } | null)?.targetId
@@ -48,9 +49,17 @@ export function Profile() {
 			try {
 				const { ok, data } = await apiPost("/api/get-user-info", { targetId })
 
-				if (!ok || cancelled)
+				if (cancelled)
 					return
 
+				if (!ok) {
+					setNotFound(true)
+					setRank(undefined)
+					setTargetInfo(undefined)
+					return
+				}
+
+				setNotFound(false)
 				setRank(data.rank)
 				setTargetInfo(data.userInfo)
 			} catch (error) {
@@ -159,7 +168,8 @@ export function Profile() {
 
 	return <Sidebar>
 		{isPending && <p>{t("sidebar_loading")}</p>}
-		{!isPending && session && <div className="p-2 h-full min-h-0 flex flex-col">
+		{!isPending && session && notFound && <p className="p-4 text-error first-letter:uppercase">{t("friend_err_user_not_found")}</p>}
+		{!isPending && session && !notFound && <div className="p-2 h-full min-h-0 flex flex-col">
 			<div className="shrink-0 flex flex-col gap-4 md:flex-row items-center justify-between border-b border-base-300 p-4 pb-6">
 				<div className="flex items-center gap-4">
 					<Avatar username={targetInfo?.username} image={targetInfo?.image} size={88} />
@@ -251,14 +261,14 @@ function MatchesItem({ result, otherPlayer, otherDeleted, placement, type, match
 	let colorBg = "bg-neutral/20"
 	let colorBd = "border-neutral"
 	if (points !== "unranked") {
-		if (result === "win") {
+		if (points >= 0) {
 			pointsTxt = `+${points}`
 			colorTxt = "text-info"
 			colorBg = "bg-info/10"
 			colorBd = "border-info"
 		}
 		else {
-			pointsTxt = `-${points}`
+			pointsTxt = `${points}`
 			colorTxt = "text-error"
 			colorBg = "bg-error/10"
 			colorBd = "border-error"

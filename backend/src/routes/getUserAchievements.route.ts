@@ -21,6 +21,12 @@ export async function getUserAchievementsHandler(req: Request, res: Response) {
 
 		const userId = targetId || session.user.id
 
+		if (targetId) {
+			const target = await prisma.user.findUnique({ where: { id: targetId }, select: { id: true } })
+			if (!target)
+				return res.status(404).json({ ok: false })
+		}
+
 		const unlocked = await prisma.userAchievement.findMany({
 			where: { userId },
 			select: { achievementId: true, unlockedAt: true }

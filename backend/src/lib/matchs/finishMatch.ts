@@ -3,10 +3,11 @@ import type { ClientToServerEvents, Matchs, matchType, ServerToClientEvents, Soc
 import { currentMatches } from "../../mapMatches.ts";
 import { prisma } from "../../db/client.ts";
 import type { PairMatchIndex } from "./eloLib.ts";
-import { filterMatchForUser } from "./matchUtils.ts";
+import { filterMatchForUser, isListening } from "./matchUtils.ts";
 import { applyEloToMatch, computeMatchElo, isRankedmatch } from "./eloMatchAdapater.ts";
 import { clearMatchDisconnectTimers } from "./disconnectTimers.ts";
 import { checkAchievements } from "../achievements.ts";
+import { setAvailable } from "../../index.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
@@ -88,7 +89,7 @@ async function saveMatch(match: Matchs, ranked: boolean, deltas: Map<string, num
 
 function emitFinalState(match: Matchs, io: IO) {
 	for (const player of match.players) {
-		if (player.userId && !player.isBot && player.status !== "LEFT")
+		if (isListening(player))
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 	}
 	for (const spectator of match.spectators) {
@@ -121,6 +122,7 @@ export async function finishMatch(match: Matchs, io: IO) {
 			} catch (err) {
 				console.error("elo error, match saved as unranked:", err)
 				ranked = false
+				match.isRanked = false
 				deltas.clear()
 				for (const player of match.players)
 					player.matchPoints = 0
@@ -138,5 +140,12 @@ export async function finishMatch(match: Matchs, io: IO) {
 
 		if (currentMatches.get(match.hostId) === match)
 			currentMatches.delete(match.hostId)
+
+		for (const player of match.players) {
+			if (isListening(player))
+				setAvailable(player.userId).catch(err => console.error("finish match presence:", err))
+		}
+		for (const spectator of match.spectators)
+			setAvailable(spectator).catch(err => console.error("finish match presence:", err))
 	}
 }

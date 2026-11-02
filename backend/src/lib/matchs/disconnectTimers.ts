@@ -1,6 +1,6 @@
 import type { Server } from "socket.io"
 import type { ClientToServerEvents, Matchs, ServerToClientEvents, SocketData } from "../../events.ts"
-import { filterMatchForUser, updatePlayer } from "./matchUtils.ts"
+import { filterMatchForUser, updatePlayer, isListening } from "./matchUtils.ts"
 import { currentMatches } from "../../mapMatches.ts"
 import { emitTurn, markPlayerLeft } from "./turnTimer.ts"
 
@@ -16,7 +16,7 @@ function timerKey(hostId: string, userId: string) {
 
 function emitMatch(match: Matchs, io: IO) {
 	for (const player of match.players) {
-		if (player.userId && player.status !== "LEFT")
+		if (isListening(player))
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 	}
 }

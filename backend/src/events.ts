@@ -1,5 +1,5 @@
 export interface ClientToServerEvents {
-	send_message: (payload: { toUserId: string, message: string }) => void
+	send_message: (payload: { toUserId: string, message: string }, ack?: (res: { ok: boolean, error?: string }) => void) => void
 	set_active_conversation: (peerId: string | null) => void
 	set_activity: (payload: { status: PresenceStatus }) => void
 	set_typing: (payload: { toUserId: string, typing: boolean }) => void

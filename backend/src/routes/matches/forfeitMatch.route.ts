@@ -41,8 +41,10 @@ export async function forfeitMatchHandler(req: Request, res: Response) {
 		if (player.status === "LEFT")
 			return res.status(400).json({ ok: false, code: "match_err_player_already_left" })
 
-
-		markPlayerLeft(match, userId, io)
+		if (player.placement > 0)
+			player.hasQuit = true
+		else
+			markPlayerLeft(match, userId, io)
 
 		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
 		activityStatus.set(userId, "available")

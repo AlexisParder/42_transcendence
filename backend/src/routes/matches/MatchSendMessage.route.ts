@@ -3,7 +3,7 @@ import type { Request, Response } from "express"
 import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
-import { filterMatchForUser } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, isListening } from "../../lib/matchs/matchUtils.ts";
 import { io } from "../../server.ts";
 
 export async function matchSendMessageHandler(req: Request, res: Response) {
@@ -63,8 +63,11 @@ export async function matchSendMessageHandler(req: Request, res: Response) {
 			message: text
 		})
 
+		if (team.chat.length > 100)
+			team.chat.shift()
+
 		for (const p of match.players) {
-			if (p.userId && p.team === team.id)
+			if (isListening(p) && p.team === team.id)
 				io.to(p.userId).emit("refresh_chat_match", filterMatchForUser(match, p.userId))
 		}
 

@@ -418,7 +418,10 @@ export function Friends() {
 		if (message.length > 1000)
 			return setErrors({ messages: t("friend_err_msg_to_long") })
 
-		socket.emit("send_message", { toUserId: peerId, message })
+		socket.emit("send_message", { toUserId: peerId, message }, (res) => {
+			if (!res.ok)
+				setErrors({ messages: t(res.error ?? "txt_err_auth") })
+		})
 		if (typingTimerRef.current)
 			clearTimeout(typingTimerRef.current)
 		isTypingRef.current = false

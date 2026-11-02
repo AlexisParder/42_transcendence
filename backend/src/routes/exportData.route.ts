@@ -193,6 +193,17 @@ export async function exportDataHandler(req: Request, res: Response) {
 		})
 		data.achievements = achievements
 
+		data.notifications = await prisma.notification.findMany({
+			where: { userId },
+			orderBy: { createdAt: "asc" },
+			select: { title: true, description: true, params: true, read: true, createdAt: true }
+		})
+
+		data.notificationPreferences = await prisma.notificationPreferences.findUnique({
+			where: { userId },
+			omit: { userId: true }
+		})
+
 		notifySecurity(userId, "data_exported")
 
 		res.attachment(`sonar-export-${user.username ?? user.id}-${exportedAt.slice(0, 10)}.json`)

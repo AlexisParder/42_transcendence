@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
-import { filterMatchForUser, findActiveMatchOf, updatePlayer } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, findActiveMatchOf, updatePlayer, isListening } from "../../lib/matchs/matchUtils.ts";
 import { endDeploy } from "../../lib/matchs/turnTimer.ts";
 import { SHIP_COUNT, validateShips } from "../../lib/matchs/shipValidation.ts";
 import { io } from "../../server.ts";
@@ -40,7 +40,7 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 
 		match.teams[player.team - 1].ships = validShips
 		for (const p of match.players) {
-			if (p.userId && p.status !== "LEFT")
+			if (isListening(p))
 				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))
 		}
 
@@ -81,7 +81,7 @@ export async function setPlayerReadyOnSelectHandler(req: Request, res: Response)
 		updatePlayer(match, session.user.id, { isReady: true })
 
 		for (const p of match.players) {
-			if (p.userId)
+			if (isListening(p))
 				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))
 		}
 

@@ -167,7 +167,7 @@ export function Match() {
 			const { ok, data } = await apiPost("/api/player-fire", {
 				hostId: joinedMatch?.hostId,
 				coords: targetLocked,
-				targetTeamId: selectedTarget
+				targetTeamId: getAliveTarget(joinedMatch, session?.user.id, selectedTarget)
 			})
 
 			setTargetLocked({ x: -1, y: -1 })
@@ -238,7 +238,9 @@ export function Match() {
 	if (!joinedMatch || joinedMatch.startedAt === 0)
 		return <Navigate to="/play" replace />
 
-	const isLocked = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
+	const myTeam = joinedMatch.players.find(p => p.userId === session?.user.id)?.team
+	const isLocked = joinedMatch.players.some(p => p.team === myTeam && p.isReady)
+	const target = getAliveTarget(joinedMatch, session?.user.id, selectedTarget)
 	const isSpec = isSpectator(joinedMatch, session?.user.id)
 
 	return <div className="h-dvh flex flex-col overflow-hidden">
@@ -265,8 +267,8 @@ export function Match() {
 		{category === "match" && joinedMatch.endedAt === 0 && <>
 			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
 			<div className="flex flex-1 min-h-0 min-w-0">
-				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
-				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} chatError={errors.messages} />
+				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={target} setSelectedTarget={setSelectedTarget} />
+				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={target} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} chatError={errors.messages} />
 				<GameInfos match={joinedMatch} myId={session?.user.id} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} chatError={errors.messages} />
 			</div>
 		</>}
@@ -284,4 +286,32 @@ export function Match() {
 			</div>
 		</Modal>
 	</div>
+}
+const FLEET_CELLS = 17
+
+// si l'équipe ciblée est éliminée (coulée ou partie), on vise la première équipe adverse encore en vie
+function getAliveTarget(match: Matchs | undefined, myId: string | undefined, selected: number) {
+	if (!match)
+		return selected
+
+	const myTeam = match.players.find(p => p.userId === myId)?.team
+	let firstAlive = 0
+
+	for (const team of match.teams) {
+		if (team.id === myTeam)
+			continue
+
+		const players = match.players.filter(p => p.team === team.id)
+		const allLeft = players.length > 0 && players.every(p => p.status === "LEFT")
+		const sunkCells = team.shots.filter(s => s.status === "sunk").length
+		if (allLeft || sunkCells >= FLEET_CELLS)
+			continue
+
+		if (team.id === selected)
+			return selected
+		if (firstAlive === 0)
+			firstAlive = team.id
+	}
+
+	return firstAlive || selected
 }

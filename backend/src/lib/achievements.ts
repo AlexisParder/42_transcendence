@@ -25,7 +25,7 @@ export const achievements: Achievement[] = [
 	{ id: "duo", difficulty: "medium", check: s => s.wins2v2 >= 2 },
 	{ id: "survivor", difficulty: "medium", check: s => s.winsFFA >= 1 },
 	{ id: "sniper", difficulty: "hard", check: s => s.lastMatchWon && s.lastMatchAccuracy >= 0.8 },
-	{ id: "admiral", difficulty: "hard", check: s => s.points >= 1000 },
+	{ id: "admiral", difficulty: "hard", check: s => s.points >= 3500 },
 ]
 
 async function getPlayerStats(userId: string) {
@@ -67,7 +67,8 @@ async function getPlayerStats(userId: string) {
 
 		if (i === 0) {
 			stats.lastMatchWon = won
-			if (m.shotsTotal > 0)
+			// au moins 17 tirs (la taille d'une flotte) pour éviter une précision gonflée par un abandon rapide
+			if (m.shotsTotal >= 17)
 				stats.lastMatchAccuracy = m.shotsHit / m.shotsTotal
 		}
 	}

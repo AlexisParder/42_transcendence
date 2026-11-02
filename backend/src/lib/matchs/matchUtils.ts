@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import type { MatchPlayers, Matchs, matchType } from "../../events.ts";
 
 export function isInAnyMatch(currentMatches: Map<string, Matchs>, userId: string): boolean {
@@ -34,6 +35,10 @@ export function firstFreeTeam(players: MatchPlayers[], teamCount: number): numbe
 	return bestTeam
 }
 
+export function isListening(player: MatchPlayers): player is MatchPlayers & { userId: string } {
+	return player.userId !== null && !player.isBot && player.status !== "LEFT" && !player.hasQuit
+}
+
 export function updatePlayer(match: Matchs, userId: string, patch: Partial<MatchPlayers>): MatchPlayers | null {
 	const player = match.players.find(p => p.userId === userId)
 	if (!player)
@@ -44,13 +49,22 @@ export function updatePlayer(match: Matchs, userId: string, patch: Partial<Match
 }
 
 const CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+function isCodeUsed(existing: Map<string, Matchs>, code: string) {
+	for (const match of existing.values()) {
+		if (match.code === code)
+			return true
+	}
+	return false
+}
+
 export function generateCode(existing: Map<string, Matchs>): string {
 	let code = ""
 
-	while (!code || existing.has(code)) {
+	while (!code || isCodeUsed(existing, code)) {
 		let suffix = ""
 		for (let i = 0; i < 6; i++)
-			suffix += CHARS[Math.floor(Math.random() * CHARS.length)]
+			suffix += CHARS[randomInt(CHARS.length)]
 		code = `s-${suffix}`
 	}
 	return code

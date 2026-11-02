@@ -126,6 +126,12 @@ export const auth = betterAuth({
 	],
 	hooks: {
 		before: createAuthMiddleware(async ctx => {
+			if (ctx.path === "/sign-in/email-otp")
+				throw new APIError("FORBIDDEN", { message: "sign-in with email otp is disabled" })
+
+			if (ctx.path === "/email-otp/send-verification-otp" && ctx.body?.type === "sign-in")
+				throw new APIError("FORBIDDEN", { message: "sign-in with email otp is disabled" })
+
 			if ((ctx.path === "/sign-up/email" || ctx.path === "/update-user") && ctx.body?.language !== undefined && !isSupportedLanguage(ctx.body.language))
 				throw new APIError("BAD_REQUEST", { message: "invalid language" })
 

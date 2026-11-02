@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import type { ClientToServerEvents, Log, Matchs, ServerToClientEvents, SocketData } from "../../events.ts";
-import { filterMatchForUser, isTeamEliminated, setFinalPlacement, updatePlayer } from "./matchUtils.ts";
+import { filterMatchForUser, isTeamEliminated, setFinalPlacement, updatePlayer, isListening } from "./matchUtils.ts";
 import { currentMatches } from "../../mapMatches.ts";
 import { fillRandomShips } from "./shipValidation.ts";
 import { finishMatch } from "./finishMatch.ts";
@@ -8,6 +8,7 @@ import { cancelDisconnectTimer, clearMatchDisconnectTimers } from "./disconnectT
 import { addLog } from "./logMatch.ts";
 import { clearBotTurn, scheduleBotTurn } from "./bot/botTurn.ts";
 import { notify } from "../notify.ts";
+import { createBotPlayer } from "./bot/botPlayer.ts";
 import { setAvailable } from "../../index.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
@@ -23,7 +24,7 @@ export function emitTurn(match: Matchs, io: IO) {
 	const data = { remaining: getRemaining(match) }
 
 	for (const player of match.players) {
-		if (player.userId && player.status !== "LEFT") {
+		if (isListening(player)) {
 			io.to(player.userId).emit("turn_update", data)
 			io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
@@ -59,31 +60,35 @@ export function endDeploy(match: Matchs, io: IO) {
 	nextTurn(match, io, false)
 }
 
+function endMatch(match: Matchs, io: IO) {
+	stopTurns(match)
+	const players = match.players.filter(p => p.placement === 0)
+	for (const player of players)
+		setFinalPlacement(match, player.userId ?? "")
+
+	for (const player of match.players) {
+		if (player.isBot || !player.userId)
+			continue
+
+		let shotsCount = 0
+		let hitsCount = 0
+		for (const team of match.teams.filter(t => t.id !== player.team)) {
+			shotsCount += team.shots.filter(s => s.authorId === player.userId).length
+			hitsCount += team.shots.filter(s => s.authorId === player.userId && s.status !== "miss").length
+		}
+		updatePlayer(match, player.userId, { shotsHit: hitsCount, shotsTotal: shotsCount })
+	}
+
+	finishMatch(match, io).catch(err => console.log("finish match:", err))
+}
+
 export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 	if (match.endedAt !== 0)
 		return
 
 	const aliveTeams = match.teams.filter(t => !isTeamEliminated(match, t.id))
 	if (aliveTeams.length <= 1) {
-		stopTurns(match)
-		const players = match.players.filter(p => p.placement === 0)
-		for (const player of players)
-			setFinalPlacement(match, player.userId ?? "")
-
-		for (const player of match.players) {
-			if (player.isBot || !player.userId)
-				continue
-
-			let shotsCount = 0
-			let hitsCount = 0
-			for (const team of match.teams.filter(t => t.id !== player.team)) {
-				shotsCount += team.shots.filter(s => s.authorId === player.userId).length
-				hitsCount += team.shots.filter(s => s.authorId === player.userId && s.status !== "miss").length
-			}
-			updatePlayer(match, player.userId, { shotsHit: hitsCount, shotsTotal: shotsCount })
-		}
-
-		finishMatch(match, io).catch(err => console.log("finish match:", err))
+		endMatch(match, io)
 		return
 	}
 
@@ -158,15 +163,25 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 		return
 	}
 
-	if (player.placement > 0) {
-		player.hasQuit = true
+	if (player.placement > 0)
 		return
-	}
 
 	updatePlayer(match, userId, {
 		status: "LEFT",
 		leftAt: player.leftAt === 0 ? Date.now() : player.leftAt
 	})
+
+	const wasHisTurn = match.turns.userTurn === userId
+	const humanStillPlaying = match.players.some(p => !p.isBot && p.status !== "LEFT" && p.placement === 0)
+	const replacedByBot = humanStillPlaying && match.settings.replace && (match.type === "ONE_V_ONE" || match.type === "FFA")
+	if (replacedByBot) {
+		const bot = createBotPlayer(userId, player.team)
+		match.players.push(bot)
+		match.turns.turnOrder = match.turns.turnOrder.map(id => id === userId ? bot.userId! : id)
+		if (wasHisTurn)
+			match.turns.userTurn = bot.userId
+	}
+
 	setFinalPlacement(match, userId)
 
 	const aliveTeams = match.teams.filter(t => !isTeamEliminated(match, t.id))
@@ -182,9 +197,15 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 	}
 	addLog(match, log, io, false)
 
+	// plus aucun humain en jeu : on ne laisse pas des bots jouer entre eux
+	if (!humanStillPlaying) {
+		endMatch(match, io)
+		return
+	}
+
 	if (match.turns.userTurn === userId)
 		nextTurn(match, io, true)
-	else if (aliveTeams.length <= 1)
+	else if (aliveTeams.length <= 1 || (replacedByBot && wasHisTurn))
 		nextTurn(match, io, false)
 	else
 		emitTurn(match, io)

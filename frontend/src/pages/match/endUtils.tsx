@@ -12,6 +12,7 @@ export function EndDisplay({ match }: {
 	const player = match.players.find(p => p.userId === session?.user.id)
 	const playerTeamData = match.teams.find(t => t.id === player?.team)
 	const isWin = player?.status !== "LEFT" && player?.placement === 1
+	const matchPoints = player?.matchPoints ?? 0
 
 	const sunkShip = [
 		...new Map(
@@ -27,8 +28,8 @@ export function EndDisplay({ match }: {
 			<h2 className="font-bold text-5xl max-md:text-4xl first-letter:uppercase text-center">{isWin ? t("end_enemy_fleet_sunk") : t("end_fleet_lost")}</h2>
 			<p className="first-letter:uppercase text-neutral-content/50 text-sm font-medium font-mono tracking-[0.06em]">{t("end_match_time", { time: formatMS((match.endedAt - match.startedAt) / 1000) })}</p>
 
-			{match.isRanked && <div className={`flex items-center gap-2 py-2 px-4 border rounded-lg ${isWin ? "bg-info/10 border-info/50" : "bg-error/10 border-error/50"}`}>
-				<p className={`font-mono font-bold text-2xl ${isWin ? "text-info" : "text-error"}`}>{isWin ? "+" : ""}{player?.matchPoints ?? 0}</p>
+			{match.isRanked && <div className={`flex items-center gap-2 py-2 px-4 border rounded-lg ${matchPoints >= 0 ? "bg-info/10 border-info/50" : "bg-error/10 border-error/50"}`}>
+				<p className={`font-mono font-bold text-2xl ${matchPoints >= 0 ? "text-info" : "text-error"}`}>{matchPoints >= 0 ? "+" : ""}{matchPoints}</p>
 				<div className="flex flex-col">
 					<p className="text-xs text-neutral-content/50">{t("txt_points")}</p>
 					<p className="inline-flex items-center gap-1 text-xs text-neutral-content/50">{player?.points ?? 0} <MdArrowRightAlt />{(player?.points ?? 0) + (player?.matchPoints ?? 0)}</p>

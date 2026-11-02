@@ -3,7 +3,7 @@ import type { Request, Response } from "express"
 import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs, PresenceStatus } from "../../events.ts";
-import { filterMatchForUser, isInAnyMatch, isInAnySpecMatch } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, isInAnyMatch, isInAnySpecMatch, isListening } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
 import { io } from "../../server.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
@@ -39,13 +39,16 @@ export async function joinSpecMatchHandler(req: Request, res: Response) {
 		if (isInAnyMatch(currentMatches, userId) || isInAnySpecMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
+		if (match.players.some(p => p.userId === userId))
+			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
+
 		if (match.startedAt === 0)
 			return res.status(400).json({ ok: false, code: "match_err_not_started" })
 
 		match.spectators.push(userId)
 
 		for (const player of match.players) {
-			if (player.userId)
+			if (isListening(player))
 				io.to(player.userId).emit("refresh_joined_match", filterMatchForUser(match, player.userId))
 		}
 		for (const spectator of match.spectators) {
