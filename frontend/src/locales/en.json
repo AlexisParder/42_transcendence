@@ -512,6 +512,7 @@
 	"settings_err_rmv_user_in_match": "Cannot remove account while in a match",
 	"SESSION_EXPIRED": "Your sign-in is too old. Sign out and sign back in to delete your account",
 	"INVALID_PASSWORD": "Incorrect password",
+	"txt_err_auth": "Something went wrong. Please try again",
 	"deleted_user": "Deleted Account",
 	"deleted_user_id": "Deleted Account #{{id}}",
 	"settings_updt_email_wait": "Pending change to {{email}} - confirm it from your inbox",

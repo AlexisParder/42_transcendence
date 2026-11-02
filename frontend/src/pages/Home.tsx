@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
 import { RadarEchoes } from "../components/RadarEchoes"
 import { Sidebar } from "../components/Sidebar"
-import { getTranslationLanguage, t } from "../lib/translate"
+import { t } from "../lib/translate"
 import { useEffect, useState } from "react"
 import { apiGet, apiPost } from "../lib/api"
 
@@ -20,25 +20,35 @@ const features = [
 	},
 ]
 
-type Stats = { played: number, inProgress: number, open: number }
-
 export function Home() {
 	const [code, setCode] = useState("")
-	const [counts, setCounts] = useState<Stats | null>(null)
+	const [played, setPlayed] = useState(0)
+	const [inProgress, setInProgress] = useState(0)
+	const [open, setOpen] = useState(0)
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		apiGet("/api/stats").then(({ ok, data }) => {
-			if (ok)
-				setCounts(data)
-		}).catch(error => console.error("get stats:", error))
+		async function loadStats() {
+			try {
+				const { ok, data } = await apiGet("/api/stats")
+				if (!ok)
+					return
+
+				setPlayed(data.played ?? 0)
+				setInProgress(data.inProgress ?? 0)
+				setOpen(data.open ?? 0)
+			} catch (error) {
+				console.error("load stats:", error)
+			}
+		}
+
+		loadStats()
 	}, [])
 
-	const format = (value: number | undefined) => value === undefined ? "-" : value.toLocaleString(getTranslationLanguage())
 	const stats = [
-		{ value: format(counts?.played), label: t("home_matches_played") },
-		{ value: format(counts?.inProgress), label: t("home_in_progress") },
-		{ value: format(counts?.open), label: t("home_open_matches") },
+		{ value: played, label: t("home_matches_played") },
+		{ value: inProgress, label: t("home_in_progress") },
+		{ value: open, label: t("home_open_matches") },
 	]
 
 	async function handleJoinWithCode() {

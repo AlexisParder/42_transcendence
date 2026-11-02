@@ -492,6 +492,7 @@
 	"settings_err_rmv_user_in_match": "No puedes eliminar tu cuenta mientras estás en una partida",
 	"SESSION_EXPIRED": "Tu inicio de sesión es demasiado antiguo. Cierra sesión y vuelve a iniciarla para eliminar tu cuenta",
 	"INVALID_PASSWORD": "Contraseña incorrecta",
+	"txt_err_auth": "Se ha producido un error. Vuelve a intentarlo",
 	"deleted_user": "Cuenta eliminada",
 	"deleted_user_id": "Cuenta eliminada #{{id}}",
 	"settings_updt_email_wait": "Cambio pendiente a {{email}}: confírmalo desde tu bandeja de entrada",

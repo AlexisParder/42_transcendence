@@ -26,23 +26,13 @@ export function getTranslationLanguage() {
 	return language
 }
 
-function lookup(lang: string, key: string) {
+export function t(key: string, vars?: Record<string, string | number>) {
 	const raw = key.split(".").reduce<unknown>(
 		(o, k) => (o as Translations | undefined)?.[k],
-		languages[lang]
+		languages[language]
 	)
 
-	return typeof raw === "string" ? raw : null
-}
-
-export function hasTranslation(key: string) {
-	return lookup(language, key) !== null || lookup("en", key) !== null
-}
-
-export function t(key: string, vars?: Record<string, string | number>) {
-	const raw = lookup(language, key) ?? lookup("en", key)
-
-	if (raw === null)
+	if (typeof raw !== "string")
 		return key
 
 	return vars ? raw.replace(/\{\{(\w+)\}\}/g, (_m: string, k:string) => String(vars[k] ?? `{{${k}}}`)) : raw

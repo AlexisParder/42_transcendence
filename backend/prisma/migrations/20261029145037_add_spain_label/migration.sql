@@ -1,7 +1,3 @@
--- La table "ranks" est déjà remplie par le seed : la colonne est d'abord ajoutée
--- sans contrainte, remplie avec une valeur unique (le seed met ensuite le vrai
--- libellé espagnol), puis passée en NOT NULL.
-
 -- AlterTable
 ALTER TABLE "ranks" ADD COLUMN     "es_label" TEXT;
 

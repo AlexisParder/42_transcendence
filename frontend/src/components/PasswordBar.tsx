@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react"
-import { getPasswordScore, isPasswordCheckerReady, loadPasswordChecker } from "../lib/password"
+import { getPasswordScore } from "../lib/password"
 import { t } from "../lib/translate"
 
 const Levels = [
@@ -11,13 +10,7 @@ const Levels = [
 ] as const
 
 export function PasswordBar({ password }: { password: string }) {
-	const [ready, setReady] = useState(isPasswordCheckerReady())
-
-	useEffect(() => {
-		loadPasswordChecker().then(() => setReady(true))
-	}, [])
-
-	const level = Levels[ready ? getPasswordScore(password) : 0]
+	const level = Levels[getPasswordScore(password)]
 
 
 	return <div className="flex items-center w-full">
