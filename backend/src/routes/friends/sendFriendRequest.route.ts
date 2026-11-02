@@ -82,6 +82,8 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 		})
 		res.json({ ok: true, request })
 	} catch (error) {
+		if ((error as { code?: string }).code === "P2002")
+			return res.status(409).json({ ok: false, error: "friend_err_user_already_pending" })
 		res.status(500).json({ ok: false })
 	}
 }

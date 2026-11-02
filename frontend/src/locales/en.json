@@ -308,6 +308,8 @@
 	"notifications_security_new_session": "New sign-in from {{device}}",
 	"notifications_security_data_exported": "Your data has been exported",
 	"notifications_achievement": "Achievement unlocked",
+	"notifications_match": "Match",
+	"notifications_match_closed": "The lobby has been closed by the host",
 	
 	"friends_conversations_title": "conversations",
 	"friends_requests_title": "requests",

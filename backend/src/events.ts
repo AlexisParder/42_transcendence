@@ -36,6 +36,7 @@ export type PresenceStatus = "available" | "in a match" | "away" | "offline"
 
 export interface SocketData {
 	userId: string
+	sessionId: string
 	activeConversationPeerId?: string | null
 }
 

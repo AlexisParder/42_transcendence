@@ -28,7 +28,10 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 				where: { id: targetId },
 				select: { id: true }
 			})
-			userId = target?.id ?? session.user.id
+			if (!target)
+				return res.status(404).json({ ok: false })
+
+			userId = target.id
 		}
 
 		const [rows, total, wins, shots] = await Promise.all([

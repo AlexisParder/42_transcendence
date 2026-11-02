@@ -22,6 +22,10 @@ export async function blockUserHandler(req: Request, res: Response) {
 		if (targetId === userId)
 			return res.status(400).json({ ok: false, error: 'friend_block_err_self' })
 
+		const target = await prisma.user.findUnique({ where: { id: targetId }, select: { id: true } })
+		if (!target)
+			return res.status(404).json({ ok: false, error: 'friend_err_user_not_found' })
+
 		const already = await prisma.userBlocked.findFirst({
 			where: { userId, targetId }
 		})
@@ -45,6 +49,8 @@ export async function blockUserHandler(req: Request, res: Response) {
 		io.to(targetId).emit("friend_removed", { userId })
 		res.json({ ok: true })
 	} catch (error) {
+		if ((error as { code?: string }).code === "P2002")
+			return res.status(409).json({ ok: false, error: 'friend_block_err_already' })
 		console.error("block error:", error)
 		res.status(500).json({ ok: false })
 	}

@@ -101,22 +101,30 @@ export async function finishMatch(match: Matchs, io: IO) {
 	clearMatchDisconnectTimers(match.hostId)
 
 	try {
-		const ranked = isRankedmatch(match)
+		let ranked = isRankedmatch(match)
 		const deltas = new Map<string, number>()
 
 		if (ranked) {
-			const userIds = match.players.map(p => p.userId).filter((id): id is string => id !== null)
+			try {
+				const userIds = match.players.map(p => p.userId).filter((id): id is string => id !== null)
 
-			const [rankedGames, pairMatchIndex] = await Promise.all([
-				loadRankedGames(userIds),
-				loadPairMatchIndex(userIds)
-			])
+				const [rankedGames, pairMatchIndex] = await Promise.all([
+					loadRankedGames(userIds),
+					loadPairMatchIndex(userIds)
+				])
 
-			const results = computeMatchElo(match, rankedGames, pairMatchIndex)
-			applyEloToMatch(match, results)
+				const results = computeMatchElo(match, rankedGames, pairMatchIndex)
+				applyEloToMatch(match, results)
 
-			for (const r of results)
-				deltas.set(r.id, r.delta)
+				for (const r of results)
+					deltas.set(r.id, r.delta)
+			} catch (err) {
+				console.error("elo error, match saved as unranked:", err)
+				ranked = false
+				deltas.clear()
+				for (const player of match.players)
+					player.matchPoints = 0
+			}
 		}
 
 		await saveMatch(match, ranked, deltas)

@@ -1,9 +1,9 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
-import type { Matchs, PresenceStatus } from "../../events.ts";
+import type { Matchs } from "../../events.ts";
 import { io } from "../../server.ts";
-import { notifyFriendsOfPresence } from "../../index.ts";
+import { closeLobby } from "../../lib/matchs/turnTimer.ts";
 
 export async function deleteMatchHandler(req: Request, res: Response) {
 	try {
@@ -27,16 +27,7 @@ export async function deleteMatchHandler(req: Request, res: Response) {
 		if (match.startedAt !== 0)
 			return res.status(403).json({ ok: false, code: "match_err_already_started" })
 
-		for (const player of match.players) {
-			if (player.userId)
-				io.to(player.userId).emit("refresh_joined_match", undefined)
-		}
-
-		currentMatches.delete(userId)
-
-		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>
-		activityStatus.set(userId, "available")
-		await notifyFriendsOfPresence(userId, "available")
+		closeLobby(match, io)
 		res.json({ ok: true })
 	} catch (err) {
 		res.status(500).json({ ok: false })

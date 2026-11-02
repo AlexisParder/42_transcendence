@@ -37,6 +37,12 @@ export async function matchSendMessageHandler(req: Request, res: Response) {
 		if (match.startedAt === 0)
 			return res.status(403).json({ ok: false, code: "match_err_not_started" })
 
+		if (match.endedAt !== 0)
+			return res.status(403).json({ ok: false, code: "match_err_already_ended" })
+
+		if (player.status === "LEFT")
+			return res.status(403).json({ ok: false, code: "match_err_player_already_left" })
+
 		const team = match.teams.find(t => t.id === player.team)
 		if (!team)
 			return res.status(400).json({ ok: false, code: "match_err_team_does_not_exist" })
@@ -44,15 +50,17 @@ export async function matchSendMessageHandler(req: Request, res: Response) {
 		if (typeof message !== "string")
 			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
-		if (message.length < 1)
+		const text = message.trim()
+
+		if (text.length < 1)
 			return res.status(400).json({ ok: false, code: "match_err_msg_to_short" })
 
-		if (message.length > 1000)
+		if (text.length > 1000)
 			return res.status(400).json({ ok: false, code: "friend_err_msg_to_long" })
 
 		team.chat.push({
 			authorId: userId,
-			message
+			message: text
 		})
 
 		for (const p of match.players) {

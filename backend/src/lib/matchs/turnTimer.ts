@@ -7,6 +7,8 @@ import { finishMatch } from "./finishMatch.ts";
 import { cancelDisconnectTimer, clearMatchDisconnectTimers } from "./disconnectTimers.ts";
 import { addLog } from "./logMatch.ts";
 import { clearBotTurn, scheduleBotTurn } from "./bot/botTurn.ts";
+import { notify } from "../notify.ts";
+import { setAvailable } from "../../index.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -103,8 +105,13 @@ export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 		match.turns.userTurn = next
 	}
 	match.turns.isBotTurn = match.players.find(p => p.userId === match.turns.userTurn)?.isBot ?? false
-	match.turns.timerStart = Date.now()
 
+	if (match.step === "deploy") {
+		emitTurn(match, io)
+		return
+	}
+
+	match.turns.timerStart = Date.now()
 	startTurnTimer(match, io)
 }
 
@@ -115,6 +122,22 @@ export function stopTurns(match: Matchs) {
 	timers.delete(match.hostId)
 }
 
+export function closeLobby(match: Matchs, io: IO) {
+	for (const player of match.players) {
+		if (!player.userId || player.isBot)
+			continue
+
+		io.to(player.userId).emit("refresh_joined_match", undefined)
+		setAvailable(player.userId).catch(err => console.error("close lobby:", err))
+
+		if (player.userId !== match.hostId)
+			void notify({ userId: player.userId, title: "notifications_match", description: "notifications_match_closed" })
+	}
+
+	clearMatchDisconnectTimers(match.hostId)
+	currentMatches.delete(match.hostId)
+}
+
 export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 	const player = match.players.find(p => p.userId === userId)
 
@@ -123,15 +146,9 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 		return
 
 	if (match.startedAt === 0) {
-		if (match.hostId === userId) {
-			for (const player of match.players) {
-				if (player.userId && player.status !== "LEFT")
-					io.to(player.userId).emit("refresh_joined_match", undefined)
-			}
-
-			clearMatchDisconnectTimers(match.hostId)
-			currentMatches.delete(userId)
-		} else {
+		if (match.hostId === userId)
+			closeLobby(match, io)
+		else {
 			match.players = match.players.filter(p => p.userId !== userId)
 			for (const player of match.players) {
 				if (player.userId && player.status !== "LEFT")
@@ -171,4 +188,7 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 		nextTurn(match, io, false)
 	else
 		emitTurn(match, io)
+
+	if (match.step === "deploy" && match.endedAt === 0 && match.players.every(p => p.isReady || p.isBot || p.status === "LEFT"))
+		endDeploy(match, io)
 }

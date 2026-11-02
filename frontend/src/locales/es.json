@@ -297,6 +297,8 @@
 	"notifications_security_new_session": "Nuevo inicio de sesión desde {{device}}",
 	"notifications_security_data_exported": "Se han exportado tus datos",
 	"notifications_achievement": "Logro desbloqueado",
+	"notifications_match": "Partida",
+	"notifications_match_closed": "El anfitrión ha cerrado la sala",
 	"friends_conversations_title": "conversaciones",
 	"friends_requests_title": "solicitudes",
 	"friends_online_title": "conectados",

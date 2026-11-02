@@ -31,7 +31,7 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 		if (match.startedAt == 0 || match.step !== "deploy")
 			return res.status(403).json({ ok: false, code: "match_err_already_started" })
 
-		if (player.isReady)
+		if (match.players.some(p => p.team === player.team && p.isReady))
 			return res.status(400).json({ ok: false, code: "match_err_already_ready" })
 
 		const validShips = validateShips(ships)
@@ -85,7 +85,7 @@ export async function setPlayerReadyOnSelectHandler(req: Request, res: Response)
 				io.to(p.userId).emit("refresh_joined_match", filterMatchForUser(match, p.userId))
 		}
 
-		if (match.players.every(p => p.isReady || p.isBot))
+		if (match.players.every(p => p.isReady || p.isBot || p.status === "LEFT"))
 			endDeploy(match, io)
 
 		res.json({ ok: true })

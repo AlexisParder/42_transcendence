@@ -297,6 +297,8 @@
 	"notifications_security_new_session": "Nouvelle connexion depuis {{device}}",
 	"notifications_security_data_exported": "Vos données ont été exportées",
 	"notifications_achievement": "Succès débloqué",
+	"notifications_match": "Partie",
+	"notifications_match_closed": "Le salon a été fermé par l'hôte",
 	"friends_conversations_title": "conversations",
 	"friends_requests_title": "demandes",
 	"friends_online_title": "en ligne",

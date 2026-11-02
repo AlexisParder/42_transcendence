@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { socket } from "../lib/socket";
 import { authClient } from "../lib/auth-client";
 import { SocketContext } from "../components/socketContext";
@@ -8,16 +8,22 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 	const { data: session, isPending } = authClient.useSession()
 	const userId = session?.user.id
 
+	const connectedUserRef = useRef<string | null>(null)
+
 	useEffect(() => {
 		if (isPending)
 			return
 
-		if (userId) {
-			if (!socket.connected)
-				socket.connect()
-		} else {
-			if (socket.connected)
-				socket.disconnect()
+		if (!userId) {
+			socket.disconnect()
+			connectedUserRef.current = null
+			return
+		}
+
+		if (connectedUserRef.current !== userId) {
+			socket.disconnect()
+			socket.connect()
+			connectedUserRef.current = userId
 		}
 	}, [userId, isPending])
 

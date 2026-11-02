@@ -207,6 +207,17 @@ export const auth = betterAuth({
 		}),
 	},
 	databaseHooks: {
+		session: {
+			delete: {
+				after: async (session) => {
+					const sockets = await io.in(session.userId).fetchSockets()
+					for (const socket of sockets) {
+						if (socket.data.sessionId === session.id)
+							socket.disconnect(true)
+					}
+				}
+			}
+		},
 		user: {
 			update: {
 				after: async (user, ctx) => {

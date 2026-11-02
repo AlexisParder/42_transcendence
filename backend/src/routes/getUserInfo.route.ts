@@ -40,19 +40,14 @@ export async function getUserInfoHandler(req: Request, res: Response) {
 				select: { points: true, username: true, image: true, createdAt: true }
 			})
 
-			if (target) {
-				username = target.username
-				image = target.image
-				createdAt = target.createdAt
-				points = target.points ?? 0
-				isMine = targetId === session.user.id
-			} else {
-				username = session.user.username
-				image = session.user.image
-				createdAt = session.user.createdAt
-				points = session.user.points ?? 0
-				isMine = true
-			}
+			if (!target)
+				return res.status(404).json({ ok: false })
+
+			username = target.username
+			image = target.image
+			createdAt = target.createdAt
+			points = target.points ?? 0
+			isMine = targetId === session.user.id
 		} else {
 			username = session.user.username
 			image = session.user.image

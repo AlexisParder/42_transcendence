@@ -135,6 +135,7 @@ io.use(async (socket, next) => {
 			return next(new Error("unauthorized"))
 
 		socket.data.userId = session.user.id
+		socket.data.sessionId = session.session.id
 		next()
 	} catch (error) {
 		next(new Error("unauthorized"))
@@ -342,6 +343,14 @@ process.on("unhandledRejection", (err) => {
 
 const PORT = 3000
 server.listen(PORT, () => console.log(`Backend listening on port ${PORT}`))
+
+export async function setAvailable(userId: string) {
+	if (!onlineUsers.has(userId))
+		return
+
+	activityStatus.set(userId, "available")
+	await notifyFriendsOfPresence(userId, "available")
+}
 
 export async function notifyFriendsOfPresence(userId: string, status: PresenceStatus) {
 	const rows = await prisma.friends.findMany({

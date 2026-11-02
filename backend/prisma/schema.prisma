@@ -122,6 +122,7 @@ model Friends {
   user       User    @relation("SentFriends", fields: [userId], references: [id], onDelete: Cascade)
   target     User    @relation("ReceivedFriends", fields: [targetId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, targetId])
   @@index([userId])
   @@index([targetId])
   @@map("friends")
@@ -149,6 +150,7 @@ model UserBlocked {
   user   User @relation("SentBlock", fields: [userId], references: [id], onDelete: Cascade)
   target User @relation("ReceivedBlock", fields: [targetId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, targetId])
   @@index([userId])
   @@index([targetId])
   @@map("userblocked")

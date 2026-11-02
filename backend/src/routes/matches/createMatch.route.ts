@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs, PresenceStatus } from "../../events.ts";
-import { filterMatchForUser, generateCode, isInAnyMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, generateCode, isInAnyMatch, isInAnySpecMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
 import { createBotPlayer } from "../../lib/matchs/bot/botPlayer.ts";
@@ -27,7 +27,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 		if (!data)
 			return res.status(400).json({ ok: false })
 
-		if (isInAnyMatch(currentMatches, userId))
+		if (isInAnyMatch(currentMatches, userId) || isInAnySpecMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
 		if (currentMatches.has(userId))
