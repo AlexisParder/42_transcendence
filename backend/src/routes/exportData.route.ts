@@ -2,6 +2,7 @@ import { fromNodeHeaders } from "better-auth/node"
 import type { Request, Response } from "express"
 import { auth } from "../auth.ts"
 import { prisma } from "../db/client.ts"
+import { t } from "../lib/translate.ts"
 
 export async function exportDataHandler(req: Request, res: Response) {
 	try {
@@ -42,13 +43,13 @@ export async function exportDataHandler(req: Request, res: Response) {
 			}),
 			prisma.matchPlayers.findMany({
 				where: { userId },
-				orderBy: { matchs: { startedAt: "asc" } },
+				orderBy: { matchs: { startedAt: "desc" } },
 				select: {
-					team: true, placement: true, points: true, status: true, leftAt: true, shotsHit: true, shotsTotal: true,
+					id: true, team: true, placement: true, points: true, status: true, leftAt: true, shotsHit: true, shotsTotal: true,
 					matchs: {
 						select: {
-							type: true, isRanked: true, startedAt: true, endedAt: true,
-							players: { where: { userId: { not: userId } }, select: { isBot: true, team: true, user: { select: { username: true } } } }
+							id: true, type: true, isRanked: true, startedAt: true, endedAt: true,
+							players: { select: { id: true, isBot: true, team: true, placement: true, user: { select: { username: true } } } }
 						}
 					}
 				}
@@ -58,55 +59,134 @@ export async function exportDataHandler(req: Request, res: Response) {
 		if (!user)
 			return res.status(404).json({ ok: false })
 
-		const peerIds = [...new Set(messages.map(m => m.userId === userId ? m.targetId : m.userId))]
+		const exportedAt = new Date().toISOString()
+		const data: Record<string, unknown> = { exportedAt }
+
+		const { points, ...profile } = user
+		data.profile = profile
+		data.linkedAccounts = accounts
+		data.sessions = sessions
+
+		data.friends = friends.map(f => ({
+			username: f.userId === userId ? f.target.username : f.user.username,
+			isAccepted: f.isAccepted,
+			direction: f.userId === userId ? "sent" : "received",
+		}))
+		data.blocked = blocked.map(b => b.target.username)
+
+		const conversations: Record<string, any[]> = {}
+		for (const m of messages) {
+			const isSent = m.userId === userId
+			const peerId = isSent ? m.targetId : m.userId
+
+			if (!conversations[peerId])
+				conversations[peerId] = []
+
+			conversations[peerId].push({
+				direction: isSent ? "sent" : "received",
+				message: m.message,
+				sendAt: m.sendAt,
+				isRead: m.isRead,
+			})
+		}
+
 		const peers = await prisma.user.findMany({
-			where: { id: { in: peerIds } },
+			where: { id: { in: Object.keys(conversations) } },
 			select: { id: true, username: true }
 		})
-		const peerNames = new Map(peers.map(p => [p.id, p.username]))
 
-		const data = {
-			exportedAt: new Date().toISOString(),
-			profile: user,
-			linkedAccounts: accounts,
-			sessions,
-			friends: friends.map(f => ({
-				username: f.userId === userId ? f.target.username : f.user.username,
-				isAccepted: f.isAccepted,
-				direction: f.userId === userId ? "sent" : "received",
-			})),
-			blocked: blocked.map(b => b.target.username),
-			messages: messages.map(m => {
-				const isSent = m.userId === userId
-				return {
-					direction: isSent ? "sent" : "received",
-					with: peerNames.get(isSent ? m.targetId : m.userId) ?? null,
-					message: m.message,
-					sendAt: m.sendAt,
-					isRead: m.isRead,
-				}
-			}),
-			matches: matches.map(m => ({
-				type: m.matchs.type,
+		const conversationList = []
+		for (const peerId in conversations) {
+			const peer = peers.find(p => p.id === peerId)
+			conversationList.push({
+				with: peer ? peer.username : null,
+				messages: conversations[peerId],
+			})
+		}
+		data.conversations = conversationList
+
+		const rank = await prisma.ranks.findFirst({
+			where: { min: { lte: points } },
+			orderBy: { min: "desc" }
+		})
+		let rankLabel = null
+		if (rank) {
+			if (user.language === "fr")
+				rankLabel = rank.fr_label
+			else if (user.language === "es")
+				rankLabel = rank.es_label
+			else
+				rankLabel = rank.en_label
+		}
+
+		let wins = 0
+		let left = 0
+		let shotsHit = 0
+		let shotsTotal = 0
+		for (const m of matches) {
+			shotsHit += m.shotsHit
+			shotsTotal += m.shotsTotal
+
+			if (m.status === "LEFT")
+				left++
+			else if (m.matchs.isRanked && m.points >= 0)
+				wins++
+			else if (!m.matchs.isRanked && m.placement === 1)
+				wins++
+		}
+
+		let accuracy = 0
+		if (shotsTotal > 0)
+			accuracy = Math.round((shotsHit / shotsTotal) * 100) / 100
+
+		const stats = {
+			matchesPlayed: matches.length,
+			wins,
+			losses: matches.length - wins - left,
+			left,
+			shotsHit,
+			shotsTotal,
+			accuracy,
+		}
+
+		const matchList = []
+
+		for (const m of matches) {
+			const players = []
+
+			for (const p of m.matchs.players) {
+				if (p.id === m.id)
+					continue
+
+				players.push({
+					username: p.user ? p.user.username : null,
+					isBot: p.isBot,
+					team: p.team,
+					placement: p.placement,
+				})
+			}
+
+			matchList.push({
+				type: t(user.language, `txt_${m.matchs.type}`),
 				isRanked: m.matchs.isRanked,
 				startedAt: m.matchs.startedAt,
 				endedAt: m.matchs.endedAt,
-				team: m.team,
-				placement: m.placement,
-				points: m.points,
-				status: m.status,
-				leftAt: m.leftAt,
-				shotsHit: m.shotsHit,
-				shotsTotal: m.shotsTotal,
-				opponents: m.matchs.players.map(p => ({
-					username: p.isBot ? "bot" : p.user?.username ?? null,
-					team: p.team,
-				})),
-			})),
+				you: {
+					team: m.team,
+					placement: m.placement,
+					points: m.points,
+					status: m.status,
+					leftAt: m.leftAt,
+					shotsHit: m.shotsHit,
+					shotsTotal: m.shotsTotal,
+				},
+				players,
+			})
 		}
 
-		const date = data.exportedAt.slice(0, 10)
-		res.attachment(`sonar-export-${user.username ?? user.id}-${date}.json`)
+		data.game = { points, rank: rankLabel, stats, matches: matchList }
+
+		res.attachment(`sonar-export-${user.username ?? user.id}-${exportedAt.slice(0, 10)}.json`)
 		res.json(data)
 	} catch (error) {
 		console.error("export-data error:", error)
