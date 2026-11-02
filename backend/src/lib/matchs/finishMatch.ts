@@ -6,6 +6,7 @@ import type { PairMatchIndex } from "./eloLib.ts";
 import { filterMatchForUser } from "./matchUtils.ts";
 import { applyEloToMatch, computeMatchElo, isRankedmatch } from "./eloMatchAdapater.ts";
 import { clearMatchDisconnectTimers } from "./disconnectTimers.ts";
+import { checkAchievements } from "../achievements.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
@@ -119,6 +120,11 @@ export async function finishMatch(match: Matchs, io: IO) {
 		}
 
 		await saveMatch(match, ranked, deltas)
+
+		for (const player of match.players) {
+			if (player.userId && !player.isBot)
+				await checkAchievements(player.userId)
+		}
 	} finally {
 		emitFinalState(match, io)
 

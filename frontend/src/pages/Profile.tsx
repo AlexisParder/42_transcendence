@@ -2,7 +2,7 @@ import { TbPointFilled } from "react-icons/tb";
 import { Avatar } from "../components/Avatar";
 import { Sidebar } from "../components/Sidebar";
 import { getTranslationLanguage, t } from "../lib/translate";
-import { FaRegCircle } from "react-icons/fa6";
+import { FaRegCircle, FaCircleCheck } from "react-icons/fa6";
 import { authClient } from "../lib/auth-client";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { truncateText } from "../lib/truncateText";
@@ -14,6 +14,13 @@ import { apiPost } from "../lib/api";
 import { ordinal } from "../lib/ordinal";
 
 type categoryType = "matches" | "achievements"
+type Achievement = {
+	id: string
+	difficulty: "easy" | "medium" | "hard"
+	unlocked: boolean
+	unlockedAt: string | null
+}
+
 export function Profile() {
 	const { data: session, isPending } = authClient.useSession()
 	const [rank, setRank] = useState<Rank>()
@@ -21,6 +28,7 @@ export function Profile() {
 	const [matches, setMatches] = useState<Match[]>([])
 	const [stats, setStats] = useState<Stat>()
 	const [category, setCategory] = useState<categoryType>('matches')
+	const [achievements, setAchievements] = useState<Achievement[]>([])
 	const [hasMore, setHasMore] = useState(true)
 	const loadingMoreRef = useRef(false)
 	const scrollRef = useRef<HTMLDivElement>(null)
@@ -67,8 +75,23 @@ export function Profile() {
 			}
 		}
 
+		async function loadAchievements() {
+			try {
+				const { ok, data } = await apiPost("/api/get-user-achievements", { targetId })
+
+				if (!ok || cancelled)
+					return
+
+				setAchievements(data.achievements)
+			} catch (error) {
+				if (!cancelled)
+					console.error("load achievements:", error)
+			}
+		}
+
 		loadUserInfo()
 		loadFirstUserStats()
+		loadAchievements()
 
 		return () => {
 			cancelled = true
@@ -123,6 +146,12 @@ export function Profile() {
 		}
 	}, [loadMore, matches.length, category])
 
+	let unlockedCount = 0
+	for (const a of achievements) {
+		if (a.unlocked)
+			unlockedCount++
+	}
+
 	useDocumentTitle(targetInfo?.isMine === true ? t("profile_title") : t("profile_of_title", { username: targetInfo?.username ?? "?" }))
 
 	return <Sidebar>
@@ -156,11 +185,10 @@ export function Profile() {
 					<p className="font-bold text-2xl font-mono">{stats?.shotAccuracy} %</p>
 					<p className="text-xs text-neutral-content/50">{t("profile_txt_shot_accuracy")}</p>
 				</div>
-				{/* TODO: Remplacer par le nombre d'achievement debloqués */}
-				{/* <div className="flex-1/4 p-4 border-l border-base-300">
-					<p className="font-bold text-2xl text-warning font-mono">{stats?.tournamentsWon}</p>
-					<p className="text-xs text-neutral-content/50">{t("profile_txt_tournaments_won")}</p>
-				</div> */}
+				<div className="flex-1/4 p-4 border-l border-base-300">
+					<p className="font-bold text-2xl text-warning font-mono">{unlockedCount} / {achievements.length}</p>
+					<p className="text-xs text-neutral-content/50">{t("profile_txt_achievements")}</p>
+				</div>
 			</div>
 
 			<div className="shrink-0 join lg:hidden pt-4 px-4">
@@ -187,41 +215,9 @@ export function Profile() {
 				<div className={`flex-1 min-h-0 flex flex-col lg:flex-none lg:w-1/3 lg:border-l border-base-300 pt-2 px-4 pb-4 ${category !== "achievements" ? "max-lg:hidden" : ""}`}>
 					<p className="shrink-0 text-xs uppercase py-2 text-neutral-content/50 max-lg:hidden">{t("profile_achievements_title")}</p>
 					<div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 pr-1">
-						<AchievementsItem title={t("profile_ach_no_scratch")} desc={t("profile_ach_no_scratch_desc")} difficulty="hard" />
-						<AchievementsItem title={t("profile_ach_sharp_ear")} desc={t("profile_ach_sharp_ear_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_duo")} desc={t("profile_ach_duo_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_no_scratch")} desc={t("profile_ach_no_scratch_desc")} difficulty="hard" />
-						<AchievementsItem title={t("profile_ach_sharp_ear")} desc={t("profile_ach_sharp_ear_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_duo")} desc={t("profile_ach_duo_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_no_scratch")} desc={t("profile_ach_no_scratch_desc")} difficulty="hard" />
-						<AchievementsItem title={t("profile_ach_sharp_ear")} desc={t("profile_ach_sharp_ear_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_duo")} desc={t("profile_ach_duo_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_no_scratch")} desc={t("profile_ach_no_scratch_desc")} difficulty="hard" />
-						<AchievementsItem title={t("profile_ach_sharp_ear")} desc={t("profile_ach_sharp_ear_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_duo")} desc={t("profile_ach_duo_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_no_scratch")} desc={t("profile_ach_no_scratch_desc")} difficulty="hard" />
-						<AchievementsItem title={t("profile_ach_sharp_ear")} desc={t("profile_ach_sharp_ear_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_duo")} desc={t("profile_ach_duo_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_no_scratch")} desc={t("profile_ach_no_scratch_desc")} difficulty="hard" />
-						<AchievementsItem title={t("profile_ach_sharp_ear")} desc={t("profile_ach_sharp_ear_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_duo")} desc={t("profile_ach_duo_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_no_scratch")} desc={t("profile_ach_no_scratch_desc")} difficulty="hard" />
-						<AchievementsItem title={t("profile_ach_sharp_ear")} desc={t("profile_ach_sharp_ear_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
-						<AchievementsItem title={t("profile_ach_duo")} desc={t("profile_ach_duo_desc")} difficulty="medium" />
-						<AchievementsItem title={t("profile_ach_admiral")} desc={t("profile_ach_admiral_desc")} difficulty="easy" />
+						{achievements.map(a => (
+							<AchievementsItem key={a.id} title={t(`ach_${a.id}`)} desc={t(`ach_${a.id}_desc`)} difficulty={a.difficulty} unlocked={a.unlocked} />
+						))}
 					</div>
 				</div>
 			</div>
@@ -274,10 +270,11 @@ function MatchesItem({ result, otherPlayer, otherDeleted, placement, type, match
 	</div>
 }
 
-function AchievementsItem({ title, desc, difficulty }: {
+function AchievementsItem({ title, desc, difficulty, unlocked }: {
 	title: string,
 	desc: string,
 	difficulty: "easy" | "medium" | "hard",
+	unlocked: boolean,
 }) {
 	let colorTxt = "text-neutral-content/50"
 	let colorBd = "border-neutral"
@@ -291,8 +288,8 @@ function AchievementsItem({ title, desc, difficulty }: {
 		colorBd = "border-warning/50"
 	}
 
-	return <div className={`flex items-center gap-2 p-2.5 rounded-xl border ${colorBd}`}>
-		<FaRegCircle className={`${colorTxt} size-6`} />
+	return <div className={`flex items-center gap-2 p-2.5 rounded-xl border ${colorBd} ${unlocked ? "" : "opacity-40"}`}>
+		{unlocked ? <FaCircleCheck className={`${colorTxt} size-6`} /> : <FaRegCircle className={`${colorTxt} size-6`} />}
 		<div>
 			<p className={`text-sm first-letter:uppercase`}>{title}</p>
 			<p className="text-xs text-neutral-content/50 first-letter:uppercase">{desc}</p>

@@ -44,6 +44,7 @@ model User {
   notifications           Notification[]           @relation("ReceivedNotifications")
   sentNotifications       Notification[]           @relation("SentNotifications")
   notificationPreferences NotificationPreferences?
+  achievements            UserAchievement[]
 
   @@unique([username])
   @@map("user")
@@ -226,6 +227,17 @@ model Notification {
 
   @@index([userId])
   @@map("notifications")
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
 }
 
 enum MatchType {

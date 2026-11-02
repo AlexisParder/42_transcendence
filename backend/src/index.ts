@@ -20,6 +20,7 @@ import { unblockUserHandler } from "./routes/friends/unblockUser.route.ts"
 import { getBlockedHandler } from "./routes/friends/getBlocked.route.ts"
 import { getUserStatsHandler } from "./routes/getUserStats.route.ts"
 import { getUserInfoHandler } from "./routes/getUserInfo.route.ts"
+import { getUserAchievementsHandler } from "./routes/getUserAchievements.route.ts"
 import { getSentHandler, setSentHandler } from "./routes/otpCooldown.route.ts"
 import { getNotificationsHandler } from "./routes/getNotifications.route.ts"
 import { setNotificationReadHandler } from "./routes/setNotificationRead.route.ts"
@@ -103,6 +104,7 @@ app.post("/api/get-blocked", getBlockedHandler)
 app.post("/api/get-user-info", getUserInfoHandler)
 app.post("/api/get-user-points", getUserPointsHandler)
 app.post("/api/get-user-stats", getUserStatsHandler)
+app.post("/api/get-user-achievements", getUserAchievementsHandler)
 app.post("/api/otp/cooldown", getSentHandler)
 app.post("/api/otp/send", otpLimit, setSentHandler)
 app.post("/api/get-leaderboard-infos", leaderboardLimit, getLeaderboardInfosHandler)

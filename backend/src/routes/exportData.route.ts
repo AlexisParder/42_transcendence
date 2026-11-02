@@ -187,6 +187,13 @@ export async function exportDataHandler(req: Request, res: Response) {
 
 		data.game = { points, rank: rankLabel, stats, matches: matchList }
 
+		const achievements = await prisma.userAchievement.findMany({
+			where: { userId },
+			orderBy: { unlockedAt: "asc" },
+			select: { achievementId: true, unlockedAt: true }
+		})
+		data.achievements = achievements
+
 		notifySecurity(userId, "data_exported")
 
 		res.attachment(`sonar-export-${user.username ?? user.id}-${exportedAt.slice(0, 10)}.json`)
