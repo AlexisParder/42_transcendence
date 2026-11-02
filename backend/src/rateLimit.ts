@@ -10,6 +10,7 @@ function createLimit(windowMs: number, limit: number) {
 	})
 }
 
+export const apiLimit = createLimit(60000, 300)
 export const leaderboardLimit = createLimit(60000, 30)
 export const otpLimit = createLimit(60000, 5)
 export const checkPwdLimit = createLimit(60000, 5)

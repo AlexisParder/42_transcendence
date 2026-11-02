@@ -16,7 +16,7 @@ export async function blockUserHandler(req: Request, res: Response) {
 		const userId = session.user.id
 		const { targetId } = req.body
 
-		if (!targetId)
+		if (typeof targetId !== "string" || !targetId)
 			return res.status(400).json({ ok: false, error: 'friend_block_err_invalid' })
 		if (targetId === userId)
 			return res.status(400).json({ ok: false, error: 'friend_block_err_self' })

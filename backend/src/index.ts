@@ -28,7 +28,7 @@ import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
 import { createNotificationHandler } from "./routes/createNotification.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
-import { checkPwdLimit, friendRequestLimit, joinCodeLimit, leaderboardLimit, otpLimit } from "./rateLimit.ts"
+import { apiLimit, checkPwdLimit, friendRequestLimit, joinCodeLimit, leaderboardLimit, otpLimit } from "./rateLimit.ts"
 import { getNotificationPreferencesHandler, setNotificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
 import { notify } from "./lib/notify.ts"
 import { allowedOrigins, app, io, server } from "./server.ts"
@@ -71,6 +71,7 @@ app.use(cors({
 app.all("/api/auth/*splat", toNodeHandler(auth))
 
 app.use(express.json())
+app.use("/api", apiLimit)
 
 app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
