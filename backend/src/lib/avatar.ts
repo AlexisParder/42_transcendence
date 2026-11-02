@@ -43,7 +43,7 @@ export async function importAvatar(url: string | null | undefined): Promise<stri
 		return null
 
 	try {
-		const { protocol, hostname } = new URL(url)
+		const { protocol } = new URL(url)
 		if (protocol !== "https:")
 			return null
 

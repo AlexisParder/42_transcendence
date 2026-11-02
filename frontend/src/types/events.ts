@@ -1,7 +1,6 @@
 export interface ClientToServerEvents {
 	send_message: (payload: { toUserId: string, message: string }) => void
 	set_active_conversation: (peerId: string | null) => void
-	send_friend_request: (payload: { toUserId: string }) => void
 	set_activity: (payload: { status: PresenceStatus }) => void
 	set_typing: (payload: { toUserId: string, typing: boolean }) => void
 }
@@ -34,11 +33,6 @@ export interface NotificationEvent {
 }
 
 export type PresenceStatus = "available" | "in a match" | "away" | "offline"
-
-export interface SocketData {
-	userId: string
-	activeConversationPeerId?: string | null
-}
 
 export interface Message {
 	id: string,

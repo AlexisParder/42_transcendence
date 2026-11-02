@@ -34,7 +34,7 @@ export function Match() {
 	const [turnEndsAt, setTurnEndsAt] = useState(0)
 	const [remaining, setRemaining] = useState(0)
 	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
-	const [errors, setErrors] = useState<{ action?: string, forfeit?: string }>({})
+	const [errors, setErrors] = useState<{ action?: string, forfeit?: string, messages?: string }>({})
 	const [isLoading, setIsLoading] = useState(true)
 	const [hasUnreadMessage, setHasUnreadMessage] = useState(false)
 	const [sendInput, setSendInput] = useState("")
@@ -204,8 +204,7 @@ export function Match() {
 			return
 
 		if (message.length > 1000)
-			return
-		// return setErrors({ messages: t("friend_err_msg_to_long") })
+			return setErrors({ messages: t("friend_err_msg_to_long") })
 
 		try {
 			setErrors({})
@@ -215,7 +214,7 @@ export function Match() {
 			})
 
 			if (!ok)
-				return setErrors({ action: data.code })
+				return setErrors({ messages: t(data.code ?? "match_err_invalid_input") })
 
 			setSendInput("")
 		} catch (error) {
@@ -257,8 +256,8 @@ export function Match() {
 			<MatchHeader type={joinedMatch.type} title={joinedMatch.isRanked ? t("txt_ranked") : t("txt_unranked")} description={t("match_your_turn")} remaining={remaining} isMyTurn={joinedMatch.turns.userTurn === session?.user.id} openForfeitModal={() => ShowModal("forfeitModal")} myId={session?.user.id} match={joinedMatch} handleSpecLeave={handleSpecLeave} />
 			<div className="flex flex-1 min-h-0 min-w-0">
 				<GameStats match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} />
-				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} />
-				<GameInfos match={joinedMatch} myId={session?.user.id} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} />
+				<Game match={joinedMatch} myId={session?.user.id} selectedTarget={selectedTarget} setSelectedTarget={setSelectedTarget} waterView={waterView} setWaterView={setWaterView} targetLocked={targetLocked} setTargetLocked={setTargetLocked} handleFire={handleFire} errorMsg={errors.action ?? ""} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} chatError={errors.messages} />
+				<GameInfos match={joinedMatch} myId={session?.user.id} hasUnreadMessage={hasUnreadMessage} gameInfosView={gameInfosView} setGameInfosView={setGameInfosView} setHasUnreadMessage={setHasUnreadMessage} sendInput={sendInput} setSendInput={setSendInput} handleSend={handleSend} chatError={errors.messages} />
 			</div>
 		</>}
 

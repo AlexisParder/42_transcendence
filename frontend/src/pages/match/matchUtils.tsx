@@ -171,7 +171,7 @@ function getRowName(coords: vect2) {
 	return `${rowName[coords.y]}${coords.x + 1}`
 }
 
-export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire, errorMsg, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage, sendInput, setSendInput, handleSend }: {
+export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView, setWaterView, targetLocked, setTargetLocked, handleFire, errorMsg, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage, sendInput, setSendInput, handleSend, chatError }: {
 	match: Matchs,
 	myId: string | null | undefined,
 	selectedTarget: number,
@@ -188,7 +188,8 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	setHasUnreadMessage: (hasUnread: boolean) => void,
 	sendInput: string,
 	setSendInput: (msg: string) => void,
-	handleSend: () => void
+	handleSend: () => void,
+	chatError?: string
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
 	const view = isDesktop ? "attack" : waterView
@@ -319,7 +320,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 
 			{gameInfosView === "chat" && <div className="flex flex-1 items-center justify-between gap-2">
 				<div className="w-full">
-					<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+					<Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={chatError} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
 						if (e.key === "Enter")
 							handleSend()
 					}} useLabel={false} />
@@ -357,7 +358,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	</div>
 }
 
-export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage, sendInput, setSendInput, handleSend }: {
+export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGameInfosView, setHasUnreadMessage, sendInput, setSendInput, handleSend, chatError }: {
 	match: Matchs,
 	myId: string | null | undefined,
 	hasUnreadMessage: boolean
@@ -366,7 +367,8 @@ export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGam
 	setHasUnreadMessage: (hasUnread: boolean) => void,
 	sendInput: string,
 	setSendInput: (msg: string) => void,
-	handleSend: () => void
+	handleSend: () => void,
+	chatError?: string
 }) {
 	const myTeam = match.players.find(p => p.userId === myId)?.team
 	const myTeamData = match.teams.find(t => t.id === myTeam)
@@ -412,7 +414,7 @@ export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGam
 
 		{gameInfosView === "chat" && <div className="flex items-center justify-between bg-base-200 gap-2">
 			<div className="w-full">
-				<Input type="text" name="message" label={t("txt_message")} value={sendInput} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
+				<Input type="text" name="message" label={t("txt_message")} value={sendInput} errorMsg={chatError} onChange={(e) => setSendInput(e.target.value)} onKeyDown={(e) => {
 					if (e.key === "Enter")
 						handleSend()
 				}} useLabel={false} />

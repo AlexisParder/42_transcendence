@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
-import type { MatchPlayers, Matchs } from "../../events.ts";
+import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { io } from "../../server.ts";
 

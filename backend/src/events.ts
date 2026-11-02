@@ -1,7 +1,6 @@
 export interface ClientToServerEvents {
 	send_message: (payload: { toUserId: string, message: string }) => void
 	set_active_conversation: (peerId: string | null) => void
-	send_friend_request: (payload: { toUserId: string }) => void
 	set_activity: (payload: { status: PresenceStatus }) => void
 	set_typing: (payload: { toUserId: string, typing: boolean }) => void
 }
@@ -87,18 +86,6 @@ export interface ConversationSummary {
 
 export type matchType = "ONE_V_ONE" | "TWO_V_TWO" | "FFA" | "BOT"
 
-export interface Match {
-	id: string,
-	result: 'win' | 'loss',
-	otherPlayer: string | null,
-	otherDeleted: boolean,
-	placement: number | null,
-	matchType: matchType,
-	matchTime: string,
-	ranked: boolean,
-	points: number | 'unranked',
-}
-
 export interface Stat {
 	total: number,
 	winRate: number,
@@ -133,14 +120,6 @@ export interface LeaderboardInfo {
 	win: number,
 	lose: number,
 	accuracy: number
-}
-
-export interface Rules {
-	format: string,
-	timeTurn: number,
-	replace: boolean,
-	spectators: boolean,
-	ranked: boolean
 }
 
 export interface Matchs {
