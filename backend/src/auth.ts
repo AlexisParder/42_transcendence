@@ -117,11 +117,11 @@ export const auth = betterAuth({
 			expiresIn: 600,
 			sendVerificationOTP: async ({ email, otp }, ctx) => {
 				const language = await getUserLanguage({ email }) ?? resolveLanguage(ctx?.headers?.get("accept-language"))
-				void sendMail({
+				sendMail({
 					to: email,
 					subject: t(language, "mail_otp_subject"),
 					html: t(language, "mail_otp_body", { otp }),
-				})
+				}).catch(error => console.error("otp mail error:", error))
 			},
 		})
 	],

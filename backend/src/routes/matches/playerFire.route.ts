@@ -45,7 +45,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 		if (player.team === targetTeamId)
 			return res.status(400).json({ ok: false, code: "match_err_own_team" })
 
-		if (match.startedAt === 0)
+		if (match.startedAt === 0 || match.step !== "game")
 			return res.status(403).json({ ok: false, code: "match_err_not_started" })
 
 		if (match.turns.userTurn !== userId)
