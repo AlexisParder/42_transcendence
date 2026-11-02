@@ -1,3 +1,5 @@
+import { isMatchWon } from "./matchUtils.ts"
+
 type Type = "ONE_V_ONE" | "TWO_V_TWO" | "FFA"
 
 export function formatMatch(row: any, userId: string) {
@@ -19,7 +21,7 @@ export function formatMatch(row: any, userId: string) {
 	const otherPlayer: string | null = other && !other.isBot ? (other.user?.username ?? null) : null
 	const otherDeleted = !!other && !other.isBot && !other.user
 
-	const result: 'win' | 'loss' = match.isRanked ? (me.points >= 0 ? 'win' : 'loss') : (me.placement === 1 ? 'win' : 'loss')
+	const result: 'win' | 'loss' = isMatchWon(me.status, me.placement) ? 'win' : 'loss'
 
 	return {
 		id: match.id,

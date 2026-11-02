@@ -4,6 +4,7 @@ import { auth } from "../auth.ts"
 import { prisma } from "../db/client.ts"
 import { t } from "../lib/translate.ts"
 import { notifySecurity } from "../lib/notify.ts"
+import { isMatchWon } from "../lib/matchs/matchUtils.ts"
 
 export async function exportDataHandler(req: Request, res: Response) {
 	try {
@@ -130,9 +131,7 @@ export async function exportDataHandler(req: Request, res: Response) {
 
 			if (m.status === "LEFT")
 				left++
-			else if (m.matchs.isRanked && m.points >= 0)
-				wins++
-			else if (!m.matchs.isRanked && m.placement === 1)
+			else if (isMatchWon(m.status, m.placement))
 				wins++
 		}
 

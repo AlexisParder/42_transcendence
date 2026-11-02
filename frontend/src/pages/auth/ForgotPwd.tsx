@@ -53,7 +53,7 @@ export function ForgotPwd() {
 		setCode("")
 
 		try {
-			const { ok, data } = await apiPost(`/api/otp/send`, { email })
+			const { ok, data } = await apiPost(`/api/otp/send`, { email, type: "forget-password" })
 
 			if (!ok) {
 				if (data.error == "cooldown")
@@ -65,6 +65,8 @@ export function ForgotPwd() {
 			setSentAt(Date.now())
 		} catch {
 			setErrors({ code: t("verified_err_resend_email") })
+		} finally {
+			setSending(false)
 		}
 	}
 

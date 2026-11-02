@@ -42,6 +42,7 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 					team: true,
 					placement: true,
 					points: true,
+					status: true,
 					leftAt: true,
 					matchs: {
 						select: {
@@ -72,10 +73,8 @@ export async function getUserStatsHandler(req: Request, res: Response) {
 			prisma.matchPlayers.count({
 				where: {
 					userId,
-					OR: [
-						{ matchs: { isRanked: true }, points: { gte: 0 } },
-						{ matchs: { isRanked: false }, placement: 1 }
-					]
+					placement: 1,
+					status: { not: "LEFT" }
 				}
 			}),
 			prisma.matchPlayers.aggregate({

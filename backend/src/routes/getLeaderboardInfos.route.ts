@@ -72,10 +72,8 @@ export async function getLeaderboardInfosHandler(req: Request, res: Response) {
 				by: ['userId'],
 				where: {
 					userId: { in: pageIds },
-					OR: [
-						{ matchs: { isRanked: true }, points: { gt: 0 } },
-						{ matchs: { isRanked: false }, placement: 1 }
-					]
+					placement: 1,
+					status: { not: "LEFT" }
 				},
 				_count: { _all: true }
 			})

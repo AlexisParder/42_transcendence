@@ -191,6 +191,7 @@ export interface MatchPlayers {
 	matchPoints: number,
 	leftAt: number,
 	status: "PLAYED" | "LEFT"
+	hasQuit?: boolean,
 	shotsHit: number,
 	shotsTotal: number
 }

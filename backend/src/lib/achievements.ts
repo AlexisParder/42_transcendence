@@ -1,5 +1,6 @@
 import { prisma } from "../db/client.ts"
 import { notify } from "./notify.ts"
+import { isMatchWon } from "./matchs/matchUtils.ts"
 
 type PlayerStats = {
 	matchesPlayed: number
@@ -54,13 +55,7 @@ async function getPlayerStats(userId: string) {
 	for (let i = 0; i < matches.length; i++) {
 		const m = matches[i]
 
-		let won = false
-		if (m.status === "LEFT")
-			won = false
-		else if (m.matchs.isRanked)
-			won = m.points >= 0
-		else
-			won = m.placement === 1
+		const won = isMatchWon(m.status, m.placement)
 
 		if (won) {
 			stats.wins++

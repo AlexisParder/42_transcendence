@@ -11,7 +11,7 @@ export function EndDisplay({ match }: {
 	const { data: session } = authClient.useSession()
 	const player = match.players.find(p => p.userId === session?.user.id)
 	const playerTeamData = match.teams.find(t => t.id === player?.team)
-	const isWin = (player?.matchPoints ?? 0) >= 0
+	const isWin = player?.status !== "LEFT" && player?.placement === 1
 
 	const sunkShip = [
 		...new Map(

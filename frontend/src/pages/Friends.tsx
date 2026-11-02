@@ -35,6 +35,7 @@ export function Friends() {
 	const [hasMore, setHasMore] = useState(true)
 	const prevScrollHeightRef = useRef<number | null>(null)
 	const loadingMoreRef = useRef(false)
+	const peerIdRef = useRef<string | null>(null)
 	const [search, setSearch] = useState("")
 	const [, setTick] = useState(0)
 	const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -239,6 +240,7 @@ export function Friends() {
 	}, [peerId])
 
 	useEffect(() => {
+		peerIdRef.current = peerId
 		if (!peerId)
 			return
 
@@ -269,7 +271,7 @@ export function Friends() {
 			const oldest = messages[0]
 			const { ok, data } = await apiPost("/api/get-conv-history", { peerId, before: oldest.createdAt })
 
-			if (!ok)
+			if (!ok || peerIdRef.current !== peerId)
 				return
 
 			const older: Message[] = data.messages ?? []
@@ -454,16 +456,21 @@ export function Friends() {
 			return
 		}
 
-		const { ok, data } = await apiPost("/api/send-friend-request", { username })
+		try {
+			const { ok, data } = await apiPost("/api/send-friend-request", { username })
 
-		if (!ok) {
-			setErrors({ username: t(data.error) })
-			return
+			if (!ok) {
+				setErrors({ username: t(data.error ?? "txt_err_auth") })
+				return
+			}
+
+			HideModal("SendFriendRequestModal")
+			setErrors({})
+			formElem.reset()
+		} catch (error) {
+			console.error("send friend request:", error)
+			setErrors({ username: t("txt_err_auth") })
 		}
-
-		HideModal("SendFriendRequestModal")
-		setErrors({})
-		formElem.reset()
 	}
 
 	async function handleAccept(requestId: string) {
@@ -471,7 +478,7 @@ export function Friends() {
 			const { ok, data } = await apiPost("/api/accept-friend-request", { requestId })
 
 			if (!ok) {
-				setErrors({ username: t(data.error) })
+				setErrors({ username: t(data.error ?? "txt_err_auth") })
 				return
 			}
 
@@ -487,7 +494,7 @@ export function Friends() {
 			const { ok, data } = await apiPost("/api/decline-friend-request", { requestId })
 
 			if (!ok) {
-				setErrors({ username: t(data.error) })
+				setErrors({ username: t(data.error ?? "txt_err_auth") })
 				return
 			}
 			setRequests(prev => prev.filter(r => r.id !== requestId))
@@ -497,7 +504,12 @@ export function Friends() {
 	}
 
 	function selectPeer(id: string) {
+		if (id === peerId)
+			return
+
 		setPeerTyping(false)
+		setMessages([])
+		prevScrollHeightRef.current = null
 		setPeerId(id)
 	}
 
@@ -516,7 +528,7 @@ export function Friends() {
 			const { ok, data } = await apiPost("/api/block-user", { targetId })
 
 			if (!ok) {
-				setErrors({ block: t(data.error) })
+				setErrors({ block: t(data.error ?? "txt_err_auth") })
 				return
 			}
 
@@ -538,7 +550,7 @@ export function Friends() {
 			const { ok, data } = await apiPost("/api/unblock-user", { targetId })
 
 			if (!ok) {
-				setErrors({ block: t(data.error) })
+				setErrors({ block: t(data.error ?? "txt_err_auth") })
 				return
 			}
 			setBlocked(prev => prev.filter(b => b.id !== targetId))

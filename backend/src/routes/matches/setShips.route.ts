@@ -2,7 +2,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
-import { filterMatchForUser, updatePlayer } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, findActiveMatchOf, updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { endDeploy } from "../../lib/matchs/turnTimer.ts";
 import { SHIP_COUNT, validateShips } from "../../lib/matchs/shipValidation.ts";
 import { io } from "../../server.ts";
@@ -19,16 +19,7 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
-		const matches = Array.from(currentMatches.values())
-
-		let match = null
-
-		for (const m of matches) {
-			if (m.players.some(p => p.userId === session.user.id)) {
-				match = m
-				break
-			}
-		}
+		const match = findActiveMatchOf(currentMatches, session.user.id)
 
 		if (!match)
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
@@ -69,16 +60,7 @@ export async function setPlayerReadyOnSelectHandler(req: Request, res: Response)
 			return res.status(401).json({ ok: false })
 
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
-		const matches = Array.from(currentMatches.values())
-
-		let match = null
-
-		for (const m of matches) {
-			if (m.players.some(p => p.userId === session.user.id)) {
-				match = m
-				break
-			}
-		}
+		const match = findActiveMatchOf(currentMatches, session.user.id)
 
 		if (!match)
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })

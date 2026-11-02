@@ -85,6 +85,8 @@ export function Verified() {
 			setSentAt(Date.now())
 		} catch {
 			setErrors({ code: t("verified_err_resend_email") })
+		} finally {
+			setSending(false)
 		}
 	}
 

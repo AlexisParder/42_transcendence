@@ -19,7 +19,7 @@ export async function getJoinedMatchHandler(req: Request, res: Response) {
 
 		let joinedMath = null
 		for (const match of matches) {
-			if (match.players.some(p => p.userId === session.user.id && p.status !== "LEFT") || match.spectators.some(p => p === session.user.id)) {
+			if (match.players.some(p => p.userId === session.user.id && p.status !== "LEFT" && !p.hasQuit) || match.spectators.some(p => p === session.user.id)) {
 				joinedMath = match
 				break
 			}

@@ -2,7 +2,7 @@ import type { MatchPlayers, Matchs, matchType } from "../../events.ts";
 
 export function isInAnyMatch(currentMatches: Map<string, Matchs>, userId: string): boolean {
 	for (const match of currentMatches.values()) {
-		if (match.players.some(p => p.userId === userId && p.status !== "LEFT"))
+		if (match.players.some(p => p.userId === userId && p.status !== "LEFT" && !p.hasQuit))
 			return true
 	}
 	return false
@@ -113,11 +113,21 @@ export function isTeamEliminated(match: Matchs, teamId: number) {
 }
 
 export function setFinalPlacement(match: Matchs, playerId: string) {
-	const playersPlaced = match.players.filter(p => p.placement > 0).length
+	const player = match.players.find(p => p.userId === playerId)
+	if (!player)
+		return
 
-	updatePlayer(match, playerId, {
-		placement: match.players.length - playersPlaced
-	})
+	let otherAliveTeams = 0
+	for (const team of match.teams) {
+		if (team.id !== player.team && !isTeamEliminated(match, team.id))
+			otherAliveTeams++
+	}
+
+	player.placement = otherAliveTeams + 1
+}
+
+export function isMatchWon(status: string, placement: number | null) {
+	return status !== "LEFT" && placement === 1
 }
 
 export function findActiveMatchOf(currentMatches: Map<string, Matchs>, userId: string) {
@@ -126,7 +136,7 @@ export function findActiveMatchOf(currentMatches: Map<string, Matchs>, userId: s
 			continue
 
 		const player = match.players.find(p => p.userId === userId)
-		if (player && player.status === "PLAYED")
+		if (player && player.status === "PLAYED" && !player.hasQuit)
 			return match
 	}
 	return undefined

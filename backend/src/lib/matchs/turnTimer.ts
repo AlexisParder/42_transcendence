@@ -141,8 +141,10 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 		return
 	}
 
-	if (player.placement > 0)
+	if (player.placement > 0) {
+		player.hasQuit = true
 		return
+	}
 
 	updatePlayer(match, userId, {
 		status: "LEFT",
