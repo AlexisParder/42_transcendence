@@ -28,7 +28,7 @@ import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
 import { createNotificationHandler } from "./routes/createNotification.route.ts"
 import { getLeaderboardInfosHandler } from "./routes//getLeaderboardInfos.route.ts"
-import { leaderboardLimit } from "./rateLimit.ts"
+import { exportLimit, leaderboardLimit } from "./rateLimit.ts"
 import { getNotificationPreferencesHandler, setNotificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
 import { notify } from "./lib/notify.ts"
 import { allowedOrigins, app, io, server } from "./server.ts"
@@ -53,6 +53,7 @@ import { getUserPointsHandler } from "./routes/getUserPoints.route.ts"
 import { joinSpecMatchHandler } from "./routes/matches/joinSpecMatch.route.ts"
 import { leaveSpecMatchHandler } from "./routes/matches/leaveSpecMatch.route.ts"
 import { matchSendMessageHandler } from "./routes/matches/MatchSendMessage.route.ts"
+import { exportDataHandler } from "./routes/exportData.route.ts"
 
 const onlineUsers = new Map<string, number>()
 const activityStatus = new Map<string, PresenceStatus>()
@@ -76,6 +77,7 @@ app.get("/api/get-friends", getFriendsHandler)
 app.get("/api/get-friends-pending", getFriendsPendingHandler)
 app.get("/api/notifications", getNotificationsHandler)
 app.get("/api/notification-preferences", getNotificationPreferencesHandler)
+app.get("/api/export-data", exportLimit, exportDataHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdHandler)

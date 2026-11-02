@@ -12,7 +12,7 @@ import { Avatar } from "../../components/Avatar"
 import { IoWarning } from "react-icons/io5"
 import { setTranslationLanguage, t } from "../../lib/translate"
 import { Enable2FA, RecoveryCodes, ReScan2FA } from "./Security"
-import { apiPost } from "../../lib/api"
+import { apiGet, apiPost } from "../../lib/api"
 import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password"
 import { AVATAR_INPUT_MAX_SIZE, AVATAR_INPUT_MAX_SIZE_MB, AVATAR_MAX_SIZE, AVATAR_MAX_SIZE_MB, AVATAR_TYPES, resizeAvatar } from "../../lib/avatar"
 
@@ -26,6 +26,7 @@ type Errors = {
 	pwdForm?: string
 	picture?: string
 	deleteAccount?: string
+	exportData?: string
 	lang?: string
 	code?: string
 }
@@ -48,6 +49,7 @@ export function SettingsCat() {
 	const [prevUsername, setPrevUsername] = useState(session?.user.username)
 	const [prevLanguage, setPrevLanguage] = useState(session?.user.language)
 	const [code, setCode] = useState("")
+	const [isExporting, setIsExporting] = useState(false)
 
 	if (session?.user.username !== prevUsername) {
 		setPrevUsername(session?.user.username)
@@ -276,6 +278,25 @@ export function SettingsCat() {
 		// ajouter une notif de success
 	}
 
+	async function handleExportData() {
+		setErrors({})
+		setIsExporting(true)
+		const { ok, data } = await apiGet("/api/export-data")
+		setIsExporting(false)
+
+		if (!ok) {
+			setErrors({ exportData: t(data.error ?? "settings_err_export") })
+			return
+		}
+
+		const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }))
+		const link = document.createElement("a")
+		link.href = url
+		link.download = `sonar-export-${session?.user.username ?? "user"}-${new Date().toISOString().slice(0, 10)}.json`
+		link.click()
+		URL.revokeObjectURL(url)
+	}
+
 	const handleDeleteAccount: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
 
@@ -422,7 +443,11 @@ export function SettingsCat() {
 					<p className="text-xs text-neutral-content/60">{t("settings_danger_dl_desc")}.</p>
 				</div>
 				<div>
-					<button className="btn btn-outline border-neutral btn-sm">{t("settings_danger_dl_btn")}</button>
+					<button onClick={handleExportData} disabled={isExporting} className="btn btn-outline border-neutral btn-sm">
+						{isExporting && <span className="loading loading-spinner loading-xs"></span>}
+						{t("settings_danger_dl_btn")}
+					</button>
+					{errors.exportData && <span className="text-error block pt-0.5 pb-2 pl-2 text-xs">{errors.exportData}</span>}
 				</div>
 			</div>
 			<div className="flex border border-error bg-error/10 rounded-md p-4 items-center my-2">
