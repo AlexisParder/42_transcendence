@@ -166,9 +166,7 @@ export interface Matchs {
 }
 
 export interface Turns {
-	timerStart: number,
 	userTurn: string | null,
-	isBotTurn: boolean,
 	turnOrder: string[]
 }
 
@@ -199,8 +197,7 @@ export interface Shot {
 	coords: vect2,
 	status: "miss" | "hit" | "sunk"
 	ship: null | Ship,
-	authorId: string | null,
-	authorTeam: number
+	authorId: string | null
 }
 
 export interface MatchPlayers {
@@ -213,7 +210,6 @@ export interface MatchPlayers {
 	placement: number,
 	points: number,
 	matchPoints: number,
-	leftAt: number,
 	status: "PLAYED" | "LEFT"
 	shotsHit: number,
 	shotsTotal: number

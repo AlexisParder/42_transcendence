@@ -51,9 +51,21 @@ export function generateCode(existing: Map<string, Matchs>): string {
 
 export function filterMatchForUser(match: Matchs, userId: string): Matchs {
 	const team = match.players.find(p => p.userId === userId)?.team
+	const isPlayer = team !== undefined
+	const isSpectator = match.spectators.includes(userId)
+
+	let invitedPlayers: string[] = []
+	if (isPlayer)
+		invitedPlayers = match.invitedPlayers
+
+	let logs = match.logs
+	if (!isPlayer && !isSpectator)
+		logs = []
 
 	return {
 		...match,
+		invitedPlayers,
+		logs,
 		teams: match.teams.map(t =>
 			t.id === team ? t : { ...t, ships: [], chat: [] }
 		)
