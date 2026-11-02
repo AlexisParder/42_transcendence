@@ -24,7 +24,7 @@ export function EndDisplay({ match }: {
 	return <div className="flex items-center justify-center flex-1">
 		<div className="flex flex-col items-center gap-3 bg-base-200 p-4 rounded-lg border border-neutral max-md:min-w-75 min-w-150">
 			<p className={`uppercase text-xs font-medium font-mono tracking-[0.24em] ${isWin ? "text-info" : "text-error"}`}>{t("end_match_over")}</p>
-			<h2 className="font-bold text-5xl max-md:text-4xl first-letter:uppercase">{isWin ? t("end_enemy_fleet_sunk") : t("end_fleet_lost")}</h2>
+			<h2 className="font-bold text-5xl max-md:text-4xl first-letter:uppercase text-center">{isWin ? t("end_enemy_fleet_sunk") : t("end_fleet_lost")}</h2>
 			<p className="first-letter:uppercase text-neutral-content/50 text-sm font-medium font-mono tracking-[0.06em]">{t("end_match_time", { time: formatMS((match.endedAt - match.startedAt) / 1000) })}</p>
 
 			{match.isRanked && <div className={`flex items-center gap-2 py-2 px-4 border rounded-lg ${isWin ? "bg-info/10 border-info/50" : "bg-error/10 border-error/50"}`}>
