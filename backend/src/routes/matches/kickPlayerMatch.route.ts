@@ -40,6 +40,9 @@ export async function kickPlayerMatchHandler(req: Request, res: Response) {
 		if (userId === targetId)
 			return res.json({ ok: false, code: "match_err_kick_self" })
 
+		if (match.players.some(p => p.userId === targetId && p.isBot))
+			return res.status(400).json({ ok: false, code: "match_err_kick_failure" })
+
 		match.players = match.players.filter(p => p.userId !== targetId)
 
 		for (const player of match.players) {

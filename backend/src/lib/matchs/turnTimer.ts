@@ -6,6 +6,7 @@ import { fillRandomShips } from "./shipValidation.ts";
 import { finishMatch } from "./finishMatch.ts";
 import { cancelDisconnectTimer, clearMatchDisconnectTimers } from "./disconnectTimers.ts";
 import { addLog } from "./logMatch.ts";
+import { clearBotTurn, scheduleBotTurn } from "./bot/botTurn.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 const timers = new Map<string, NodeJS.Timeout>()
@@ -43,6 +44,9 @@ export function startTurnTimer(match: Matchs, io: IO) {
 		}
 	}, ((match.step === "deploy" ? 30 : match.settings.time_turn) * 1000)))
 	emitTurn(match, io)
+
+	if (match.step === "game" && match.turns.isBotTurn)
+		scheduleBotTurn(match, io)
 }
 
 export function endDeploy(match: Matchs, io: IO) {
@@ -97,8 +101,8 @@ export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 		}
 
 		match.turns.userTurn = next
-		match.turns.isBotTurn = match.players.find(p => p.userId === next)?.isBot ?? false
 	}
+	match.turns.isBotTurn = match.players.find(p => p.userId === match.turns.userTurn)?.isBot ?? false
 	match.turns.timerStart = Date.now()
 
 	startTurnTimer(match, io)
@@ -106,6 +110,7 @@ export function nextTurn(match: Matchs, io: IO, changePlayer: boolean) {
 
 export function stopTurns(match: Matchs) {
 	clearTimeout(timers.get(match.hostId))
+	clearBotTurn(match.hostId)
 	match.endedAt = Date.now()
 	timers.delete(match.hostId)
 }

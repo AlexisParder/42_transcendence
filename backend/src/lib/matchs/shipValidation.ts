@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto"
 import type { Ship, ShipName, vect2 } from "../../events.ts"
 
-const GRID_SIZE = 14
+export const GRID_SIZE = 14
 
 const SHIP_SIZES: Record<ShipName, number> = {
 	carrier: 5,

@@ -62,7 +62,7 @@ async function saveMatch(match: Matchs, ranked: boolean, deltas: Map<string, num
 			endedAt: new Date(match.endedAt),
 			players: {
 				create: match.players.map(p => ({
-					userId: p.userId,
+					userId: p.isBot ? null : p.userId,
 					isBot: p.isBot,
 					team: p.team,
 					placement: p.placement,

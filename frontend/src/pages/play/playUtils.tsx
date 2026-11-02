@@ -71,7 +71,7 @@ export function WaitingRoom({ isHost, myId, joinedMatch, friends, presence, Matc
 				<p className="lg:hidden uppercase text-xs text-neutral-content/50 font-mono">{t("play_players")}</p>
 				<div className="flex flex-col gap-2 lg:grid lg:grid-cols-4 lg:gap-3">
 					{joinedMatch.players.map(p => (
-						<PlayerItem key={p.userId} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.userId === myId} isHost={p.userId === joinedMatch.hostId} canKick={isHost && p.userId !== joinedMatch.hostId} team={p.team} isDuo={joinedMatch.type === "TWO_V_TWO"} handleKick={handleKick} userId={p.userId ?? ""} />
+						<PlayerItem key={p.userId} username={p.username} image={p.image} points={p.points} isReady={p.isReady} isMine={p.userId === myId} isHost={p.userId === joinedMatch.hostId} canKick={isHost && p.userId !== joinedMatch.hostId && !p.isBot} team={p.team} isDuo={joinedMatch.type === "TWO_V_TWO"} handleKick={handleKick} userId={p.userId ?? ""} />
 					))}
 					{Array.from({ length: missing }).map((_, i) => <WaitingPlayerItem key={`empty_${i}`} />)}
 				</div>

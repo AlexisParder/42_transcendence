@@ -5,6 +5,7 @@ import type { Matchs, PresenceStatus } from "../../events.ts";
 import { filterMatchForUser, generateCode, isInAnyMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
+import { createBotPlayer } from "../../lib/matchs/bot/botPlayer.ts";
 
 export async function createMatchHandler(req: Request, res: Response) {
 	const { selectedMatchType, visibility, timeTurn, replace, spectators } = req.body ?? {}
@@ -94,6 +95,9 @@ export async function createMatchHandler(req: Request, res: Response) {
 			logs: [],
 			spectators: [],
 		}
+
+		if (selectedMatchType === "BOT")
+			newMatch.players.push(createBotPlayer(userId, 2))
 
 		currentMatches.set(userId, newMatch)
 		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>

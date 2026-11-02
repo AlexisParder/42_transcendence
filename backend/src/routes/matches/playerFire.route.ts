@@ -2,23 +2,13 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
-import type { Log, Matchs, Ship, Shot, vect2 } from "../../events.ts";
-import { isExpired, isTeamEliminated, setFinalPlacement } from "../../lib/matchs/matchUtils.ts";
-import { nextTurn } from "../../lib/matchs/turnTimer.ts";
-import { addLog } from "../../lib/matchs/logMatch.ts";
+import type { Matchs, vect2 } from "../../events.ts";
+import { isExpired, isTeamEliminated } from "../../lib/matchs/matchUtils.ts";
+import { fireShot } from "../../lib/matchs/fireShot.ts";
 import { io } from "../../server.ts";
 
 const sameCoords = (a: vect2, b: vect2) => a.x === b.x && a.y === b.y
 const isValidCell = (c: any): c is vect2 => c && Number.isInteger(c.x) && Number.isInteger(c.y) && c.x >= 0 && c.x < 14 && c.y >= 0 && c.y < 14
-
-function isOnShip(ship: Ship, c: vect2): boolean {
-	const minX = Math.min(ship.start.x, ship.end.x)
-	const maxX = Math.max(ship.start.x, ship.end.x)
-	const minY = Math.min(ship.start.y, ship.end.y)
-	const maxY = Math.max(ship.start.y, ship.end.y)
-
-	return c.x >= minX && c.x <= maxX && c.y >= minY && c.y <= maxY
-}
 
 export async function playerFireHandler(req: Request, res: Response) {
 	const { hostId, coords, targetTeamId }: {
@@ -77,63 +67,7 @@ export async function playerFireHandler(req: Request, res: Response) {
 		if (team.shots.some(s => sameCoords(s.coords, coords)))
 			return res.status(400).json({ ok: false, code: "match_err_cell_already_shot" })
 
-		const ship = team.ships.find(s => isOnShip(s, coords))
-		let shot: Shot
-
-		if (!ship) {
-			shot = {
-				coords,
-				status: "miss",
-				ship: null,
-				authorId: session.user.id,
-				authorTeam: match.players.find(p => p.userId === session.user.id)?.team ?? 0
-			}
-
-			team.shots.push(shot)
-		} else {
-			const previousHits = team.shots.filter(s => s.status === "hit" && isOnShip(ship, s.coords))
-			const isSunk = previousHits.length + 1 >= ship.size
-
-			shot = {
-				coords,
-				status: isSunk ? "sunk" : "hit",
-				ship: isSunk ? ship : null,
-				authorId: session.user.id,
-				authorTeam: match.players.find(p => p.userId === session.user.id)?.team ?? 0
-			}
-
-			team.shots.push(shot)
-
-			if (isSunk) {
-				previousHits.forEach(s => {
-					s.status = "sunk"
-					s.ship = ship
-				})
-
-				if (isTeamEliminated(match, targetTeamId)) {
-					const players = match.players.filter(p => p.team === targetTeamId && p.placement === 0)
-					for (const player of players)
-						setFinalPlacement(match, player.userId ?? "")
-				}
-			}
-		}
-
-
-		const targetData = match.players.find(p => p.team === targetTeamId)
-
-		const log: Log = {
-			timestamp: Date.now(),
-			authorId: session.user.id,
-			authorUsername: player.username,
-			targetId: targetData?.userId,
-			targetUsername: targetData?.username,
-			logType: "fire",
-			shot: { ...shot }
-		}
-
-		addLog(match, log, io, false)
-
-		nextTurn(match, io, true)
+		fireShot(match, player, team, coords, io)
 
 		res.json({ ok: true })
 	} catch (err) {
