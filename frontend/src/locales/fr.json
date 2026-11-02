@@ -96,6 +96,7 @@
 	"match_err_host": "Vous n'êtes pas l'hôte de cette partie",
 	"match_err_does_not_exist": "Cette partie n'existe pas",
 	"match_err_full": "La partie est complète",
+	"match_err_not_full": "Pas assez de joueurs pour lancer la partie",
 	"match_err_already_started": "La partie a déjà commencé",
 	"match_err_already_invited": "Ce joueur a déjà reçu une invitation",
 	"match_err_must_close": "En tant qu'hôte, vous devez fermer la partie",

@@ -3,7 +3,7 @@ import type { Request, Response } from "express"
 import { isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
-import { updatePlayer } from "../../lib/matchs/matchUtils.ts";
+import { countTeamPlayers, updatePlayer } from "../../lib/matchs/matchUtils.ts";
 import { buildTurnOrder } from "../../lib/matchs/playerOrder.ts";
 import { startTurnTimer } from "../../lib/matchs/turnTimer.ts";
 import { io } from "../../server.ts";
@@ -38,6 +38,14 @@ export async function startMatchHandler(req: Request, res: Response) {
 
 		if (match.hostId !== userId)
 			return res.status(400).json({ ok: false, code: "match_err_host" })
+
+		if (match.players.length !== match.maxPlayers)
+			return res.status(400).json({ ok: false, code: "match_err_not_full" })
+
+		for (const team of match.teams) {
+			if (countTeamPlayers(match.players, team.id) === 0)
+				return res.status(400).json({ ok: false, code: "match_err_not_full" })
+		}
 
 		if (match.players.some(p => !p.isReady))
 			return res.status(400).json({ ok: false, code: "match_err_all_players_not_ready" })

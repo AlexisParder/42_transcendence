@@ -59,7 +59,7 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 				return res.status(403).json({ ok: false, code: "match_err_rating_gap" })
 		}
 
-		const team = firstFreeTeam(match.players, match.type === "TWO_V_TWO" ? 2 : 1)
+		const team = firstFreeTeam(match.players, match.teams.length)
 		const newPlayer: MatchPlayers = {
 			userId,
 			username: session.user.username,

@@ -16,15 +16,22 @@ export function isInAnySpecMatch(currentMatches: Map<string, Matchs>, userId: st
 	return false
 }
 
-export function firstFreeTeam(players: MatchPlayers[], teamSize: number): number {
-	const counts = new Map<number, number>()
-	for (const p of players)
-		counts.set(p.team, (counts.get(p.team) ?? 0) + 1)
+export function countTeamPlayers(players: MatchPlayers[], team: number): number {
+	let count = 0
+	for (const p of players) {
+		if (p.team === team)
+			count++
+	}
+	return count
+}
 
-	let t = 1
-	while ((counts.get(t) ?? 0) >= teamSize)
-		t++
-	return t
+export function firstFreeTeam(players: MatchPlayers[], teamCount: number): number {
+	let bestTeam = 1
+	for (let t = 2; t <= teamCount; t++) {
+		if (countTeamPlayers(players, t) < countTeamPlayers(players, bestTeam))
+			bestTeam = t
+	}
+	return bestTeam
 }
 
 export function updatePlayer(match: Matchs, userId: string, patch: Partial<MatchPlayers>): MatchPlayers | null {

@@ -100,6 +100,7 @@
 	"match_err_host": "You are not the host of this match",
 	"match_err_does_not_exist": "This match does not exist",
 	"match_err_full": "This match is full",
+	"match_err_not_full": "Not enough players to start the match",
 	"match_err_already_started": "This match has already started",
 	"match_err_already_invited": "This player has already been invited",
 	"match_err_must_close": "As the host, you must close the match",

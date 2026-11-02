@@ -24,7 +24,6 @@ const PASSWORD_FIELDS: Record<string, string> = {
 	"/email-otp/reset-password": "password",
 	"/reset-password": "newPassword",
 	"/change-password": "newPassword",
-	"/set-password": "newPassword",
 }
 
 const trustedOrigins = (process.env.CORS_ORIGIN ?? "").split(",")
@@ -194,7 +193,7 @@ export const auth = betterAuth({
 			if (ctx.context.returned instanceof APIError)
 				return
 
-			if (ctx.path === "/change-password" || ctx.path === "/set-password") {
+			if (ctx.path === "/change-password") {
 				const userId = ctx.context.session?.user.id
 				if (userId)
 					notifySecurity(userId, "password_changed")

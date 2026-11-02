@@ -96,6 +96,7 @@
 	"match_err_host": "No eres el anfitrión de esta partida",
 	"match_err_does_not_exist": "Esta partida no existe",
 	"match_err_full": "Esta partida está completa",
+	"match_err_not_full": "No hay suficientes jugadores para iniciar la partida",
 	"match_err_already_started": "Esta partida ya ha empezado",
 	"match_err_already_invited": "Ya has invitado a este jugador",
 	"match_err_must_close": "Como anfitrión, debes cerrar la partida",

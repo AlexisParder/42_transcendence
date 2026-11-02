@@ -84,7 +84,7 @@ app.get("/api/stats", getStatsHandler)
 
 app.post("/api/set-pwd", setPwdHandler)
 app.post("/api/check-pwd", checkPwdLimit, checkPwdHandler)
-app.post("/api/view-codes", getBackupCodesHandler)
+app.post("/api/view-codes", checkPwdLimit, getBackupCodesHandler)
 app.post("/api/get-conv-history", getConvHistoryHandler)
 app.post("/api/send-friend-request", friendRequestLimit, sendFriendRequestHandler)
 app.post("/api/accept-friend-request", acceptFriendRequestHandler)
@@ -141,14 +141,35 @@ io.use(async (socket, next) => {
 	}
 })
 
+function createSocketLimit(limit: number, windowMs: number) {
+	let count = 0
+	let windowStart = Date.now()
+
+	return function isLimited() {
+		const now = Date.now()
+		if (now - windowStart > windowMs) {
+			windowStart = now
+			count = 0
+		}
+		count++
+		return count > limit
+	}
+}
+
 io.on("connection", async (socket) => {
 	const userId = socket.data.userId
+	const messageLimit = createSocketLimit(20, 10000)
+	const typingLimit = createSocketLimit(30, 10000)
+	const activityLimit = createSocketLimit(10, 10000)
 
 	socket.on("set_active_conversation", (peerId) => {
 		socket.data.activeConversationPeerId = typeof peerId === "string" ? peerId : null
 	})
 
 	socket.on("send_message", async (payload) => {
+		if (messageLimit())
+			return
+
 		try {
 			const fromUserId = socket.data.userId
 			const toUserId = payload?.toUserId
@@ -220,6 +241,9 @@ io.on("connection", async (socket) => {
 	})
 
 	socket.on("set_typing", async (payload) => {
+		if (typingLimit())
+			return
+
 		try {
 			const fromUserId = socket.data.userId
 			const toUserId = payload?.toUserId
@@ -262,6 +286,9 @@ io.on("connection", async (socket) => {
 	onlineUsers.set(userId, before + 1)
 
 	socket.on("set_activity", async (payload) => {
+		if (activityLimit())
+			return
+
 		if (!onlineUsers.has(userId))
 			return
 
