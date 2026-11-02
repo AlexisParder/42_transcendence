@@ -224,18 +224,16 @@ export function Friends() {
 		}
 	}
 
-	const loadHistory = useCallback(async (cancelled: boolean) => {
+	const loadHistory = useCallback(async (isCancelled: () => boolean) => {
 		try {
 			const { ok, data } = await apiPost("/api/get-conv-history", { peerId })
 
-			if (!ok)
+			if (!ok || isCancelled())
 				return
 
-			if (cancelled)
-				return
 			setMessages(data.messages ?? [])
 		} catch (error) {
-			if (!cancelled)
+			if (!isCancelled())
 				console.error("load history:", error)
 		}
 	}, [peerId])
@@ -248,7 +246,7 @@ export function Friends() {
 		setHasMore(true)
 		let cancelled = false
 
-		loadHistory(cancelled)
+		loadHistory(() => cancelled)
 		setRead(peerId)
 
 		return () => {
@@ -568,6 +566,8 @@ export function Friends() {
 	}
 
 	useEffect(() => {
+		let cancelled = false
+
 		function onReconnect() {
 			loadFriends()
 			reloadConversations()
@@ -575,12 +575,13 @@ export function Friends() {
 			loadBlocked()
 			if (peerId) {
 				setHasMore(true)
-				loadHistory(false)
+				loadHistory(() => cancelled)
 			}
 		}
 
 		socket.io.on("reconnect", onReconnect)
 		return () => {
+			cancelled = true
 			socket.io.off("reconnect", onReconnect)
 		}
 	}, [socket, peerId, loadHistory])
