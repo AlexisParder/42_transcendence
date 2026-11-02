@@ -36,8 +36,12 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 	const location = useLocation()
 	const [open, setOpen] = useState(false)
 	const [points, setPoints] = useState(session?.user.points ?? 0)
+	const userId = session?.user.id
 
 	useEffect(() => {
+		if (!userId)
+			return
+
 		async function loadPoints() {
 			try {
 				const { ok, data } = await apiPost("/api/get-user-points")
@@ -52,7 +56,7 @@ export function Sidebar({ children, guest = false }: { children: React.ReactNode
 		}
 
 		loadPoints()
-	})
+	}, [userId])
 
 	if (!guest && isPending)
 		return <p>{t("sidebar_loading")}</p>
