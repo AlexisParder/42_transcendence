@@ -269,7 +269,11 @@ io.on("connection", async (socket) => {
 			return
 
 		activityStatus.set(userId, payload.status)
-		await notifyFriendsOfPresence(userId, payload.status)
+		try {
+			await notifyFriendsOfPresence(userId, payload.status)
+		} catch (err) {
+			console.error("set_activity error:", err)
+		}
 	})
 
 	socket.on("disconnect", async () => {
@@ -282,7 +286,11 @@ io.on("connection", async (socket) => {
 			if (match)
 				startDisconnectTimer(match, userId, io)
 
-			await notifyFriendsOfPresence(userId, "offline")
+			try {
+				await notifyFriendsOfPresence(userId, "offline")
+			} catch (err) {
+				console.error("disconnect error:", err)
+			}
 		} else
 			onlineUsers.set(userId, count - 1)
 	})
@@ -293,8 +301,16 @@ io.on("connection", async (socket) => {
 			reconnectPlayer(match, userId, io)
 
 		activityStatus.set(userId, "available")
-		await notifyFriendsOfPresence(userId, "available")
+		try {
+			await notifyFriendsOfPresence(userId, "available")
+		} catch (err) {
+			console.error("connection error:", err)
+		}
 	}
+})
+
+process.on("unhandledRejection", (err) => {
+	console.error("unhandled rejection:", err)
 })
 
 const PORT = 3000
