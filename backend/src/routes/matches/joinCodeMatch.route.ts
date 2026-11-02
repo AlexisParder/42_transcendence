@@ -18,6 +18,9 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
+		if (typeof code !== "string" || code.length === 0)
+			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
+
 		const userId = session.user.id
 		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
 		const data = await prisma.user.findUnique({

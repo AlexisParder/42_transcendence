@@ -27,7 +27,7 @@ export async function leaveSpecMatchHandler(req: Request, res: Response) {
 			return res.status(409).json({ ok: false, code: "match_err_no_match" })
 
 		if (match.startedAt === 0)
-			return res.status(403).json({ ok: false, code: "match_err_no_started" })
+			return res.status(403).json({ ok: false, code: "match_err_not_started" })
 
 		if (userId === hostId)
 			return res.json({ ok: false, code: "match_err_must_close" })

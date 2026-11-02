@@ -7,7 +7,7 @@ import type { Stat } from "../events.ts";
 
 export async function getUserStatsHandler(req: Request, res: Response) {
 	const { targetId, offset } = req.body
-	const skip = Number(offset) || 0
+	const skip = Math.max(0, Math.floor(Number(offset) || 0))
 
 	if (targetId !== undefined && typeof targetId !== "string")
 		return res.status(400).json({ ok: false })

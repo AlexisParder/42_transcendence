@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../../components/Input";
 import { authClient } from "../../lib/auth-client";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { isValidEmail } from "../../lib/isValideEmail";
 import { SignGoogle } from "../../lib/SignGoogle";
 import { SignDiscord } from "../../lib/SignDiscord";
@@ -34,7 +34,6 @@ function validateLogin(email: string, password: string): Errors {
 export function Login() {
 	useDocumentTitle(t("btn_sign_in"))
 	const [errors, setErrors] = useState<Errors>({})
-	const navigate = useNavigate()
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -51,7 +50,7 @@ export function Login() {
 		if (Object.keys(newErrors).length > 0)
 			return
 
-		const { error } = await authClient.signIn.email({
+		const { data, error } = await authClient.signIn.email({
 			email,
 			password,
 			rememberMe
@@ -59,8 +58,8 @@ export function Login() {
 
 		if (error)
 			setErrors({ form: t("sign_in_failed") })
-		else
-			navigate('/')
+		else if (!(data && "twoFactorRedirect" in data))
+			location.assign("/")
 	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">

@@ -6,7 +6,7 @@ import type { LeaderboardInfo } from "../events.ts";
 
 export async function getLeaderboardInfosHandler(req: Request, res: Response) {
 	const { offset, filter } = req.body
-	const skip = Number(offset) || 0
+	const skip = Math.max(0, Math.floor(Number(offset) || 0))
 
 	try {
 		const session = await auth.api.getSession({

@@ -37,6 +37,9 @@ export async function matchSendMessageHandler(req: Request, res: Response) {
 		if (!team)
 			return res.status(400).json({ ok: false, code: "match_err_team_does_not_exist" })
 
+		if (typeof message !== "string")
+			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
 		if (message.length < 1)
 			return res.status(400).json({ ok: false, code: "match_err_msg_to_short" })
 

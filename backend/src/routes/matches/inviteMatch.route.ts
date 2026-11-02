@@ -4,6 +4,7 @@ import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, isInAnyMatch } from "../../lib/matchs/matchUtils.ts";
 import { io } from "../../server.ts";
+import { prisma } from "../../db/client.ts";
 
 export async function inviteMatchHandler(req: Request, res: Response) {
 	const { hostId, peerId } = req.body
@@ -15,6 +16,11 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
+		const userId = session.user.id
+
+		if (typeof peerId !== "string")
+			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
+
 		if (hostId === peerId)
 			return res.status(400).json({ ok: false, code: "match_err_invite_host" })
 
@@ -23,6 +29,22 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 
 		if (!match)
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
+
+		if (!match.players.some(p => p.userId === userId))
+			return res.status(403).json({ ok: false, code: "match_err_no_match" })
+
+		const areFriends = await prisma.friends.findFirst({
+			where: {
+				isAccepted: true,
+				OR: [
+					{ userId, targetId: peerId },
+					{ userId: peerId, targetId: userId },
+				]
+			}
+		})
+
+		if (!areFriends)
+			return res.status(403).json({ ok: false, code: "friend_err_user_not_found" })
 
 		if (isInAnyMatch(currentMatches, peerId))
 			return res.status(409).json({ ok: false, code: "match_err_user_already_in_match" })

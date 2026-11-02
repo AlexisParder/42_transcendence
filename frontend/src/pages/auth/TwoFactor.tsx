@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SonarTitle } from "../../components/SonarTitle";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { t } from "../../lib/translate";
 import { authClient } from "../../lib/auth-client";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
@@ -17,7 +17,6 @@ export function TwoFactor() {
 	const [step, setStep] = useState<OTPType>('app')
 	const [errors, setErrors] = useState<Errors>({})
 	const [codeTotp, setCodeTotp] = useState("")
-	const navigate = useNavigate()
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -42,7 +41,7 @@ export function TwoFactor() {
 			setErrors({ form: t("txt_err_2fa_invalid") })
 			return
 		}
-		navigate("/")
+		location.assign("/")
 	}
 
 	const handleSubmitRecovery: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
@@ -66,7 +65,7 @@ export function TwoFactor() {
 			setErrors({ form: t("txt_err_2fa_invalid") })
 			return
 		}
-		navigate("/")
+		location.assign("/")
 	}
 
 	return <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">

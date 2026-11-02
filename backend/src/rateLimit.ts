@@ -1,16 +1,18 @@
 import rateLimit from "express-rate-limit"
 
-export const leaderboardLimit = rateLimit({
-	windowMs: 60000,
-	limit: 30,
-	standardHeaders: true,
-	legacyHeaders: true,
-	message: { ok: false, error: "txt_err_too_many_requests" }
-})
-export const exportLimit = rateLimit({
-	windowMs: 60 * 60 * 1000,
-	limit: 3,
-	standardHeaders: true,
-	legacyHeaders: true,
-	message: { ok: false, error: "settings_err_export_too_many" }
-})
+function createLimit(windowMs: number, limit: number) {
+	return rateLimit({
+		windowMs,
+		limit,
+		standardHeaders: true,
+		legacyHeaders: true,
+		message: { ok: false, error: "txt_err_too_many_requests", code: "txt_err_too_many_requests" }
+	})
+}
+
+export const apiLimit = createLimit(60000, 300)
+export const leaderboardLimit = createLimit(60000, 30)
+export const otpLimit = createLimit(60000, 5)
+export const checkPwdLimit = createLimit(60000, 5)
+export const joinCodeLimit = createLimit(60000, 10)
+export const friendRequestLimit = createLimit(60000, 10)

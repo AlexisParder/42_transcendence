@@ -16,6 +16,9 @@ export async function setReadHandler(req: Request, res: Response) {
 		const userId = session.user.id
 		const { peer } = req.body
 
+		if (typeof peer !== "string")
+			return res.status(400).json({ ok: false })
+
 		await prisma.conversations.updateMany({
 			where: {
 				userId: peer,

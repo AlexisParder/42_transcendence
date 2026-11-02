@@ -14,6 +14,9 @@ export async function setNotificationReadHandler(req: Request, res: Response) {
 
 		const { notificationId } = req.body
 
+		if (typeof notificationId !== "string")
+			return res.status(400).json({ ok: false })
+
 		const result = await prisma.notification.updateMany({
 			where: {
 				id: notificationId,

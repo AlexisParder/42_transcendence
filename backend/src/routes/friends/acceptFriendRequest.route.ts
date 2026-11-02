@@ -16,6 +16,9 @@ export async function acceptFriendRequestHandler(req: Request, res: Response) {
 		const userId = session.user.id
 		const { requestId } = req.body
 
+		if (typeof requestId !== "string")
+			return res.status(400).json({ ok: false, error: "friend_err_user_not_found" })
+
 		const request = await prisma.friends.findUnique({
 			where: { id: requestId }
 		})

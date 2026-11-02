@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./db/client.ts"
 import { sendMail } from "./lib/mail.ts"
-import { getUserLanguage, resolveLanguage, t } from "./lib/translate.ts"
+import { getUserLanguage, isSupportedLanguage, resolveLanguage, t } from "./lib/translate.ts"
 import { twoFactor, username, emailOTP } from "better-auth/plugins"
 import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api"
 import { notifyNewSession, notifySecurity } from "./lib/notify.ts"
@@ -36,6 +36,9 @@ export const auth = betterAuth({
 	session: {
 		expiresIn: 60 * 60 * 24 * 30,
 		updateAge: 60 * 60 * 24
+	},
+	rateLimit: {
+		enabled: true
 	},
 	socialProviders: {
 		google: {
@@ -115,6 +118,9 @@ export const auth = betterAuth({
 	],
 	hooks: {
 		before: createAuthMiddleware(async ctx => {
+			if ((ctx.path === "/sign-up/email" || ctx.path === "/update-user") && ctx.body?.language !== undefined && !isSupportedLanguage(ctx.body.language))
+				throw new APIError("BAD_REQUEST", { message: "invalid language" })
+
 			const field = PASSWORD_FIELDS[ctx.path]
 			if (field) {
 				const body = (ctx.body ?? {}) as Record<string, unknown>
@@ -124,13 +130,12 @@ export const auth = betterAuth({
 					return
 
 				const session = await getSessionFromCtx(ctx)
-				if (!session)
-					return
+				const email = session?.user.email ?? (typeof body.email === "string" ? body.email : null)
 
-				const error = validatePassword(password, [session.user.email])
+				const error = validatePassword(password, email ? [email] : [])
 				if (error)
 					throw new APIError("BAD_REQUEST", { message: PASSWORD_MESSAGES[error] })
-				return ctx.json({ok: true})
+				return
 			}
 
 			if (ctx.path === "/update-user" && typeof ctx.body?.image === "string") {
@@ -198,7 +203,9 @@ export const auth = betterAuth({
 						candidate = `${base}${i}`
 					}
 
-					return { data: { ...user, image, username: candidate, displayUsername: candidate } }
+					const language = resolveLanguage(ctx?.headers?.get("accept-language"))
+
+					return { data: { ...user, image, language, username: candidate, displayUsername: candidate } }
 				}
 			},
 		},

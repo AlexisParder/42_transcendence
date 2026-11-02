@@ -297,7 +297,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip, isLocked, compa
 				<img src={ship.image} alt={ship.name} draggable={false} className="h-4 max-w-full object-contain" />
 			</div>
 			<div className="flex flex-col items-center min-w-0 w-full">
-				<p className="text-sm font-semibold first-letter:uppercase truncate">{ship.name}</p>
+				<p className="text-sm font-semibold first-letter:uppercase truncate">{t(`ship_${ship.name}`)}</p>
 				<p className={`${isDragging || isPlaced ? statusColor : "text-neutral-content/50"} font-mono text-xs uppercase truncate`}>{isDragging || isPlaced ? status : t("select_cells", { nb: ship.size })}</p>
 			</div>
 		</div>
@@ -307,7 +307,7 @@ function DockItem({ ship, isPlaced, isDragging, setDraggingShip, isLocked, compa
 			<img src={ship.image} alt={ship.name} draggable={false} className="h-6 object-contain object-left w-full" />
 		</div>
 		<div className="flex-1 min-w-0">
-			<p className="text-sm font-semibold first-letter:uppercase truncate">{ship.name}</p>
+			<p className="text-sm font-semibold first-letter:uppercase truncate">{t(`ship_${ship.name}`)}</p>
 			<p className="text-neutral-content/50 font-mono text-xs">{t("select_cells", { nb: ship.size })}</p>
 		</div>
 		<p className={`${statusColor} font-mono font-semibold text-xs uppercase shrink-0`}>{status}</p>
