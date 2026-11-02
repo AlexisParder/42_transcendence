@@ -149,8 +149,18 @@ export const auth = betterAuth({
 				return
 
 			const session = await getSessionFromCtx(ctx)
-			if (session && (isInAnyMatch(currentMatches, session.user.id) || isInAnySpecMatch(currentMatches, session.user.id)))
+			if (!session)
+				return
+
+			if (isInAnyMatch(currentMatches, session.user.id) || isInAnySpecMatch(currentMatches, session.user.id))
 				return ctx.json({ ok: false, code: "settings_err_rmv_user_in_match" }, { status: 409 })
+
+			const hasPassword = await prisma.account.findFirst({
+				where: { userId: session.user.id, providerId: "credential", password: { not: null } },
+				select: { id: true }
+			})
+			if (hasPassword && (typeof ctx.body?.password !== "string" || !ctx.body.password))
+				return ctx.json({ ok: false, code: "settings_err_rmv_user" }, { status: 400 })
 		}),
 		after: createAuthMiddleware(async ctx => {
 			const newSession = ctx.context.newSession
