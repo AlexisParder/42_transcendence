@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { prisma } from "./db/client.ts"
 import { sendMail } from "./lib/mail.ts"
-import { getUserLanguage, resolveLanguage, t } from "./lib/translate.ts"
+import { getUserLanguage, isSupportedLanguage, resolveLanguage, t } from "./lib/translate.ts"
 import { twoFactor, username, emailOTP } from "better-auth/plugins"
 import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api"
 import { notifyNewSession, notifySecurity } from "./lib/notify.ts"
@@ -118,6 +118,9 @@ export const auth = betterAuth({
 	],
 	hooks: {
 		before: createAuthMiddleware(async ctx => {
+			if ((ctx.path === "/sign-up/email" || ctx.path === "/update-user") && ctx.body?.language !== undefined && !isSupportedLanguage(ctx.body.language))
+				throw new APIError("BAD_REQUEST", { message: "invalid language" })
+
 			const field = PASSWORD_FIELDS[ctx.path]
 			if (field) {
 				const body = (ctx.body ?? {}) as Record<string, unknown>

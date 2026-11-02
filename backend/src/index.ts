@@ -147,8 +147,12 @@ io.on("connection", async (socket) => {
 	socket.on("send_message", async (payload) => {
 		try {
 			const fromUserId = socket.data.userId
-			const toUserId = payload.toUserId
-			const message = payload.message?.trim()
+			const toUserId = payload?.toUserId
+
+			if (typeof toUserId !== "string" || typeof payload.message !== "string")
+				return
+
+			const message = payload.message.trim()
 
 			if (!message || message.length > 1000)
 				return

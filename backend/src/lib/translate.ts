@@ -15,6 +15,10 @@ export function resolveLanguage(language: string | null | undefined) {
 	return short in languages ? short : defaultLanguage
 }
 
+export function isSupportedLanguage(language: unknown): language is string {
+	return typeof language === "string" && Object.hasOwn(languages, language)
+}
+
 export async function getUserLanguage(where: { id: string } | { email: string }) {
 	const user = await prisma.user.findUnique({ where, select: { language: true } })
 	return user ? resolveLanguage(user.language) : null
