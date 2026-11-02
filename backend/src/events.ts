@@ -26,13 +26,10 @@ export type NotificationParams = Record<string, string | number>
 
 export interface NotificationEvent {
 	id: string
-	fromUserId?: string
 	title: string
 	description: string
 	params?: NotificationParams
 	time: number
-	read: boolean
-	createdAt: string
 	requestId?: string
 }
 

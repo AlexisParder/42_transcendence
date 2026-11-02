@@ -31,9 +31,6 @@ function LiveNotifications() {
 			const setter = notification.requestId ? setFriendRequests : setLiveNotifications
 			setter(prev => [...prev.filter(item => item.id !== notification.id), notification].slice(-3))
 
-			if (notification.time <= 0)
-				return
-
 			const timer = setTimeout(() => {
 				setter(prev => prev.map(item => item.id === notification.id ? { ...item, leaving: true } : item))
 				timers.delete(timer)
@@ -106,16 +103,14 @@ function LiveNotifications() {
 						<div className="flex gap-1">
 							<button
 								className="btn btn-xs bg-info/10 border border-info/50"
-								disabled={!request.requestId}
-								onClick={() => request.requestId && answerFriendRequest(request.requestId, "accept")}
+								onClick={() => answerFriendRequest(request.requestId!, "accept")}
 								aria-label={t("notifications_accept_friend_request")}
 							>
 								<FaCheck className="text-info" />
 							</button>
 							<button
 								className="btn btn-xs bg-error/10 border border-error/50"
-								disabled={!request.requestId}
-								onClick={() => request.requestId && answerFriendRequest(request.requestId, "decline")}
+								onClick={() => answerFriendRequest(request.requestId!, "decline")}
 								aria-label={t("notifications_decline_friend_request")}
 							>
 								<RxCross1 className="text-error" />
@@ -160,12 +155,10 @@ function NotificationCard({ notification, onClose, onRemove, children }: {
 						</button>
 					</div>
 					{children}
-					{notification.time > 0 && (
-						<div
-							className="absolute bottom-0 left-0 h-0.5 bg-info/50 animate-notification-timer"
-							style={{ animationDuration: `${notification.time}ms` }}
-						/>
-					)}
+					<div
+						className="absolute bottom-0 left-0 h-0.5 bg-info/50 animate-notification-timer"
+						style={{ animationDuration: `${notification.time}ms` }}
+					/>
 				</div>
 			</div>
 		</div>

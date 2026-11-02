@@ -1,14 +1,11 @@
-import { apiPost } from "./api"
 import type { NotificationEvent, NotificationParams } from "../types/events"
 
-export const defaultNotificationTime = 5000
+const notificationTime = 5000
 
 type NotificationInput = {
 	title: string
 	description: string
 	params?: NotificationParams
-	time?: number
-	save?: boolean
 }
 
 type NotificationListener = (notification: NotificationEvent) => void
@@ -21,23 +18,15 @@ export function onNotification(listener: NotificationListener) {
 	return () => { listeners.delete(listener) }
 }
 
-export async function sendNotification({ title, description, params, time = defaultNotificationTime, save = false }: NotificationInput) {
+export function sendNotification({ title, description, params }: NotificationInput) {
 	const notification: NotificationEvent = {
 		id: `local-${++localId}`,
 		title,
 		description,
 		params,
-		time,
-		read: false,
-		createdAt: new Date().toISOString(),
+		time: notificationTime,
 	}
 
 	for (const listener of listeners)
 		listener(notification)
-
-	if (!save)
-		return true
-
-	const { ok } = await apiPost("/api/notifications/create", { title, description, params })
-	return ok
 }

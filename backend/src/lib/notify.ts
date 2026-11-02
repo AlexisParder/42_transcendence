@@ -6,7 +6,7 @@ import { defaultNotificationPreferences } from "./notificationPreferences.ts"
 import { t } from "./translate.ts"
 import { io } from "../server.ts"
 
-export const defaultNotificationTime = 5000
+const notificationTime = 5000
 
 type NotificationCategory = "friend" | "chat" | "achievements" | "security"
 
@@ -19,7 +19,6 @@ type NotificationInput = {
 	title: string
 	description: string
 	params?: NotificationParams
-	time?: number
 	save?: boolean
 	category?: NotificationCategory
 	mail?: string
@@ -43,22 +42,24 @@ export function withUsername(params: NotificationParams | undefined, username: s
 }
 
 async function emitNotification(input: NotificationInput) {
-	const content = { fromUserId: input.fromUserId, title: input.title, description: input.description }
-	const notification = input.save
-		? await prisma.notification.create({ data: { userId: input.userId, ...content, params: input.params } })
-		: { id: randomUUID(), read: false, createdAt: new Date() }
+	let id: string = randomUUID()
+	if (input.save) {
+		const saved = await prisma.notification.create({
+			data: { userId: input.userId, fromUserId: input.fromUserId, title: input.title, description: input.description, params: input.params }
+		})
+		id = saved.id
+	}
 
 	const sender = input.fromUserId
 		? await prisma.user.findUnique({ where: { id: input.fromUserId }, select: { username: true } })
 		: null
 
 	io.to(input.userId).emit("notification_received", {
-		...content,
-		id: notification.id,
-		read: notification.read,
-		createdAt: notification.createdAt.toISOString(),
+		id,
+		title: input.title,
+		description: input.description,
 		params: input.fromUserId ? withUsername(input.params, sender?.username) : input.params,
-		time: input.time ?? defaultNotificationTime,
+		time: notificationTime,
 		requestId: input.requestId,
 	})
 }

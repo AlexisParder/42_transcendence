@@ -7,6 +7,7 @@ import { IoWarning } from "react-icons/io5"
 import { QRCodeSVG } from "qrcode.react"
 import { t } from "../../lib/translate"
 import { apiPost } from "../../lib/api"
+import { sendNotification } from "../../lib/notify"
 
 type Enable2FAStep = 'password' | 'verify'
 export function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
@@ -82,7 +83,7 @@ export function Enable2FA({ hasPwd }: { hasPwd: boolean | null | undefined }) {
 			return
 		}
 		close()
-		// ajouter notif
+		sendNotification({ title: "settings_title", description: "settings_success_2fa_enabled" })
 	}
 
 	return <Modal id="Enable2FAModal" onClose={reset}>

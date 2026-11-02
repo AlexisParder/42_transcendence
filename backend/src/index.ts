@@ -27,7 +27,6 @@ import { setNotificationReadHandler } from "./routes/setNotificationRead.route.t
 import { setAllNotificationsReadHandler } from "./routes/setAllNotificationsRead.route.ts"
 import { deleteNotificationHandler } from "./routes/deleteNotification.route.ts"
 import { deleteAllNotificationsHandler } from "./routes/deleteAllNotifications.route.ts"
-import { createNotificationHandler } from "./routes/createNotification.route.ts"
 import { getLeaderboardInfosHandler } from "./routes/getLeaderboardInfos.route.ts"
 import { apiLimit, checkPwdLimit, friendRequestLimit, joinCodeLimit, leaderboardLimit, otpLimit } from "./rateLimit.ts"
 import { getNotificationPreferencesHandler, setNotificationPreferencesHandler } from "./routes/notificationPreferences.route.ts"
@@ -97,7 +96,6 @@ app.post("/api/notifications/read-all", setAllNotificationsReadHandler)
 app.post("/api/notifications/delete", deleteNotificationHandler)
 app.post("/api/notification-preferences", setNotificationPreferencesHandler)
 app.post("/api/notifications/delete-all", deleteAllNotificationsHandler)
-app.post("/api/notifications/create", createNotificationHandler)
 app.post("/api/block-user", blockUserHandler)
 app.post("/api/unblock-user", unblockUserHandler)
 app.post("/api/get-blocked", getBlockedHandler)

@@ -13,6 +13,7 @@ import { IoWarning } from "react-icons/io5"
 import { setTranslationLanguage, t } from "../../lib/translate"
 import { Enable2FA, RecoveryCodes, ReScan2FA } from "./Security"
 import { apiGet, apiPost } from "../../lib/api"
+import { sendNotification } from "../../lib/notify"
 import { PASSWORD_MESSAGES, validatePassword } from "../../lib/password"
 import { AVATAR_INPUT_MAX_SIZE, AVATAR_INPUT_MAX_SIZE_MB, AVATAR_MAX_SIZE, AVATAR_MAX_SIZE_MB, AVATAR_TYPES, resizeAvatar } from "../../lib/avatar"
 
@@ -118,8 +119,7 @@ export function SettingsCat() {
 			setCurrPassword('')
 			setPassword('')
 			setPassword2('')
-			// ajouter une notif de success
-
+			sendNotification({ title: "settings_title", description: "settings_success_pwd" })
 		} else {
 			const { ok } = await apiPost("/api/set-pwd", { newPassword: password })
 
@@ -133,7 +133,7 @@ export function SettingsCat() {
 			setPassword('')
 			setPassword2('')
 			revokeOthers()
-			// ajouter une notif de success
+			sendNotification({ title: "settings_title", description: "settings_success_pwd_set" })
 		}
 	}
 
@@ -202,7 +202,7 @@ export function SettingsCat() {
 			return
 		}
 		HideModal("Disable2FAModal")
-		// ajouter une notif
+		sendNotification({ title: "settings_title", description: "settings_success_2fa_disabled" })
 	}
 
 	async function handleRemovePicture() {
@@ -279,8 +279,8 @@ export function SettingsCat() {
 			return
 		}
 		setTranslationLanguage(lang)
+		sendNotification({ title: "settings_title", description: "settings_success_lang" })
 		location.reload()
-		// ajouter une notif de success
 	}
 
 	async function handleExportData() {
@@ -347,8 +347,8 @@ export function SettingsCat() {
 			setErrors({ deleteAccount: error.code ? authErrorMessage(error.code) : t("settings_err_rmv_user") })
 			return
 		}
+		sendNotification({ title: "settings_title", description: "settings_success_dlt_user" })
 		navigate('/')
-		// Ajouter une notif
 	}
 
 	return <>
