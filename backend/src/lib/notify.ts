@@ -10,7 +10,7 @@ export const defaultNotificationTime = 5000
 
 type NotificationCategory = "friend" | "chat" | "achievements" | "security"
 
-export type SecurityEvent = "password_changed" | "2fa_enabled" | "2fa_disabled" | "new_session"
+export type SecurityEvent = "password_changed" | "2fa_enabled" | "2fa_disabled" | "new_session" | "data_exported"
 
 
 type NotificationInput = {
@@ -70,15 +70,19 @@ export async function notify(input: NotificationInput) {
 			select: { email: true, emailVerified: true, language: true, notificationPreferences: true },
 		})
 		if (!recipient) return
+	
 		const preferences = recipient.notificationPreferences ?? defaultNotificationPreferences
 		const category = input.category
 		const jobs: Promise<void>[] = []
+
 		if (!category || preferences[`app_${category}`])
 			jobs.push(emitNotification(input))
 		if (category && preferences[`email_${category}`] && recipient.emailVerified)
 			jobs.push(sendMail({ to: recipient.email, ...email(input.mail ?? category, recipient.language, input.params) }))
+
 		const results = await Promise.allSettled(jobs)
-		for (const result of results) if (result.status === "rejected") console.error("notification delivery error:", result.reason)
+		for (const result of results) if (result.status === "rejected")
+			console.error("notification delivery error:", result.reason)
 	} catch (error) {
 		console.error("notification delivery error:", error)
 	}

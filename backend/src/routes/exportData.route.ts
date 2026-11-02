@@ -3,6 +3,7 @@ import type { Request, Response } from "express"
 import { auth } from "../auth.ts"
 import { prisma } from "../db/client.ts"
 import { t } from "../lib/translate.ts"
+import { notifySecurity } from "../lib/notify.ts"
 
 export async function exportDataHandler(req: Request, res: Response) {
 	try {
@@ -185,6 +186,8 @@ export async function exportDataHandler(req: Request, res: Response) {
 		}
 
 		data.game = { points, rank: rankLabel, stats, matches: matchList }
+
+		notifySecurity(userId, "data_exported")
 
 		res.attachment(`sonar-export-${user.username ?? user.id}-${exportedAt.slice(0, 10)}.json`)
 		res.json(data)

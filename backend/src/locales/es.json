@@ -15,6 +15,8 @@
 	"mail_security_2fa_disabled_body": "<p>Se ha desactivado la verificación en dos pasos en tu cuenta. Si no has sido tú, cambia tu contraseña de inmediato.</p>",
 	"mail_security_new_session_subject": "SONAR - Nuevo inicio de sesión",
 	"mail_security_new_session_body": "<p>Se ha detectado un nuevo inicio de sesión en tu cuenta.</p><p>Dispositivo: <strong>{{device}}</strong><br>Dirección IP: <strong>{{ip}}</strong></p><p>Si no has sido tú, cambia tu contraseña de inmediato.</p>",
+	"mail_security_data_exported_subject": "SONAR - Exportación de tus datos",
+	"mail_security_data_exported_body": "<p>Se ha exportado una copia de tus datos desde tu cuenta.</p><p>Si no has sido tú, cambia tu contraseña de inmediato.</p>",
 	"txt_ONE_V_ONE": "1 vs 1",
 	"txt_TWO_V_TWO": "2 vs 2",
 	"txt_FFA": "FFA",

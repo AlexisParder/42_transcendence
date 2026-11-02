@@ -15,6 +15,8 @@
 	"mail_security_2fa_disabled_body": "<p>La double authentification a été désactivée sur ton compte. Si ce n'est pas toi, change ton mot de passe immédiatement.</p>",
 	"mail_security_new_session_subject": "SONAR - Nouvelle connexion",
 	"mail_security_new_session_body": "<p>Une nouvelle connexion à ton compte a été détectée.</p><p>Appareil : <strong>{{device}}</strong><br>Adresse IP : <strong>{{ip}}</strong></p><p>Si ce n'est pas toi, change ton mot de passe immédiatement.</p>",
+	"mail_security_data_exported_subject": "SONAR - Export de tes données",
+	"mail_security_data_exported_body": "<p>Une copie de tes données a été exportée depuis ton compte.</p><p>Si ce n'est pas toi, change ton mot de passe immédiatement.</p>",
 	"txt_ONE_V_ONE": "1 v 1",
 	"txt_TWO_V_TWO": "2 v 2",
 	"txt_FFA": "Chacun pour soi",

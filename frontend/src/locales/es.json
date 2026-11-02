@@ -300,6 +300,7 @@
 	"notifications_security_2fa_enabled": "Se ha activado la verificación en dos pasos",
 	"notifications_security_2fa_disabled": "Se ha desactivado la verificación en dos pasos",
 	"notifications_security_new_session": "Nuevo inicio de sesión desde {{device}}",
+	"notifications_security_data_exported": "Se han exportado tus datos",
 	"friends_conversations_title": "conversaciones",
 	"friends_requests_title": "solicitudes",
 	"friends_online_title": "conectados",

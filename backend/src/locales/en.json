@@ -15,6 +15,8 @@
 	"mail_security_2fa_disabled_body": "<p>Two-factor authentication has been disabled on your account. If this wasn't you, change your password immediately.</p>",
 	"mail_security_new_session_subject": "SONAR - New sign-in",
 	"mail_security_new_session_body": "<p>A new sign-in to your account was detected.</p><p>Device: <strong>{{device}}</strong><br>IP address: <strong>{{ip}}</strong></p><p>If this wasn't you, change your password immediately.</p>",
+	"mail_security_data_exported_subject": "SONAR - Your data was exported",
+	"mail_security_data_exported_body": "<p>A copy of your data was exported from your account.</p><p>If this wasn't you, change your password immediately.</p>",
 	"txt_ONE_V_ONE": "1 v 1",
 	"txt_TWO_V_TWO": "2 v 2",
 	"txt_FFA": "FFA",

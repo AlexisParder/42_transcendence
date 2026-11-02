@@ -300,6 +300,7 @@
 	"notifications_security_2fa_enabled": "L'authentification à deux facteurs a été activée",
 	"notifications_security_2fa_disabled": "L'authentification à deux facteurs a été désactivée",
 	"notifications_security_new_session": "Nouvelle connexion depuis {{device}}",
+	"notifications_security_data_exported": "Vos données ont été exportées",
 	"friends_conversations_title": "conversations",
 	"friends_requests_title": "demandes",
 	"friends_online_title": "en ligne",
