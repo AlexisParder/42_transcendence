@@ -24,6 +24,9 @@ export async function deleteMatchHandler(req: Request, res: Response) {
 		if (match.hostId !== userId)
 			return res.status(400).json({ ok: false, code: "match_err_host" })
 
+		if (match.startedAt !== 0)
+			return res.status(403).json({ ok: false, code: "match_err_already_started" })
+
 		for (const player of match.players) {
 			if (player.userId)
 				io.to(player.userId).emit("refresh_joined_match", undefined)

@@ -89,7 +89,7 @@ export async function getLeaderboardInfosHandler(req: Request, res: Response) {
 				image: row.image,
 				points: row.points,
 				isMine: row.id === userId,
-				pos: offset + index + 1,
+				pos: skip + index + 1,
 				matches,
 				win,
 				lose: matches - win,
