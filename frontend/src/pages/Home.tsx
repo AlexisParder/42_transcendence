@@ -4,6 +4,7 @@ import { Sidebar } from "../components/Sidebar"
 import { t } from "../lib/translate"
 import { useEffect, useState } from "react"
 import { apiGet, apiPost } from "../lib/api"
+import { authClient } from "../lib/auth-client"
 
 const features = [
 	{
@@ -21,7 +22,9 @@ const features = [
 ]
 
 export function Home() {
+	const { data: session } = authClient.useSession()
 	const [code, setCode] = useState("")
+	const [codeError, setCodeError] = useState("")
 	const [played, setPlayed] = useState(0)
 	const [inProgress, setInProgress] = useState(0)
 	const [open, setOpen] = useState(0)
@@ -52,15 +55,20 @@ export function Home() {
 	]
 
 	async function handleJoinWithCode() {
+		if (!session)
+			return navigate("/login")
+
 		try {
-			const { ok } = await apiPost("/api/join-code-match", { code })
+			const { ok, data } = await apiPost("/api/join-code-match", { code })
 			if (!ok)
-				return
+				return setCodeError(t(data.code ?? "match_err_join_failure"))
 
 			setCode("")
+			setCodeError("")
 			navigate("/play")
 		} catch (error) {
 			console.error("join code match:", error)
+			setCodeError(t("match_err_join_failure"))
 		}
 	}
 
@@ -91,6 +99,7 @@ export function Home() {
 								</button>
 							</div>
 						</div>
+						{codeError && <p className="text-error text-sm">{codeError}</p>}
 						<div className="grid grid-cols-3 gap-4 border-t border-base-content/10 pt-4">
 							{stats.map((stat) => (
 								<div key={stat.label}>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaDiscord, FaGoogle } from "react-icons/fa6";
 import { Input } from "../../components/Input";
 import { authClient } from "../../lib/auth-client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { isValidEmail } from "../../lib/isValideEmail";
 import { SignGoogle } from "../../lib/SignGoogle";
 import { SignDiscord } from "../../lib/SignDiscord";
@@ -34,6 +34,7 @@ function validateLogin(email: string, password: string): Errors {
 export function Login() {
 	useDocumentTitle(t("btn_sign_in"))
 	const [errors, setErrors] = useState<Errors>({})
+	const navigate = useNavigate()
 
 	const handleSubmit: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
 		e.preventDefault()
@@ -56,7 +57,9 @@ export function Login() {
 			rememberMe
 		})
 
-		if (error)
+		if (error?.code === "EMAIL_NOT_VERIFIED")
+			navigate("/verified", { state: { email } })
+		else if (error)
 			setErrors({ form: t(error.status === 429 ? "txt_err_too_many_requests" : "sign_in_failed") })
 		else if (!(data && "twoFactorRedirect" in data))
 			location.assign("/")

@@ -33,6 +33,7 @@ export function Profile() {
 	const loadingMoreRef = useRef(false)
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const loadedRef = useRef(0)
+	const targetIdRef = useRef<string | undefined>(undefined)
 
 	const location = useLocation()
 	const targetId = (location.state as { targetId?: string } | null)?.targetId
@@ -41,18 +42,20 @@ export function Profile() {
 		let cancelled = false
 		loadingMoreRef.current = false
 		loadedRef.current = 0
+		targetIdRef.current = targetId
 
 		async function loadUserInfo() {
 			try {
 				const { ok, data } = await apiPost("/api/get-user-info", { targetId })
 
-				if (!ok)
+				if (!ok || cancelled)
 					return
 
 				setRank(data.rank)
 				setTargetInfo(data.userInfo)
 			} catch (error) {
-				console.error("load user info:", error)
+				if (!cancelled)
+					console.error("load user info:", error)
 			}
 		}
 
@@ -107,7 +110,7 @@ export function Profile() {
 		try {
 			const { ok, data } = await apiPost("/api/get-user-stats", { targetId, offset: loadedRef.current })
 
-			if (!ok)
+			if (!ok || targetIdRef.current !== targetId)
 				return
 
 			const next: Match[] = data.matchs ?? []

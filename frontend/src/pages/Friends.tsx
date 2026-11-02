@@ -419,11 +419,25 @@ export function Friends() {
 			return setErrors({ messages: t("friend_err_msg_to_long") })
 
 		socket.emit("send_message", { toUserId: peerId, message })
+		if (typingTimerRef.current)
+			clearTimeout(typingTimerRef.current)
 		isTypingRef.current = false
 		socket.emit("set_typing", { toUserId: peerId, typing: false })
 		setSendInput("")
 		setErrors({})
 	}
+
+	useEffect(() => {
+		return () => {
+			if (typingTimerRef.current)
+				clearTimeout(typingTimerRef.current)
+
+			if (isTypingRef.current && peerId)
+				socket.emit("set_typing", { toUserId: peerId, typing: false })
+
+			isTypingRef.current = false
+		}
+	}, [peerId, socket])
 
 	function handleTyping() {
 		if (!peerId)
@@ -661,7 +675,7 @@ export function Friends() {
 				</div>}
 				{peerId && <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 					<div className="flex flex-col min-h-full">
-						{messages.map((msg) => <DisplayMessage key={msg.id} isLastMessage={messages.findIndex(m => m.id === msg.id) === messages.length - 1} isRead={msg.isRead} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
+						{messages.map((msg, index) => <DisplayMessage key={msg.id} isLastMessage={index === messages.length - 1} isRead={msg.isRead} message={msg.message} isMine={msg.fromUserId === session?.user.id} createdAt={msg.createdAt} />)}
 					</div>
 				</div>}
 				{peerId && <>

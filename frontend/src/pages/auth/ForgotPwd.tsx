@@ -31,14 +31,14 @@ export function ForgotPwd() {
 	const left = sentAt ? Math.max(0, COOLDOWN - Math.floor((now - sentAt) / 1000)) : 0
 
 	useEffect(() => {
-		if (!email) return
+		if (!email || step !== "emailOtp") return
 		(async () => {
 			const { ok, data } = await apiPost("/api/otp/cooldown", { email })
 
 			if (ok)
 				setSentAt(data.left > 0 ? Date.now() - (COOLDOWN - data.left) * 1000 : 0)
 		})()
-	}, [email])
+	}, [email, step])
 
 	useEffect(() => {
 		const id = setInterval(() => setNow(Date.now()), 1000)

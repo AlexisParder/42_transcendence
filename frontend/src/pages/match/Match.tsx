@@ -34,6 +34,7 @@ export function Match() {
 	const [turnEndsAt, setTurnEndsAt] = useState(0)
 	const [remaining, setRemaining] = useState(0)
 	const shipsRequest = useRef<Promise<unknown>>(Promise.resolve())
+	const pendingShipsRequests = useRef(0)
 	const [errors, setErrors] = useState<{ action?: string, forfeit?: string, messages?: string }>({})
 	const [isLoading, setIsLoading] = useState(true)
 	const [hasUnreadMessage, setHasUnreadMessage] = useState(false)
@@ -41,6 +42,7 @@ export function Match() {
 
 	function updatePlacedShips(ships: Ship[]) {
 		setPlacedShips(ships)
+		pendingShipsRequests.current++
 
 		shipsRequest.current = shipsRequest.current.then(async () => {
 			try {
@@ -49,6 +51,8 @@ export function Match() {
 					setErrors({ action: data.code ?? "match_err_invalid_input" })
 			} catch (error) {
 				console.error("set player ships:", error)
+			} finally {
+				pendingShipsRequests.current--
 			}
 		})
 	}
@@ -64,19 +68,25 @@ export function Match() {
 		}
 	}
 
+	const userId = session?.user.id
+
 	useEffect(() => {
 		function onRefreshMatch(payload: Matchs | undefined) {
 			setJoinedMatch(payload)
 			setCategory(payload?.step === "game" ? "match" : "select")
-			if (payload && payload.step === "deploy") {
-				const myTeam = payload.players.find(p => p.userId === session?.user.id)?.team
+			if (payload && payload.step === "deploy" && pendingShipsRequests.current === 0) {
+				const myTeam = payload.players.find(p => p.userId === userId)?.team
 				setPlacedShips(payload.teams.find(t => t.id === myTeam)?.ships ?? [])
 			}
 		}
 		function onRefreshMatchChat(payload: Matchs | undefined) {
 			setJoinedMatch(payload)
 			setCategory(payload?.step === "game" ? "match" : "select")
-			if (gameInfosView !== "chat")
+
+			const myTeam = payload?.players.find(p => p.userId === userId)?.team
+			const chat = payload?.teams.find(t => t.id === myTeam)?.chat ?? []
+			const lastMessage = chat[chat.length - 1]
+			if (gameInfosView !== "chat" && lastMessage && lastMessage.authorId !== userId)
 				setHasUnreadMessage(true)
 		}
 		function onTurnUpdate(payload: { remaining: number }) {
@@ -93,7 +103,7 @@ export function Match() {
 			socket.off("refresh_chat_match", onRefreshMatchChat)
 			socket.off("turn_update", onTurnUpdate)
 		}
-	}, [socket, joinedMatch, session, gameInfosView])
+	}, [socket, userId, gameInfosView])
 
 	useEffect(() => {
 		if (!turnEndsAt)

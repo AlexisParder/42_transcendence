@@ -3,8 +3,7 @@ import { FaTrash } from "react-icons/fa6"
 import { Sidebar } from "../components/Sidebar"
 import { useDocumentTitle } from "../hooks/useDocumentTitle"
 import { Modal, ShowModal, HideModal } from "../components/Modal"
-import { authClient } from "../lib/auth-client"
-import { t } from "../lib/translate"
+import { getTranslationLanguage, t } from "../lib/translate"
 import { apiPost, apiGet } from "../lib/api"
 import type { NotificationParams } from "../types/events"
 
@@ -18,9 +17,7 @@ type NotificationItem = {
 }
 
 export function Notifications() {
-	const { data: session } = authClient.useSession()
-	const dateLocale = session?.user.language === "fr" ? "fr-FR"
-		: session?.user.language === "en" ? "en-US" : navigator.language
+	const dateLocale = getTranslationLanguage()
 	useDocumentTitle(t("notifications_title"))
 	const [notifications, setNotifications] = useState<NotificationItem[]>([])
 
@@ -41,35 +38,51 @@ export function Notifications() {
 	}, [])
 
 	async function markAsRead(notificationId: string) {
-		const { ok } = await apiPost("/api/notifications/read", { notificationId })
+		try {
+			const { ok } = await apiPost("/api/notifications/read", { notificationId })
 
-		if (ok)
-			setNotifications(prev => prev.map(notification =>
-				notification.id === notificationId
-					? { ...notification, read: true }
-					: notification
-			))
+			if (ok)
+				setNotifications(prev => prev.map(notification =>
+					notification.id === notificationId
+						? { ...notification, read: true }
+						: notification
+				))
+		} catch (error) {
+			console.error("mark as read:", error)
+		}
 	}
 
 	async function markAllAsRead() {
-		const { ok } = await apiPost("/api/notifications/read-all")
+		try {
+			const { ok } = await apiPost("/api/notifications/read-all")
 
-		if (ok)
-			setNotifications(prev => prev.map(notification => ({ ...notification, read: true })))
+			if (ok)
+				setNotifications(prev => prev.map(notification => ({ ...notification, read: true })))
+		} catch (error) {
+			console.error("mark all as read:", error)
+		}
 	}
 
 	async function deleteNotification(notificationId: string) {
-		const { ok } = await apiPost("/api/notifications/delete", { notificationId })
+		try {
+			const { ok } = await apiPost("/api/notifications/delete", { notificationId })
 
-		if (ok)
-			setNotifications(prev => prev.filter(notification => notification.id !== notificationId))
+			if (ok)
+				setNotifications(prev => prev.filter(notification => notification.id !== notificationId))
+		} catch (error) {
+			console.error("delete notification:", error)
+		}
 	}
 
 	async function deleteAllNotifications() {
-		const { ok } = await apiPost("/api/notifications/delete-all")
+		try {
+			const { ok } = await apiPost("/api/notifications/delete-all")
 
-		if (ok)
-			setNotifications([])
+			if (ok)
+				setNotifications([])
+		} catch (error) {
+			console.error("delete all notifications:", error)
+		}
 
 		HideModal("DeleteAllNotificationsModal")
 	}

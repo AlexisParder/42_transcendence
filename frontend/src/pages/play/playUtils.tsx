@@ -129,7 +129,7 @@ export function PlayerItem({ userId, username, image, points, isReady, isMine, i
 	isDuo: boolean,
 	handleKick: (id: string) => void
 }) {
-	return <div className={`flex items-center gap-3 p-3	border rounded-lg lg:flex-col lg:justify-between lg:gap-1 lg:h-52 lg:p-2.5 ${isMine ? "bg-ingo/10 border-info/50" : "bg-neutral/10 border-neutral/50"}`}>
+	return <div className={`flex items-center gap-3 p-3	border rounded-lg lg:flex-col lg:justify-between lg:gap-1 lg:h-52 lg:p-2.5 ${isMine ? "bg-info/10 border-info/50" : "bg-neutral/10 border-neutral/50"}`}>
 		<div className="max-lg:hidden flex justify-end items-center h-4 w-full">
 			{isHost && <HostBadge />}
 			{!isHost && canKick && <KickButton handleKick={handleKick} targetId={userId} />}

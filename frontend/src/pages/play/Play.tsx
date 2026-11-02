@@ -84,7 +84,7 @@ export function Play() {
 		}
 
 		loadJoinedMatch()
-	}, [session?.user, navigate])
+	}, [session?.user.id, navigate])
 
 	async function loadFriends() {
 		try {
@@ -397,6 +397,7 @@ export function Play() {
 						onClick={() => {
 							setSelectedMatchType("BOT")
 							setVisibility("private")
+							setSpectators(false)
 						}}
 					/>
 				</div>
@@ -462,7 +463,7 @@ export function Play() {
 								match={m}
 								joinMatchErr={matchJoinError.id === m.hostId ? matchJoinError.error : ""} />
 						))}
-						{matches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
+						{visibleMatches.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 					</div>
 				</div>
 			</div>

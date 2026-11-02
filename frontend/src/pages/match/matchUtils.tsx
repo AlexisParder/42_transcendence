@@ -330,8 +330,8 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 		</div>
 
 		{gameInfosView === "logs" && <div ref={logsRef} className="shrink-0 h-28 flex flex-col gap-2 overflow-y-auto lg:hidden outline-none scrollbar-none">
-			{match.logs.length > 0 && match.logs.map(l => (
-				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} match={match} />
+			{match.logs.length > 0 && match.logs.map((l, index) => (
+				<LogItem key={index} log={l} myId={myId} replace={match.settings.replace} match={match} />
 			))}
 
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
@@ -399,8 +399,8 @@ export function GameInfos({ match, myId, hasUnreadMessage, gameInfosView, setGam
 		<div className="divider m-0"></div>
 
 		{gameInfosView === "logs" && <div ref={logsRef} className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto outline-none scrollbar-none">
-			{match.logs.length > 0 && gameInfosView === "logs" && match.logs.map(l => (
-				<LogItem key={l.timestamp} log={l} myId={myId} replace={match.settings.replace} match={match} />
+			{match.logs.length > 0 && gameInfosView === "logs" && match.logs.map((l, index) => (
+				<LogItem key={index} log={l} myId={myId} replace={match.settings.replace} match={match} />
 			))}
 			{match.logs.length < 1 && <p className="text-xs text-neutral-content/60">{t("txt_no_show_now")}..</p>}
 		</div>}

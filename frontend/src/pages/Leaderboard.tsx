@@ -19,12 +19,14 @@ export function Leaderboard() {
 	const loadingMoreRef = useRef(false)
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const loadedRef = useRef(0)
+	const filterRef = useRef<LdbFilterType>('global')
 	const navigate = useNavigate()
 
 	useEffect(() => {
 		let cancelled = false
 		loadingMoreRef.current = false
 		loadedRef.current = 0
+		filterRef.current = ldbFilter
 
 		async function loadFirst() {
 			try {
@@ -63,6 +65,8 @@ export function Leaderboard() {
 		try {
 			const { ok, data } = await apiPost("/api/get-leaderboard-infos", { offset: loadedRef.current, filter: ldbFilter })
 
+			if (filterRef.current !== ldbFilter)
+				return
 			if (!ok)
 				return setReqError(data.error)
 			setReqError("")

@@ -286,20 +286,27 @@ export function SettingsCat() {
 	async function handleExportData() {
 		setErrors({})
 		setIsExporting(true)
-		const { ok, data } = await apiGet("/api/export-data")
-		setIsExporting(false)
 
-		if (!ok) {
-			setErrors({ exportData: t(data.error ?? "settings_err_export") })
-			return
+		try {
+			const { ok, data } = await apiGet("/api/export-data")
+
+			if (!ok) {
+				setErrors({ exportData: t(data.error ?? "settings_err_export") })
+				return
+			}
+
+			const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }))
+			const link = document.createElement("a")
+			link.href = url
+			link.download = `sonar-export-${session?.user.username ?? "user"}-${new Date().toISOString().slice(0, 10)}.json`
+			link.click()
+			URL.revokeObjectURL(url)
+		} catch (error) {
+			console.error("export data:", error)
+			setErrors({ exportData: t("settings_err_export") })
+		} finally {
+			setIsExporting(false)
 		}
-
-		const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }))
-		const link = document.createElement("a")
-		link.href = url
-		link.download = `sonar-export-${session?.user.username ?? "user"}-${new Date().toISOString().slice(0, 10)}.json`
-		link.click()
-		URL.revokeObjectURL(url)
 	}
 
 	const handleDeleteAccount: React.ComponentProps<'form'>['onSubmit'] = async (e) => {
