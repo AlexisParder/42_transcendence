@@ -47,6 +47,7 @@ model User {
   achievements            UserAchievement[]
 
   @@unique([username])
+  @@index([points])
   @@map("user")
 }
 
@@ -196,6 +197,7 @@ model MatchPlayers {
   shotsTotal Int @default(0)
 
   @@unique([matchsId, userId])
+  @@index([userId])
   @@map("matchplayers")
 }
 

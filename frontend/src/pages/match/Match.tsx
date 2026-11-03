@@ -46,7 +46,8 @@ export function Match() {
 
 		shipsRequest.current = shipsRequest.current.then(async () => {
 			try {
-				const { ok, data } = await apiPost("/api/set-player-ships", { ships: ships.map(s => ({ name: s.name, size: s.size, start: s.start, end: s.end })) })
+				setErrors({})
+				const { ok, data } = await apiPost("/api/set-player-ships",{ ships: ships.map(s => ({ name: s.name, size: s.size, start: s.start, end: s.end })) })
 				if (!ok)
 					setErrors({ action: data.code ?? "match_err_invalid_input" })
 			} catch (error) {
@@ -60,6 +61,7 @@ export function Match() {
 	async function setReady() {
 		await shipsRequest.current
 		try {
+			setErrors({})
 			const { ok, data } = await apiPost("/api/set-player-ready-on-select")
 			if (!ok)
 				setErrors({ action: data.code ?? "match_err_invalid_input" })
