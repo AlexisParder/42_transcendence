@@ -383,7 +383,7 @@ export function Play() {
 					<MatchTypeBtn
 						selected={selectedMatchType === "FFA"}
 						title={t("txt_FFA")}
-						subtitle={`3-4 ${t("play_players")}, ${ranked ? t("txt_ranked") : t("txt_unranked")}`}
+						subtitle={`4 ${t("play_players")}, ${ranked ? t("txt_ranked") : t("txt_unranked")}`}
 						onClick={() => {
 							setSelectedMatchType("FFA")
 						}}

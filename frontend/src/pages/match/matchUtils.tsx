@@ -89,7 +89,7 @@ export function GameStats({ match, myId, selectedTarget, setSelectedTarget }: {
 			{match.type === "FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 rounded-md">
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-2">{t("match_target")}</p>
 				<div className="flex flex-col gap-2">
-					{match.players.filter(p => p.userId !== myId).map(p => (
+					{match.players.filter(p => p.userId !== myId && p.status !== "LEFT").map(p => (
 						<button key={p.userId} className={`${selectedTarget === p.team ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate`} onClick={() => setSelectedTarget(p.team ?? 0)}>{p.username}</button>
 					))}
 				</div>
@@ -273,7 +273,7 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 			{match.type === "FFA" && <div className="bg-neutral/10 border border-neutral/50 p-2 mt-1.5 rounded-md sm:hidden">
 				<p className="uppercase text-neutral-content/50 text-xs font-medium font-mono pb-1 text-center">{t("match_target")}</p>
 				<div className="flex gap-1 items-center">
-					{match.players.filter(p => p.userId !== myId).map(p => (
+					{match.players.filter(p => p.userId !== myId && p.status !== "LEFT").map(p => (
 						<button key={p.userId} className={`${selectedTarget === p.team ? "bg-warning/10 border border-warning/50" : "bg-neutral/10 border border-neutral/50 hover:bg-neutral/50"} rounded-md  p-1 text-xs font-semibold cursor-pointer truncate w-full`} onClick={() => {
 							setSelectedTarget(p.team ?? 0)
 							setTargetLocked({ x: -1, y: -1 })

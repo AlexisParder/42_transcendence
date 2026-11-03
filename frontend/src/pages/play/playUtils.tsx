@@ -308,7 +308,7 @@ export function MatchItem({ username, image, type, players, maxPlayers, canJoin,
 	else if (type === "TWO_V_TWO")
 		typeTxt = t("txt_TWO_V_TWO")
 	else if (type === "FFA")
-		typeTxt = `3-4 ${t("play_players")}`
+		typeTxt = `4 ${t("play_players")}`
 
 	return <div className="grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_6rem_4rem_6rem] gap-4 items-center bg-neutral/10 border border-neutral/50 rounded-md p-4">
 		<div className={`flex gap-2 items-center ${canSpec ? "opacity-50" : ""}`}>
@@ -335,13 +335,11 @@ export function SidebarRight({ children, format, replace, visibility }: {
 	replace: boolean,
 	visibility: "public" | "private"
 }) {
-	let players = "3-4"
+	let players = "4"
 	if (format === "ONE_V_ONE")
 		players = "2"
 	else if (format === "BOT")
 		players = "1"
-	else if (format === "TWO_V_TWO")
-		players = "4"
 
 	let ranked = "ON"
 	if (format === "BOT" || replace || visibility === "private")
