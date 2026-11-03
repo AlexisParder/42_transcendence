@@ -1,6 +1,6 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
-import { isString } from "../../lib/validate.ts"
+import { isMatchId } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs, PresenceStatus } from "../../events.ts";
 import { filterMatchForUser, isInAnyMatch, isInAnySpecMatch, isListening } from "../../lib/matchs/matchUtils.ts";
@@ -11,7 +11,7 @@ import { notifyFriendsOfPresence } from "../../index.ts";
 export async function joinSpecMatchHandler(req: Request, res: Response) {
 	const { hostId } = req.body ?? {}
 
-	if (!isString(hostId))
+	if (!isMatchId(hostId))
 		return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 	try {
@@ -23,7 +23,7 @@ export async function joinSpecMatchHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const data = await prisma.user.findUnique({
 			where: { id: session.user.id },
 			select: { points: true }

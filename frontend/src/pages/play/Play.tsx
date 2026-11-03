@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "../../components/Sidebar";
 import { useSocket } from "../../components/socketContext";
-import type { Friend, Matchs, matchType, PresenceStatus, PresenceUpdate } from "../../types/events";
+import type { Friend, MatchPlayers, Matchs, matchType, PresenceStatus, PresenceUpdate } from "../../types/events";
 import { t } from "../../lib/translate";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { Togglebox } from "../../components/Togglebox";
@@ -29,7 +29,7 @@ export function Play() {
 	const [joinedMatch, setJoinedMatch] = useState<Matchs>()
 	const [code, setCode] = useState("")
 	const [errors, setErrors] = useState<{ matchCreation?: string, matchWaiting?: string, matchJoinCode?: string }>({})
-	const [matchJoinError, setMatchJoinError] = useState<{ id?: string, error?: string }>({})
+	const [matchJoinError, setMatchJoinError] = useState<{ id?: number, error?: string }>({})
 
 	const ranked = !replace && visibility === "public"
 
@@ -73,7 +73,7 @@ export function Play() {
 				setJoinedMatch(match)
 
 				if (match && match.startedAt === 0)
-					setView(match.hostId === session?.user.id ? "host" : "guest")
+					setView(match.players.some((p: MatchPlayers) => p.userId === session?.user.id && p.isHost) ? "host" : "guest")
 				else if (match && match.startedAt !== 0)
 					return navigate("/match")
 				else

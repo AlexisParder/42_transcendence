@@ -2,13 +2,14 @@ import type { MatchPlayers } from "../../../events.ts"
 
 const BOT_USERNAME = "Bot"
 
-export function createBotPlayer(hostId: string, team: number): MatchPlayers {
+export function createBotPlayer(key: string | number, team: number): MatchPlayers {
 	return {
-		userId: `bot-${hostId}`,
+		userId: `bot-${key}`,
 		username: BOT_USERNAME,
 		image: null,
 		isReady: true,
 		isBot: true,
+		isHost: false,
 		team,
 		placement: 0,
 		points: 0,

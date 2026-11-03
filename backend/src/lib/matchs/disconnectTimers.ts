@@ -10,7 +10,7 @@ const DISCONNECT_GRACE_MS = 30 * 1000
 
 const disconnectTimers = new Map<string, NodeJS.Timeout>()
 
-function timerKey(hostId: string, userId: string) {
+function timerKey(hostId: number, userId: string) {
 	return `${hostId}:${userId}`
 }
 
@@ -47,7 +47,7 @@ export function startDisconnectTimer(match: Matchs, userId: string, io: IO) {
 	emitMatch(match, io)
 }
 
-export function cancelDisconnectTimer(hostId: string, userId: string) {
+export function cancelDisconnectTimer(hostId: number, userId: string) {
 	const key = timerKey(hostId, userId)
 	const timer = disconnectTimers.get(key)
 
@@ -74,7 +74,7 @@ export function reconnectPlayer(match: Matchs, userId: string, io: IO) {
 		emitMatch(match, io)
 }
 
-export function clearMatchDisconnectTimers(hostId: string) {
+export function clearMatchDisconnectTimers(hostId: number) {
 	const prefix = `${hostId}:`
 
 	for (const  [key, timer] of disconnectTimers) {

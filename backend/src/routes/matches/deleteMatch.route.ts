@@ -4,6 +4,7 @@ import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
 import { io } from "../../server.ts";
 import { closeLobby } from "../../lib/matchs/turnTimer.ts";
+import { findHostedMatch } from "../../lib/matchs/matchUtils.ts";
 
 export async function deleteMatchHandler(req: Request, res: Response) {
 	try {
@@ -15,9 +16,9 @@ export async function deleteMatchHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 
-		const match = currentMatches.get(userId)
+		const match = findHostedMatch(currentMatches, userId)
 		if (!match)
 			return res.status(400).json({ ok: false, code: "match_err_no_match" })
 

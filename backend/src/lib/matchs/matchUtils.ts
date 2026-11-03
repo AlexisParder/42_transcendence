@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 import type { MatchPlayers, Matchs, matchType } from "../../events.ts";
 
-export function isInAnyMatch(currentMatches: Map<string, Matchs>, userId: string): boolean {
+export function isInAnyMatch(currentMatches: Map<number, Matchs>, userId: string): boolean {
 	for (const match of currentMatches.values()) {
 		if (match.players.some(p => p.userId === userId && p.status !== "LEFT" && !p.hasQuit))
 			return true
@@ -9,7 +9,7 @@ export function isInAnyMatch(currentMatches: Map<string, Matchs>, userId: string
 	return false
 }
 
-export function isInAnySpecMatch(currentMatches: Map<string, Matchs>, userId: string): boolean {
+export function isInAnySpecMatch(currentMatches: Map<number, Matchs>, userId: string): boolean {
 	for (const match of currentMatches.values()) {
 		if (match.spectators.some(p => p === userId))
 			return true
@@ -50,7 +50,7 @@ export function updatePlayer(match: Matchs, userId: string, patch: Partial<Match
 
 const CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
 
-function isCodeUsed(existing: Map<string, Matchs>, code: string) {
+function isCodeUsed(existing: Map<number, Matchs>, code: string) {
 	for (const match of existing.values()) {
 		if (match.code === code)
 			return true
@@ -58,7 +58,7 @@ function isCodeUsed(existing: Map<string, Matchs>, code: string) {
 	return false
 }
 
-export function generateCode(existing: Map<string, Matchs>): string {
+export function generateCode(existing: Map<number, Matchs>): string {
 	let code = ""
 
 	while (!code || isCodeUsed(existing, code)) {
@@ -144,13 +144,25 @@ export function isMatchWon(status: string, placement: number | null) {
 	return status !== "LEFT" && placement === 1
 }
 
-export function findActiveMatchOf(currentMatches: Map<string, Matchs>, userId: string) {
+export function findActiveMatchOf(currentMatches: Map<number, Matchs>, userId: string) {
 	for (const match of currentMatches.values()) {
 		if (match.endedAt !== 0)
 			continue
 
 		const player = match.players.find(p => p.userId === userId)
 		if (player && player.status === "PLAYED" && !player.hasQuit)
+			return match
+	}
+	return undefined
+}
+
+export function isMatchHost(match: Matchs, userId: string): boolean {
+	return match.players.some(p => p.userId === userId && p.isHost)
+}
+
+export function findHostedMatch(currentMatches: Map<number, Matchs>, userId: string): Matchs | undefined {
+	for (const match of currentMatches.values()) {
+		if (isMatchHost(match, userId))
 			return match
 	}
 	return undefined

@@ -12,7 +12,7 @@ import { createBotPlayer } from "./bot/botPlayer.ts";
 import { setAvailable } from "../../index.ts";
 
 type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
-const timers = new Map<string, NodeJS.Timeout>()
+const timers = new Map<number, NodeJS.Timeout>()
 
 export function getRemaining(match: Matchs): number {
 	const elapsed = Date.now() - match.turns.timerStart
@@ -135,7 +135,7 @@ export function closeLobby(match: Matchs, io: IO) {
 		io.to(player.userId).emit("refresh_joined_match", undefined)
 		setAvailable(player.userId).catch(err => console.error("close lobby:", err))
 
-		if (player.userId !== match.hostId)
+		if (!player.isHost)
 			void notify({ userId: player.userId, title: "notifications_match", description: "notifications_match_closed" })
 	}
 
@@ -151,7 +151,7 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 		return
 
 	if (match.startedAt === 0) {
-		if (match.hostId === userId)
+		if (player.isHost)
 			closeLobby(match, io)
 		else {
 			match.players = match.players.filter(p => p.userId !== userId)
@@ -197,7 +197,6 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 	}
 	addLog(match, log, io, false)
 
-	// plus aucun humain en jeu : on ne laisse pas des bots jouer entre eux
 	if (!humanStillPlaying) {
 		endMatch(match, io)
 		return

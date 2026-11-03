@@ -9,3 +9,7 @@ export function isOptionalString(value: unknown): value is string | undefined {
 export function isOptionalOffset(value: unknown): value is number | undefined {
 	return value === undefined || (Number.isInteger(value) && (value as number) >= 0)
 }
+
+export function isMatchId(value: unknown): value is number {
+	return Number.isInteger(value) && (value as number) >= 0
+}

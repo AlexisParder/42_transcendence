@@ -23,7 +23,7 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
 
 		const userId = session.user.id
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const data = await prisma.user.findUnique({
 			where: { id: session.user.id },
 			select: { points: true }
@@ -66,6 +66,7 @@ export async function joinCodeMatchHandler(req: Request, res: Response) {
 			image: session.user.image,
 			isReady: false,
 			isBot: false,
+			isHost: false,
 			team,
 			placement: 0,
 			points: data.points,

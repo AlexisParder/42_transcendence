@@ -2,12 +2,13 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
 import { auth } from "../../auth.ts";
 import type { Matchs, PresenceStatus } from "../../events.ts";
-import { filterMatchForUser, generateCode, isInAnyMatch, isInAnySpecMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, findHostedMatch, generateCode, isInAnyMatch, isInAnySpecMatch, isMatchType, MATCH_CONFIG } from "../../lib/matchs/matchUtils.ts";
 import { prisma } from "../../db/client.ts";
 import { notifyFriendsOfPresence } from "../../index.ts";
 import { createBotPlayer } from "../../lib/matchs/bot/botPlayer.ts";
 import { closeLobby } from "../../lib/matchs/turnTimer.ts";
 import { io } from "../../server.ts";
+import { newMatchId } from "../../mapMatches.ts";
 
 const LOBBY_MAX_TIME = 30 * 60 * 1000
 
@@ -22,7 +23,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const data = await prisma.user.findUnique({
 			where: { id: session.user.id },
 			select: { points: true }
@@ -34,7 +35,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 		if (isInAnyMatch(currentMatches, userId) || isInAnySpecMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "match_err_already_in_match" })
 
-		if (currentMatches.has(userId))
+		if (findHostedMatch(currentMatches, userId))
 			return res.status(409).json({ ok: false, code: "match_err_your_host_match_not_end" })
 
 		if (!isMatchType(selectedMatchType))
@@ -54,6 +55,8 @@ export async function createMatchHandler(req: Request, res: Response) {
 
 		const code = generateCode(currentMatches)
 
+		const matchId = newMatchId()
+
 		const newMatch: Matchs = {
 			type: selectedMatchType,
 			settings: {
@@ -67,7 +70,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 			isRanked: selectedMatchType !== "BOT" && !replace && visibility === "public",
 			startedAt: 0,
 			endedAt: 0,
-			hostId: userId,
+			hostId: matchId,
 			maxPlayers: MATCH_CONFIG[selectedMatchType].maxPlayers,
 			invitedPlayers: [],
 			turns: {
@@ -89,6 +92,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 					image: session.user.image,
 					isReady: true,
 					isBot: false,
+					isHost: true,
 					team: 1,
 					placement: 0,
 					points: data.points,
@@ -104,12 +108,12 @@ export async function createMatchHandler(req: Request, res: Response) {
 		}
 
 		if (selectedMatchType === "BOT")
-			newMatch.players.push(createBotPlayer(userId, 2))
+			newMatch.players.push(createBotPlayer(matchId, 2))
 
-		currentMatches.set(userId, newMatch)
+		currentMatches.set(matchId, newMatch)
 
 		setTimeout(() => {
-			if (currentMatches.get(userId) === newMatch && newMatch.startedAt === 0)
+			if (currentMatches.get(matchId) === newMatch && newMatch.startedAt === 0)
 				closeLobby(newMatch, io)
 		}, LOBBY_MAX_TIME)
 		const activityStatus = req.app.get("activityStatus") as Map<string, PresenceStatus>

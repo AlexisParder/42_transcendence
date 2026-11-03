@@ -13,7 +13,7 @@ export async function getPublicMatchesHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const matches = Array.from(currentMatches.values())
 
 		const publicMatches = matches.filter(m => m.visibility === "public" && (m.startedAt === 0 || (m.startedAt !== 0 && m.settings.spectators))).reverse()

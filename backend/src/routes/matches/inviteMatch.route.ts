@@ -1,16 +1,16 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
-import { isString } from "../../lib/validate.ts"
+import { isMatchId, isString } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
-import { filterMatchForUser, isInAnyMatch } from "../../lib/matchs/matchUtils.ts";
+import { filterMatchForUser, isInAnyMatch, isMatchHost } from "../../lib/matchs/matchUtils.ts";
 import { io } from "../../server.ts";
 import { prisma } from "../../db/client.ts";
 
 export async function inviteMatchHandler(req: Request, res: Response) {
 	const { hostId, peerId } = req.body ?? {}
 
-	if (!isString(hostId) || !isString(peerId))
+	if (!isMatchId(hostId) || !isString(peerId))
 		return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 	try {
@@ -23,14 +23,14 @@ export async function inviteMatchHandler(req: Request, res: Response) {
 
 		const userId = session.user.id
 
-		if (hostId === peerId)
-			return res.status(400).json({ ok: false, code: "match_err_invite_host" })
-
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const match = currentMatches.get(hostId)
 
 		if (!match)
 			return res.status(400).json({ ok: false, code: "match_err_does_not_exist" })
+
+		if (isMatchHost(match, peerId))
+			return res.status(400).json({ ok: false, code: "match_err_invite_host" })
 
 		if (!match.players.some(p => p.userId === userId))
 			return res.status(403).json({ ok: false, code: "match_err_no_match" })

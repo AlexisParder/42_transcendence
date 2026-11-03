@@ -18,7 +18,7 @@ export async function setPlayerShipsHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const match = findActiveMatchOf(currentMatches, session.user.id)
 
 		if (!match)
@@ -59,7 +59,7 @@ export async function setPlayerReadyOnSelectHandler(req: Request, res: Response)
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const match = findActiveMatchOf(currentMatches, session.user.id)
 
 		if (!match)

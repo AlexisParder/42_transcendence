@@ -9,7 +9,7 @@ type IO = Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>
 
 const BOT_THINKING_MS = 1500
 
-const botTimers = new Map<string, NodeJS.Timeout>()
+const botTimers = new Map<number, NodeJS.Timeout>()
 
 export function scheduleBotTurn(match: Matchs, io: IO) {
 	clearBotTurn(match.hostId)
@@ -19,7 +19,7 @@ export function scheduleBotTurn(match: Matchs, io: IO) {
 	}, BOT_THINKING_MS))
 }
 
-export function clearBotTurn(hostId: string) {
+export function clearBotTurn(hostId: number) {
 	clearTimeout(botTimers.get(hostId))
 	botTimers.delete(hostId)
 }

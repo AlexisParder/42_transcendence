@@ -14,7 +14,7 @@ export async function getJoinedMatchHandler(req: Request, res: Response) {
 		if (!session)
 			return res.status(401).json({ ok: false })
 
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 		const matches = Array.from(currentMatches.values())
 
 		let joinedMath = null

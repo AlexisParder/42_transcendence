@@ -1,6 +1,6 @@
 import { fromNodeHeaders } from "better-auth/node";
 import type { Request, Response } from "express"
-import { isString } from "../../lib/validate.ts"
+import { isMatchId } from "../../lib/validate.ts"
 import { auth } from "../../auth.ts";
 import type { Matchs } from "../../events.ts";
 import { filterMatchForUser, isListening } from "../../lib/matchs/matchUtils.ts";
@@ -9,7 +9,7 @@ import { io } from "../../server.ts";
 export async function matchSendMessageHandler(req: Request, res: Response) {
 	const { hostId, message } = req.body ?? {}
 
-	if (!isString(hostId))
+	if (!isMatchId(hostId))
 		return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 	try {
@@ -21,7 +21,7 @@ export async function matchSendMessageHandler(req: Request, res: Response) {
 			return res.status(401).json({ ok: false })
 
 		const userId = session.user.id
-		const currentMatches = req.app.get("currentMatches") as Map<string, Matchs>
+		const currentMatches = req.app.get("currentMatches") as Map<number, Matchs>
 
 		const match = currentMatches.get(hostId)
 		if (!match)
