@@ -191,10 +191,10 @@ export function Game({ match, myId, selectedTarget, setSelectedTarget, waterView
 	chatError?: string
 }) {
 	const isDesktop = useMediaQuery("(min-width: 64rem)")
-	const view = isDesktop ? "attack" : waterView
+	const isSpec = isSpectator(match, myId)
+	const view = isDesktop && !isSpec ? "attack" : waterView
 	const target = match.players.find(p => p.team === selectedTarget)
 	const myTeam = match.players.find(p => p.userId === myId)?.team
-	const isSpec = isSpectator(match, myId)
 	const logsRef = useRef<HTMLDivElement>(null)
 	const chatRef = useRef<HTMLDivElement>(null)
 	useAutoScroll(logsRef, match.logs.length, gameInfosView)

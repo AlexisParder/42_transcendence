@@ -289,7 +289,6 @@ export function Match() {
 }
 const FLEET_CELLS = 17
 
-// si l'équipe ciblée est éliminée (coulée ou partie), on vise la première équipe adverse encore en vie
 function getAliveTarget(match: Matchs | undefined, myId: string | undefined, selected: number) {
 	if (!match)
 		return selected

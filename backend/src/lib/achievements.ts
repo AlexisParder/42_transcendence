@@ -67,7 +67,6 @@ async function getPlayerStats(userId: string) {
 
 		if (i === 0) {
 			stats.lastMatchWon = won
-			// au moins 17 tirs (la taille d'une flotte) pour éviter une précision gonflée par un abandon rapide
 			if (m.shotsTotal >= 17)
 				stats.lastMatchAccuracy = m.shotsHit / m.shotsTotal
 		}
