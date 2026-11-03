@@ -81,7 +81,7 @@ export function Login() {
 
 					<form onSubmit={handleSubmit} className="min-w-full">
 
-						<Input type="email" label={t("txt_email")} name="email" errorMsg={errors.email} />
+						<Input type="email" label={t("txt_email")} name="email" errorMsg={errors.email} autoComplete="off" />
 						<Input type="password" label={t("txt_password")} name="password" errorMsg={errors.password} autoComplete="current-password" />
 
 						<div className="flex items-center justify-between mt-3 mb-5">
