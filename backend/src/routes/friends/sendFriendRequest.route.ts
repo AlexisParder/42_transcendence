@@ -64,7 +64,6 @@ export async function sendFriendRequestHandler(req: Request, res: Response) {
 			}
 		})
 
-		// si A et B s'envoient une demande en même temps, on ne garde que celle de l'id le plus petit
 		const pair = await prisma.friends.findMany({
 			where: {
 				OR: [

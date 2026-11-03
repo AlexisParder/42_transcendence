@@ -241,7 +241,6 @@ export function Match() {
 		return <Navigate to="/play" replace />
 
 	const myTeam = joinedMatch.players.find(p => p.userId === session?.user.id)?.team
-	// la flotte est partagée : elle est verrouillée dès qu'un membre de l'équipe est prêt, mais chacun doit valider "prêt"
 	const isLocked = joinedMatch.players.some(p => p.team === myTeam && p.isReady)
 	const isMeReady = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
 	const target = getAliveTarget(joinedMatch, session?.user.id, selectedTarget)

@@ -137,7 +137,6 @@ model Conversations {
   sendAt   DateTime @default(now())
   isRead   Boolean  @default(false)
 
-  // pas de relation vers User : les messages sont conservés après suppression d'un compte (affiché "Anonyme")
   @@index([userId])
   @@index([targetId])
   @@map("conversations")
