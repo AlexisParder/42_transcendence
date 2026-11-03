@@ -63,8 +63,7 @@ app.set("onlineUsers", onlineUsers)
 app.set("activityStatus", activityStatus)
 app.set("currentMatches", currentMatches)
 
-if (process.env.NODE_ENV === "production")
-	app.set("trust proxy", 1)
+app.set("trust proxy", 1)
 
 app.disable("x-powered-by")
 
