@@ -181,15 +181,15 @@ export function Deployment({ placedShips, setPlacedShips, draggingShip, setDragg
 	</div>
 }
 
-export function DeploymentFooter({ placedShips, isLocked, onReady }: { placedShips: Ship[], isLocked: boolean, onReady: () => void }) {
+export function DeploymentFooter({ placedShips, isReady, onReady }: { placedShips: Ship[], isLocked: boolean, isReady: boolean, onReady: () => void }) {
 	return <div className="bg-base-200 border-t border-neutral/50 p-4 lg:hidden">
-		<ReadyButton placedShips={placedShips} isLocked={isLocked} onReady={onReady} />
+		<ReadyButton placedShips={placedShips} isReady={isReady} onReady={onReady} />
 	</div>
 }
 
-function ReadyButton({ placedShips, isLocked, onReady, className = "" }: {
+function ReadyButton({ placedShips, isReady, onReady, className = "" }: {
 	placedShips: Ship[],
-	isLocked: boolean,
+	isReady: boolean,
 	onReady: () => void,
 	className?: string
 }) {
@@ -198,9 +198,9 @@ function ReadyButton({ placedShips, isLocked, onReady, className = "" }: {
 	return <div className={`flex flex-col gap-2 ${className}`}>
 		<button
 			className="btn btn-info w-full disabled:bg-info/10 disabled:border-info/30 disabled:text-info/60"
-			disabled={shipsLeft > 0 || isLocked}
+			disabled={shipsLeft > 0 || isReady}
 			onClick={onReady}
-		>{isLocked ? t("select_waiting_opponents") : shipsLeft > 0 ? t(shipsLeft > 1 ? "select_ready_ships_left" : "select_ready_ship_left", { nb: shipsLeft }) : t("select_btn_ready")}
+		>{isReady ? t("select_waiting_opponents") : shipsLeft > 0 ? t(shipsLeft > 1 ? "select_ready_ships_left" : "select_ready_ship_left", { nb: shipsLeft }) : t("select_btn_ready")}
 		</button>
 		<p className="text-neutral-content/50 text-xs text-center">{t("select_random_info")}</p>
 	</div>
@@ -235,7 +235,7 @@ function DockActions({ placedShips, setPlacedShips, rotation, setRotation, isLoc
 	</div>
 }
 
-export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation, isLocked, onReady }: {
+export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShip, rotation, setRotation, isLocked, isReady, onReady }: {
 	placedShips: Ship[],
 	setPlacedShips: (ships: Ship[]) => void,
 	draggingShip: ShipName | null,
@@ -243,6 +243,7 @@ export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShi
 	rotation: shipRotation,
 	setRotation: (rotation: shipRotation) => void,
 	isLocked: boolean,
+	isReady: boolean,
 	onReady: () => void
 }) {
 	return <div className="bg-base-200 p-4 flex flex-col min-h-0 w-72 xl:w-80 shrink-0 max-lg:hidden">
@@ -258,7 +259,7 @@ export function Dock({ placedShips, setPlacedShips, draggingShip, setDraggingShi
 		</div>
 
 		<DockActions placedShips={placedShips} setPlacedShips={setPlacedShips} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
-		<ReadyButton placedShips={placedShips} isLocked={isLocked} onReady={onReady} className="mt-auto pt-4" />
+		<ReadyButton placedShips={placedShips} isReady={isReady} onReady={onReady} className="mt-auto pt-4" />
 	</div>
 }
 

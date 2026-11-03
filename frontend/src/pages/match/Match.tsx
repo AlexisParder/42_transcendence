@@ -239,7 +239,9 @@ export function Match() {
 		return <Navigate to="/play" replace />
 
 	const myTeam = joinedMatch.players.find(p => p.userId === session?.user.id)?.team
+	// la flotte est partagée : elle est verrouillée dès qu'un membre de l'équipe est prêt, mais chacun doit valider "prêt"
 	const isLocked = joinedMatch.players.some(p => p.team === myTeam && p.isReady)
+	const isMeReady = joinedMatch.players.find(p => p.userId === session?.user.id)?.isReady ?? false
 	const target = getAliveTarget(joinedMatch, session?.user.id, selectedTarget)
 	const isSpec = isSpectator(joinedMatch, session?.user.id)
 
@@ -249,10 +251,10 @@ export function Match() {
 			{!isSpec && <div className="flex flex-1 min-h-0">
 				<DeploymentInfos match={joinedMatch} myId={session?.user.id} />
 				<Deployment placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} />
-				<Dock placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} onReady={setReady} />
+				<Dock placedShips={placedShips} setPlacedShips={updatePlacedShips} draggingShip={draggingShip} setDraggingShip={setDraggingShip} rotation={rotation} setRotation={setRotation} isLocked={isLocked} isReady={isMeReady} onReady={setReady} />
 			</div>}
 			{errors.action && <p className="text-error text-xs text-center px-4 py-1">{t(errors.action)}.</p>}
-			{!isSpec && <DeploymentFooter placedShips={placedShips} isLocked={isLocked} onReady={setReady} />}
+			{!isSpec && <DeploymentFooter placedShips={placedShips} isLocked={isLocked} isReady={isMeReady} onReady={setReady} />}
 			{isSpec && <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
 				<div className="flex flex-col min-h-full items-center justify-center">
 					<div className="border border-neutral border-dashed rounded-xl p-4 bg-neutral/15 flex flex-col items-center gap-2">

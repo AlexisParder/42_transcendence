@@ -50,7 +50,7 @@ export async function createMatchHandler(req: Request, res: Response) {
 		if (typeof replace !== "boolean" || typeof spectators !== "boolean")
 			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
-		if (replace && selectedMatchType !== "ONE_V_ONE" && selectedMatchType !== "FFA")
+		if (replace && selectedMatchType === "BOT")
 			return res.status(400).json({ ok: false, code: "match_err_invalid_input" })
 
 		const code = generateCode(currentMatches)

@@ -173,7 +173,7 @@ export function markPlayerLeft(match: Matchs, userId: string, io: IO) {
 
 	const wasHisTurn = match.turns.userTurn === userId
 	const humanStillPlaying = match.players.some(p => !p.isBot && p.status !== "LEFT" && p.placement === 0)
-	const replacedByBot = humanStillPlaying && match.settings.replace && (match.type === "ONE_V_ONE" || match.type === "FFA")
+	const replacedByBot = humanStillPlaying && match.settings.replace && match.type !== "BOT"
 	if (replacedByBot) {
 		const bot = createBotPlayer(userId, player.team)
 		match.players.push(bot)
